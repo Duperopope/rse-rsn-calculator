@@ -10,7 +10,7 @@ export function useAnalysis() {
   const [erreur, setErreur] = useState(null);
   const [chargement, setChargement] = useState(false);
 
-  async function analyser(csvTexte, typeService, pays, equipage) {
+  async function analyser(csvTexte, csv2, typeService, pays, equipage) {
     setChargement(true);
     setErreur(null);
     setResultat(null);
@@ -19,12 +19,7 @@ export function useAnalysis() {
       const res = await fetch(API_URL + '/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          csv: csvTexte,
-          typeService: typeService || 'REGULIER',
-          pays: pays || 'FR',
-          equipage: equipage || 'solo'
-        }),
+        body: JSON.stringify(Object.assign({ csv: csvTexte, typeService: typeService || "REGULIER", pays: pays || "FR", equipage: equipage || "solo" }, csv2 && csv2.trim().length > 0 ? { csv2: csv2 } : {})),
         signal: AbortSignal.timeout(30000)
       });
 

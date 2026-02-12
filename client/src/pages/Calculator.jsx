@@ -36,6 +36,8 @@ export default function Calculator() {
   const [equipage, setEquipage] = useState('solo');
   const [mode, setMode] = useState('formulaire');
   const [csvTexte, setCsvTexte] = useState('');
+  const [csvTexte2, setCsvTexte2] = useState('');
+  const [conducteurActif, setConducteurActif] = useState(1);
   const [voirHistorique, setVoirHistorique] = useState(false);
   const [statsJour, setStatsJour] = useState(null);
 
@@ -48,6 +50,14 @@ export default function Calculator() {
       { debut: '10:45', fin: '11:30', type: 'P' },
       { debut: '11:30', fin: '14:30', type: 'C' },
       { debut: '14:30', fin: '14:45', type: 'T' }
+    ]  }]);
+
+  const [jours2, setJours2] = useState([{
+    date: today,
+    activites: [
+      { debut: '06:00', fin: '10:30', type: 'D' },
+      { debut: '10:30', fin: '11:15', type: 'T' },
+      { debut: '11:15', fin: '14:30', type: 'D' }
     ]
   }]);
 
@@ -88,7 +98,8 @@ export default function Calculator() {
     let csv = csvTexte;
     if (mode === 'formulaire') csv = activitesToCSV(jours);
     if (!csv || !csv.trim()) return;
-    const data = await analyser(csv, typeService, pays, equipage);
+    const csv2 = equipage === "double" ? (mode === "csv" ? csvTexte2 : activitesToCSV(jours2)) : null;
+    const data = await analyser(csv, csv2, typeService, pays, equipage);
     if (data) {
       const entry = {
         date: new Date().toISOString(),
@@ -99,6 +110,13 @@ export default function Calculator() {
       setHistorique(prev => [entry, ...(prev || [])].slice(0, HISTORIQUE_MAX));
     }
   }
+
+  const joursActifs = equipage === "double" && conducteurActif === 2 ? jours2 : jours;
+  const setJoursActifs = equipage === "double" && conducteurActif === 2 ? setJours2 : setJours;
+  function updateJourActif(index, newJour) { setJoursActifs(prev => prev.map((j, i) => i === index ? newJour : j)); }
+  function ajouterJourActif() { const ld = joursActifs[joursActifs.length-1]?.date||today; const d=new Date(ld); d.setDate(d.getDate()+1); setJoursActifs(prev=>[...prev,{date:d.toISOString().slice(0,10),activites:[{debut:"06:00",fin:"06:15",type:"T"}]}]); }
+  function supprimerJourActif(i) { if(joursActifs.length<=1)return; setJoursActifs(prev=>prev.filter((_,idx)=>idx!==i)); }
+  function dupliquerJourActif(i) { const s=joursActifs[i];const d=new Date(s.date);d.setDate(d.getDate()+1);const c={date:d.toISOString().slice(0,10),activites:s.activites.map(a=>({...a}))};setJoursActifs(prev=>{const a=[...prev];a.splice(i+1,0,c);return a;}); }
 
   return (
     <div className={styles.app}>
@@ -117,20 +135,20 @@ export default function Calculator() {
         <div className={styles.inputSection}>
           {mode === 'formulaire' ? (
             <div className={styles.formulaire}>
-              {jours.map((jour, i) => (
+              {joursActifs.map((jour, i) => (
                 <JourFormulaire
                   key={jour.date + '-' + i}
                   jour={jour} index={i}
-                  onUpdate={updateJour}
-                  onRemove={supprimerJour}
-                  onDuplicate={dupliquerJour}
-                  canRemove={jours.length > 1}
+                  onUpdate={updateJourActif}
+                  onRemove={supprimerJourActif}
+                  onDuplicate={dupliquerJourActif}
+                  canRemove={joursActifs.length > 1}
                 />
               ))}
-              <Button variant='secondary' onClick={ajouterJour}>+ Ajouter un jour</Button>
+              <Button variant='secondary' onClick={ajouterJourActif}>+ Ajouter un jour</Button>
             </div>
           ) : (
-            <Card><CsvInput value={csvTexte} onChange={setCsvTexte} /></Card>
+            <Card><CsvInput value={conducteurActif===1?csvTexte:csvTexte2} onChange={conducteurActif===1?setCsvTexte:setCsvTexte2} /></Card>
           )}
         </div>
 
