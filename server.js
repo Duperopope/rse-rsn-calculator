@@ -1557,6 +1557,138 @@ app.get('/api/qa/limites', async (req, res) => {
 });
 
 // Fallback : servir le frontend pour toutes les routes non-API
+// ============================================================
+// GET /api/qa/robustesse
+// Axe 1: Edge cases temporels
+// Axe 2: Inputs malformes
+// Axe 4: Multi-jours
+// ============================================================
+app.get('/api/qa/robustesse', async (req, res) => {
+  const rapport = {
+    timestamp: new Date().toISOString(),
+    version: "5.7.4",
+    description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
+    tests: [],
+    resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
+  };
+
+  function test(categorie, nom, csvData, typeService, attendu, article) {
+    rapport.resume.total++;
+    try {
+      const r = analyserCSV(csvData, typeService || "REGULIER", "FR");
+      let ok = true;
+      let detail = "";
+      if (attendu.nocrash) { ok = true; detail = "No crash - score:" + r.score; }
+      if (attendu.score !== undefined && r.score !== attendu.score) { ok = false; detail += "score att:" + attendu.score + " obt:" + r.score + " "; }
+      if (attendu.infractions !== undefined) {
+        const nbInf = r.infractions ? r.infractions.length : 0;
+        if (nbInf !== attendu.infractions) { ok = false; detail += "inf att:" + attendu.infractions + " obt:" + nbInf + " "; }
+      }
+      if (attendu.jours !== undefined) {
+        const nbJ = r.details_jours ? r.details_jours.length : 0;
+        if (nbJ !== attendu.jours) { ok = false; detail += "jours att:" + attendu.jours + " obt:" + nbJ + " "; }
+      }
+      if (attendu.conduite_min !== undefined) {
+        const c = r.details_jours && r.details_jours[0] ? r.details_jours[0].conduite_min : 0;
+        if (c !== attendu.conduite_min) { ok = false; detail += "cond att:" + attendu.conduite_min + " obt:" + c + " "; }
+      }
+      if (attendu.amplitude_min !== undefined) {
+        const a = r.details_jours && r.details_jours[0] ? parseFloat(r.details_jours[0].amplitude_estimee_h) : 0;
+        if (a < attendu.amplitude_min) { ok = false; detail += "amp att>=" + attendu.amplitude_min + " obt:" + a + " "; }
+      }
+      if (ok) rapport.resume.ok++; else rapport.resume.ko++;
+      rapport.tests.push({ categorie, nom, ok, detail: ok ? "OK" : detail.trim(), article: article || "", score: r.score });
+    } catch(e) {
+      if (attendu.nocrash) {
+        rapport.resume.ko++;
+        rapport.tests.push({ categorie, nom, ok: false, detail: "CRASH: " + e.message, article: article || "" });
+      } else if (attendu.error) {
+        rapport.resume.ok++;
+        rapport.tests.push({ categorie, nom, ok: true, detail: "Erreur attendue", article: article || "" });
+      } else {
+        rapport.resume.ko++;
+        rapport.tests.push({ categorie, nom, ok: false, detail: "ERREUR: " + e.message, article: article || "" });
+      }
+    }
+  }
+
+  // AXE 1: EDGE CASES TEMPORELS
+  test("E1-ZERO", "Activite 0 min", "2025-06-15;06:00;06:00;C", "REGULIER", { nocrash: true });
+  test("E1-ZERO", "Plusieurs 0 min", "2025-06-15;08:00;08:00;T\n2025-06-15;08:00;08:00;C\n2025-06-15;08:00;08:00;P", "REGULIER", { nocrash: true });
+  test("E1-MICRO", "1 minute", "2025-06-15;06:00;06:01;C", "REGULIER", { nocrash: true });
+  test("E1-24H", "00:00 a 00:00", "2025-06-15;00:00;04:30;C\n2025-06-15;04:30;05:15;P\n2025-06-15;05:15;09:00;C\n2025-06-15;09:00;09:30;T\n2025-06-15;09:30;00:00;D", "REGULIER", { nocrash: true });
+  test("E1-OVERLAP", "Chevauchement", "2025-06-15;06:00;08:00;C\n2025-06-15;07:30;09:00;C", "REGULIER", { nocrash: true });
+  test("E1-DESORDRE", "Non chronologique", "2025-06-15;10:00;11:00;C\n2025-06-15;06:00;07:00;T\n2025-06-15;07:00;10:00;C", "REGULIER", { nocrash: true });
+  test("E1-MINUIT", "Pause a minuit", "2025-06-15;23:00;23:30;T\n2025-06-15;23:30;00:30;C\n2025-06-15;00:30;01:00;P", "REGULIER", { nocrash: true });
+  test("E1-LONG", "Journee 20h", "2025-06-15;02:00;06:30;C\n2025-06-15;06:30;07:15;P\n2025-06-15;07:15;11:45;C\n2025-06-15;11:45;12:30;P\n2025-06-15;12:30;17:00;C\n2025-06-15;17:00;17:45;P\n2025-06-15;17:45;22:00;C", "REGULIER", { nocrash: true, amplitude_min: 19 });
+  test("E1-SOLO", "1 seule ligne", "2025-06-15;06:00;10:00;C", "REGULIER", { nocrash: true });
+
+  // E10: 60 activites
+  (function() {
+    var csv = [], h = 0, m = 0;
+    function fmt(hh, mm) { return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm; }
+    for (var i = 0; i < 60; i++) {
+      var deb = fmt(h, m);
+      m += 10; if (m >= 60) { h++; m -= 60; }
+      csv.push("2025-06-15;" + deb + ";" + fmt(h, m) + ";" + (i % 3 === 0 ? "P" : i % 3 === 1 ? "C" : "T"));
+    }
+    test("E1-MASS", "60 activites", csv.join("\n"), "REGULIER", { nocrash: true });
+  })();
+
+  // AXE 2: INPUTS MALFORMES
+  test("E2-VIDE", "CSV vide", "", "REGULIER", { nocrash: true });
+  test("E2-BLANCS", "Espaces seuls", "   \n  \n  ", "REGULIER", { nocrash: true });
+  test("E2-VIRGULE", "Separateur virgule", "2025-06-15,06:00,10:00,C", "REGULIER", { nocrash: true });
+  test("E2-DATE-FR", "Date DD/MM/YYYY", "15/06/2025;06:00;10:00;C", "REGULIER", { nocrash: true });
+  test("E2-HEURE-KO", "Heure 25:00", "2025-06-15;25:00;26:00;C", "REGULIER", { nocrash: true });
+  test("E2-TYPE-KO", "Type X inconnu", "2025-06-15;06:00;10:00;X", "REGULIER", { nocrash: true });
+  test("E2-INCOMPLET", "Ligne incomplete", "2025-06-15;06:00", "REGULIER", { nocrash: true });
+  test("E2-ACCENTS", "Caracteres speciaux", "2025-06-15;06:00;10:00;C\nCommentaire: trajet", "REGULIER", { nocrash: true });
+  test("E2-VIDES", "Lignes vides intercalees", "2025-06-15;06:00;08:00;C\n\n\n2025-06-15;08:00;08:45;P\n\n2025-06-15;08:45;12:00;C", "REGULIER", { nocrash: true });
+  test("E2-SERVICE", "Service INCONNU", "2025-06-15;06:00;10:00;C", "INCONNU", { nocrash: true });
+  test("E2-MINUS", "Types minuscules", "2025-06-15;06:00;10:00;c\n2025-06-15;10:00;10:45;p\n2025-06-15;10:45;12:00;t", "REGULIER", { nocrash: true });
+  test("E2-TABS", "Tabulations", "2025-06-15\t06:00\t10:00\tC", "REGULIER", { nocrash: true });
+
+  // AXE 4: MULTI-JOURS
+  test("E4-2JOURS", "2 jours", "2025-06-15;06:00;10:30;C\n2025-06-15;10:30;11:15;P\n2025-06-15;11:15;15:00;C\n2025-06-16;06:00;10:30;C\n2025-06-16;10:30;11:15;P\n2025-06-16;11:15;15:00;C", "REGULIER", { nocrash: true, jours: 2 });
+  test("E4-TROU", "Jours non consecutifs", "2025-06-15;06:00;15:00;C\n2025-06-17;06:00;15:00;C", "REGULIER", { nocrash: true, jours: 2 });
+
+  (function() {
+    var csv = [];
+    for (var d = 15; d <= 19; d++) {
+      var dt = "2025-06-" + (d < 10 ? "0" : "") + d;
+      csv.push(dt + ";06:00;10:30;C\n" + dt + ";10:30;11:15;P\n" + dt + ";11:15;15:00;C");
+    }
+    test("E4-SEMAINE", "5 jours", csv.join("\n"), "REGULIER", { nocrash: true, jours: 5 });
+  })();
+
+  (function() {
+    var csv = [];
+    for (var d = 15; d <= 21; d++) {
+      var dt = "2025-06-" + (d < 10 ? "0" : "") + d;
+      csv.push(dt + ";06:00;10:30;C\n" + dt + ";10:30;11:15;P\n" + dt + ";11:15;15:00;C");
+    }
+    test("E4-7JOURS", "7 jours", csv.join("\n"), "REGULIER", { nocrash: true, jours: 7 });
+  })();
+
+  test("E4-NUIT2J", "Nuit sur 2 dates", "2025-06-15;20:00;20:30;T\n2025-06-15;20:30;23:59;C\n2025-06-16;00:00;04:00;C\n2025-06-16;04:00;04:30;T", "REGULIER", { nocrash: true });
+
+  (function() {
+    var csv = [];
+    for (var d = 1; d <= 14; d++) {
+      var dt = "2025-06-" + (d < 10 ? "0" : "") + d;
+      csv.push(dt + ";06:00;10:30;C\n" + dt + ";10:30;11:15;P\n" + dt + ";11:15;15:00;C");
+    }
+    test("E4-14JOURS", "14 jours", csv.join("\n"), "REGULIER", { nocrash: true, jours: 14 });
+  })();
+
+  test("E4-MIX", "Jour + nuit", "2025-06-16;06:00;10:30;C\n2025-06-16;10:30;11:15;P\n2025-06-16;11:15;15:00;C\n2025-06-17;20:00;20:30;T\n2025-06-17;20:30;01:00;C\n2025-06-17;01:00;01:45;P\n2025-06-17;01:45;04:00;C\n2025-06-17;04:00;04:30;T", "REGULIER", { nocrash: true });
+
+  rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round(rapport.resume.ok / rapport.resume.total * 100) : 0;
+  console.log('[QA Robustesse] ' + rapport.resume.ok + '/' + rapport.resume.total + ' (' + rapport.resume.pourcentage + '%)');
+  res.json(rapport);
+});
+
 app.get('*', (req, res) => {
   const indexPath = path.join(distPath, 'index.html');
   if (fs.existsSync(indexPath)) {
