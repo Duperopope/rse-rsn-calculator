@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: rse-rsn-calculator
+    runtime: node
+    plan: free
+    buildCommand: npm install && cd client && npm install && npx vite build
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
