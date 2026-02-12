@@ -18,7 +18,7 @@ export function Footer() {
           L3312-1
         </a>
         <span className={styles.sep}>|</span>
-        <a href="https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-personnes" target="_blank" rel="noopener noreferrer">
           ecologie.gouv.fr
         </a>
       </div>
