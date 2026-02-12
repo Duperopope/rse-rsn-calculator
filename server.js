@@ -123,7 +123,7 @@ const SANCTIONS = {
   classe_4: {
     intitule: "Contravention de 4e classe",
     amende_max: 750,
-    amende_forfaitaire: 135,
+    amende_forfaitaire: 135, amende_minoree: 90, amende_majoree: 375,
     seuils: {
       conduite_continue_depassement: "Plus de 1h30 au-dela de 4h30",
       conduite_journaliere_depassement: "Plus de 2h au-dela de 9h (ou 10h avec derogation)",
@@ -410,7 +410,7 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
           constate: compteurReduits + ' repos reduits detectes',
           depassement: (compteurReduits - REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO) + ' de trop',
           classe: '4e classe',
-          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros',
+          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), minoree ' + SANCTIONS.classe_4.amende_minoree + ' euros, majoree ' + SANCTIONS.classe_4.amende_majoree + ' euros',
           dates_concernees: [...datesAvecReposReduit]
         });
       }
@@ -439,7 +439,7 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
       constate: compteurReduits + ' repos reduits detectes',
       depassement: (compteurReduits - REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO) + ' de trop',
       classe: '4e classe',
-      amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros',
+      amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), minoree ' + SANCTIONS.classe_4.amende_minoree + ' euros, majoree ' + SANCTIONS.classe_4.amende_majoree + ' euros',
       dates_concernees: [...datesAvecReposReduit]
     });
   }
@@ -543,7 +543,7 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
             constate: 'Repos reduit ' + r1.duree_h + 'h (' + r1.date_debut + ') suivi de repos reduit ' + r2.duree_h + 'h (' + r2.date_debut + ')',
             depassement: 'N/A',
             classe: '4e classe',
-            amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros'
+            amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), minoree ' + SANCTIONS.classe_4.amende_minoree + ' euros, majoree ' + SANCTIONS.classe_4.amende_majoree + ' euros'
           });
         }
       }
@@ -856,7 +856,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           constate: amplitudeH.toFixed(1) + "h",
           depassement: depassement + "h",
           classe: "4e classe",
-          amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros"
+          amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros"
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
@@ -868,7 +868,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       const classe = depassement > 90 ? "5e classe" : "4e classe";
       const amende = depassement > 90
         ? SANCTIONS.classe_5.amende_max + " euros (max), " + SANCTIONS.classe_5.amende_recidive + " euros en recidive"
-        : SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros";
+        : SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros";
       infractionsJour.push({
         regle: "Conduite continue (CE 561/2006 Art.7 + R3312-9)",
         limite: "4h30 (" + REGLES.CONDUITE_CONTINUE_MAX_MIN + " min)",
@@ -887,7 +887,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         const classe = depassement > 120 ? "5e classe" : "4e classe";
         const amende = depassement > 120
           ? SANCTIONS.classe_5.amende_max + " euros (max), " + SANCTIONS.classe_5.amende_recidive + " euros en recidive"
-          : SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros";
+          : SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros";
         infractionsJour.push({
           regle: "Conduite journaliere (CE 561/2006 Art.6 + R3312-11)",
           limite: "9h (10h derogatoire, 2x/semaine)",
@@ -926,7 +926,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         constate: (travailTotalNuitJour / 60).toFixed(1) + "h",
         depassement: ((travailTotalNuitJour / 60) - REGLES.TRAVAIL_NUIT_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
-        amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros"
+        amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros"
       });
       amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
     }
@@ -940,7 +940,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         constate: (travailTotalJour / 60).toFixed(1) + "h",
         depassement: ((travailTotalJour / 60) - REGLES.TRAVAIL_JOURNALIER_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
-        amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros"
+        amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros"
       });
       amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
     }
@@ -967,7 +967,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "4e classe",
-          amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros"
+          amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros"
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
@@ -1002,7 +1002,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           constate: totalInterruptionMin + ' min d\'interruption',
           depassement: (totalInterruptionMin - 60) + ' min',
           classe: '4e classe',
-          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), max ' + SANCTIONS.classe_4.amende_max + ' euros'
+          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), minoree ' + SANCTIONS.classe_4.amende_minoree + ' euros, majoree ' + SANCTIONS.classe_4.amende_majoree + ' euros, max ' + SANCTIONS.classe_4.amende_max + ' euros'
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
@@ -1152,7 +1152,7 @@ totalConduiteMin += conduiteJour;
         constate: reposHebdosDetectes.length + " repos hebdo detecte(s) sur " + joursTries.length + " jours",
         depassement: "Manque " + (2 - reposHebdosDetectes.length) + " repos hebdomadaire(s)",
         classe: "4e classe",
-        amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros"
+        amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros"
       });
       amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
     }
@@ -1213,7 +1213,7 @@ totalConduiteMin += conduiteJour;
           regle: 'Derogation 10h depassee (CE 561/2006 Art.6 par.1)',
           message: joursDerog.length + ' jours a plus de 9h de conduite en ' + semaine + ' (max autorise: ' + REGLES.CONDUITE_DEROG_MAX_PAR_SEMAINE + ' jours/semaine)',
           classe: '4e classe',
-          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros'
+          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), minoree ' + SANCTIONS.classe_4.amende_minoree + ' euros, majoree ' + SANCTIONS.classe_4.amende_majoree + ' euros'
         });
       }
     });
@@ -1350,7 +1350,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.1.1',
+    version: '7.1.2',
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
@@ -1598,7 +1598,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.1.1',
+    version: '7.1.2',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2871,7 +2871,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.1.1',
+    version: '7.1.2',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
