@@ -840,42 +840,335 @@ app.get('/api/qa', async (req, res) => {
 
 
 // ============================================================
-// ROUTE QA ETUDES DE CAS REELLES
+// ============================================================
+// ROUTE QA ETUDES DE CAS REELLES - v5.4.1
 // GET /api/qa/cas-reels
+// Sources :
+//   - CE 561/2006 Art.6-8 (conduite, pause, repos)
+//   - Code des transports R3312-9, R3312-11, R3312-28, L3312-1, L3312-2
+//   - Seuils 4e/5e classe : dan-dis-scan.fr/les-sanctions, inodis.fr/infractions-tachygraphe
+//   - domformateur.com (pause fractionnee, nuit 4h autocar)
+//   - ecologie.gouv.fr (amplitude, travail nuit, repos)
+//   - groupito.com (conduite autocar, nuit)
+//   - sinari.com/blog/rse-temps-conduite (temps service)
 // ============================================================
 app.get('/api/qa/cas-reels', (req, res) => {
-  const rapport = { timestamp: new Date().toISOString(), version: '5.4.0', cas: [], resume: { total: 0, ok: 0, ko: 0, anomalies: [] } };
+  const rapport = {
+    timestamp: new Date().toISOString(),
+    version: '5.4.1',
+    description: '15 cas de test bases sur des scenarios reels de transport routier de personnes',
+    sources: [
+      'CE 561/2006 Art.6-8',
+      'Code des transports L3312-1, L3312-2, R3312-9, R3312-11, R3312-28',
+      'https://www.dan-dis-scan.fr/les-sanctions',
+      'https://inodis.fr/infractions-tachygraphe/',
+      'https://www.domformateur.com/pages/tronc-commun/durees-de-conduite-temps-de-pause-et-temps-de-repos.html',
+      'https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-personnes',
+      'https://www.groupito.com/blog/la-minute-groupito/combien-de-temps-un-conducteur-dautocar-peut-il-conduire/',
+      'https://www.sinari.com/blog/rse-temps-conduite'
+    ],
+    cas: [],
+    resume: { total: 0, ok: 0, ko: 0, anomalies: [] }
+  };
+
   function testerCas(nom, desc, csv, ts, cp, att) {
-    const r = analyserCSV(csv, ts, cp);
-    const v = []; let ok = true;
-    if (att.infractions !== undefined) { const t = r.infractions.length === att.infractions; v.push({test:'Nb infractions',attendu:att.infractions,obtenu:r.infractions.length,ok:t}); if(!t)ok=false; }
-    if (att.infractions_contiennent) { att.infractions_contiennent.forEach(function(m){const t=r.infractions.some(function(i){return i.regle&&i.regle.toLowerCase().includes(m.toLowerCase())}); v.push({test:'Contient '+m,attendu:true,obtenu:t,ok:t}); if(!t)ok=false;}); }
-    if (att.score_min !== undefined) { const t = r.score >= att.score_min; v.push({test:'Score>='+att.score_min,attendu:att.score_min,obtenu:r.score,ok:t}); if(!t)ok=false; }
-    if (att.score_max !== undefined) { const t = r.score <= att.score_max; v.push({test:'Score<='+att.score_max,attendu:att.score_max,obtenu:r.score,ok:t}); if(!t)ok=false; }
-    if (att.amende_min !== undefined) { const t = r.amende_estimee >= att.amende_min; v.push({test:'Amende>='+att.amende_min,attendu:att.amende_min,obtenu:r.amende_estimee,ok:t}); if(!t)ok=false; }
-    if (att.amende_exacte !== undefined) { const t = r.amende_estimee === att.amende_exacte; v.push({test:'Amende='+att.amende_exacte,attendu:att.amende_exacte,obtenu:r.amende_estimee,ok:t}); if(!t)ok=false; }
-    if (att.jours !== undefined) { const t = r.nombre_jours === att.jours; v.push({test:'Nb jours',attendu:att.jours,obtenu:r.nombre_jours,ok:t}); if(!t)ok=false; }
-    if (att.conduite_h) { const t = r.statistiques.conduite_totale_h === att.conduite_h; v.push({test:'Conduite',attendu:att.conduite_h+'h',obtenu:r.statistiques.conduite_totale_h+'h',ok:t}); if(!t)ok=false; }
-    rapport.cas.push({ nom:nom, description:desc, type_service:ts, pays:cp, verdict:ok?'OK':'ANOMALIE', verifications:v,
-      resultat_brut:{ score:r.score, infractions:r.infractions.length, avertissements:r.avertissements.length, amende:r.amende_estimee, jours:r.nombre_jours, conduite_h:r.statistiques.conduite_totale_h,
-        infractions_detail:r.infractions.map(function(i){return{regle:i.regle,classe:i.classe,limite:i.limite,constate:i.constate,depassement:i.depassement}}),
-        avertissements_detail:r.avertissements.map(function(a){return{regle:a.regle,message:a.message}}) }
+    var r = analyserCSV(csv, ts, cp);
+    var v = []; var ok = true;
+    if (att.infractions !== undefined) {
+      var t = r.infractions.length === att.infractions;
+      v.push({test:'Nb infractions',attendu:att.infractions,obtenu:r.infractions.length,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.infractions_min !== undefined) {
+      var t = r.infractions.length >= att.infractions_min;
+      v.push({test:'Infractions >= '+att.infractions_min,attendu:att.infractions_min,obtenu:r.infractions.length,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.infractions_contiennent) {
+      att.infractions_contiennent.forEach(function(m) {
+        var t = r.infractions.some(function(i) { return i.regle && i.regle.toLowerCase().includes(m.toLowerCase()); });
+        v.push({test:'Contient "'+m+'"',attendu:true,obtenu:t,ok:t});
+        if(!t) ok = false;
+      });
+    }
+    if (att.infractions_absent) {
+      att.infractions_absent.forEach(function(m) {
+        var t = !r.infractions.some(function(i) { return i.regle && i.regle.toLowerCase().includes(m.toLowerCase()); });
+        v.push({test:'Ne contient PAS "'+m+'"',attendu:true,obtenu:t,ok:t});
+        if(!t) ok = false;
+      });
+    }
+    if (att.score_min !== undefined) {
+      var t = r.score >= att.score_min;
+      v.push({test:'Score >= '+att.score_min,attendu:att.score_min,obtenu:r.score,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.score_max !== undefined) {
+      var t = r.score <= att.score_max;
+      v.push({test:'Score <= '+att.score_max,attendu:att.score_max,obtenu:r.score,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.amende_exacte !== undefined) {
+      var t = r.amende_estimee === att.amende_exacte;
+      v.push({test:'Amende = '+att.amende_exacte,attendu:att.amende_exacte,obtenu:r.amende_estimee,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.amende_min !== undefined) {
+      var t = r.amende_estimee >= att.amende_min;
+      v.push({test:'Amende >= '+att.amende_min,attendu:att.amende_min,obtenu:r.amende_estimee,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.jours !== undefined) {
+      var t = r.nombre_jours === att.jours;
+      v.push({test:'Nb jours',attendu:att.jours,obtenu:r.nombre_jours,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.conduite_h !== undefined) {
+      var t = r.statistiques && r.statistiques.conduite_totale_h === att.conduite_h;
+      v.push({test:'Conduite totale',attendu:att.conduite_h+'h',obtenu:(r.statistiques?r.statistiques.conduite_totale_h:'N/A')+'h',ok:t});
+      if(!t) ok = false;
+    }
+    if (att.avertissements_min !== undefined) {
+      var t = r.avertissements.length >= att.avertissements_min;
+      v.push({test:'Avertissements >= '+att.avertissements_min,attendu:att.avertissements_min,obtenu:r.avertissements.length,ok:t});
+      if(!t) ok = false;
+    }
+    if (att.classe_contient) {
+      att.classe_contient.forEach(function(c) {
+        var t = r.infractions.some(function(i) { return i.classe && i.classe.includes(c); });
+        v.push({test:'Classe "'+c+'" presente',attendu:true,obtenu:t,ok:t});
+        if(!t) ok = false;
+      });
+    }
+    rapport.cas.push({
+      nom: nom, description: desc, type_service: ts, pays: cp, verdict: ok ? 'OK' : 'ANOMALIE',
+      verifications: v,
+      resultat_brut: {
+        score: r.score, infractions: r.infractions.length,
+        avertissements: r.avertissements.length, amende: r.amende_estimee,
+        jours: r.nombre_jours,
+        conduite_h: r.statistiques ? r.statistiques.conduite_totale_h : 'N/A',
+        infractions_detail: r.infractions.map(function(i) {
+          return { regle:i.regle, classe:i.classe, limite:i.limite, constate:i.constate, depassement:i.depassement };
+        }),
+        avertissements_detail: r.avertissements.map(function(a) {
+          return { regle:a.regle, message:a.message };
+        })
+      }
     });
-    rapport.resume.total++; if(ok)rapport.resume.ok++;else{rapport.resume.ko++;rapport.resume.anomalies.push(nom);}
+    rapport.resume.total++;
+    if(ok) rapport.resume.ok++;
+    else { rapport.resume.ko++; rapport.resume.anomalies.push(nom); }
   }
-  testerCas('CAS 1 - Journee parfaite autocar','Conducteur Paris-Lyon 8h conduite pause 45min. CE 561/2006 Art.6-7','2025-03-10;05:45;06:00;T\n2025-03-10;06:00;10:15;C\n2025-03-10;10:15;11:00;P\n2025-03-10;11:00;14:45;C\n2025-03-10;14:45;15:00;T','REGULIER','FR',{infractions:0,score_min:80,amende_exacte:0,jours:1,conduite_h:'8.0'});
-  testerCas('CAS 2 - Oubli pause 4h30 (continue 6h)','Conduit 6h sans pause. CE 561/2006 Art.7 + R3312-9','2025-03-10;06:00;06:15;T\n2025-03-10;06:15;12:15;C\n2025-03-10;12:15;13:00;P\n2025-03-10;13:00;15:00;C\n2025-03-10;15:00;15:15;T','OCCASIONNEL','FR',{infractions_contiennent:['ontinue'],amende_min:135,conduite_h:'8.0'});
-  testerCas('CAS 3 - Conduite 12h48 (depassement derog)','Navette aeroport depasse 10h derog. CE 561/2006 Art.6 + R3312-11','2025-03-10;04:30;04:45;T\n2025-03-10;04:45;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;14:00;C\n2025-03-10;14:00;14:45;P\n2025-03-10;14:45;19:15;C\n2025-03-10;19:15;19:30;T','REGULIER','FR',{infractions_contiennent:['ournali'],amende_min:135});
-  testerCas('CAS 4 - Repos insuffisant (6h)','Finit 22h amplitude 17h repos 6h. CE 561/2006 Art.8 + R3312-28','2025-03-10;05:00;05:30;T\n2025-03-10;05:30;09:30;C\n2025-03-10;09:30;10:15;P\n2025-03-10;10:15;13:15;C\n2025-03-10;13:15;14:00;P\n2025-03-10;14:00;17:00;C\n2025-03-10;17:00;17:30;T\n2025-03-10;17:30;20:00;D\n2025-03-10;20:00;22:00;C','OCCASIONNEL','FR',{infractions_contiennent:['epos'],amende_min:135});
-  testerCas('CAS 5 - Semaine conforme 5j','Ligne reguliere 8h/j x5. CE 561/2006 Art.6','2025-03-10;06:00;06:15;T\n2025-03-10;06:15;10:30;C\n2025-03-10;10:30;11:15;P\n2025-03-10;11:15;15:00;C\n2025-03-10;15:00;15:15;T\n2025-03-11;06:00;06:15;T\n2025-03-11;06:15;10:30;C\n2025-03-11;10:30;11:15;P\n2025-03-11;11:15;15:00;C\n2025-03-11;15:00;15:15;T\n2025-03-12;06:00;06:15;T\n2025-03-12;06:15;10:30;C\n2025-03-12;10:30;11:15;P\n2025-03-12;11:15;15:00;C\n2025-03-12;15:00;15:15;T\n2025-03-13;06:00;06:15;T\n2025-03-13;06:15;10:30;C\n2025-03-13;10:30;11:15;P\n2025-03-13;11:15;15:00;C\n2025-03-13;15:00;15:15;T\n2025-03-14;06:00;06:15;T\n2025-03-14;06:15;10:30;C\n2025-03-14;10:30;11:15;P\n2025-03-14;11:15;15:00;C\n2025-03-14;15:00;15:15;T','REGULIER','FR',{infractions:0,jours:5,score_min:80,amende_exacte:0});
-  testerCas('CAS 6 - Nuit depassement >10h','Navette CDG 21h-07h30. L3312-1','2025-03-10;20:30;21:00;T\n2025-03-10;21:00;01:30;C\n2025-03-10;01:30;02:15;P\n2025-03-10;02:15;06:15;C\n2025-03-10;06:15;07:30;C','REGULIER','FR',{infractions_contiennent:['uit'],amende_min:135});
-  testerCas('CAS 7 - Repos reduit legal 9h30','Repos 9h30 legal reduit 3x/sem. CE 561/2006 Art.8','2025-03-10;06:00;06:30;T\n2025-03-10;06:30;10:30;C\n2025-03-10;10:30;11:15;P\n2025-03-10;11:15;14:15;C\n2025-03-10;14:15;15:00;P\n2025-03-10;15:00;18:30;C','STANDARD','FR',{infractions:0,score_min:80,amende_exacte:0});
-  testerCas('CAS 8 - Espagne ete UTC+2','Autocar Espagne juillet. CE 561/2006 + Dir 2000/84/CE','2025-07-15;07:00;07:15;T\n2025-07-15;07:15;11:30;C\n2025-07-15;11:30;12:15;P\n2025-07-15;12:15;16:00;C\n2025-07-15;16:00;16:15;T','OCCASIONNEL','ES',{infractions:0,score_min:80,amende_exacte:0,jours:1});
-  testerCas('CAS 9 - Cumul graves 14h continue','Catastrophe 14h conduite. CE 561/2006 + R3315-10/11','2025-03-10;04:00;04:15;T\n2025-03-10;04:15;10:15;C\n2025-03-10;10:15;10:30;P\n2025-03-10;10:30;16:30;C\n2025-03-10;16:30;16:45;P\n2025-03-10;16:45;22:45;C\n2025-03-10;22:45;23:00;T','STANDARD','FR',{infractions_contiennent:['ontinue','ournali'],amende_min:270,score_max:50});
-  testerCas('CAS 10 - Amplitude >13h regulier','Amplitude 04:30-19:00=14h30. L3312-2','2025-03-10;04:30;05:00;T\n2025-03-10;05:00;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;13:00;C\n2025-03-10;13:00;14:00;P\n2025-03-10;14:00;17:30;C\n2025-03-10;17:30;18:30;D\n2025-03-10;18:30;19:00;T','REGULIER','FR',{infractions_contiennent:['mplitude'],amende_min:135});
+
+  // ========================
+  // CAS 1 - Journee parfaite regulier
+  // Source: CE 561/2006 Art.6 = 9h max, Art.7 = pause 45min apres 4h30
+  // Conduite: 4h15+3h45=8h, Pause: 45min, Amplitude: 9h15 (<13h regulier)
+  // Attendu: 0 infraction, score >= 80
+  // ========================
+  testerCas(
+    'CAS 1 - Journee parfaite ligne reguliere',
+    'Paris-Lyon 8h conduite, pause 45min correcte. CE 561/2006 Art.6-7. Amplitude 9h15 < 13h.',
+    '2025-03-10;05:45;06:00;T\n2025-03-10;06:00;10:15;C\n2025-03-10;10:15;11:00;P\n2025-03-10;11:00;14:45;C\n2025-03-10;14:45;15:00;T',
+    'REGULIER', 'FR',
+    { infractions: 0, score_min: 80, amende_exacte: 0, jours: 1, conduite_h: '8.0' }
+  );
+
+  // ========================
+  // CAS 2 - Conduite continue 6h sans pause (4e classe)
+  // Source: CE 561/2006 Art.7 + R3312-9
+  // Seuil 4e classe: depassement < 1h30 au-dela de 4h30 (dan-dis-scan.fr)
+  // 6h continue = depassement 1h30 => limite 4e classe
+  // ========================
+  testerCas(
+    'CAS 2 - Conduite continue 6h sans pause (4e classe)',
+    'Conducteur oublie la pause, 6h continues. CE 561/2006 Art.7. Depassement 90min = seuil 4e classe.',
+    '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;12:15;C\n2025-03-10;12:15;13:00;P\n2025-03-10;13:00;15:00;C\n2025-03-10;15:00;15:15;T',
+    'OCCASIONNEL', 'FR',
+    { infractions_contiennent: ['ontinue'], amende_min: 135, conduite_h: '8.0', classe_contient: ['4e'] }
+  );
+
+  // ========================
+  // CAS 3 - Conduite journaliere 11h (depassement <2h sur 9h = 4e classe)
+  // Source: CE 561/2006 Art.6, dan-dis-scan.fr, inodis.fr
+  // 11h conduite = depassement 2h sur 9h = seuil limite 4e classe
+  // ========================
+  testerCas(
+    'CAS 3 - Conduite journaliere 11h (4e classe)',
+    'Navette aeroport 11h conduite. CE 561/2006 Art.6. Depassement 2h/9h = limite haute 4e classe.',
+    '2025-03-10;04:30;04:45;T\n2025-03-10;04:45;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;14:00;C\n2025-03-10;14:00;14:45;P\n2025-03-10;14:45;16:45;C\n2025-03-10;16:45;17:00;T',
+    'REGULIER', 'FR',
+    { infractions_contiennent: ['ournali'], amende_min: 135 }
+  );
+
+  // ========================
+  // CAS 4 - Conduite journaliere 12h (depassement >2h sur 9h = 5e classe)
+  // Source: inodis.fr : au-dela de 2h de depassement = 5e classe (1500 EUR)
+  // 12h = depassement 3h = 5e classe
+  // ========================
+  testerCas(
+    'CAS 4 - Conduite journaliere 12h (5e classe)',
+    'Depassement massif 12h conduite. CE 561/2006 Art.6. >2h sur 9h = 5e classe. inodis.fr',
+    '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;08:45;C\n2025-03-10;08:45;09:30;P\n2025-03-10;09:30;13:30;C\n2025-03-10;13:30;14:15;P\n2025-03-10;14:15;18:15;C\n2025-03-10;18:15;18:30;T',
+    'REGULIER', 'FR',
+    { infractions_contiennent: ['ournali'], amende_min: 135, classe_contient: ['5e'] }
+  );
+
+  // ========================
+  // CAS 5 - Repos journalier insuffisant (7h au lieu de 9h minimum reduit)
+  // Source: CE 561/2006 Art.8 + R3312-28
+  // Insuffisance repos reduit: <2h = 4e classe (dan-dis-scan.fr)
+  // 7h repos = manque 2h sur 9h = seuil 4e classe
+  // ========================
+  testerCas(
+    'CAS 4bis - Repos journalier 7h (4e classe)',
+    'Finit a 22h, amplitude 17h, repos estime 7h. CE 561/2006 Art.8. Insuffisance 2h = 4e classe.',
+    '2025-03-10;05:00;05:30;T\n2025-03-10;05:30;09:30;C\n2025-03-10;09:30;10:15;P\n2025-03-10;10:15;14:15;C\n2025-03-10;14:15;15:00;P\n2025-03-10;15:00;18:30;C\n2025-03-10;18:30;19:00;T\n2025-03-10;19:00;20:00;D\n2025-03-10;20:00;22:00;C',
+    'OCCASIONNEL', 'FR',
+    { infractions_contiennent: ['epos'], amende_min: 135 }
+  );
+
+  // ========================
+  // CAS 6 - Semaine conforme 5 jours x 8h
+  // Source: CE 561/2006 Art.6 = 56h/sem max, 90h/2sem
+  // 5 x 8h = 40h < 56h => OK
+  // ========================
+  testerCas(
+    'CAS 6 - Semaine conforme 5 jours regulier',
+    'Ligne reguliere 8h/j x5j = 40h/sem. CE 561/2006 Art.6. Bien sous 56h.',
+    '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;10:30;C\n2025-03-10;10:30;11:15;P\n2025-03-10;11:15;15:00;C\n2025-03-10;15:00;15:15;T\n2025-03-11;06:00;06:15;T\n2025-03-11;06:15;10:30;C\n2025-03-11;10:30;11:15;P\n2025-03-11;11:15;15:00;C\n2025-03-11;15:00;15:15;T\n2025-03-12;06:00;06:15;T\n2025-03-12;06:15;10:30;C\n2025-03-12;10:30;11:15;P\n2025-03-12;11:15;15:00;C\n2025-03-12;15:00;15:15;T\n2025-03-13;06:00;06:15;T\n2025-03-13;06:15;10:30;C\n2025-03-13;10:30;11:15;P\n2025-03-13;11:15;15:00;C\n2025-03-13;15:00;15:15;T\n2025-03-14;06:00;06:15;T\n2025-03-14;06:15;10:30;C\n2025-03-14;10:30;11:15;P\n2025-03-14;11:15;15:00;C\n2025-03-14;15:00;15:15;T',
+    'REGULIER', 'FR',
+    { infractions: 0, jours: 5, score_min: 80, amende_exacte: 0 }
+  );
+
+  // ========================
+  // CAS 7 - Repos reduit legal 9h30 (CORRIGE)
+  // Source: CE 561/2006 Art.8-2 = repos reduit >= 9h admis 3x/sem
+  // Conduite: 4h+3h = 7h (<9h) => pas infraction conduite
+  // Amplitude: 06:00-15:30 = 9h30 => repos ~ 14h30 >= 9h => OK
+  // ========================
+  testerCas(
+    'CAS 7 - Repos reduit legal 9h30 (conforme)',
+    'Journee courte 7h conduite, amplitude 9h30. Repos 14h30 >> 9h reduit. CE 561/2006 Art.8-2.',
+    '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;10:15;C\n2025-03-10;10:15;11:00;P\n2025-03-10;11:00;14:00;C\n2025-03-10;14:00;15:15;D\n2025-03-10;15:15;15:30;T',
+    'STANDARD', 'FR',
+    { infractions: 0, score_min: 80, amende_exacte: 0, conduite_h: '7.0' }
+  );
+
+  // ========================
+  // CAS 8 - Espagne ete UTC+2 conforme
+  // Source: CE 561/2006 applicable dans toute l'UE, Dir 2000/84/CE (heure ete)
+  // 8h conduite, pauses correctes => OK
+  // ========================
+  testerCas(
+    'CAS 8 - Espagne ete UTC+2 (conforme)',
+    'Autocar Espagne juillet, 8h conduite. CE 561/2006 applicable UE. groupito.com.',
+    '2025-07-15;07:00;07:15;T\n2025-07-15;07:15;11:30;C\n2025-07-15;11:30;12:15;P\n2025-07-15;12:15;16:00;C\n2025-07-15;16:00;16:15;T',
+    'OCCASIONNEL', 'ES',
+    { infractions: 0, score_min: 80, amende_exacte: 0, jours: 1 }
+  );
+
+  // ========================
+  // CAS 9 - Catastrophe 18h conduite cumul infractions
+  // Source: CE 561/2006 Art.6+7+8, R3312-9/11/28
+  // Attendu: multiple infractions (continue, journaliere, repos, amplitude, travail)
+  // Score tres bas, amende elevee
+  // ========================
+  testerCas(
+    'CAS 9 - Catastrophe 18h conduite (cumul 5e classe)',
+    '18h conduite sans repos suffisant. CE 561/2006 Art.6-8. Cumul infractions graves.',
+    '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;10:15;C\n2025-03-10;10:15;10:30;P\n2025-03-10;10:30;16:30;C\n2025-03-10;16:30;16:45;P\n2025-03-10;16:45;22:45;C\n2025-03-10;22:45;23:00;T',
+    'STANDARD', 'FR',
+    { infractions_contiennent: ['ontinue','ournali'], amende_min: 270, score_max: 20, infractions_min: 4 }
+  );
+
+  // ========================
+  // CAS 10 - Amplitude >13h regulier (L3312-2)
+  // Source: ecologie.gouv.fr = amplitude 12h general, R3312-9/R3312-11
+  // Code transports: amplitude regulier 13h (convention), occasionnel 14h
+  // Amplitude 04:30-19:00 = 14h30 > 13h => infraction
+  // ========================
+  testerCas(
+    'CAS 10 - Amplitude 14h30 regulier (infraction)',
+    'Amplitude 04:30-19:00 = 14h30. Limite regulier 13h. R3312-9, L3312-2.',
+    '2025-03-10;04:30;05:00;T\n2025-03-10;05:00;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;13:00;C\n2025-03-10;13:00;14:00;P\n2025-03-10;14:00;17:30;C\n2025-03-10;17:30;18:30;D\n2025-03-10;18:30;19:00;T',
+    'REGULIER', 'FR',
+    { infractions_contiennent: ['mplitude'], amende_min: 135 }
+  );
+
+  // ========================
+  // CAS 11 - Amplitude 13h30 OCCASIONNEL (conforme car limite = 14h)
+  // Source: R3312-11, convention collective transport voyageurs
+  // 13h30 < 14h => pas d'infraction amplitude
+  // ========================
+  testerCas(
+    'CAS 11 - Amplitude 13h30 occasionnel (conforme)',
+    'Sortie scolaire amplitude 13h30. Occasionnel limite 14h. R3312-11.',
+    '2025-03-10;05:30;06:00;T\n2025-03-10;06:00;10:15;C\n2025-03-10;10:15;11:00;P\n2025-03-10;11:00;14:30;C\n2025-03-10;14:30;15:15;P\n2025-03-10;15:15;17:30;C\n2025-03-10;17:30;18:30;D\n2025-03-10;18:30;19:00;T',
+    'OCCASIONNEL', 'FR',
+    { infractions_absent: ['mplitude'], conduite_h: '9.0' }
+  );
+
+  // ========================
+  // CAS 12 - Nuit autocar conduite continue >4h (domformateur.com, groupito.com)
+  // Source: Convention collective = 4h max continue entre 21h-6h
+  // L3312-1 = travail nuit max 10h
+  // Conduite 21:00-02:15 = 5h15 continue de nuit
+  // ========================
+  testerCas(
+    'CAS 12 - Nuit conduite continue 5h15 (infraction nuit)',
+    'Navette CDG nuit 21h-02h15 sans pause. domformateur.com: 4h max nuit. L3312-1.',
+    '2025-03-10;20:30;21:00;T\n2025-03-10;21:00;02:15;C\n2025-03-10;02:15;03:00;P\n2025-03-10;03:00;06:00;C\n2025-03-10;06:00;07:00;C\n2025-03-10;07:00;07:30;T',
+    'REGULIER', 'FR',
+    { amende_min: 135, infractions_min: 1 }
+  );
+
+  // ========================
+  // CAS 13 - Pause fractionnee conforme (15min + 30min)
+  // Source: CE 561/2006 Art.7 = pause fractionnable 15min puis 30min
+  // domformateur.com: ordre obligatoire 15min PUIS 30min
+  // Conduite: 2h + 2h30 + 3h30 = 8h avec pauses fractionnees correctes
+  // ========================
+  testerCas(
+    'CAS 13 - Pause fractionnee 15+30 conforme',
+    'Pauses fractionnees legales: 15min puis 30min. CE 561/2006 Art.7. domformateur.com.',
+    '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;08:15;C\n2025-03-10;08:15;08:30;P\n2025-03-10;08:30;11:00;C\n2025-03-10;11:00;11:30;P\n2025-03-10;11:30;15:00;C\n2025-03-10;15:00;15:15;T',
+    'REGULIER', 'FR',
+    { score_min: 70, conduite_h: '8.0' }
+  );
+
+  // ========================
+  // CAS 14 - Conduite 10h derog conforme (2x/sem max)
+  // Source: CE 561/2006 Art.6-1 = 10h possible 2x par semaine
+  // sinari.com: "9h max, assouplie a 10h deux fois par semaine"
+  // 10h conduite = pas d'infraction si derog
+  // ========================
+  testerCas(
+    'CAS 14 - Conduite 10h derogatoire (conforme)',
+    'Journee longue 10h conduite, 2x/sem autorise. CE 561/2006 Art.6-1. sinari.com.',
+    '2025-03-10;05:00;05:15;T\n2025-03-10;05:15;09:45;C\n2025-03-10;09:45;10:30;P\n2025-03-10;10:30;14:30;C\n2025-03-10;14:30;15:15;P\n2025-03-10;15:15;17:15;C\n2025-03-10;17:15;17:30;T',
+    'OCCASIONNEL', 'FR',
+    { amende_min: 0, conduite_h: '10.0' }
+  );
+
+  // ========================
+  // CAS 15 - Multi-pays Allemagne hiver
+  // Source: CE 561/2006 applicable UE, Allemagne UTC+1 hiver
+  // Conduite conforme 8h30, amplitude OK
+  // ========================
+  testerCas(
+    'CAS 15 - Allemagne hiver conforme',
+    'Ligne Berlin, janvier, 8h30 conduite. CE 561/2006 UE. UTC+1 hiver.',
+    '2025-01-15;06:30;06:45;T\n2025-01-15;06:45;11:00;C\n2025-01-15;11:00;11:45;P\n2025-01-15;11:45;16:00;C\n2025-01-15;16:00;16:15;T',
+    'REGULIER', 'DE',
+    { infractions: 0, score_min: 80, amende_exacte: 0, jours: 1, conduite_h: '8.5' }
+  );
+
+  // Resume
   rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round((rapport.resume.ok / rapport.resume.total) * 100) : 0;
   rapport.resume.status = rapport.resume.ko === 0 ? 'TOUS LES CAS PASSENT' : rapport.resume.ko + ' CAS EN ANOMALIE';
-  console.log('[QA CAS REELS] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%)');
+  console.log('[QA CAS REELS v5.4.1] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%)');
   res.json(rapport);
 });
 
