@@ -1,131 +1,110 @@
-﻿# RSE/RSN Calculator v5.6.1
+# RSE/RSN Calculator v5.7.3
 
-**Calculateur de conformite RSE/RSN** - Reglementation Sociale Europeenne et Nationale du transport routier de personnes
+> Calculateur educatif de conformite RSE/RSN pour conducteurs de transport routier de personnes.
 
-> Application web educative pour l'apprentissage et la verification des temps de conduite, repos et pauses des conducteurs de transport en commun, conforme au reglement CE 561/2006 et au Code des transports francais.
+[![Version](https://img.shields.io/badge/version-5.7.3-blue)]()
+[![Tests](https://img.shields.io/badge/tests-81%2F81-brightgreen)]()
+[![Conformite](https://img.shields.io/badge/CE%20561%2F2006-conforme-brightgreen)]()
+[![Node](https://img.shields.io/badge/node-%3E%3D18-green)]()
 
-![Version](https://img.shields.io/badge/version-5.6.1-blue) ![Tests](https://img.shields.io/badge/QA-25%2F25%20(100%25)-brightgreen) ![Licence](https://img.shields.io/badge/licence-usage%20educatif-orange)
-
----
-
-## Demo en ligne
+## Demo
 
 **https://rse-rsn-calculator.onrender.com/**
 
----
+## Description
 
-## Fonctionnalites
-
-### Analyse de conformite
-- Analyse des temps de conduite (continue, journaliere, hebdomadaire) selon CE 561/2006 Art.6-7
-- Verification des pauses obligatoires (45min ou fractionnee 15min + 30min) selon CE 561/2006 Art.7
-- Controle des repos journaliers (11h normal, 9h reduit) selon CE 561/2006 Art.8
-- Detection du travail de nuit (21h-6h, max 10h) selon L3312-1 Code des transports
-- Verification de l'amplitude journaliere (13h regulier, 14h occasionnel) selon R3312-9/R3312-11
-- Classification automatique des infractions en 4eme et 5eme classe avec seuils reglementaires
-- Estimation des amendes forfaitaires (135E classe 4, 1500E classe 5, 3000E recidive)
-
-### Interface utilisateur
-- Saisie manuelle des activites avec pictogrammes conformes CE 3821/85 Annexe IB
-- Import de fichiers CSV depuis chronotachygraphe
-- Jauges temps reel (conduite continue, journaliere, amplitude)
-- Timeline interactive avec zones horaires et seuils visuels
-- Modeles de journees predefinis (conduite, mixte)
-- Historique des analyses en localStorage
-- Theme clair / sombre
-- Responsive mobile
-- Bareme complet des sanctions (classes 4, 5, delits)
-
-### Support multi-pays
-29 pays supportes avec gestion automatique des fuseaux horaires (heure ete/hiver) : France, Allemagne, Espagne, Italie, Belgique, Pays-Bas, Portugal, Royaume-Uni, Suisse, Autriche, Pologne, Roumanie, Grece, Bulgarie, Tchequie, Hongrie, Suede, Danemark, Finlande, Irlande, Luxembourg, Croatie, Slovaquie, Slovenie, Norvege, Maroc, Tunisie, Algerie, Turquie.
-
----
+Application web educative qui analyse les temps de conduite, pauses, repos, amplitude et travail de nuit des conducteurs routiers, conformement au reglement europeen CE 561/2006 et au Code des transports francais. Elle classifie automatiquement les infractions (4e/5e classe) et estime les amendes.
 
 ## Sources reglementaires
 
-| Source | Reference |
-|--------|-----------|
-| Reglement europeen | CE 561/2006 Art.6, 7, 8 - Temps de conduite, pauses, repos |
-| Code des transports | R3312-9, R3312-11, R3312-28 - Amplitude, conduite journaliere |
-| Code des transports | L3312-1, L3312-2 - Travail de nuit, amplitude |
-| Pictogrammes | CE 3821/85 Annexe IB, UE 165/2014 - Symboles chronotachygraphe |
-| Sanctions | Decret 2010-855, Decret 2020-1088 - Bareme des amendes |
-| EUR-Lex | [Reglement 561/2006](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX%3A32006R0561) |
-| Legifrance | [Code des transports](https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/) |
-| Ecologie.gouv.fr | [Temps de travail conducteurs](https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-personnes) |
+| Source | Reference | URL |
+|--------|-----------|-----|
+| Reglement europeen | CE 561/2006 Art. 6, 7, 8 | https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX%3A32006R0561 |
+| Code des transports | L3312-1, L3312-2 | https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000033453099/ |
+| Decret sanctions | 2010-855 / R3315-10, R3315-11 | https://www.legifrance.gouv.fr/codes/id/LEGISCTA000033450375/ |
+| Ministere Ecologie | Temps de travail conducteurs | https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-marchandises |
+| Sanctions | dan-dis-scan.fr | https://www.dan-dis-scan.fr/les-sanctions |
+| Heure ete/hiver | Directive 2000/84/CE | https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX%3A32000L0084 |
 
----
+## Fonctionnalites
 
-## Pictogrammes chronotachygraphe
+- Analyse complete : conduite continue, journaliere, hebdomadaire, bi-hebdomadaire
+- Pauses : verification CE 561/2006 Art.7 (45min apres 4h30)
+- Repos : journalier normal 11h / reduit 9h, hebdomadaire normal 45h / reduit 24h
+- Amplitude : regulier 13h (R3312-9), occasionnel 14h (R3312-11)
+- Travail de nuit : L3312-1 conforme ecologie.gouv.fr (travail total > 10h si activite entre 0h-5h)
+- Services de nuit : detection par traversee de minuit, tri chronologique correct
+- Classification infractions : 4e classe (135 EUR) / 5e classe (1500 EUR)
+- 29 pays avec fuseaux horaires et heure ete/hiver (Directive 2000/84/CE)
+- Import CSV : format date;heure_debut;heure_fin;type (C, T, D, P)
+- Interface : jauges temps-reel, timeline, modeles, historique, theme sombre/clair, responsive
 
-Les 4 pictogrammes officiels du chronotachygraphe numerique (UE 165/2014) :
+## QA : 81 tests sources (100%)
 
-| Symbole | Activite | Code CSV | Description |
-|---------|----------|----------|-------------|
-| Volant | Conduite | C | Conduite du vehicule |
-| Marteaux croises | Autre tache | T | Travail autre que la conduite |
-| Carre barre | Disponibilite | D | Temps d'attente |
-| Lit | Repos / Pause | P | Pause reglementaire ou repos |
+### Niveau 1 - Assertions reglementaires (56 tests)
 
----
+| Categorie | Tests | Source |
+|-----------|-------|--------|
+| R1-CONDUITE | 4 | CE 561/2006 Art.6 |
+| R2-PAUSES | 2 | CE 561/2006 Art.7 |
+| R3-REPOS | 4 | CE 561/2006 Art.8 |
+| R4-AMPLITUDE | 8 | L3312-1, L3312-2 |
+| R5-SANCTIONS | 7 | Decret 2010-855 |
+| R6-SEUILS | 6 | Seuils 4e/5e classe |
+| R7-PAYS | 11 | 29 pays, Dir. 2000/84/CE |
+| R8-MOTEUR | 12 | Scenarios CSV |
+| R9-INFRA | 2 | Build + port |
 
-## Format CSV
+### Niveau 2 - Scenarios cas reels (25 tests)
 
-Format attendu : `date;heure_debut;heure_fin;type`
+| Categorie | Cas | Description |
+|-----------|-----|-------------|
+| CAT-A | 1-4 | Journees conformes (FR regulier/occasionnel, DE, ES) |
+| CAT-B | 5-8 | Conduite continue (conformes + infractions 4e/5e) |
+| CAT-C | 9-12 | Conduite journaliere (avertissement, derogatoire, 4e/5e) |
+| CAT-D | 13-15 | Repos journalier (conforme, insuffisant 4e, tres insuffisant 5e) |
+| CAT-E | 16-19 | Amplitude (conforme/infraction regulier + occasionnel) |
+| CAT-F | 20-22 | Travail de nuit (conforme 4h/9h, infraction >10h L3312-1) |
+| CAT-G | 23-25 | Edge cases (pause 30min, cumul multi-infractions, marathon 18h) |
 
-Types : `C` (Conduite), `T` (Autre tache), `D` (Disponibilite), `P` (Pause/Repos)
+### Verification
 
-Exemple :
-```csv
-2025-03-10;06:00;06:15;T
-2025-03-10;06:15;10:30;C
-2025-03-10;10:30;11:15;P
-2025-03-10;11:15;15:00;C
-2025-03-10;15:00;15:15;T
+```bash
+curl https://rse-rsn-calculator.onrender.com/api/qa
+curl https://rse-rsn-calculator.onrender.com/api/qa/cas-reels
 ```
-
----
 
 ## API REST
 
 | Methode | Route | Description |
 |---------|-------|-------------|
-| GET | /api/health | Etat du serveur, version, nombre de pays |
-| GET | /api/pays | Liste des 29 pays avec fuseaux horaires |
-| GET | /api/regles | Toutes les regles RSE et bareme sanctions |
-| GET | /api/example-csv | Exemple de CSV multi-jours |
-| POST | /api/analyze | Analyse un CSV (body: csv, type_service, pays) |
-| POST | /api/upload | Upload d'un fichier CSV |
-| GET | /api/qa | Tests automatises du moteur (43 checks) |
-| GET | /api/qa/cas-reels | 25 scenarios QA avances (7 categories) |
+| GET | /api/health | Version, status, nombre de pays |
+| GET | /api/pays | Liste des 29 pays |
+| GET | /api/regles | Constantes + sanctions |
+| GET | /api/exemple-csv | Exemple CSV valide |
+| POST | /api/analyze | Analyse CSV (body: csv, type_service, pays) |
+| POST | /api/upload | Upload fichier CSV |
+| GET | /api/qa | QA Niveau 1 : 56 assertions |
+| GET | /api/qa/cas-reels | QA Niveau 2 : 25 scenarios |
 
----
+## Format CSV
 
-## Tests QA - 25 scenarios (7 categories)
+```
+date;heure_debut;heure_fin;type
+2026-02-12;06:45;11:00;C
+2026-02-12;11:00;11:45;P
+2026-02-12;11:45;15:30;C
+2026-02-12;15:30;16:00;T
+```
 
-| Categorie | Cas | Ce qui est teste |
-|-----------|-----|-----------------|
-| CAT-A | 1-4 | Conformite parfaite (FR regulier, FR occasionnel, semaine 5j, Espagne UTC+2) |
-| CAT-B | 5-8 | Conduite continue - seuils 270min OK, 300min 4e, 360min seuil, 390min 5e |
-| CAT-C | 9-12 | Conduite journaliere - 9h30 avert, 9h45 derog, 11h 4e, 12h 5e |
-| CAT-D | 13-15 | Repos journalier - conforme, 8h (4e classe), 5h30 (5e classe) |
-| CAT-E | 16-19 | Amplitude - 12h50 OK, 14h30 infr, 13h30 occ OK, 15h occ infr |
-| CAT-F | 20-22 | Travail de nuit - 4h OK, 8h OK, plus de 10h infraction |
-| CAT-G | 23-25 | Edge cases - pause 30min reset, 25min no-reset, cumul 18h |
-
----
+Types : C = Conduite, T = Autre tache, D = Disponibilite, P = Pause
 
 ## Stack technique
 
-| Composant | Technologie |
-|-----------|-------------|
-| Backend | Node.js + Express |
-| Frontend | React (JSX) + Vite |
-| Deploiement | Render (free tier, auto-deploy) |
-| Tests | Systeme QA integre (25 cas, 100+ assertions) |
-| Versioning | Git + GitHub |
-
----
+- Backend : Node.js + Express
+- Frontend : React + Vite
+- Deploiement : Render (auto-deploy GitHub)
+- Tests : QA integre (81 tests, 0 dependance externe)
 
 ## Installation locale
 
@@ -135,41 +114,22 @@ cd rse-rsn-calculator
 npm install
 cd client && npm install && npx vite build && cd ..
 node server.js
-# Ouvrir http://localhost:3001
 ```
 
----
+## Changelog
 
-## Structure du projet
+### v5.7.3 (2026-02-12)
+- Fix detection service de nuit par traversee de minuit
+- Fix amplitude = 0 sur journees normales (faux positif service nuit)
+- Fix travail de nuit L3312-1 conforme ecologie.gouv.fr
+- QA 81/81 tests (100%) en production
 
-```text
-rse-rsn-calculator/
--- server.js              # Serveur Express + moteur analyse RSE + routes API + QA
--- package.json           # Dependances serveur (express, multer, cors)
--- render.yaml            # Configuration deploiement Render
--- README.md              # Cette documentation
--- client/
-   -- index.html          # Shell HTML
-   -- package.json        # Dependances frontend (react, vite)
-   -- src/
-      -- main.jsx         # Point entree React
-      -- App.jsx          # Application complete (1083 lignes)
-```
+### v5.7.0 (2026-02-12)
+- QA Niveau 1 : 56 assertions reglementaires sourcees
 
----
-
-## Contexte
-
-Ce projet a ete cree dans le cadre de la preparation du **Titre Professionnel Conducteur Transport en Commun sur Route** (Permis D + FIMO Voyageurs). Il vise a faciliter l'apprentissage de la Reglementation Sociale Europeenne (RSE) et Nationale (RSN) pour les conducteurs de transport de personnes.
-
----
+### v5.6.0
+- Moteur RSE/RSN avec 25 scenarios, 29 pays, interface React responsive
 
 ## Auteur
 
-**Samir Medjaher**
-
----
-
-## Licence
-
-Usage educatif. Tous droits reserves.
+**Samir Medjaher** - Projet educatif, licence educative.

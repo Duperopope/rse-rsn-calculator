@@ -5,3 +5,6 @@ uploads/
 .env
 *.log
 .DS_Store
+
+*_backup*
+*_pre_*
