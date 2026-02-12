@@ -323,9 +323,12 @@ function analyserCSV(csvTexte, typeService, codePays) {
     // Si activites avant ET apres 12h sur le meme jour = service de nuit
     // Dans ce cas, les heures >= 12h passent en premier (debut de service)
     const activitesJourBrut = joursMap[dateJour];
-    const aDesHeuresAvant12 = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) < 12);
-    const aDesHeuresApres12 = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) >= 12);
-    const estServiceNuit = aDesHeuresAvant12 && aDesHeuresApres12;
+    // Detection service de nuit : activites APRES 18h ET activites AVANT 6h sur le meme jour CSV
+    // Un jour normal (ex: 06:45-16:00) a des heures avant et apres 12h mais n'est PAS un service de nuit
+    // Un vrai service de nuit (ex: 20:00-04:30) a des heures >= 18h ET des heures < 6h
+    const aDesHeuresMatinales = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) < 6);
+    const aDesHeuresSoiree = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) >= 18);
+    const estServiceNuit = aDesHeuresMatinales && aDesHeuresSoiree;
 
     const activitesJour = activitesJourBrut.sort((a, b) => {
       if (estServiceNuit) {
@@ -687,7 +690,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: "5.6.0",
+    version: "5.7.2",
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
