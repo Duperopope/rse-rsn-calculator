@@ -46,7 +46,7 @@ export function JaugeCirculaire({
   const center = size / 2;
 
   return (
-    <div className={styles.container} style={{ width: size, height: size }}>
+    <div className={styles.container} style={{ width: size, minHeight: size }}>
       <svg width={size} height={size} className={styles.svg}>
         <circle
           cx={center}
