@@ -132,6 +132,24 @@ export default function Calculator() {
           mode={mode} onModeChange={(m) => { setMode(m); reset(); }}
         />
 
+
+        {equipage === 'double' ? (
+          <div className={styles.conducteurTabs}>
+            <button
+              className={conducteurActif === 1 ? styles.tabActive : styles.tab}
+              onClick={() => setConducteurActif(1)}
+            >
+              Conducteur 1
+            </button>
+            <button
+              className={conducteurActif === 2 ? styles.tabActive : styles.tab}
+              onClick={() => setConducteurActif(2)}
+            >
+              Conducteur 2
+            </button>
+          </div>
+        ) : null}
+
         <div className={styles.inputSection}>
           {mode === 'formulaire' ? (
             <div className={styles.formulaire}>
