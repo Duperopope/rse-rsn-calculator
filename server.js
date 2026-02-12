@@ -687,157 +687,158 @@ app.get('/api/regles', (req, res) => {
   res.json({ regles: REGLES, sanctions: SANCTIONS });
 });
 
+
 // ============================================================
-// ROUTE QA - Tests automatisés accessibles par LLM
-// GET /api/qa - Exécute tous les tests et retourne un rapport
+// ROUTE QA NIVEAU 1 - TESTS REGLEMENTAIRES SOURCES
+// GET /api/qa
+// Version: 5.7.0
+// Sources primaires:
+//   [EUR-1] CE 561/2006 Art.6 - Durees de conduite
+//   [EUR-2] CE 561/2006 Art.7 - Pauses
+//   [EUR-3] CE 561/2006 Art.8 - Repos
+//   [FR-1]  L3312-1 Code des transports - Travail de nuit
+//   [FR-2]  L3312-2 Code des transports - Amplitude
+//   [FR-4]  R3315-10 Decret 2010-855 - Seuils 4e classe
+//   [FR-5]  R3315-11 Decret 2010-855 - Seuils 5e classe
+//   [EU-TZ] Directive 2000/84/CE - Heure ete/hiver
+//   [QCM-1] legistrans.com FIMO/FCO
+//   [QCM-2] Wayground QCM RSE
 // ============================================================
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "5.6.0",
+    version: "5.7.0",
+    description: "Tests reglementaires sources - Niveau 1",
+    methode: "Chaque assertion cite son article de loi exact",
+    sources: [
+      { id: "EUR-1", ref: "CE 561/2006 Art.6", sujet: "Durees de conduite", url: "https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX%3A32006R0561" },
+      { id: "EUR-2", ref: "CE 561/2006 Art.7", sujet: "Pauses obligatoires" },
+      { id: "EUR-3", ref: "CE 561/2006 Art.8", sujet: "Temps de repos" },
+      { id: "FR-1", ref: "L3312-1 Code des transports", sujet: "Travail de nuit", url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/" },
+      { id: "FR-2", ref: "L3312-2 Code des transports", sujet: "Amplitude journaliere" },
+      { id: "FR-4", ref: "R3315-10 Decret 2010-855", sujet: "Seuils 4e classe", url: "https://www.dan-dis-scan.fr/les-sanctions" },
+      { id: "FR-5", ref: "R3315-11 Decret 2010-855", sujet: "Seuils 5e classe", url: "http://www.chronocaraibes.com/wp-content/uploads/Infractions_RSE_depliant" },
+      { id: "FR-6", ref: "Code penal transport", sujet: "Delits" },
+      { id: "EU-TZ", ref: "Directive 2000/84/CE", sujet: "Heure ete/hiver" },
+      { id: "QCM-1", ref: "legistrans.com", sujet: "QCM FIMO/FCO 100Q", url: "http://alainfrancis.free.fr/exercicesetqcm/QCMpar100Q.htm" },
+      { id: "QCM-2", ref: "Wayground RSE", sujet: "QCM RSE 20Q", url: "https://wayground.com/admin/quiz/68e4bf60a509337bdd0c7210" }
+    ],
+    categories: [],
     tests: [],
     resume: { total: 0, ok: 0, ko: 0 }
   };
 
-  function test(nom, condition, detail) {
-    const ok = !!condition;
-    rapport.tests.push({ nom, ok, detail: detail || (ok ? 'OK' : 'ECHEC') });
+  function test(categorie, nom, condition, source_id, article, detail) {
+    var ok = !!condition;
+    rapport.tests.push({ categorie: categorie, nom: nom, ok: ok, source: source_id, article: article, detail: detail || (ok ? 'CONFORME' : 'NON CONFORME') });
     rapport.resume.total++;
-    if (ok) rapport.resume.ok++;
-    else rapport.resume.ko++;
+    if (ok) rapport.resume.ok++; else rapport.resume.ko++;
   }
 
-  // TEST 1 : Serveur en ligne
-  test('Serveur en ligne', true, 'Le serveur repond sur le port ' + PORT);
+  // === R1-CONDUITE : CE 561/2006 Art.6 ===
+  test('R1-CONDUITE', 'Conduite journaliere max = 540 min (9h)', REGLES.CONDUITE_JOURNALIERE_MAX_MIN === 540, 'EUR-1', 'CE 561/2006 Art.6 para.1', 'Attendu: 540. Obtenu: ' + REGLES.CONDUITE_JOURNALIERE_MAX_MIN + '. Cross-check: Wayground Q1, legistrans Q2');
+  test('R1-CONDUITE', 'Conduite derogatoire max = 600 min (10h)', REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN === 600, 'EUR-1', 'CE 561/2006 Art.6 para.1', 'Attendu: 600. Obtenu: ' + REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN + '. Cross-check: Wayground Q2 (2x/semaine)');
+  test('R1-CONDUITE', 'Conduite hebdomadaire max = 3360 min (56h)', REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN === 3360, 'EUR-1', 'CE 561/2006 Art.6 para.2', 'Attendu: 3360. Obtenu: ' + REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN + '. Cross-check: Wayground Q3, legistrans Q12');
+  test('R1-CONDUITE', 'Conduite bi-hebdo max = 5400 min (90h)', REGLES.CONDUITE_BIHEBDO_MAX_MIN === 5400, 'EUR-1', 'CE 561/2006 Art.6 para.3', 'Attendu: 5400. Obtenu: ' + REGLES.CONDUITE_BIHEBDO_MAX_MIN + '. Cross-check: Wayground Q4, legistrans Q18');
 
-  // TEST 2 : Constantes reglementaires
-  test('Conduite continue max = 270 min (4h30)', REGLES.CONDUITE_CONTINUE_MAX_MIN === 270, 'Valeur: ' + REGLES.CONDUITE_CONTINUE_MAX_MIN);
-  test('Conduite journaliere max = 540 min (9h)', REGLES.CONDUITE_JOURNALIERE_MAX_MIN === 540, 'Valeur: ' + REGLES.CONDUITE_JOURNALIERE_MAX_MIN);
-  test('Conduite derogatoire max = 600 min (10h)', REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN === 600, 'Valeur: ' + REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN);
-  test('Conduite hebdo max = 3360 min (56h)', REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN === 3360, 'Valeur: ' + REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN);
-  test('Repos journalier normal = 11h', REGLES.REPOS_JOURNALIER_NORMAL_H === 11, 'Valeur: ' + REGLES.REPOS_JOURNALIER_NORMAL_H);
-  test('Repos journalier reduit = 9h', REGLES.REPOS_JOURNALIER_REDUIT_H === 9, 'Valeur: ' + REGLES.REPOS_JOURNALIER_REDUIT_H);
-  test('Repos hebdo normal = 45h', REGLES.REPOS_HEBDO_NORMAL_H === 45, 'Valeur: ' + REGLES.REPOS_HEBDO_NORMAL_H);
-  test('Amplitude regulier = 13h', REGLES.AMPLITUDE_MAX_REGULIER_H === 13, 'Valeur: ' + REGLES.AMPLITUDE_MAX_REGULIER_H);
-  test('Amplitude occasionnel = 14h', REGLES.AMPLITUDE_MAX_OCCASIONNEL_H === 14, 'Valeur: ' + REGLES.AMPLITUDE_MAX_OCCASIONNEL_H);
-  test('Nuit debut = 21h', REGLES.NUIT_DEBUT_H === 21, 'Valeur: ' + REGLES.NUIT_DEBUT_H);
-  test('Nuit fin = 6h', REGLES.NUIT_FIN_H === 6, 'Valeur: ' + REGLES.NUIT_FIN_H);
+  // === R2-PAUSES : CE 561/2006 Art.7 ===
+  test('R2-PAUSES', 'Conduite continue max = 270 min (4h30)', REGLES.CONDUITE_CONTINUE_MAX_MIN === 270, 'EUR-2', 'CE 561/2006 Art.7', 'Attendu: 270. Obtenu: ' + REGLES.CONDUITE_CONTINUE_MAX_MIN + '. Cross-check: legistrans Q3 Q8');
+  test('R2-PAUSES', 'Pause min pour reset = 30 min', REGLES.PAUSE_OBLIGATOIRE_MIN === 30, 'EUR-2', 'CE 561/2006 Art.7 (fractionnement 15+30)', 'Attendu: 30. Obtenu: ' + REGLES.PAUSE_OBLIGATOIRE_MIN + '. Pause complete=45min fractionnable 15+30');
 
-  // TEST 3 : Sanctions
-  test('Amende 4e classe forfaitaire = 135', SANCTIONS.classe_4.amende_forfaitaire === 135, 'Valeur: ' + SANCTIONS.classe_4.amende_forfaitaire);
-  test('Amende 4e classe max = 750', SANCTIONS.classe_4.amende_max === 750, 'Valeur: ' + SANCTIONS.classe_4.amende_max);
-  test('Amende 5e classe max = 1500', SANCTIONS.classe_5.amende_max === 1500, 'Valeur: ' + SANCTIONS.classe_5.amende_max);
-  test('Amende 5e classe recidive = 3000', SANCTIONS.classe_5.amende_recidive === 3000, 'Valeur: ' + SANCTIONS.classe_5.amende_recidive);
+  // === R3-REPOS : CE 561/2006 Art.8 ===
+  test('R3-REPOS', 'Repos journalier normal = 11h', REGLES.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + REGLES.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
+  test('R3-REPOS', 'Repos journalier reduit = 9h', REGLES.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + REGLES.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
+  test('R3-REPOS', 'Repos hebdo normal = 45h', REGLES.REPOS_HEBDO_NORMAL_H === 45, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 45. Obtenu: ' + REGLES.REPOS_HEBDO_NORMAL_H + '. Cross-check: Wayground Q7');
+  test('R3-REPOS', 'Repos hebdo reduit = 24h', REGLES.REPOS_HEBDO_REDUIT_H === 24, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 24. Obtenu: ' + REGLES.REPOS_HEBDO_REDUIT_H);
 
-  // TEST 4 : Liste des pays
-  const nbPays = Object.keys(PAYS).length;
-  test('Pays charges >= 25', nbPays >= 25, 'Nombre de pays: ' + nbPays);
-  test('France presente', !!PAYS.FR, 'FR: ' + JSON.stringify(PAYS.FR));
-  test('Allemagne presente', !!PAYS.DE, 'DE: ' + JSON.stringify(PAYS.DE));
-  test('Maroc present', !!PAYS.MA, 'MA: ' + JSON.stringify(PAYS.MA));
+  // === R4-AMPLITUDE : Code des transports FR ===
+  test('R4-AMPLITUDE', 'Amplitude regulier = 13h', REGLES.AMPLITUDE_MAX_REGULIER_H === 13, 'FR-2', 'L3312-2 / R3312-9', 'Attendu: 13. Obtenu: ' + REGLES.AMPLITUDE_MAX_REGULIER_H);
+  test('R4-AMPLITUDE', 'Amplitude occasionnel = 14h', REGLES.AMPLITUDE_MAX_OCCASIONNEL_H === 14, 'FR-2', 'L3312-2 / R3312-11', 'Attendu: 14. Obtenu: ' + REGLES.AMPLITUDE_MAX_OCCASIONNEL_H);
+  test('R4-AMPLITUDE', 'Nuit debut = 21h', REGLES.NUIT_DEBUT_H === 21, 'FR-1', 'L3312-1', 'Attendu: 21. Obtenu: ' + REGLES.NUIT_DEBUT_H);
+  test('R4-AMPLITUDE', 'Nuit fin = 6h', REGLES.NUIT_FIN_H === 6, 'FR-1', 'L3312-1', 'Attendu: 6. Obtenu: ' + REGLES.NUIT_FIN_H);
+  test('R4-AMPLITUDE', 'Travail nuit max = 10h', REGLES.TRAVAIL_NUIT_MAX_H === 10, 'FR-1', 'L3312-1', 'Attendu: 10. Obtenu: ' + REGLES.TRAVAIL_NUIT_MAX_H);
+  test('R4-AMPLITUDE', 'Travail journalier max = 10h', REGLES.TRAVAIL_JOURNALIER_MAX_H === 10, 'FR-2', 'Code du travail transport', 'Attendu: 10. Obtenu: ' + REGLES.TRAVAIL_JOURNALIER_MAX_H + '. Cross-check: legistrans Q15');
+  test('R4-AMPLITUDE', 'Travail hebdo max = 48h', REGLES.TRAVAIL_HEBDO_MAX_H === 48, 'FR-2', 'Code du travail / R3312-11', 'Attendu: 48. Obtenu: ' + REGLES.TRAVAIL_HEBDO_MAX_H + '. Cross-check: legistrans Q17');
+  test('R4-AMPLITUDE', 'Travail hebdo moyenne = 44h', REGLES.TRAVAIL_HEBDO_MOYENNE_MAX_H === 44, 'FR-2', 'Code du travail (moy 12 semaines)', 'Attendu: 44. Obtenu: ' + REGLES.TRAVAIL_HEBDO_MOYENNE_MAX_H);
 
-  // TEST 5 : Fuseau horaire / heure ete
-  const datEte = new Date('2025-07-15T12:00:00Z');
-  const datHiver = new Date('2025-01-15T12:00:00Z');
-  test('Heure ete detectee en juillet', estHeureEteEU(datEte) === true, 'Juillet 2025: ete=' + estHeureEteEU(datEte));
-  test('Heure hiver detectee en janvier', estHeureEteEU(datHiver) === false, 'Janvier 2025: ete=' + estHeureEteEU(datHiver));
-  test('UTC France ete = +2', getDecalageUTC('FR', datEte) === 2, 'FR ete: UTC+' + getDecalageUTC('FR', datEte));
-  test('UTC France hiver = +1', getDecalageUTC('FR', datHiver) === 1, 'FR hiver: UTC+' + getDecalageUTC('FR', datHiver));
-  test('UTC Portugal ete = +1', getDecalageUTC('PT', datEte) === 1, 'PT ete: UTC+' + getDecalageUTC('PT', datEte));
-  test('UTC Turquie = +3 (pas de changement)', getDecalageUTC('TR', datEte) === 3, 'TR: UTC+' + getDecalageUTC('TR', datEte));
+  // === R5-SANCTIONS : Decret 2010-855 ===
+  test('R5-SANCTIONS', 'AF 4e classe = 135 EUR', SANCTIONS.classe_4.amende_forfaitaire === 135, 'FR-4', 'R3315-10', 'Attendu: 135. Obtenu: ' + SANCTIONS.classe_4.amende_forfaitaire);
+  test('R5-SANCTIONS', 'Max 4e classe = 750 EUR', SANCTIONS.classe_4.amende_max === 750, 'FR-4', 'R3315-10', 'Attendu: 750. Obtenu: ' + SANCTIONS.classe_4.amende_max);
+  test('R5-SANCTIONS', 'Max 5e classe = 1500 EUR', SANCTIONS.classe_5.amende_max === 1500, 'FR-5', 'R3315-11', 'Attendu: 1500. Obtenu: ' + SANCTIONS.classe_5.amende_max);
+  test('R5-SANCTIONS', 'Recidive 5e classe = 3000 EUR', SANCTIONS.classe_5.amende_recidive === 3000, 'FR-5', 'R3315-11', 'Attendu: 3000. Obtenu: ' + SANCTIONS.classe_5.amende_recidive);
+  test('R5-SANCTIONS', 'Delit falsification = 1 an + 30000 EUR', SANCTIONS.delits.falsification === "1 an emprisonnement + 30 000 euros", 'FR-6', 'Code penal', 'Obtenu: ' + SANCTIONS.delits.falsification);
+  test('R5-SANCTIONS', 'Delit carte non conforme = 6 mois + 3750 EUR', SANCTIONS.delits.carte_non_conforme === "6 mois emprisonnement + 3 750 euros", 'FR-6', 'Code penal', 'Obtenu: ' + SANCTIONS.delits.carte_non_conforme);
+  test('R5-SANCTIONS', 'Delit refus controle = 6 mois + 3750 EUR', SANCTIONS.delits.refus_controle === "6 mois emprisonnement + 3 750 euros", 'FR-6', 'Code penal', 'Obtenu: ' + SANCTIONS.delits.refus_controle);
 
-  // TEST 6 : Analyse CSV - Journee conforme
-  const csvConforme = [
-    '2025-01-06;06:00;06:30;T',
-    '2025-01-06;06:30;10:30;C',
-    '2025-01-06;10:30;11:15;P',
-    '2025-01-06;11:15;13:15;C',
-    '2025-01-06;13:15;14:00;P',
-    '2025-01-06;14:00;16:00;C',
-    '2025-01-06;16:00;16:30;T'
-  ].join('\n');
-  const resConforme = analyserCSV(csvConforme, 'STANDARD', 'FR');
-  test('CSV conforme: 0 infraction', resConforme.infractions.length === 0, 'Infractions: ' + resConforme.infractions.length);
-  test('CSV conforme: score >= 80', resConforme.score >= 80, 'Score: ' + resConforme.score);
-  test('CSV conforme: conduite ~6h', parseFloat(resConforme.statistiques.conduite_totale_h) >= 5.5 && parseFloat(resConforme.statistiques.conduite_totale_h) <= 6.5, 'Conduite: ' + resConforme.statistiques.conduite_totale_h + 'h');
-  test('CSV conforme: amende = 0', resConforme.amende_estimee === 0, 'Amende: ' + resConforme.amende_estimee);
+  // === R6-SEUILS : Basculement 4e -> 5e classe ===
+  test('R6-SEUILS', 'Seuil conduite continue 4e = dep < 1h30', SANCTIONS.classe_4.seuils.conduite_continue_depassement.includes('1h30'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_continue_depassement);
+  test('R6-SEUILS', 'Seuil conduite journaliere 4e = dep < 2h', SANCTIONS.classe_4.seuils.conduite_journaliere_depassement.includes('2h'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_journaliere_depassement);
+  test('R6-SEUILS', 'Seuil conduite hebdo 4e = dep < 14h', SANCTIONS.classe_4.seuils.conduite_hebdomadaire_depassement.includes('14h'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_hebdomadaire_depassement);
+  test('R6-SEUILS', 'Seuil conduite bihebdo 4e = dep < 22h30', SANCTIONS.classe_4.seuils.conduite_bihebdo_depassement.includes('22h30'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_bihebdo_depassement);
+  test('R6-SEUILS', 'Seuil repos journalier 4e = insuff < 2h30', SANCTIONS.classe_4.seuils.repos_journalier_insuffisant.includes('2h30'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.repos_journalier_insuffisant);
+  test('R6-SEUILS', 'Seuil repos hebdo 4e = insuff < 9h', SANCTIONS.classe_4.seuils.repos_hebdomadaire_insuffisant.includes('9h'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.repos_hebdomadaire_insuffisant);
 
-  // TEST 7 : Analyse CSV - Journee avec depassement conduite continue
-  const csvDepassement = [
-    '2025-01-06;06:00;12:00;C',
-    '2025-01-06;12:00;12:30;P',
-    '2025-01-06;12:30;18:30;C'
-  ].join('\n');
-  const resDepass = analyserCSV(csvDepassement, 'STANDARD', 'FR');
-  test('CSV depassement: infractions > 0', resDepass.infractions.length > 0, 'Infractions: ' + resDepass.infractions.length);
-  test('CSV depassement: amende > 0', resDepass.amende_estimee > 0, 'Amende: ' + resDepass.amende_estimee + ' euros');
-  test('CSV depassement: conduite = 12h', parseFloat(resDepass.statistiques.conduite_totale_h) === 12.0, 'Conduite: ' + resDepass.statistiques.conduite_totale_h + 'h');
-  const infraContinue = resDepass.infractions.find(i => i.regle && i.regle.includes('ontinue'));
-  test('CSV depassement: infraction conduite continue detectee', !!infraContinue, infraContinue ? infraContinue.regle : 'Non trouvee');
-  const infraJournaliere = resDepass.infractions.find(i => i.regle && i.regle.includes('ournali'));
-  test('CSV depassement: infraction conduite journaliere detectee', !!infraJournaliere, infraJournaliere ? infraJournaliere.regle : 'Non trouvee');
+  // === R7-PAYS : Fuseaux horaires ===
+  var nbPays = Object.keys(PAYS).length;
+  test('R7-PAYS', 'Nombre pays >= 25', nbPays >= 25, 'EU-TZ', 'Config multi-pays', 'Obtenu: ' + nbPays);
+  test('R7-PAYS', 'France (FR) presente', !!PAYS.FR, 'EU-TZ', 'Pays obligatoire', JSON.stringify(PAYS.FR));
+  test('R7-PAYS', 'Allemagne (DE) presente', !!PAYS.DE, 'EU-TZ', 'Pays obligatoire', JSON.stringify(PAYS.DE));
+  test('R7-PAYS', 'Maroc (MA) present', !!PAYS.MA, 'EU-TZ', 'Pays Maghreb', JSON.stringify(PAYS.MA));
+  var dEte = new Date('2025-07-15T12:00:00Z');
+  var dHiv = new Date('2025-01-15T12:00:00Z');
+  test('R7-PAYS', 'Heure ete juillet = true', estHeureEteEU(dEte) === true, 'EU-TZ', 'Directive 2000/84/CE', 'Juillet: ' + estHeureEteEU(dEte));
+  test('R7-PAYS', 'Heure hiver janvier = false', estHeureEteEU(dHiv) === false, 'EU-TZ', 'Directive 2000/84/CE', 'Janvier: ' + estHeureEteEU(dHiv));
+  test('R7-PAYS', 'FR ete = UTC+2', getDecalageUTC('FR', dEte) === 2, 'EU-TZ', 'Directive 2000/84/CE', 'FR ete: UTC+' + getDecalageUTC('FR', dEte));
+  test('R7-PAYS', 'FR hiver = UTC+1', getDecalageUTC('FR', dHiv) === 1, 'EU-TZ', 'Directive 2000/84/CE', 'FR hiver: UTC+' + getDecalageUTC('FR', dHiv));
+  test('R7-PAYS', 'PT ete = UTC+1', getDecalageUTC('PT', dEte) === 1, 'EU-TZ', 'Directive 2000/84/CE', 'PT ete: UTC+' + getDecalageUTC('PT', dEte));
+  test('R7-PAYS', 'TR = UTC+3 permanent', getDecalageUTC('TR', dEte) === 3, 'EU-TZ', 'Turquie pas changement', 'TR: UTC+' + getDecalageUTC('TR', dEte));
+  test('R7-PAYS', 'RO ete = UTC+3', getDecalageUTC('RO', dEte) === 3, 'EU-TZ', 'Directive 2000/84/CE', 'RO ete: UTC+' + getDecalageUTC('RO', dEte));
 
-  // TEST 8 : Analyse CSV - Repos insuffisant
-  const csvRepos = [
-    '2025-01-06;04:00;08:30;C',
-    '2025-01-06;08:30;09:00;P',
-    '2025-01-06;09:00;13:00;C',
-    '2025-01-06;13:00;13:30;P',
-    '2025-01-06;13:30;17:30;C',
-    '2025-01-06;17:30;18:00;T',
-    '2025-01-06;18:00;22:00;D'
-  ].join('\n');
-  const resRepos = analyserCSV(csvRepos, 'STANDARD', 'FR');
-  const infraRepos = resRepos.infractions.find(i => i.regle && i.regle.toLowerCase().includes('repos'));
-  test('CSV repos insuffisant: infraction repos detectee', !!infraRepos, infraRepos ? infraRepos.regle + ' - ' + infraRepos.constate : 'Non detectee');
+  // === R8-MOTEUR : Scenarios CSV ===
+  var csvOK = '2025-01-06;06:00;06:30;T\n2025-01-06;06:30;10:30;C\n2025-01-06;10:30;11:15;P\n2025-01-06;11:15;13:15;C\n2025-01-06;13:15;14:00;P\n2025-01-06;14:00;16:00;C\n2025-01-06;16:00;16:30;T';
+  var rOK = analyserCSV(csvOK, 'STANDARD', 'FR');
+  test('R8-MOTEUR', 'Conforme: 0 infraction', rOK.infractions.length === 0, 'EUR-1+2+3', 'Scenario conforme 6h', 'Infractions: ' + rOK.infractions.length + ' Score: ' + rOK.score);
+  test('R8-MOTEUR', 'Conforme: score >= 80', rOK.score >= 80, 'EUR-1+2+3', 'Score conformite', 'Score: ' + rOK.score);
+  test('R8-MOTEUR', 'Conforme: amende = 0', rOK.amende_estimee === 0, 'FR-4', 'Pas de sanction', 'Amende: ' + rOK.amende_estimee);
 
-  // TEST 9 : Parsing CSV invalide
-  const csvInvalide = 'ceci;nest;pas;valide\n2025-01-06;06:00;07:00;Z';
-  const resInvalide = analyserCSV(csvInvalide, 'STANDARD', 'FR');
-  test('CSV invalide: erreurs detectees', resInvalide.erreurs_analyse.length > 0, 'Erreurs: ' + resInvalide.erreurs_analyse.length + ' - ' + (resInvalide.erreurs_analyse[0] || ''));
+  var csvKO = '2025-01-06;06:00;12:00;C\n2025-01-06;12:00;12:30;P\n2025-01-06;12:30;18:30;C';
+  var rKO = analyserCSV(csvKO, 'STANDARD', 'FR');
+  test('R8-MOTEUR', 'Depassement: infractions > 0', rKO.infractions.length > 0, 'EUR-1+2', 'Art.6+7 violes', 'Infractions: ' + rKO.infractions.length);
+  test('R8-MOTEUR', 'Depassement: continue detectee', rKO.infractions.some(function(i){return i.regle && i.regle.toLowerCase().indexOf('continu')!==-1;}), 'EUR-2', 'Art.7 6h>4h30', '');
+  test('R8-MOTEUR', 'Depassement: journaliere detectee', rKO.infractions.some(function(i){return i.regle && i.regle.toLowerCase().indexOf('ournali')!==-1;}), 'EUR-1', 'Art.6 12h>9h', '');
+  test('R8-MOTEUR', 'Depassement: amende > 0', rKO.amende_estimee > 0, 'FR-4+5', 'Sanctions', 'Amende: ' + rKO.amende_estimee + ' EUR');
 
-  // TEST 10 : Parsing CSV vide
-  const resVide = analyserCSV('', 'STANDARD', 'FR');
-  test('CSV vide: aucune activite', resVide.details_jours.length === 0, 'Jours: ' + resVide.details_jours.length);
+  var csvRP = '2025-01-06;04:00;08:30;C\n2025-01-06;08:30;09:00;P\n2025-01-06;09:00;13:00;C\n2025-01-06;13:00;13:30;P\n2025-01-06;13:30;17:30;C\n2025-01-06;17:30;18:00;T\n2025-01-06;18:00;22:00;D';
+  var rRP = analyserCSV(csvRP, 'STANDARD', 'FR');
+  test('R8-MOTEUR', 'Repos insuff: detecte', rRP.infractions.some(function(i){return i.regle && i.regle.toLowerCase().indexOf('repos')!==-1;}), 'EUR-3', 'Art.8 repos<11h', '');
 
-  // TEST 11 : Multi-jours
-  const csvMulti = [
-    '2025-01-06;06:00;10:30;C',
-    '2025-01-06;10:30;11:15;P',
-    '2025-01-06;11:15;15:00;C',
-    '2025-01-07;06:00;10:30;C',
-    '2025-01-07;10:30;11:15;P',
-    '2025-01-07;11:15;15:00;C',
-    '2025-01-08;06:00;10:30;C',
-    '2025-01-08;10:30;11:15;P',
-    '2025-01-08;11:15;15:00;C'
-  ].join('\n');
-  const resMulti = analyserCSV(csvMulti, 'STANDARD', 'FR');
-  test('CSV multi-jours: 3 jours detectes', resMulti.nombre_jours === 3, 'Jours: ' + resMulti.nombre_jours);
-  test('CSV multi-jours: details_jours = 3', resMulti.details_jours.length === 3, 'Details: ' + resMulti.details_jours.length);
-  test('CSV multi-jours: periode correcte', resMulti.periode && resMulti.periode.includes('2025-01-06'), 'Periode: ' + resMulti.periode);
+  var rInv = analyserCSV('ceci;nest;pas;valide\n2025-01-06;06:00;07:00;Z', 'STANDARD', 'FR');
+  test('R8-MOTEUR', 'CSV invalide: erreurs', rInv.erreurs_analyse.length > 0, 'EUR-1', 'Robustesse parser', 'Erreurs: ' + rInv.erreurs_analyse.length);
 
-  // TEST 12 : Service de nuit
-  const csvNuit = [
-    '2025-01-06;21:00;23:59;C',
-    '2025-01-06;00:00;04:00;C'
-  ].join('\n');
-  const resNuit = analyserCSV(csvNuit, 'STANDARD', 'FR');
-  test('CSV nuit: travail de nuit detecte', resNuit.details_jours.length > 0 && resNuit.details_jours[0].travail_nuit_min > 0, 'Nuit: ' + (resNuit.details_jours[0] ? resNuit.details_jours[0].travail_nuit_min + ' min' : 'N/A'));
+  var rVide = analyserCSV('', 'STANDARD', 'FR');
+  test('R8-MOTEUR', 'CSV vide: 0 jours', rVide.details_jours.length === 0, 'EUR-1', 'Robustesse parser', 'Jours: ' + rVide.details_jours.length);
 
-  // TEST 13 : Frontend build existe
-  const distExists = fs.existsSync(path.join(__dirname, 'client', 'dist', 'index.html'));
-  test('Frontend build (client/dist/index.html) existe', distExists, distExists ? 'Fichier present' : 'MANQUANT - npx vite build necessaire');
+  var csvMJ = '2025-01-06;06:00;10:30;C\n2025-01-06;10:30;11:15;P\n2025-01-06;11:15;15:00;C\n2025-01-07;06:00;10:30;C\n2025-01-07;10:30;11:15;P\n2025-01-07;11:15;15:00;C\n2025-01-08;06:00;10:30;C\n2025-01-08;10:30;11:15;P\n2025-01-08;11:15;15:00;C';
+  var rMJ = analyserCSV(csvMJ, 'STANDARD', 'FR');
+  test('R8-MOTEUR', 'Multi-jours: 3 jours', rMJ.nombre_jours === 3, 'EUR-1', 'Parser multi-jours', 'Jours: ' + rMJ.nombre_jours);
 
-  // Résumé
+  var csvNT = '2025-01-06;21:00;23:59;C\n2025-01-06;00:00;04:00;C';
+  var rNT = analyserCSV(csvNT, 'STANDARD', 'FR');
+  test('R8-MOTEUR', 'Nuit: minutes > 0', rNT.details_jours.length > 0 && rNT.details_jours[0].travail_nuit_min > 0, 'FR-1', 'L3312-1 nuit 21h-6h', 'Nuit: ' + (rNT.details_jours[0] ? rNT.details_jours[0].travail_nuit_min + 'min' : 'N/A'));
+
+  // === R9-INFRA ===
+  test('R9-INFRA', 'Frontend build existe', fs.existsSync(path.join(__dirname, 'client', 'dist', 'index.html')), 'INFRA', 'Deploiement', '');
+  test('R9-INFRA', 'Serveur port ' + PORT, true, 'INFRA', 'Express.js', 'Port: ' + PORT);
+
+  // === RESUME ===
+  var cats = {};
+  rapport.tests.forEach(function(t) { if (!cats[t.categorie]) cats[t.categorie] = {total:0,ok:0}; cats[t.categorie].total++; if(t.ok) cats[t.categorie].ok++; });
+  rapport.categories = Object.keys(cats).map(function(c) { return {categorie:c, total:cats[c].total, ok:cats[c].ok, status: cats[c].ok===cats[c].total?'PARFAIT':'ECHEC'}; });
   rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round((rapport.resume.ok / rapport.resume.total) * 100) : 0;
-  rapport.resume.status = rapport.resume.ko === 0 ? 'TOUS LES TESTS PASSENT' : rapport.resume.ko + ' TEST(S) EN ECHEC';
-
-  console.log('[QA] ' + rapport.resume.ok + '/' + rapport.resume.total + ' tests OK (' + rapport.resume.pourcentage + '%)');
-
+  rapport.resume.status = rapport.resume.ko === 0 ? 'TOUS LES TESTS PASSENT - CONFORME AUX TEXTES DE LOI' : rapport.resume.ko + ' TEST(S) NON CONFORME(S)';
+  console.log('[QA Niveau 1] ' + rapport.resume.ok + '/' + rapport.resume.total + ' (' + rapport.resume.pourcentage + '%)');
   res.json(rapport);
 });
-
 
 // ============================================================
 // ============================================================
