@@ -24,12 +24,12 @@ function IconeConduite({ taille = 22, couleur = '#3b82f6' }) {
 function IconeAutreTache({ taille = 22, couleur = '#f59e0b' }) {
   return (
     <svg width={taille} height={taille} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <line x1="7" y1="4" x2="12" y2="12" stroke={couleur} strokeWidth="2.5" strokeLinecap="round"/>
-      <line x1="17" y1="4" x2="12" y2="12" stroke={couleur} strokeWidth="2.5" strokeLinecap="round"/>
-      <line x1="12" y1="12" x2="7" y2="20" stroke={couleur} strokeWidth="2.5" strokeLinecap="round"/>
-      <line x1="12" y1="12" x2="17" y2="20" stroke={couleur} strokeWidth="2.5" strokeLinecap="round"/>
-      <rect x="4" y="2" width="6" height="3" rx="1" fill={couleur} opacity="0.3"/>
-      <rect x="14" y="2" width="6" height="3" rx="1" fill={couleur} opacity="0.3"/>
+      {/* Marteau gauche : manche diagonal + tete rectangulaire */}
+      <line x1="5" y1="19" x2="14" y2="6" stroke={couleur} strokeWidth="2" strokeLinecap="round"/>
+      <rect x="12" y="2.5" width="7" height="4" rx="1" transform="rotate(25 15 4.5)" fill={couleur} opacity="0.85"/>
+      {/* Marteau droit : manche diagonal + tete rectangulaire */}
+      <line x1="19" y1="19" x2="10" y2="6" stroke={couleur} strokeWidth="2" strokeLinecap="round"/>
+      <rect x="5" y="2.5" width="7" height="4" rx="1" transform="rotate(-25 9 4.5)" fill={couleur} opacity="0.85"/>
     </svg>
   );
 }
