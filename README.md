@@ -7,7 +7,7 @@
 
 | Element | Valeur |
 |---------|--------|
-| Backend | v6.3.1 |
+| Backend | v7.0.0 |
 | Frontend | v6.0.0 |
 | Tests automatises | **144/144 (100%)** |
 | Couverture reglementaire | 100% |
@@ -157,7 +157,7 @@ node server.js
 
 ## Changelog
 
-### v6.3.1 - Multi-conducteur deux onglets (2025-02-12)
+### v7.0.0 - Multi-conducteur deux onglets (2025-02-12)
 
 - Onglets Conducteur 1 / Conducteur 2 en mode double equipage (Art.8 par.5)
 - Backend accepte csv2 : analyse independante des deux conducteurs

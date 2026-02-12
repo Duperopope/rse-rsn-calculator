@@ -190,7 +190,7 @@ const PAYS = {
 // ============================================================
 
 /**
- * Calcule le dernier dimanche d\'un mois donne
+ * Calcule le dernier dimanche d'un mois donne
  * Utilise pour determiner automatiquement heure ete/hiver
  * Source : Directive 2000/84/CE
  */
@@ -301,7 +301,7 @@ function parseCSVLigne(ligne, numeroLigne) {
 }
 
 /**
- * Analyse complete d\'un CSV
+ * Analyse complete d'un CSV
  */
 
 
@@ -534,7 +534,7 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
           tracking.derogations.art8_6_2_reduits_consecutifs = true;
           avertissements.push({
             regle: 'Deux repos hebdo reduits consecutifs (Art.8 par.6 - 2020/1054)',
-            message: '2 repos reduits consecutifs detectes. Autorise en transport international de marchandises a condition de prendre au moins 4 repos hebdo sur 4 semaines dont 2 normaux (>= 45h). Verifiez que les repos reduits sont pris hors Etat d\'etablissement.'
+            message: '2 repos reduits consecutifs detectes. Autorise en transport international de marchandises a condition de prendre au moins 4 repos hebdo sur 4 semaines dont 2 normaux (>= 45h). Verifiez que les repos reduits sont pris hors Etat d'etablissement.'
           });
         } else {
           infractions.push({
@@ -625,12 +625,12 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
         conditions: [
           'Service dans un Etat membre different de celui de depart',
           'Conduite nuit solo (22h-6h) max 3h sans pause',
-          'A l\'arrivee : 2 repos normaux OU 1 normal + 1 reduit (avec compensation)'
+          'A l'arrivee : 2 repos normaux OU 1 normal + 1 reduit (avec compensation)'
         ]
       };
       avertissements.push({
         regle: 'Derogation 12 jours transport occasionnel (Art.8 par.6bis - 2024/1258)',
-        message: joursConsecutifsSansRepos + ' jours consecutifs sans repos hebdomadaire. Autorise jusqu\'a 12 jours en transport occasionnel de voyageurs sous conditions strictes. Verifiez : (1) service dans un autre Etat, (2) conduite nuit solo max 3h, (3) a l\'arrivee 2 repos normaux ou 1 normal + 1 reduit avec compensation.'
+        message: joursConsecutifsSansRepos + ' jours consecutifs sans repos hebdomadaire. Autorise jusqu'a 12 jours en transport occasionnel de voyageurs sous conditions strictes. Verifiez : (1) service dans un autre Etat, (2) conduite nuit solo max 3h, (3) a l'arrivee 2 repos normaux ou 1 normal + 1 reduit avec compensation.'
       });
     }
   }
@@ -650,14 +650,14 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
   // Repos >= 45h interdit dans le vehicule (Art.8§8 - 2020/1054)
   if (reposHebdoDetectes.some(r => r.type === 'normal')) {
     tracking.rappels.push(
-      'RAPPEL : Le repos hebdomadaire normal (>= 45h) est interdit a bord du vehicule depuis le 20/08/2020 (Art.8 par.8). L\'employeur doit fournir un hebergement adapte.'
+      'RAPPEL : Le repos hebdomadaire normal (>= 45h) est interdit a bord du vehicule depuis le 20/08/2020 (Art.8 par.8). L'employeur doit fournir un hebergement adapte.'
     );
   }
 
   // Retour domicile 4 semaines (Art.8§8bis - 2020/1054)
   if (joursTries.length >= 28) {
     tracking.rappels.push(
-      'RAPPEL : L\'entreprise doit organiser le retour du conducteur a son domicile ou centre operationnel pour un repos hebdomadaire normal dans chaque periode de ' + REGLES.RETOUR_DOMICILE_MAX_SEMAINES + ' semaines consecutives (Art.8 par.8bis - 2020/1054).'
+      'RAPPEL : L'entreprise doit organiser le retour du conducteur a son domicile ou centre operationnel pour un repos hebdomadaire normal dans chaque periode de ' + REGLES.RETOUR_DOMICILE_MAX_SEMAINES + ' semaines consecutives (Art.8 par.8bis - 2020/1054).'
     );
   }
 
@@ -1224,10 +1224,6 @@ totalConduiteMin += conduiteJour;
   const nbChecks = joursTries.length * 6; // 6 verifications par jour
   const nbInfractions = infractions.length;
   const score = nbChecks > 0 ? Math.max(0, Math.round(((nbChecks - nbInfractions) / nbChecks) * 100)) : 100;
-
-
-  // === APPEL ANALYSE MULTI-SEMAINES v7.0.0 ===
-  const tracking = analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, equipage, infractions, avertissements);
 
   return {
     score,
