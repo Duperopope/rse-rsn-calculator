@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // RSE/RSN Calculator - Serveur Backend v5.0.0
 // Credits : Samir Medjaher
 // Sources reglementaires :
@@ -1354,6 +1354,207 @@ app.get('/api/qa/cas-reels', (req, res) => {
   res.json(rapport);
 });
 
+
+// ============================================================
+// ROUTE QA NIVEAU 3 - TESTS AUX LIMITES REGLEMENTAIRES
+// GET /api/qa/limites
+// Verifie le comportement exact du moteur sur chaque seuil :
+//   - 1 cran en dessous (conforme)
+//   - pile sur la limite (conforme, car operateur >)
+//   - 1 cran au dessus (infraction)
+// Sources: CE 561/2006, L3312-1, L3312-2, Decret 2010-855
+// ============================================================
+app.get('/api/qa/limites', async (req, res) => {
+  const rapport = {
+    timestamp: new Date().toISOString(),
+    version: "5.7.3",
+    description: "Tests aux limites reglementaires - Niveau 3",
+    methode: "Chaque seuil est teste a -1, pile, +1",
+    tests: [],
+    resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
+  };
+
+  // Fonction helper : generer CSV d'une journee simple
+  // conduiteMin = minutes de conduite, avec pause 45min au milieu si > 240min
+  function genererCSVJournee(conduiteMin, pauseMin, tacheMin, opts) {
+    opts = opts || {};
+    const date = opts.date || "2025-06-15";
+    const debutH = opts.debutH || 6;
+    var lignes = [];
+    var h = debutH, m = 0;
+    function fmt(hh, mm) { return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm; }
+    function avancer(min) { m += min; while (m >= 60) { h++; m -= 60; } if (h >= 24) h -= 24; }
+    // Tache debut
+    if (tacheMin > 0) {
+      var deb = fmt(h, m); avancer(tacheMin); lignes.push(date + ";" + deb + ";" + fmt(h, m) + ";T");
+    }
+    // Conduite decoupee en blocs de 270 min max avec pause 45 min entre chaque
+    var conduiteRestante = conduiteMin;
+    var premierBloc = true;
+    while (conduiteRestante > 0) {
+      if (!premierBloc) {
+        // Pause 45 min entre blocs
+        var debP = fmt(h, m); avancer(45); lignes.push(date + ";" + debP + ";" + fmt(h, m) + ";P");
+      }
+      var bloc = Math.min(conduiteRestante, 270);
+      var debC = fmt(h, m); avancer(bloc); lignes.push(date + ";" + debC + ";" + fmt(h, m) + ";C");
+      conduiteRestante -= bloc;
+      premierBloc = false;
+    }
+    return lignes.join("\n");
+  }
+
+  // Fonction helper : generer CSV conduite continue sans pause
+  function genererCSVContinue(minutes, opts) {
+    opts = opts || {};
+    const date = opts.date || "2025-06-15";
+    const debutH = opts.debutH || 6;
+    let h = debutH, m = 0;
+    function fmt(hh, mm) { return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm; }
+    function avancer(min) { m += min; while (m >= 60) { h++; m -= 60; } if (h >= 24) h -= 24; }
+    var lignes = [];
+    var deb = fmt(h, m); avancer(15); lignes.push(date + ";" + deb + ";" + fmt(h, m) + ";T");
+    var debC = fmt(h, m); avancer(minutes); lignes.push(date + ";" + debC + ";" + fmt(h, m) + ";C");
+    var finC = fmt(h, m); avancer(15); lignes.push(date + ";" + finC + ";" + fmt(h, m) + ";T");
+    return lignes.join("\n");
+  }
+
+  // Fonction helper : generer CSV amplitude exacte
+  function genererCSVAmplitude(amplitudeMin, opts) {
+    opts = opts || {};
+    const date = opts.date || "2025-06-15";
+    const debutH = opts.debutH || 5;
+    let h = debutH, m = 0;
+    function fmt(hh, mm) { return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm; }
+    function avancer(min) { m += min; while (m >= 60) { h++; m -= 60; } if (h >= 24) h -= 24; }
+    var lignes = [];
+    var deb = fmt(h, m); avancer(15); lignes.push(date + ";" + deb + ";" + fmt(h, m) + ";T");
+    var deb1 = fmt(h, m); avancer(240); lignes.push(date + ";" + deb1 + ";" + fmt(h, m) + ";C");
+    var fin1 = fmt(h, m); avancer(45); lignes.push(date + ";" + fin1 + ";" + fmt(h, m) + ";P");
+    var deb2 = fmt(h, m); avancer(180); lignes.push(date + ";" + deb2 + ";" + fmt(h, m) + ";C");
+    var utilise = 15 + 240 + 45 + 180;
+    var resteD = amplitudeMin - utilise - 15;
+    if (resteD > 0) { var debD = fmt(h, m); avancer(resteD); lignes.push(date + ";" + debD + ";" + fmt(h, m) + ";D"); }
+    var debFin = fmt(h, m); avancer(15); lignes.push(date + ";" + debFin + ";" + fmt(h, m) + ";T");
+    return lignes.join("\n");
+  }
+
+  // Analyser un CSV via le moteur interne
+  function analyser(csv, typeService, pays) {
+    return analyserCSV(csv, typeService || "REGULIER", pays || "FR");
+  }
+
+  function test(categorie, nom, csv, typeService, attenduInfractions, article) {
+    rapport.resume.total++;
+    try {
+      const r = analyser(csv, typeService, "FR");
+      const nbInf = r.infractions ? r.infractions.length : 0;
+      const ok = nbInf === attenduInfractions;
+      if (ok) rapport.resume.ok++; else rapport.resume.ko++;
+      rapport.tests.push({
+        categorie: categorie,
+        nom: nom,
+        ok: ok,
+        attendu_infractions: attenduInfractions,
+        obtenu_infractions: nbInf,
+        score: r.score,
+        amende: r.amende_estimee || 0,
+        article: article,
+        detail: ok ? "OK" : "Attendu " + attenduInfractions + " inf, obtenu " + nbInf + " (score:" + r.score + " amende:" + (r.amende_estimee||0) + ")"
+      });
+    } catch(e) {
+      rapport.resume.ko++;
+      rapport.tests.push({ categorie: categorie, nom: nom, ok: false, detail: "ERREUR: " + e.message, article: article });
+    }
+  }
+
+  // =========================================
+  // L1 - CONDUITE CONTINUE (CE 561/2006 Art.7)
+  // Seuil: > 270 min = infraction
+  // Operateur: > (strict)
+  // =========================================
+  test("L1-CONDUITE-CONTINUE", "269 min = conforme (-1)", genererCSVContinue(269), "REGULIER", 0, "CE 561/2006 Art.7");
+  test("L1-CONDUITE-CONTINUE", "270 min = conforme (pile)", genererCSVContinue(270), "REGULIER", 0, "CE 561/2006 Art.7");
+  test("L1-CONDUITE-CONTINUE", "271 min = infraction (+1)", genererCSVContinue(271), "REGULIER", 1, "CE 561/2006 Art.7");
+
+  // =========================================
+  // L2 - CONDUITE JOURNALIERE (CE 561/2006 Art.6)
+  // Seuil normal: > 540 min = avertissement/infraction
+  // Seuil derog: > 600 min = infraction
+  // =========================================
+  test("L2-CONDUITE-JOUR", "539 min = conforme (-1)", genererCSVJournee(539, 45, 15), "REGULIER", 0, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "540 min = conforme (pile)", genererCSVJournee(540, 45, 15), "REGULIER", 0, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "541 min = avertissement derog (0 inf)", genererCSVJournee(541, 45, 15), "REGULIER", 0, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "599 min = 1 infraction >540 seulement", genererCSVJournee(599, 45, 15), "REGULIER", 1, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "600 min = 1 infraction >540, pile derog", genererCSVJournee(600, 45, 15), "REGULIER", 1, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "601 min = 2 infractions >540 + >600", genererCSVJournee(601, 45, 15), "REGULIER", 2, "CE 561/2006 Art.6");
+
+  // =========================================
+  // L3 - AMPLITUDE REGULIER (L3312-2 / R3312-9)
+  // Seuil: > 13h = > 780 min = infraction
+  // =========================================
+  test("L3-AMPLITUDE-REG", "779 min (12h59) = conforme (-1)", genererCSVAmplitude(779), "REGULIER", 0, "L3312-2 / R3312-9");
+  test("L3-AMPLITUDE-REG", "780 min (13h00) = conforme (pile)", genererCSVAmplitude(780), "REGULIER", 0, "L3312-2 / R3312-9");
+  test("L3-AMPLITUDE-REG", "781 min (13h01) = infraction (+1)", genererCSVAmplitude(781), "REGULIER", 1, "L3312-2 / R3312-9");
+
+  // =========================================
+  // L4 - AMPLITUDE OCCASIONNEL (L3312-2 / R3312-11)
+  // Seuil: > 14h = > 840 min = infraction
+  // =========================================
+  test("L4-AMPLITUDE-OCC", "839 min (13h59) = conforme (-1)", genererCSVAmplitude(839), "OCCASIONNEL", 0, "L3312-2 / R3312-11");
+  test("L4-AMPLITUDE-OCC", "840 min (14h00) = conforme (pile)", genererCSVAmplitude(840), "OCCASIONNEL", 0, "L3312-2 / R3312-11");
+  test("L4-AMPLITUDE-OCC", "841 min (14h01) = infraction (+1)", genererCSVAmplitude(841), "OCCASIONNEL", 1, "L3312-2 / R3312-11");
+
+  // =========================================
+  // L5 - TRAVAIL NUIT L3312-1
+  // Si activite entre 0h-5h, travail total journee > 600 min = infraction
+  // On genere un CSV avec debut a 01:00 (zone 0h-5h)
+  // =========================================
+  function genererCSVNuit(travailTotalMin) {
+    // Genere un service de nuit commencant a 20:00
+    // Le travail passe par la zone 0h-5h, declenchant L3312-1
+    // Pauses tous les 270 min pour eviter infraction conduite continue
+    const date = "2025-06-15";
+    var lignes = [];
+    var h = 20, m = 0;
+    function fmt(hh, mm) { return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm; }
+    function avancer(min) { m += min; while (m >= 60) { h++; m -= 60; } if (h >= 24) h -= 24; }
+    // Tache debut 15 min
+    var deb = fmt(h, m); avancer(15); lignes.push(date + ";" + deb + ";" + fmt(h, m) + ";T");
+    // Conduite decoupee en blocs de 270 min max
+    var conduiteRestante = travailTotalMin - 30;
+    var premierBloc = true;
+    while (conduiteRestante > 0) {
+      if (!premierBloc) {
+        var debP = fmt(h, m); avancer(45); lignes.push(date + ";" + debP + ";" + fmt(h, m) + ";P");
+      }
+      var bloc = Math.min(conduiteRestante, 270);
+      var debC = fmt(h, m); avancer(bloc); lignes.push(date + ";" + debC + ";" + fmt(h, m) + ";C");
+      conduiteRestante -= bloc;
+      premierBloc = false;
+    }
+    // Tache fin 15 min
+    var debF = fmt(h, m); avancer(15); lignes.push(date + ";" + debF + ";" + fmt(h, m) + ";T");
+    return lignes.join("\n");
+  }
+  test("L5-TRAVAIL-NUIT", "599 min = conforme (-1)", genererCSVNuit(599), "REGULIER", 0, "L3312-1");
+  test("L5-TRAVAIL-NUIT", "600 min = conforme (pile)", genererCSVNuit(600), "REGULIER", 0, "L3312-1");
+  test("L5-TRAVAIL-NUIT", "601 min = 2 inf (conduite>540 + nuit>600)", genererCSVNuit(601), "REGULIER", 2, "L3312-1");
+
+  // =========================================
+  // L6 - TRAVAIL JOURNALIER TOTAL (Code transports)
+  // Seuil: > 10h = > 600 min (conduite + taches)
+  // =========================================
+  test("L6-TRAVAIL-JOUR", "599 min = conforme (-1)", genererCSVJournee(540, 45, 59), "REGULIER", 0, "Code transports");
+  test("L6-TRAVAIL-JOUR", "600 min = conforme (pile)", genererCSVJournee(540, 45, 60), "REGULIER", 0, "Code transports");
+  test("L6-TRAVAIL-JOUR", "601 min = infraction (+1)", genererCSVJournee(540, 45, 61), "REGULIER", 1, "Code transports");
+
+  // Resume
+  rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round((rapport.resume.ok / rapport.resume.total) * 100) : 0;
+  rapport.resume.status = rapport.resume.ko === 0 ? "TOUS LES SEUILS VALIDES" : rapport.resume.ko + " SEUIL(S) NON CONFORME(S)";
+  console.log("[QA Niveau 3 - Limites] " + rapport.resume.ok + "/" + rapport.resume.total + " (" + rapport.resume.pourcentage + "%)");
+  res.json(rapport);
+});
 
 // Fallback : servir le frontend pour toutes les routes non-API
 app.get('*', (req, res) => {
