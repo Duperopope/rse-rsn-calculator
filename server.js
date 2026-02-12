@@ -673,9 +673,9 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
   // Note: le code existant traite deja les depassements comme infractions
   // On ajoute un tracking pour les depassements <= 2h
   detailsJours.forEach(dj => {
-    if (dj.conduite_min > REGLES.CONDUITE_JOURNALIERE_MAX_MIN &&
-        dj.conduite_min <= REGLES.CONDUITE_JOURNALIERE_MAX_MIN + REGLES.DEPASSEMENT_EXCEPTIONNEL_2H_MIN) {
-      const depassement = dj.conduite_min - REGLES.CONDUITE_JOURNALIERE_MAX_MIN;
+    if (dj.conduite_min > REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN &&
+        dj.conduite_min <= REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN + REGLES.DEPASSEMENT_EXCEPTIONNEL_2H_MIN) {
+      const depassement = dj.conduite_min - REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN;
       tracking.derogations.art12_depassement_exceptionnel.push({
         date: dj.date,
         depassement_min: depassement,
@@ -1194,7 +1194,7 @@ totalConduiteMin += conduiteJour;
   }
 
   // Verification derogation 10h : max 2 jours par semaine (CE 561/2006 Art.6 par.1)
-  if (joursTries.length >= 5) {
+  if (joursTries.length >= 3) {
     // Regrouper par semaine ISO
     const semainesMap = {};
     detailsJours.forEach(j => {
@@ -1209,9 +1209,11 @@ totalConduiteMin += conduiteJour;
     Object.entries(semainesMap).forEach(([semaine, jours]) => {
       const joursDerog = jours.filter(j => j.conduite_min > REGLES.CONDUITE_JOURNALIERE_MAX_MIN);
       if (joursDerog.length > REGLES.CONDUITE_DEROG_MAX_PAR_SEMAINE) {
-        avertissements.push({
+        infractions.push({
           regle: 'Derogation 10h depassee (CE 561/2006 Art.6 par.1)',
-          message: joursDerog.length + ' jours a plus de 9h de conduite en ' + semaine + ' (max autorise: ' + REGLES.CONDUITE_DEROG_MAX_PAR_SEMAINE + ' jours/semaine)'
+          message: joursDerog.length + ' jours a plus de 9h de conduite en ' + semaine + ' (max autorise: ' + REGLES.CONDUITE_DEROG_MAX_PAR_SEMAINE + ' jours/semaine)',
+          classe: '4e classe',
+          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros'
         });
       }
     });
@@ -1348,7 +1350,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.1.0',
+    version: '7.1.1',
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
@@ -1596,7 +1598,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.1.0',
+    version: '7.1.1',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2869,7 +2871,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.1.0',
+    version: '7.1.1',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
