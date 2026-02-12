@@ -364,7 +364,7 @@ function analyserCSV(csvTexte, typeService, codePays) {
       const hFin = parseInt(a.heure_fin.split(':')[0]);
       if (a.type === 'conduite' || a.type === 'autre_tache') {
         if (hDebut >= REGLES.NUIT_DEBUT_H || hDebut < REGLES.NUIT_FIN_H ||
-            hFin >= REGLES.NUIT_DEBUT_H || hFin < REGLES.NUIT_FIN_H) {
+          hFin >= REGLES.NUIT_DEBUT_H || hFin < REGLES.NUIT_FIN_H) {
           travailNuitMin += a.duree_min;
         }
       }
@@ -518,13 +518,13 @@ function analyserCSV(csvTexte, typeService, codePays) {
       disponibilite_min: dispoJour,
       disponibilite_h: (dispoJour / 60).toFixed(1),
       amplitude_estimee_h: activitesJour.length >= 2
-        ? (function() {
-            const d = activitesJour[0].heure_debut.split(':').map(Number);
-            const f = activitesJour[activitesJour.length - 1].heure_fin.split(':').map(Number);
-            let a = (f[0] * 60 + f[1]) - (d[0] * 60 + d[1]);
-            if (a < 0) a += 24 * 60;
-            return (a / 60).toFixed(1);
-          })()
+        ? (function () {
+          const d = activitesJour[0].heure_debut.split(':').map(Number);
+          const f = activitesJour[activitesJour.length - 1].heure_fin.split(':').map(Number);
+          let a = (f[0] * 60 + f[1]) - (d[0] * 60 + d[1]);
+          if (a < 0) a += 24 * 60;
+          return (a / 60).toFixed(1);
+        })()
         : "N/A",
       conduite_continue_max_min: maxConduiteContinue,
       repos_estime_h: totalActiviteJour > 0 ? ((24 * 60 - totalActiviteJour) / 60).toFixed(1) : "N/A",
@@ -686,6 +686,158 @@ app.get('/api/pays', (req, res) => {
 app.get('/api/regles', (req, res) => {
   res.json({ regles: REGLES, sanctions: SANCTIONS });
 });
+
+// ============================================================
+// ROUTE QA - Tests automatisés accessibles par LLM
+// GET /api/qa - Exécute tous les tests et retourne un rapport
+// ============================================================
+app.get('/api/qa', async (req, res) => {
+  const rapport = {
+    timestamp: new Date().toISOString(),
+    version: "5.4.0",
+    tests: [],
+    resume: { total: 0, ok: 0, ko: 0 }
+  };
+
+  function test(nom, condition, detail) {
+    const ok = !!condition;
+    rapport.tests.push({ nom, ok, detail: detail || (ok ? 'OK' : 'ECHEC') });
+    rapport.resume.total++;
+    if (ok) rapport.resume.ok++;
+    else rapport.resume.ko++;
+  }
+
+  // TEST 1 : Serveur en ligne
+  test('Serveur en ligne', true, 'Le serveur repond sur le port ' + PORT);
+
+  // TEST 2 : Constantes reglementaires
+  test('Conduite continue max = 270 min (4h30)', REGLES.CONDUITE_CONTINUE_MAX_MIN === 270, 'Valeur: ' + REGLES.CONDUITE_CONTINUE_MAX_MIN);
+  test('Conduite journaliere max = 540 min (9h)', REGLES.CONDUITE_JOURNALIERE_MAX_MIN === 540, 'Valeur: ' + REGLES.CONDUITE_JOURNALIERE_MAX_MIN);
+  test('Conduite derogatoire max = 600 min (10h)', REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN === 600, 'Valeur: ' + REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN);
+  test('Conduite hebdo max = 3360 min (56h)', REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN === 3360, 'Valeur: ' + REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN);
+  test('Repos journalier normal = 11h', REGLES.REPOS_JOURNALIER_NORMAL_H === 11, 'Valeur: ' + REGLES.REPOS_JOURNALIER_NORMAL_H);
+  test('Repos journalier reduit = 9h', REGLES.REPOS_JOURNALIER_REDUIT_H === 9, 'Valeur: ' + REGLES.REPOS_JOURNALIER_REDUIT_H);
+  test('Repos hebdo normal = 45h', REGLES.REPOS_HEBDO_NORMAL_H === 45, 'Valeur: ' + REGLES.REPOS_HEBDO_NORMAL_H);
+  test('Amplitude regulier = 13h', REGLES.AMPLITUDE_MAX_REGULIER_H === 13, 'Valeur: ' + REGLES.AMPLITUDE_MAX_REGULIER_H);
+  test('Amplitude occasionnel = 14h', REGLES.AMPLITUDE_MAX_OCCASIONNEL_H === 14, 'Valeur: ' + REGLES.AMPLITUDE_MAX_OCCASIONNEL_H);
+  test('Nuit debut = 21h', REGLES.NUIT_DEBUT_H === 21, 'Valeur: ' + REGLES.NUIT_DEBUT_H);
+  test('Nuit fin = 6h', REGLES.NUIT_FIN_H === 6, 'Valeur: ' + REGLES.NUIT_FIN_H);
+
+  // TEST 3 : Sanctions
+  test('Amende 4e classe forfaitaire = 135', SANCTIONS.classe_4.amende_forfaitaire === 135, 'Valeur: ' + SANCTIONS.classe_4.amende_forfaitaire);
+  test('Amende 4e classe max = 750', SANCTIONS.classe_4.amende_max === 750, 'Valeur: ' + SANCTIONS.classe_4.amende_max);
+  test('Amende 5e classe max = 1500', SANCTIONS.classe_5.amende_max === 1500, 'Valeur: ' + SANCTIONS.classe_5.amende_max);
+  test('Amende 5e classe recidive = 3000', SANCTIONS.classe_5.amende_recidive === 3000, 'Valeur: ' + SANCTIONS.classe_5.amende_recidive);
+
+  // TEST 4 : Liste des pays
+  const nbPays = Object.keys(PAYS).length;
+  test('Pays charges >= 25', nbPays >= 25, 'Nombre de pays: ' + nbPays);
+  test('France presente', !!PAYS.FR, 'FR: ' + JSON.stringify(PAYS.FR));
+  test('Allemagne presente', !!PAYS.DE, 'DE: ' + JSON.stringify(PAYS.DE));
+  test('Maroc present', !!PAYS.MA, 'MA: ' + JSON.stringify(PAYS.MA));
+
+  // TEST 5 : Fuseau horaire / heure ete
+  const datEte = new Date('2025-07-15T12:00:00Z');
+  const datHiver = new Date('2025-01-15T12:00:00Z');
+  test('Heure ete detectee en juillet', estHeureEteEU(datEte) === true, 'Juillet 2025: ete=' + estHeureEteEU(datEte));
+  test('Heure hiver detectee en janvier', estHeureEteEU(datHiver) === false, 'Janvier 2025: ete=' + estHeureEteEU(datHiver));
+  test('UTC France ete = +2', getDecalageUTC('FR', datEte) === 2, 'FR ete: UTC+' + getDecalageUTC('FR', datEte));
+  test('UTC France hiver = +1', getDecalageUTC('FR', datHiver) === 1, 'FR hiver: UTC+' + getDecalageUTC('FR', datHiver));
+  test('UTC Portugal ete = +1', getDecalageUTC('PT', datEte) === 1, 'PT ete: UTC+' + getDecalageUTC('PT', datEte));
+  test('UTC Turquie = +3 (pas de changement)', getDecalageUTC('TR', datEte) === 3, 'TR: UTC+' + getDecalageUTC('TR', datEte));
+
+  // TEST 6 : Analyse CSV - Journee conforme
+  const csvConforme = [
+    '2025-01-06;06:00;06:30;T',
+    '2025-01-06;06:30;10:30;C',
+    '2025-01-06;10:30;11:15;P',
+    '2025-01-06;11:15;13:15;C',
+    '2025-01-06;13:15;14:00;P',
+    '2025-01-06;14:00;16:00;C',
+    '2025-01-06;16:00;16:30;T'
+  ].join('\n');
+  const resConforme = analyserCSV(csvConforme, 'STANDARD', 'FR');
+  test('CSV conforme: 0 infraction', resConforme.infractions.length === 0, 'Infractions: ' + resConforme.infractions.length);
+  test('CSV conforme: score >= 80', resConforme.score >= 80, 'Score: ' + resConforme.score);
+  test('CSV conforme: conduite ~6h', parseFloat(resConforme.statistiques.conduite_totale_h) >= 5.5 && parseFloat(resConforme.statistiques.conduite_totale_h) <= 6.5, 'Conduite: ' + resConforme.statistiques.conduite_totale_h + 'h');
+  test('CSV conforme: amende = 0', resConforme.amende_estimee === 0, 'Amende: ' + resConforme.amende_estimee);
+
+  // TEST 7 : Analyse CSV - Journee avec depassement conduite continue
+  const csvDepassement = [
+    '2025-01-06;06:00;12:00;C',
+    '2025-01-06;12:00;12:30;P',
+    '2025-01-06;12:30;18:30;C'
+  ].join('\n');
+  const resDepass = analyserCSV(csvDepassement, 'STANDARD', 'FR');
+  test('CSV depassement: infractions > 0', resDepass.infractions.length > 0, 'Infractions: ' + resDepass.infractions.length);
+  test('CSV depassement: amende > 0', resDepass.amende_estimee > 0, 'Amende: ' + resDepass.amende_estimee + ' euros');
+  test('CSV depassement: conduite = 12h', parseFloat(resDepass.statistiques.conduite_totale_h) === 12.0, 'Conduite: ' + resDepass.statistiques.conduite_totale_h + 'h');
+  const infraContinue = resDepass.infractions.find(i => i.regle && i.regle.includes('ontinue'));
+  test('CSV depassement: infraction conduite continue detectee', !!infraContinue, infraContinue ? infraContinue.regle : 'Non trouvee');
+  const infraJournaliere = resDepass.infractions.find(i => i.regle && i.regle.includes('ournali'));
+  test('CSV depassement: infraction conduite journaliere detectee', !!infraJournaliere, infraJournaliere ? infraJournaliere.regle : 'Non trouvee');
+
+  // TEST 8 : Analyse CSV - Repos insuffisant
+  const csvRepos = [
+    '2025-01-06;04:00;08:30;C',
+    '2025-01-06;08:30;09:00;P',
+    '2025-01-06;09:00;13:00;C',
+    '2025-01-06;13:00;13:30;P',
+    '2025-01-06;13:30;17:30;C',
+    '2025-01-06;17:30;18:00;T',
+    '2025-01-06;18:00;22:00;D'
+  ].join('\n');
+  const resRepos = analyserCSV(csvRepos, 'STANDARD', 'FR');
+  const infraRepos = resRepos.infractions.find(i => i.regle && i.regle.toLowerCase().includes('repos'));
+  test('CSV repos insuffisant: infraction repos detectee', !!infraRepos, infraRepos ? infraRepos.regle + ' - ' + infraRepos.constate : 'Non detectee');
+
+  // TEST 9 : Parsing CSV invalide
+  const csvInvalide = 'ceci;nest;pas;valide\n2025-01-06;06:00;07:00;Z';
+  const resInvalide = analyserCSV(csvInvalide, 'STANDARD', 'FR');
+  test('CSV invalide: erreurs detectees', resInvalide.erreurs_analyse.length > 0, 'Erreurs: ' + resInvalide.erreurs_analyse.length + ' - ' + (resInvalide.erreurs_analyse[0] || ''));
+
+  // TEST 10 : Parsing CSV vide
+  const resVide = analyserCSV('', 'STANDARD', 'FR');
+  test('CSV vide: aucune activite', resVide.details_jours.length === 0, 'Jours: ' + resVide.details_jours.length);
+
+  // TEST 11 : Multi-jours
+  const csvMulti = [
+    '2025-01-06;06:00;10:30;C',
+    '2025-01-06;10:30;11:15;P',
+    '2025-01-06;11:15;15:00;C',
+    '2025-01-07;06:00;10:30;C',
+    '2025-01-07;10:30;11:15;P',
+    '2025-01-07;11:15;15:00;C',
+    '2025-01-08;06:00;10:30;C',
+    '2025-01-08;10:30;11:15;P',
+    '2025-01-08;11:15;15:00;C'
+  ].join('\n');
+  const resMulti = analyserCSV(csvMulti, 'STANDARD', 'FR');
+  test('CSV multi-jours: 3 jours detectes', resMulti.nombre_jours === 3, 'Jours: ' + resMulti.nombre_jours);
+  test('CSV multi-jours: details_jours = 3', resMulti.details_jours.length === 3, 'Details: ' + resMulti.details_jours.length);
+  test('CSV multi-jours: periode correcte', resMulti.periode && resMulti.periode.includes('2025-01-06'), 'Periode: ' + resMulti.periode);
+
+  // TEST 12 : Service de nuit
+  const csvNuit = [
+    '2025-01-06;21:00;23:59;C',
+    '2025-01-06;00:00;04:00;C'
+  ].join('\n');
+  const resNuit = analyserCSV(csvNuit, 'STANDARD', 'FR');
+  test('CSV nuit: travail de nuit detecte', resNuit.details_jours.length > 0 && resNuit.details_jours[0].travail_nuit_min > 0, 'Nuit: ' + (resNuit.details_jours[0] ? resNuit.details_jours[0].travail_nuit_min + ' min' : 'N/A'));
+
+  // TEST 13 : Frontend build existe
+  const distExists = fs.existsSync(path.join(__dirname, 'client', 'dist', 'index.html'));
+  test('Frontend build (client/dist/index.html) existe', distExists, distExists ? 'Fichier present' : 'MANQUANT - npx vite build necessaire');
+
+  // Résumé
+  rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round((rapport.resume.ok / rapport.resume.total) * 100) : 0;
+  rapport.resume.status = rapport.resume.ko === 0 ? 'TOUS LES TESTS PASSENT' : rapport.resume.ko + ' TEST(S) EN ECHEC';
+
+  console.log('[QA] ' + rapport.resume.ok + '/' + rapport.resume.total + ' tests OK (' + rapport.resume.pourcentage + '%)');
+
+  res.json(rapport);
+});
+
 
 // Fallback : servir le frontend pour toutes les routes non-API
 app.get('*', (req, res) => {
