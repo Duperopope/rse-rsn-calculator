@@ -603,13 +603,9 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
     });
 
     if (maxConduiteNuit > REGLES.CONDUITE_NUIT_CONTINUE_MAX_MIN) {
-      infractions.push({
+      avertissements.push({
         regle: 'Conduite continue de nuit > 4h (21h-6h) (RSE pratique)',
-        limite: '4h (' + REGLES.CONDUITE_NUIT_CONTINUE_MAX_MIN + ' min) de conduite continue entre 21h et 6h',
-        constate: maxConduiteNuit + ' min le ' + dateJour,
-        depassement: (maxConduiteNuit - REGLES.CONDUITE_NUIT_CONTINUE_MAX_MIN) + ' min',
-        classe: '4e classe',
-        amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros'
+        message: 'Conduite continue de ' + maxConduiteNuit + ' min dans la fenetre 21h-6h le ' + dateJour + '. Limite recommandee: ' + REGLES.CONDUITE_NUIT_CONTINUE_MAX_MIN + ' min (4h). Cette regle est une pratique RSE, pas une infraction codifiee dans le decret 2010-855.'
       });
     }
   });
