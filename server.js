@@ -930,7 +930,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: "6.2.0",
+    version: "6.3.1",
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
@@ -949,7 +949,7 @@ app.get('/api/pays', (req, res) => {
 // ============================================================
 app.get("/api/qa/avance", (req, res) => {
   const tests = [];
-  const version = "6.2.0";
+  const version = "6.3.1";
   const date = new Date().toISOString().split("T")[0];
 
   function runTest(id, nom, csv, options, attendu) {

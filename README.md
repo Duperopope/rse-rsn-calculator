@@ -7,7 +7,7 @@
 
 | Element | Valeur |
 |---------|--------|
-| Backend | v6.2.0 |
+| Backend | v6.3.1 |
 | Frontend | v6.0.0 |
 | Tests automatises | **144/144 (100%)** |
 | Couverture reglementaire | 100% |
@@ -156,6 +156,14 @@ node server.js
 ```
 
 ## Changelog
+
+### v6.3.1 - Multi-conducteur deux onglets (2025-02-12)
+
+- Onglets Conducteur 1 / Conducteur 2 en mode double equipage (Art.8 par.5)
+- Backend accepte csv2 : analyse independante des deux conducteurs
+- useAnalysis.js : parametre csv2 conditionnel
+- Icone Autre tache : marteaux croises sans cadre (Reglement 165/2014 Art.34)
+- 144/144 tests QA sur 5 niveaux
 
 ### v6.2.0 - Multi-equipage + repos hebdo + N5 (2025-02-12)
 - Multi-equipage Art.8 par.5 : parametre equipage solo/double
