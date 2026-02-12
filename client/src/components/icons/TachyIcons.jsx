@@ -19,20 +19,20 @@ export function IconeConduite({ size = 24, color = '#4CAF50' }) {
   );
 }
 
-// AUTRE TACHE - Marteaux croises (outils de travail)
-// Source: Reglement 165/2014 Art.34 par.5b(ii), CE 3821/85 Annexe IB
-// Ref: https://fleetgo.com/kb/manuals/tachograph-symbols/
-// Ref: https://stoneridge-tachographs.com/fr/actualites-et-evenements/symboles-du-tachygraphe-et-significations
+// AUTRE TACHE - Marteaux croises SANS cadre (symbole officiel)
+// Source: Reglement 165/2014 Art.34 par.5b(ii) - "under the sign [crossed hammers]"
+// Ref: https://www.legislation.gov.uk/eur/2014/165/article/34
+// Ref: https://pocketbox.co.uk/tacho-symbols-and-meanings/
+// Le carre appartient uniquement au symbole Disponibilite, pas a Autre tache
 export function IconeAutreTache({ size = 24, color = '#2196F3' }) {
   return (
     <svg width={size} height={size} viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-      <rect x='2' y='2' width='20' height='20' rx='2' stroke={color} strokeWidth='2' />
-      {/* Marteau gauche : manche du bas-gauche vers haut-droite, tete en haut-droite */}
-      <line x1='7' y1='17' x2='14' y2='7' stroke={color} strokeWidth='2' strokeLinecap='round' />
-      <rect x='13' y='5' width='5' height='3' rx='1' fill={color} transform='rotate(25 15.5 6.5)' />
-      {/* Marteau droit : manche du bas-droite vers haut-gauche, tete en haut-gauche */}
-      <line x1='17' y1='17' x2='10' y2='7' stroke={color} strokeWidth='2' strokeLinecap='round' />
-      <rect x='6' y='5' width='5' height='3' rx='1' fill={color} transform='rotate(-25 8.5 6.5)' />
+      {/* Marteau gauche : manche bas-gauche -> haut-droite, tete rectangulaire en haut */}
+      <line x1='6' y1='20' x2='14' y2='6' stroke={color} strokeWidth='2.5' strokeLinecap='round' />
+      <rect x='12.5' y='3' width='6' height='3.5' rx='1' fill={color} transform='rotate(30 15.5 4.75)' />
+      {/* Marteau droit : manche bas-droite -> haut-gauche, tete rectangulaire en haut */}
+      <line x1='18' y1='20' x2='10' y2='6' stroke={color} strokeWidth='2.5' strokeLinecap='round' />
+      <rect x='5.5' y='3' width='6' height='3.5' rx='1' fill={color} transform='rotate(-30 8.5 4.75)' />
     </svg>
   );
 }
