@@ -1,0 +1,176 @@
+.jour {
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 16px;
+  padding: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.jourHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dateGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dateLabel {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent, #00d4ff);
+}
+
+.dateInput {
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.jourActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.templateSelect {
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text-secondary, #888);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.actionBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--bg-input, #1a1a2e);
+  border: 1px solid var(--border, #2a2a3e);
+  color: var(--accent, #00d4ff);
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+.actionBtn:hover { border-color: var(--accent, #00d4ff); }
+
+.removeBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--bg-input, #1a1a2e);
+  border: 1px solid var(--border, #2a2a3e);
+  color: var(--accent-red, #ff4444);
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+.removeBtn:hover { border-color: var(--accent-red, #ff4444); }
+
+.activites {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activiteLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.activiteIcon {
+  flex-shrink: 0;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeInput {
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.85rem;
+  width: 95px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tiret {
+  color: var(--text-secondary, #888);
+  flex-shrink: 0;
+}
+
+.typeSelect {
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.82rem;
+  flex: 1;
+  min-width: 100px;
+  cursor: pointer;
+}
+
+.deleteActBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary, #888);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+.deleteActBtn:hover:not(:disabled) { color: var(--accent-red, #ff4444); }
+.deleteActBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.addActBtn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px dashed var(--border, #2a2a3e);
+  color: var(--text-secondary, #888);
+  font-size: 0.82rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+.addActBtn:hover {
+  border-color: var(--accent, #00d4ff);
+  color: var(--accent, #00d4ff);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .activiteLine { flex-wrap: wrap; }
+  .timeInput { width: 80px; }
+}

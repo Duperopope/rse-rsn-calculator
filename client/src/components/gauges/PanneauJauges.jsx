@@ -1,0 +1,74 @@
+import React from 'react';
+import { JaugeCirculaire } from './JaugeCirculaire.jsx';
+import { JaugeLineaire } from './JaugeLineaire.jsx';
+import { LIMITES } from '../../config/constants.js';
+import { fmtMin } from '../../utils/time.js';
+import styles from './PanneauJauges.module.css';
+
+/**
+ * Panneau complet de jauges temps reel
+ * Affiche conduite continue, conduite journaliere, amplitude, pause
+ * @param {Object} stats - Resultat de calculerStatsJour
+ * @param {string} typeService - Code type de service
+ */
+export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
+  if (!stats || stats.nbActivites === 0) return null;
+
+  const limiteAmplitude = (typeService === 'OCCASIONNEL')
+    ? LIMITES.AMPLITUDE_OCCASIONNEL_MAX
+    : LIMITES.AMPLITUDE_REGULIER_MAX;
+
+  return (
+    <div className={styles.panneau}>
+      <div className={styles.circular}>
+        <JaugeCirculaire
+          valeur={stats.conduiteMax}
+          max={LIMITES.CONDUITE_CONTINUE_MAX}
+          label="Continue"
+          unite="min"
+          size={100}
+        />
+        <JaugeCirculaire
+          valeur={stats.conduiteTotale}
+          max={LIMITES.CONDUITE_JOURNALIERE_MAX}
+          label="Journee"
+          unite="min"
+          size={100}
+        />
+        <JaugeCirculaire
+          valeur={stats.amplitude}
+          max={limiteAmplitude}
+          label="Amplitude"
+          unite="min"
+          size={100}
+        />
+      </div>
+      <div className={styles.linear}>
+        <JaugeLineaire
+          valeur={stats.conduiteMax}
+          max={LIMITES.CONDUITE_CONTINUE_MAX}
+          label="Conduite continue"
+          texteValeur={fmtMin(stats.conduiteMax) + ' / ' + fmtMin(LIMITES.CONDUITE_CONTINUE_MAX)}
+        />
+        <JaugeLineaire
+          valeur={stats.conduiteTotale}
+          max={LIMITES.CONDUITE_JOURNALIERE_MAX}
+          label="Conduite journaliere"
+          texteValeur={fmtMin(stats.conduiteTotale) + ' / ' + fmtMin(LIMITES.CONDUITE_JOURNALIERE_MAX)}
+        />
+        <JaugeLineaire
+          valeur={stats.amplitude}
+          max={limiteAmplitude}
+          label="Amplitude"
+          texteValeur={fmtMin(stats.amplitude) + ' / ' + fmtMin(limiteAmplitude)}
+        />
+        <JaugeLineaire
+          valeur={stats.pauseTotale}
+          max={LIMITES.PAUSE_OBLIGATOIRE}
+          label="Pause cumulee"
+          texteValeur={fmtMin(stats.pauseTotale) + ' / ' + fmtMin(LIMITES.PAUSE_OBLIGATOIRE)}
+        />
+      </div>
+    </div>
+  );
+}

@@ -8,3 +8,5 @@ uploads/
 
 *_backup*
 *_pre_*
+
+*.backup

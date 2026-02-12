@@ -1,0 +1,78 @@
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+.main {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputSection { display: flex; flex-direction: column; gap: 16px; }
+.formulaire { display: flex; flex-direction: column; gap: 16px; }
+.realtime { display: flex; flex-direction: column; gap: 16px; }
+
+.analyseSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.offlineMsg { font-size: 0.82rem; color: var(--accent-red, #ff4444); text-align: center; margin: 0; }
+.erreur { color: var(--accent-red, #ff4444); font-size: 0.9rem; margin: 0; }
+
+.historique { display: flex; flex-direction: column; gap: 10px; }
+
+.histToggle {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text-secondary, #888);
+  border: 1px solid var(--border, #2a2a3e);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: border-color 0.2s, color 0.2s;
+  align-self: flex-start;
+}
+.histToggle:hover { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); }
+
+.histList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+}
+
+.histItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(42, 42, 62, 0.3);
+}
+
+.histDate { font-size: 0.78rem; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; min-width: 90px; }
+.histMeta { font-size: 0.78rem; color: var(--text-secondary, #888); }
+
+.histClear {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent-red, #ff4444);
+  border: 1px solid rgba(255, 68, 68, 0.2);
+  font-size: 0.78rem;
+  transition: background 0.2s;
+  align-self: flex-end;
+}
+.histClear:hover { background: rgba(255, 68, 68, 0.08); }
+
+@media (max-width: 600px) { .main { padding: 12px; gap: 14px; } }
+@media print { .analyseSection, .historique { display: none; } .main { max-width: 100%; padding: 0; } }

@@ -1,0 +1,87 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  user-select: none;
+}
+
+.labels {
+  position: relative;
+  height: 18px;
+  margin: 0 10px;
+}
+
+.heure {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: var(--text-secondary, #888);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  position: relative;
+  height: 28px;
+  background: var(--bg-input, #1a1a2e);
+  border-radius: 6px;
+  margin: 0 10px;
+  overflow: hidden;
+}
+
+.gridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border, #2a2a3e);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.bloc {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  min-width: 2px;
+}
+
+.bloc:hover {
+  opacity: 0.85;
+  transform: scaleY(1.15);
+  z-index: 2;
+}
+
+.legende {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 10px 0;
+}
+
+.legendeItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--text-secondary, #888);
+}
+
+.legendeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .track {
+    height: 22px;
+  }
+  .legende {
+    gap: 8px;
+  }
+}

@@ -1,0 +1,86 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #e0e0e0);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text-secondary, #888);
+  border: 1px solid var(--border, #2a2a3e);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn:hover {
+  border-color: var(--accent, #00d4ff);
+  color: var(--accent, #00d4ff);
+}
+
+.textarea {
+  width: 100%;
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s;
+}
+.textarea:focus {
+  border-color: var(--accent, #00d4ff);
+  outline: none;
+}
+
+.validOk {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  color: var(--accent-green, #00ff88);
+  font-size: 0.82rem;
+}
+
+.validErr {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 68, 68, 0.08);
+  border: 1px solid rgba(255, 68, 68, 0.2);
+  color: var(--accent-red, #ff4444);
+  font-size: 0.82rem;
+}
+
+.errLine {
+  margin: 2px 0 0 0;
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+  margin: 0;
+}
