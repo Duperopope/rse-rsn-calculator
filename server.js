@@ -933,6 +933,216 @@ app.get('/api/pays', (req, res) => {
   res.json(PAYS);
 });
 
+// ============================================================
+// GET /api/qa/avance - Tests N5 : scenarios avances
+// Multi-equipage, bi-hebdo, repos hebdo, OUT, FERRY combines
+// ============================================================
+app.get("/api/qa/avance", (req, res) => {
+  const tests = [];
+  const version = "6.2.0";
+  const date = new Date().toISOString().split("T")[0];
+
+  function runTest(id, nom, csv, options, attendu) {
+    try {
+      const typeService = options.typeService || "MARCHANDISES";
+      const pays = options.pays || "FR";
+      const equipage = options.equipage || "solo";
+      const resultat = analyserCSV(csv, typeService, pays, equipage);
+      let ok = true;
+      const details = [];
+
+      if (attendu.scoreMin !== undefined && resultat.score < attendu.scoreMin) {
+        ok = false;
+        details.push("score " + resultat.score + " < attendu min " + attendu.scoreMin);
+      }
+      if (attendu.scoreMax !== undefined && resultat.score > attendu.scoreMax) {
+        ok = false;
+        details.push("score " + resultat.score + " > attendu max " + attendu.scoreMax);
+      }
+      if (attendu.infractions !== undefined && resultat.infractions.length !== attendu.infractions) {
+        ok = false;
+        details.push("infractions " + resultat.infractions.length + " != attendu " + attendu.infractions);
+      }
+      if (attendu.infractionsMin !== undefined && resultat.infractions.length < attendu.infractionsMin) {
+        ok = false;
+        details.push("infractions " + resultat.infractions.length + " < attendu min " + attendu.infractionsMin);
+      }
+      if (attendu.equipage !== undefined && resultat.equipage !== attendu.equipage) {
+        ok = false;
+        details.push("equipage " + resultat.equipage + " != attendu " + attendu.equipage);
+      }
+      if (attendu.conduiteH !== undefined) {
+        const ch = parseFloat(resultat.statistiques.conduite_totale_h);
+        if (Math.abs(ch - attendu.conduiteH) > 0.2) {
+          ok = false;
+          details.push("conduite " + ch + "h != attendu " + attendu.conduiteH + "h");
+        }
+      }
+      if (attendu.hasRegle !== undefined) {
+        const found = resultat.infractions.some(inf => inf.regle.includes(attendu.hasRegle));
+        if (!found) {
+          ok = false;
+          details.push("regle attendue non trouvee: " + attendu.hasRegle);
+        }
+      }
+      if (attendu.hasWarn !== undefined) {
+        const found = resultat.avertissements.some(w => w.regle.includes(attendu.hasWarn));
+        if (!found) {
+          ok = false;
+          details.push("avertissement attendu non trouve: " + attendu.hasWarn);
+        }
+      }
+      if (attendu.noRegle !== undefined) {
+        const found = resultat.infractions.some(inf => inf.regle.includes(attendu.noRegle));
+        if (found) {
+          ok = false;
+          details.push("regle inattendue trouvee: " + attendu.noRegle);
+        }
+      }
+      if (attendu.ferryH !== undefined && resultat.details_jours.length > 0) {
+        const fh = parseFloat(resultat.details_jours[0].ferry_h);
+        if (Math.abs(fh - attendu.ferryH) > 0.2) {
+          ok = false;
+          details.push("ferry " + fh + "h != attendu " + attendu.ferryH + "h");
+        }
+      }
+
+      tests.push({
+        id: id,
+        nom: nom,
+        status: ok ? "OK" : "FAIL",
+        score: resultat.score,
+        infractions: resultat.infractions.length,
+        avertissements: resultat.avertissements.length,
+        details: ok ? [] : details
+      });
+    } catch (err) {
+      tests.push({ id: id, nom: nom, status: "ERROR", details: [err.message] });
+    }
+  }
+
+  // ---- OUT ----
+  runTest("N5-OUT-01", "OUT basique - 3h hors champ ignorees",
+    "2025-01-15;06:00;08:30;C\n2025-01-15;08:30;09:00;P\n2025-01-15;09:00;12:00;O\n2025-01-15;12:00;14:30;C",
+    {}, { infractions: 0, conduiteH: 5.0 }
+  );
+
+  runTest("N5-OUT-02", "OUT ne compte pas en travail",
+    "2025-01-15;06:00;10:00;C\n2025-01-15;10:00;10:45;P\n2025-01-15;10:45;16:00;O\n2025-01-15;16:00;17:00;T",
+    {}, { conduiteH: 4.0, scoreMin: 100 }
+  );
+
+  // ---- FERRY ----
+  runTest("N5-FER-01", "Ferry 8h = repos valide",
+    "2025-01-15;06:00;10:00;C\n2025-01-15;10:00;10:30;P\n2025-01-15;10:30;18:30;F\n2025-01-15;18:30;19:00;T",
+    {}, { infractions: 0, ferryH: 8.0 }
+  );
+
+  runTest("N5-FER-02", "Ferry remet conduite continue a zero",
+    "2025-01-15;06:00;10:30;C\n2025-01-15;10:30;12:00;F\n2025-01-15;12:00;16:00;C",
+    {}, { noRegle: "Conduite continue" }
+  );
+
+  // ---- MULTI-EQUIPAGE ----
+  runTest("N5-MULTI-01", "Multi-equipage retourne equipage=double",
+    "2025-01-15;05:00;09:30;C\n2025-01-15;09:30;10:15;P\n2025-01-15;10:15;14:30;C\n2025-01-15;14:30;14:45;T",
+    { equipage: "double" }, { equipage: "double", scoreMin: 100 }
+  );
+
+  runTest("N5-MULTI-02", "Solo par defaut",
+    "2025-01-15;06:00;10:00;C\n2025-01-15;10:00;10:45;P\n2025-01-15;10:45;14:00;C",
+    {}, { equipage: "solo" }
+  );
+
+  // ---- BI-HEBDOMADAIRE ----
+  runTest("N5-BIHEB-01", "10 jours x 4h = 40h < 90h, pas d infraction bi-hebdo",
+    [
+      "2025-01-06;06:00;10:00;C", "2025-01-06;10:00;10:45;P", "2025-01-06;10:45;11:00;T",
+      "2025-01-07;06:00;10:00;C", "2025-01-07;10:00;10:45;P", "2025-01-07;10:45;11:00;T",
+      "2025-01-08;06:00;10:00;C", "2025-01-08;10:00;10:45;P", "2025-01-08;10:45;11:00;T",
+      "2025-01-09;06:00;10:00;C", "2025-01-09;10:00;10:45;P", "2025-01-09;10:45;11:00;T",
+      "2025-01-10;06:00;10:00;C", "2025-01-10;10:00;10:45;P", "2025-01-10;10:45;11:00;T",
+      "2025-01-13;06:00;10:00;C", "2025-01-13;10:00;10:45;P", "2025-01-13;10:45;11:00;T",
+      "2025-01-14;06:00;10:00;C", "2025-01-14;10:00;10:45;P", "2025-01-14;10:45;11:00;T",
+      "2025-01-15;06:00;10:00;C", "2025-01-15;10:00;10:45;P", "2025-01-15;10:45;11:00;T",
+      "2025-01-16;06:00;10:00;C", "2025-01-16;10:00;10:45;P", "2025-01-16;10:45;11:00;T",
+      "2025-01-17;06:00;10:00;C", "2025-01-17;10:00;10:45;P", "2025-01-17;10:45;11:00;T"
+    ].join("\n"),
+    {}, { noRegle: "bi-hebdomadaire" }
+  );
+
+  // ---- REPOS HEBDOMADAIRE ----
+  runTest("N5-HEBDO-01", "8 jours consecutifs -> infraction delai repos hebdo",
+    [
+      "2025-01-06;06:00;10:00;C", "2025-01-06;10:00;10:45;P", "2025-01-06;10:45;14:00;C", "2025-01-06;14:00;14:15;T",
+      "2025-01-07;06:00;10:00;C", "2025-01-07;10:00;10:45;P", "2025-01-07;10:45;14:00;C", "2025-01-07;14:00;14:15;T",
+      "2025-01-08;06:00;10:00;C", "2025-01-08;10:00;10:45;P", "2025-01-08;10:45;14:00;C", "2025-01-08;14:00;14:15;T",
+      "2025-01-09;06:00;10:00;C", "2025-01-09;10:00;10:45;P", "2025-01-09;10:45;14:00;C", "2025-01-09;14:00;14:15;T",
+      "2025-01-10;06:00;10:00;C", "2025-01-10;10:00;10:45;P", "2025-01-10;10:45;14:00;C", "2025-01-10;14:00;14:15;T",
+      "2025-01-11;06:00;10:00;C", "2025-01-11;10:00;10:45;P", "2025-01-11;10:45;14:00;C", "2025-01-11;14:00;14:15;T",
+      "2025-01-12;06:00;10:00;C", "2025-01-12;10:00;10:45;P", "2025-01-12;10:45;14:00;C", "2025-01-12;14:00;14:15;T",
+      "2025-01-13;06:00;10:00;C", "2025-01-13;10:00;10:45;P", "2025-01-13;10:45;14:00;C", "2025-01-13;14:00;14:15;T"
+    ].join("\n"),
+    {}, { hasRegle: "Delai repos hebdomadaire" }
+  );
+
+  runTest("N5-HEBDO-02", "6 jours + 2 off + 2 jours = repos hebdo OK",
+    [
+      "2025-01-06;06:00;10:00;C", "2025-01-06;10:00;10:45;P", "2025-01-06;10:45;14:00;C", "2025-01-06;14:00;14:15;T",
+      "2025-01-07;06:00;10:00;C", "2025-01-07;10:00;10:45;P", "2025-01-07;10:45;14:00;C", "2025-01-07;14:00;14:15;T",
+      "2025-01-08;06:00;10:00;C", "2025-01-08;10:00;10:45;P", "2025-01-08;10:45;14:00;C", "2025-01-08;14:00;14:15;T",
+      "2025-01-09;06:00;10:00;C", "2025-01-09;10:00;10:45;P", "2025-01-09;10:45;14:00;C", "2025-01-09;14:00;14:15;T",
+      "2025-01-10;06:00;10:00;C", "2025-01-10;10:00;10:45;P", "2025-01-10;10:45;14:00;C", "2025-01-10;14:00;14:15;T",
+      "2025-01-11;06:00;10:00;C", "2025-01-11;10:00;10:45;P", "2025-01-11;10:45;14:00;C", "2025-01-11;14:00;14:15;T",
+      "2025-01-14;06:00;10:00;C", "2025-01-14;10:00;10:45;P", "2025-01-14;10:45;14:00;C", "2025-01-14;14:00;14:15;T",
+      "2025-01-15;06:00;10:00;C", "2025-01-15;10:00;10:45;P", "2025-01-15;10:45;14:00;C", "2025-01-15;14:00;14:15;T"
+    ].join("\n"),
+    {}, { noRegle: "Delai repos hebdomadaire" }
+  );
+
+  runTest("N5-HEBDO-03", "Repos reduit 30h -> avertissement compensation",
+    [
+      "2025-01-06;06:00;10:00;C", "2025-01-06;10:00;10:45;P", "2025-01-06;10:45;14:00;C", "2025-01-06;14:00;14:15;T",
+      "2025-01-07;06:00;10:00;C", "2025-01-07;10:00;10:45;P", "2025-01-07;10:45;14:00;C", "2025-01-07;14:00;14:15;T",
+      "2025-01-08;06:00;10:00;C", "2025-01-08;10:00;10:45;P", "2025-01-08;10:45;14:00;C", "2025-01-08;14:00;14:15;T",
+      "2025-01-09;06:00;10:00;C", "2025-01-09;10:00;10:45;P", "2025-01-09;10:45;14:00;C", "2025-01-09;14:00;14:15;T",
+      "2025-01-10;06:00;10:00;C", "2025-01-10;10:00;10:45;P", "2025-01-10;10:45;14:00;C", "2025-01-10;14:00;14:15;T",
+      "2025-01-12;06:00;10:00;C", "2025-01-12;10:00;10:45;P", "2025-01-12;10:45;14:00;C", "2025-01-12;14:00;14:15;T"
+    ].join("\n"),
+    {}, { hasWarn: "compensation" }
+  );
+
+  // ---- COMBINES ----
+  runTest("N5-COMBI-01", "OUT + FERRY dans la meme journee",
+    "2025-01-15;06:00;08:00;C\n2025-01-15;08:00;11:00;O\n2025-01-15;11:00;11:30;T\n2025-01-15;11:30;19:30;F\n2025-01-15;19:30;20:00;T",
+    {}, { conduiteH: 2.0, ferryH: 8.0, scoreMin: 100 }
+  );
+
+  runTest("N5-COMBI-02", "Multi-equipage + ferry",
+    "2025-01-15;05:00;09:30;C\n2025-01-15;09:30;10:15;P\n2025-01-15;10:15;18:15;F\n2025-01-15;18:15;18:30;T",
+    { equipage: "double" }, { equipage: "double", ferryH: 8.0, scoreMin: 100 }
+  );
+
+  runTest("N5-COMBI-03", "OUT + multi-equipage",
+    "2025-01-15;06:00;10:00;C\n2025-01-15;10:00;10:45;P\n2025-01-15;10:45;14:00;O\n2025-01-15;14:00;16:00;C",
+    { equipage: "double" }, { equipage: "double", conduiteH: 6.0 }
+  );
+
+  // Resume
+  const ok = tests.filter(t => t.status === "OK").length;
+  const fail = tests.filter(t => t.status === "FAIL").length;
+  const error = tests.filter(t => t.status === "ERROR").length;
+
+  res.json({
+    titre: "Tests N5 - Scenarios avances (multi-equipage, bi-hebdo, repos hebdo, OUT, FERRY)",
+    version: version,
+    date: date,
+    resume: { ok: ok, fail: fail, error: error, total: tests.length },
+    tests: tests
+  });
+});
+
+
 // GET /api/regles - Constantes reglementaires
 app.get('/api/regles', (req, res) => {
   res.json({ regles: REGLES, sanctions: SANCTIONS });
