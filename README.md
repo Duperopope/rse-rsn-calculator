@@ -1,70 +1,102 @@
-# RSE/RSN Calculator v5.7.4
+# RSE/RSN Calculator
 
-Calculateur de conformite RSE (Regle Sociale Europeenne) et RSN (Regle Sociale Nationale) pour le transport routier.
+> Calculateur de conformité des temps de conduite et de repos pour le transport routier.
+> Réglementation européenne CE 561/2006, Code des transports français (L3312-1/2), Décret 2010-855.
 
-> **102 tests automatises - 100% de couverture reglementaire**
+## Statut
 
-[![Version](https://img.shields.io/badge/version-5.7.4-blue)]()
-[![Tests](https://img.shields.io/badge/tests-102%2F102-brightgreen)]()
-[![CE 561/2006](https://img.shields.io/badge/CE-561%2F2006-blue)]()
-[![Node](https://img.shields.io/badge/node-%3E%3D18-green)]()
+| Élément | Valeur |
+|---------|--------|
+| Backend | v5.7.4 |
+| Frontend | v6.0.0 |
+| Tests automatisés | **131/131 (100%)** |
+| Couverture réglementaire | 100% |
+| Demo | [rse-rsn-calculator.onrender.com](https://rse-rsn-calculator.onrender.com/) |
 
-## Demo
+## Tests QA — 4 niveaux
 
-**https://rse-rsn-calculator.onrender.com/**
+| Niveau | Endpoint | Tests | Description |
+|--------|----------|-------|-------------|
+| N1 — Réglementaire | `GET /api/qa` | 56 | Assertions sur CE 561/2006, L3312-1, R3315-10/11, seuils, sanctions, pays |
+| N2 — Cas réels | `GET /api/qa/cas-reels` | 25 | Scénarios terrain : conduite longue, nuit, multi-jours, repos fractionnés |
+| N3 — Limites | `GET /api/qa/limites` | 21 | Tests aux bornes sur 7 seuils réglementaires |
+| N4 — Robustesse | `GET /api/qa/robustesse` | 29 | Edge cases, inputs malformés, CSV vides, séquences absurdes |
+| **Total** | | **131** | **100% de réussite** |
 
-## Sources reglementaires
+## Sources réglementaires
 
-| Reglement | Source | URL |
-|---|---|---|
-| CE 561/2006 Art.6-8 | EUR-Lex | https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32006R0561 |
-| L3312-1 / L3312-2 | Legifrance | https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021297 |
-| Decret 2010-855 | Legifrance | https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022497278 |
-| Guide temps de travail | ecologie.gouv.fr | https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers |
-
-## QA - 3 niveaux de tests (102/102)
-
-### Niveau 1 - Assertions reglementaires (56/56)
-Verification des constantes, seuils, sanctions et parametres moteur.
-- Endpoint: `GET /api/qa`
-
-### Niveau 2 - Cas reels (25/25)
-Scenarios terrain couvrant 7 categories (CAT-A a CAT-G): journees conformes, depassements conduite continue, depassements conduite journaliere, repos insuffisants, multi-infractions, service de nuit (L3312-1), edge cases et cumuls.
-- Endpoint: `GET /api/qa/cas-reels`
-
-### Niveau 3 - Tests aux limites (21/21)
-7 seuils reglementaires testes a -1, pile, +1: conduite continue (270 min), conduite journaliere (540/600 min), amplitude regulier (780 min), amplitude occasionnel (840 min), travail de nuit (600 min), repos journalier (540 min), travail journalier total (720 min).
-- Endpoint: `GET /api/qa/limites`
+- [CE 561/2006 (EUR-Lex)](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32006R0561)
+- [Code des transports L3312-1 (Légifrance)](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083578)
+- [Décret 2010-855 (Légifrance)](https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022498530)
+- [Guide du temps de travail (Ministère)](https://travail-emploi.gouv.fr/droit-du-travail/la-duree-du-travail)
 
 ## API REST
 
-| Methode | Endpoint | Description |
-|---|---|---|
-| POST | `/api/analyze` | Analyse CSV conducteur |
-| GET | `/api/health` | Version et statut |
-| GET | `/api/qa` | QA Niveau 1 (56 assertions) |
-| GET | `/api/qa/cas-reels` | QA Niveau 2 (25 cas) |
-| GET | `/api/qa/limites` | QA Niveau 3 (21 limites) |
-| GET | `/api/regles` | Regles applicables |
-| GET | `/api/pays` | Pays supportes |
+| Méthode | Route | Description |
+|---------|-------|-------------|
+| `POST` | `/api/analyze` | Analyse de conformité (JSON ou CSV) |
+| `GET` | `/api/health` | État du serveur et version |
+| `GET` | `/api/qa` | Tests N1 — Assertions réglementaires (56) |
+| `GET` | `/api/qa/cas-reels` | Tests N2 — Cas réels (25) |
+| `GET` | `/api/qa/limites` | Tests N3 — Tests aux limites (21) |
+| `GET` | `/api/qa/robustesse` | Tests N4 — Robustesse (29) |
+| `GET` | `/api/regles` | Règles réglementaires complètes |
+| `GET` | `/api/pays` | Liste des 29 pays supportés |
 
 ## Format CSV
 
 ```
 DATE;HEURE_DEBUT;HEURE_FIN;TYPE_ACTIVITE
-2025-06-15;06:00;06:15;T
-2025-06-15;06:15;10:45;C
-2025-06-15;10:45;11:30;P
+2025-01-15;06:00;08:30;C
+2025-01-15;08:30;09:15;P
+2025-01-15;09:15;11:45;C
 ```
 
-Types: C=Conduite, T=Tache, P=Pause, D=Disponibilite, R=Repos
+Types d'activité : `C` (Conduite), `T` (Autre tâche), `P` (Pause), `D` (Disponibilité), `R` (Repos).
+
+## Architecture frontend v6.0.0
+
+Le frontend a été refactoré d'un monolithe de 1182 lignes (App.jsx) vers 46 fichiers modulaires :
+
+```
+client/src/
+├── App.jsx                          # Shell minimal (21 lignes)
+├── main.jsx                         # Point d'entrée React
+├── config/constants.js              # Configuration centralisée
+├── hooks/
+│   ├── useServerHealth.js           # Polling santé serveur
+│   ├── useAnalysis.js               # Appel API /analyze
+│   ├── useLocalStorage.js           # Persistance historique
+│   └── useTheme.js                  # Thème clair/sombre
+├── utils/
+│   ├── time.js                      # Conversion horaires
+│   ├── stats.js                     # Calculs statistiques
+│   └── csv.js                       # Parsing et validation CSV
+├── components/
+│   ├── common/                      # Button, Card, Badge, Loader + CSS Modules
+│   ├── icons/TachyIcons.jsx         # Icônes SVG activités
+│   ├── gauges/                      # JaugeCirculaire, JaugeLineaire, PanneauJauges
+│   ├── timeline/Timeline24h.jsx     # Frise chronologique 24h
+│   ├── forms/                       # ParametresPanel, JourFormulaire, CsvInput
+│   ├── results/                     # ResultPanel, InfractionCard, RecommandationList, SanctionTable
+│   └── layout/                      # Header, Footer, Onboarding
+├── styles/
+│   └── global.css                   # Reset, animations, responsive
+└── pages/Calculator.jsx             # Page principale (185 lignes)
+```
+
+Choix techniques : pas de librairie UI externe, CSS Modules, React hooks natifs, Vite comme bundler.
+Bundle : 182 KB JS (59 KB gzip) + 28 KB CSS (5.7 KB gzip).
 
 ## Stack technique
 
-- **Backend**: Node.js + Express
-- **Frontend**: React + Vite
-- **Deploiement**: Render (free tier)
-- **CI/QA**: 102 tests integres dans le serveur
+| Composant | Technologie |
+|-----------|-------------|
+| Backend | Node.js + Express |
+| Frontend | React 18 + Vite 5 |
+| Styles | CSS Modules |
+| Déploiement | Render (free tier) |
+| Tests | QA intégré (4 niveaux, 131 tests) |
 
 ## Installation locale
 
@@ -74,27 +106,38 @@ cd rse-rsn-calculator
 npm install
 cd client && npm install && npx vite build && cd ..
 node server.js
+# Ouvrir http://localhost:3001
 ```
 
 ## Changelog
 
-### v5.7.4 (2026-02-12)
-- QA Niveau 3: 21 tests aux limites (7 seuils x 3 valeurs)
-- Fix generateurs CSV (join newline)
-- Total: 102/102 tests (100%)
+### v6.0.0 — Frontend modulaire (2025-02-12)
+- Refonte complète du frontend : 1182 lignes → 46 fichiers modulaires
+- App.jsx réduit à 21 lignes (shell minimal)
+- CSS Modules pour tous les composants
+- Composants réutilisables : jauges, timeline, formulaires, résultats
+- Hooks personnalisés : useServerHealth, useAnalysis, useLocalStorage, useTheme
+- Bundle optimisé : 182 KB JS + 28 KB CSS
+- Onboarding interactif avec 3 étapes
+- 131/131 tests QA passent (0 régression)
 
-### v5.7.3 (2026-02-12)
-- Fix service de nuit (detection traversee minuit)
-- Fix amplitude = 0 sur journees normales
-- Fix L3312-1 (travail total si activite 0-5h)
+### v5.7.4 — Stabilisation QA
+- Correction génération CSV (newlines)
+- 102/102 tests N1-N3 passent
+- Ajout niveau N4 robustesse (29 tests)
 
-### v5.7.0 (2026-02-12)
-- QA Niveau 1: 56 assertions reglementaires
+### v5.7.3 — Détection nuit et service
+- Correction détection service de nuit
+- Ajustements seuils repos réduit
 
-### v5.6.0
-- Moteur d analyse RSE/RSN initial
-- Interface React
+### v5.7.0 — QA Niveau 1
+- Première batterie de 56 assertions réglementaires
+- Moteur de calcul initial CE 561/2006
 
 ## Auteur
 
-**Samir Medjaher** - Chef d orchestre / Product Owner
+Samir Medjaher — [GitHub](https://github.com/Duperopope)
+
+## Licence
+
+MIT
