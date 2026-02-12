@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 
 /* ============================================================
-   RSE/RSN Calculator v6.0.0 - Frontend complet
+   RSE/RSN Calculator v5.6.0 - Frontend complet
    Auteur : Samir Medjaher
    Sources reglementaires :
      - CE 561/2006 Art.6-8 (conduite, pause, repos)
@@ -55,19 +55,19 @@ function IconeRepos({ taille = 22, couleur = '#10b981' }) {
 
 /* === CONSTANTES === */
 const API = '/api';
-const EURO = '\u20AC';
-const VERSION = '6.0.0';
+const EURO = '€';
+const VERSION = '5.6.0';
 
 const TYPES_ACTIVITE = {
   C: { code: 'C', label: 'Conduite', couleur: '#3b82f6', bgLight: 'rgba(59,130,246,0.1)', Icone: IconeConduite },
-  T: { code: 'T', label: 'Autre t\u00E2che', couleur: '#f59e0b', bgLight: 'rgba(245,158,11,0.1)', Icone: IconeAutreTache },
-  D: { code: 'D', label: 'Disponibilit\u00E9', couleur: '#8b5cf6', bgLight: 'rgba(139,92,246,0.1)', Icone: IconeDisponibilite },
+  T: { code: 'T', label: 'Autre tâche', couleur: '#f59e0b', bgLight: 'rgba(245,158,11,0.1)', Icone: IconeAutreTache },
+  D: { code: 'D', label: 'Disponibilité', couleur: '#8b5cf6', bgLight: 'rgba(139,92,246,0.1)', Icone: IconeDisponibilite },
   P: { code: 'P', label: 'Pause / Repos', couleur: '#10b981', bgLight: 'rgba(16,185,129,0.1)', Icone: IconeRepos }
 };
 
 const TYPES_SERVICE = [
   { code: 'STANDARD', label: 'Standard', amplitude: 14 },
-  { code: 'REGULIER', label: 'Ligne r\u00E9guli\u00E8re (>50km)', amplitude: 13 },
+  { code: 'REGULIER', label: 'Ligne régulière (>50km)', amplitude: 13 },
   { code: 'OCCASIONNEL', label: 'Occasionnel', amplitude: 14 },
   { code: 'SLO', label: 'SLO (Service libre occasionnel)', amplitude: 14 }
 ];
@@ -85,30 +85,30 @@ const PAYS_LISTE = [
   { code: 'AT', nom: 'Autriche', drapeau: '\uD83C\uDDE6\uD83C\uDDF9' },
   { code: 'PL', nom: 'Pologne', drapeau: '\uD83C\uDDF5\uD83C\uDDF1' },
   { code: 'RO', nom: 'Roumanie', drapeau: '\uD83C\uDDF7\uD83C\uDDF4' },
-  { code: 'GR', nom: 'Gr\u00E8ce', drapeau: '\uD83C\uDDEC\uD83C\uDDF7' },
-  { code: 'CZ', nom: 'Tch\u00E9quie', drapeau: '\uD83C\uDDE8\uD83C\uDDFF' },
+  { code: 'GR', nom: 'Grèce', drapeau: '\uD83C\uDDEC\uD83C\uDDF7' },
+  { code: 'CZ', nom: 'Tchéquie', drapeau: '\uD83C\uDDE8\uD83C\uDDFF' },
   { code: 'HU', nom: 'Hongrie', drapeau: '\uD83C\uDDED\uD83C\uDDFA' },
-  { code: 'SE', nom: 'Su\u00E8de', drapeau: '\uD83C\uDDF8\uD83C\uDDEA' },
+  { code: 'SE', nom: 'Suède', drapeau: '\uD83C\uDDF8\uD83C\uDDEA' },
   { code: 'DK', nom: 'Danemark', drapeau: '\uD83C\uDDE9\uD83C\uDDF0' },
   { code: 'FI', nom: 'Finlande', drapeau: '\uD83C\uDDEB\uD83C\uDDEE' },
   { code: 'IE', nom: 'Irlande', drapeau: '\uD83C\uDDEE\uD83C\uDDEA' },
   { code: 'LU', nom: 'Luxembourg', drapeau: '\uD83C\uDDF1\uD83C\uDDFA' },
-  { code: 'NO', nom: 'Norv\u00E8ge', drapeau: '\uD83C\uDDF3\uD83C\uDDF4' },
+  { code: 'NO', nom: 'Norvège', drapeau: '\uD83C\uDDF3\uD83C\uDDF4' },
   { code: 'MA', nom: 'Maroc', drapeau: '\uD83C\uDDF2\uD83C\uDDE6' },
   { code: 'TN', nom: 'Tunisie', drapeau: '\uD83C\uDDF9\uD83C\uDDF3' },
-  { code: 'DZ', nom: 'Alg\u00E9rie', drapeau: '\uD83C\uDDE9\uD83C\uDDFF' },
+  { code: 'DZ', nom: 'Algérie', drapeau: '\uD83C\uDDE9\uD83C\uDDFF' },
   { code: 'TR', nom: 'Turquie', drapeau: '\uD83C\uDDF9\uD83C\uDDF7' }
 ];
 
 const TEMPLATES = {
-  conduite: { label: 'Journ\u00E9e conduite', activites: [
+  conduite: { label: 'Journée conduite', activites: [
     { heure_debut: '06:00', heure_fin: '06:30', type: 'T' },
     { heure_debut: '06:30', heure_fin: '10:30', type: 'C' },
     { heure_debut: '10:30', heure_fin: '11:15', type: 'P' },
     { heure_debut: '11:15', heure_fin: '15:00', type: 'C' },
     { heure_debut: '15:00', heure_fin: '15:30', type: 'T' }
   ]},
-  mixte: { label: 'Journ\u00E9e mixte', activites: [
+  mixte: { label: 'Journée mixte', activites: [
     { heure_debut: '07:00', heure_fin: '07:30', type: 'T' },
     { heure_debut: '07:30', heure_fin: '10:00', type: 'C' },
     { heure_debut: '10:00', heure_fin: '10:30', type: 'P' },
@@ -243,7 +243,7 @@ function JaugeCirculaire({ valeur, max, label, unite, couleur, seuils }) {
       </div>
       {statut === 'danger' && (
         <div style={{ fontSize: 10, color: '#ef4444', fontWeight: 700, marginTop: 2 }}>
-          D\u00E9passement !
+          Dépassement !
         </div>
       )}
     </div>
@@ -378,16 +378,16 @@ function PanneauJauges({ stats, typeService }) {
   return (
     <div style={{ background: '#1e293b', borderRadius: 10, padding: 14, marginBottom: 12, border: '1px solid #334155' }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 10, textAlign: 'center' }}>
-        Suivi temps r\u00E9el \u2014 CE 561/2006
+        Suivi temps réel — CE 561/2006
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
         <JaugeCirculaire valeur={stats.condCourante} max={LIMITES.CONDUITE_CONTINUE} label="Continue" couleur="#3b82f6" seuils={{ warning: 240 }} />
-        <JaugeCirculaire valeur={stats.conduite} max={LIMITES.CONDUITE_JOURNALIERE} label="Journali\u00E8re" couleur="#06b6d4" seuils={{ warning: 480 }} />
+        <JaugeCirculaire valeur={stats.conduite} max={LIMITES.CONDUITE_JOURNALIERE} label="Journalière" couleur="#06b6d4" seuils={{ warning: 480 }} />
         <JaugeCirculaire valeur={stats.amplitude} max={ampMax} label={'Amplitude ' + ampLabel} couleur="#a855f7" seuils={{ warning: ampMax - 60 }} />
         <JaugeCirculaire valeur={stats.travailTotal} max={LIMITES.TRAVAIL_JOURNALIER} label="Travail total" couleur="#f59e0b" seuils={{ warning: 540 }} />
       </div>
-      <JaugeLineaire valeur={stats.conduite} max={LIMITES.CONDUITE_DEROG} label="Conduite (d\u00E9rogatoire 10h)" couleur="#3b82f6" seuils={{ warning: LIMITES.CONDUITE_JOURNALIERE }} />
-      <JaugeLineaire valeur={stats.pause} max={45} label="Pause cumul\u00E9e (min 45min)" couleur="#10b981" seuils={{ warning: 30 }} />
+      <JaugeLineaire valeur={stats.conduite} max={LIMITES.CONDUITE_DEROG} label="Conduite (dérogatoire 10h)" couleur="#3b82f6" seuils={{ warning: LIMITES.CONDUITE_JOURNALIERE }} />
+      <JaugeLineaire valeur={stats.pause} max={45} label="Pause cumulée (min 45min)" couleur="#10b981" seuils={{ warning: 30 }} />
     </div>
   );
 }
@@ -479,7 +479,7 @@ function genererRecommandations(data) {
       recos.push({
         type: 'danger',
         titre: 'Pause manquante',
-        texte: 'Vous avez d\u00E9pass\u00E9 4h30 de conduite continue. Prenez une pause de 45 minutes (ou 15min + 30min) avant d\'atteindre ce seuil. Art.7 CE 561/2006.',
+        texte: 'Vous avez dépassé 4h30 de conduite continue. Prenez une pause de 45 minutes (ou 15min + 30min) avant d\'atteindre ce seuil. Art.7 CE 561/2006.',
         icone: 'P'
       });
     }
@@ -487,10 +487,10 @@ function genererRecommandations(data) {
       const isDerog = inf.constate && parseFloat(inf.constate) > 10;
       recos.push({
         type: isDerog ? 'danger' : 'warning',
-        titre: 'Conduite journali\u00E8re excessive',
+        titre: 'Conduite journalière excessive',
         texte: isDerog
-          ? 'Vous avez d\u00E9pass\u00E9 la limite d\u00E9rogatoire de 10h. M\u00EAme avec d\u00E9rogation (2x/semaine), vous ne pouvez pas exc\u00E9der 10h. Art.6 CE 561/2006.'
-          : 'Vous avez d\u00E9pass\u00E9 9h de conduite. Pensez \u00E0 utiliser une de vos 2 d\u00E9rogations hebdomadaires (10h max). Art.6 CE 561/2006.',
+          ? 'Vous avez dépassé la limite dérogatoire de 10h. Même avec dérogation (2x/semaine), vous ne pouvez pas excéder 10h. Art.6 CE 561/2006.'
+          : 'Vous avez dépassé 9h de conduite. Pensez à utiliser une de vos 2 dérogations hebdomadaires (10h max). Art.6 CE 561/2006.',
         icone: 'C'
       });
     }
@@ -498,7 +498,7 @@ function genererRecommandations(data) {
       recos.push({
         type: 'warning',
         titre: 'Amplitude trop longue',
-        texte: 'R\u00E9duisez votre plage horaire. Commencez plus tard ou terminez plus t\u00F4t. R3312-9/R3312-11 Code des transports.',
+        texte: 'Réduisez votre plage horaire. Commencez plus tard ou terminez plus tôt. R3312-9/R3312-11 Code des transports.',
         icone: 'T'
       });
     }
@@ -506,7 +506,7 @@ function genererRecommandations(data) {
       recos.push({
         type: 'danger',
         titre: 'Repos insuffisant',
-        texte: 'Vous devez prendre au minimum 9h de repos (r\u00E9duit, 3x/semaine) ou 11h (normal). Art.8 CE 561/2006.',
+        texte: 'Vous devez prendre au minimum 9h de repos (réduit, 3x/semaine) ou 11h (normal). Art.8 CE 561/2006.',
         icone: 'P'
       });
     }
@@ -514,15 +514,15 @@ function genererRecommandations(data) {
       recos.push({
         type: 'warning',
         titre: 'Travail de nuit excessif',
-        texte: 'Le travail de nuit (21h-6h) ne peut exc\u00E9der 10h. Pr\u00E9voyez un deuxi\u00E8me conducteur. L3312-1 Code des transports.',
+        texte: 'Le travail de nuit (21h-6h) ne peut excéder 10h. Prévoyez un deuxième conducteur. L3312-1 Code des transports.',
         icone: 'C'
       });
     }
     if (inf.regle && inf.regle.toLowerCase().includes('ravail')) {
       recos.push({
         type: 'warning',
-        titre: 'Dur\u00E9e de travail excessive',
-        texte: 'La dur\u00E9e maximale quotidienne de travail est de 10h (12h 2x/semaine). Code du travail + D.3312-6 Code des transports.',
+        titre: 'Durée de travail excessive',
+        texte: 'La durée maximale quotidienne de travail est de 10h (12h 2x/semaine). Code du travail + D.3312-6 Code des transports.',
         icone: 'T'
       });
     }
@@ -531,8 +531,8 @@ function genererRecommandations(data) {
   if (data.score === 100) {
     recos.push({
       type: 'ok',
-      titre: 'Conform\u00E9 !',
-      texte: 'Aucune infraction d\u00E9tect\u00E9e. Vos temps de conduite et de repos sont conformes au r\u00E8glement CE 561/2006.',
+      titre: 'Conformé !',
+      texte: 'Aucune infraction détectée. Vos temps de conduite et de repos sont conformes au règlement CE 561/2006.',
       icone: 'P'
     });
   }
@@ -653,7 +653,7 @@ export default function App() {
     setChargement(true); setErreur(''); setResultat(null); setAnimScore(0);
     try {
       const csv = mode === 'manuel' ? construireCSV() : csvTexte;
-      if (!csv.trim()) { setErreur("Aucune donn\u00E9e \u00E0 analyser."); setChargement(false); return; }
+      if (!csv.trim()) { setErreur("Aucune donnée à analyser."); setChargement(false); return; }
       const r = await fetch(API + '/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ csv, typeService, pays }) });
       const data = await r.json();
       if (!r.ok) { setErreur(data.error || 'Erreur serveur'); }
@@ -739,21 +739,21 @@ export default function App() {
             <div style={{ fontSize: 48, marginBottom: 16 }}>&#x1F698;</div>
             <h2 style={{ fontSize: 22, fontWeight: 800, color: '#3b82f6', marginBottom: 12 }}>Bienvenue sur RSE/RSN Calculator</h2>
             <p style={{ fontSize: 14, color: theme === 'dark' ? '#94a3b8' : '#64748b', lineHeight: 1.6, marginBottom: 20 }}>
-              Analysez vos temps de conduite et de repos conform{'\u00E9'}ment au r{'\u00E8'}glement CE 561/2006
-              et au Code des transports fran{'\u00E7'}ais.
+              Analysez vos temps de conduite et de repos conform{'é'}ment au r{'è'}glement CE 561/2006
+              et au Code des transports fran{'ç'}ais.
             </p>
             <div style={{ textAlign: 'left', marginBottom: 20 }}>
               <div style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'flex-start' }}>
                 <span style={{ background: '#3b82f6', color: '#fff', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>1</span>
-                <span style={{ fontSize: 13, color: theme === 'dark' ? '#cbd5e1' : '#475569' }}>Saisissez vos activit{'\u00E9'}s manuellement ou importez un fichier CSV depuis votre chronotachygraphe</span>
+                <span style={{ fontSize: 13, color: theme === 'dark' ? '#cbd5e1' : '#475569' }}>Saisissez vos activit{'é'}s manuellement ou importez un fichier CSV depuis votre chronotachygraphe</span>
               </div>
               <div style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'flex-start' }}>
                 <span style={{ background: '#3b82f6', color: '#fff', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>2</span>
-                <span style={{ fontSize: 13, color: theme === 'dark' ? '#cbd5e1' : '#475569' }}>Suivez vos limites en temps r{'\u00E9'}el gr{'\u00E2'}ce aux jauges (conduite continue, journali{'\u00E8'}re, amplitude)</span>
+                <span style={{ fontSize: 13, color: theme === 'dark' ? '#cbd5e1' : '#475569' }}>Suivez vos limites en temps r{'é'}el gr{'â'}ce aux jauges (conduite continue, journali{'è'}re, amplitude)</span>
               </div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ background: '#3b82f6', color: '#fff', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>3</span>
-                <span style={{ fontSize: 13, color: theme === 'dark' ? '#cbd5e1' : '#475569' }}>Lancez l'analyse pour d{'\u00E9'}tecter les infractions, voir les amendes estim{'\u00E9'}es et obtenir des recommandations</span>
+                <span style={{ fontSize: 13, color: theme === 'dark' ? '#cbd5e1' : '#475569' }}>Lancez l'analyse pour d{'é'}tecter les infractions, voir les amendes estim{'é'}es et obtenir des recommandations</span>
               </div>
             </div>
             <button style={S.bP} onClick={fermerOnboarding}>Commencer</button>
@@ -767,10 +767,10 @@ export default function App() {
           <button style={S.themeBtn} onClick={toggleTheme}>{theme === 'dark' ? '\u2600\uFE0F Clair' : '\uD83C\uDF19 Sombre'}</button>
         </div>
         <h1 style={S.hTitle}>RSE/RSN Calculator</h1>
-        <p style={S.hSub}>R{'\u00E9'}glementation sociale europ{'\u00E9'}enne et nationale {'\u2014'} Transport routier de personnes</p>
+        <p style={S.hSub}>R{'é'}glementation sociale europ{'é'}enne et nationale {'—'} Transport routier de personnes</p>
         <div style={{ marginTop: 6, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: serveurOk ? '#10b981' : '#ef4444', display: 'inline-block' }}></span>
-          <span style={{ fontSize: 11, color: serveurOk ? '#10b981' : '#ef4444' }}>{serveurOk ? 'Serveur connect\u00E9' : 'Serveur hors ligne'}</span>
+          <span style={{ fontSize: 11, color: serveurOk ? '#10b981' : '#ef4444' }}>{serveurOk ? 'Serveur connecté' : 'Serveur hors ligne'}</span>
         </div>
       </div>
 
@@ -783,7 +783,7 @@ export default function App() {
 
       {/* PARAMETRES */}
       <div style={S.card}>
-        <div style={S.cTitle}>Param{'\u00E8'}tres</div>
+        <div style={S.cTitle}>Param{'è'}tres</div>
         <div style={S.row}>
           <div style={S.field}>
             <label style={S.lbl}>Pays</label>
@@ -808,10 +808,10 @@ export default function App() {
         {voirHistorique && (
           <div style={S.card} className="anim-fade">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <div style={S.cTitle}>Analyses pr{'\u00E9'}c{'\u00E9'}dentes</div>
+              <div style={S.cTitle}>Analyses pr{'é'}c{'é'}dentes</div>
               {historique.length > 0 && <button style={{ ...S.bD, fontSize: 11 }} onClick={viderHistorique}>Tout supprimer</button>}
             </div>
-            {historique.length === 0 && <p style={{ color: '#64748b', fontSize: 13 }}>Aucune analyse enregistr{'\u00E9'}e.</p>}
+            {historique.length === 0 && <p style={{ color: '#64748b', fontSize: 13 }}>Aucune analyse enregistr{'é'}e.</p>}
             {historique.map(h => (
               <div key={h.id} style={S.histItem} onClick={() => chargerDepuisHistorique(h)}>
                 <div>
@@ -882,7 +882,7 @@ export default function App() {
                 {/* Templates */}
                 {ouvert && (
                   <div style={{ display: 'flex', gap: 4, marginTop: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 11, color: '#64748b', lineHeight: '30px' }}>Mod{'\u00E8'}les :</span>
+                    <span style={{ fontSize: 11, color: '#64748b', lineHeight: '30px' }}>Mod{'è'}les :</span>
                     {Object.entries(TEMPLATES).map(([k, tpl]) => (
                       <button key={k} style={{ ...S.bS, fontSize: 11, minHeight: 30, padding: '3px 10px' }} onClick={() => appliquerTemplate(ij, k)}>{tpl.label}</button>
                     ))}
@@ -907,7 +907,7 @@ export default function App() {
                   );
                 })}
 
-                {ouvert && <button style={{ ...S.bG, marginTop: 8 }} onClick={() => ajouterActivite(ij)}>+ Ajouter une activit{'\u00E9'}</button>}
+                {ouvert && <button style={{ ...S.bG, marginTop: 8 }} onClick={() => ajouterActivite(ij)}>+ Ajouter une activit{'é'}</button>}
               </div>
             );
           })}
@@ -918,7 +918,7 @@ export default function App() {
       {/* MODE CSV */}
       {mode === 'csv' && (
         <div style={S.card}>
-          <div style={S.cTitle}>Donn{'\u00E9'}es CSV</div>
+          <div style={S.cTitle}>Donn{'é'}es CSV</div>
           <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10 }}>
             Format : <code style={{ background: theme === 'dark' ? '#334155' : '#e2e8f0', padding: '2px 6px', borderRadius: 4 }}>date;heure_debut;heure_fin;type</code> (C/T/D/P)
           </p>
@@ -946,7 +946,7 @@ export default function App() {
       {/* FOOTER */}
       <div style={S.foot}>
         <p style={{ fontWeight: 600, marginBottom: 4 }}>RSE/RSN Calculator v{VERSION}</p>
-        <p>Cr{'\u00E9'}dits : Samir Medjaher</p>
+        <p>Cr{'é'}dits : Samir Medjaher</p>
         <p style={{ marginTop: 6 }}>Sources : CE 561/2006 (Art.6-8) | Code des transports R3312-9, R3312-11, R3312-28, L3312-1, L3312-2</p>
         <p>Pictogrammes : CE 3821/85 Annexe IB, UE 165/2014</p>
         <p style={{ marginTop: 4 }}>
@@ -980,14 +980,14 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
       {/* SCORE ANIME */}
       <div style={{ ...S.scoreBox, background: scBg, border: '2px solid ' + scC }}>
         <div style={{ fontSize: 52, fontWeight: 800, color: scC, transition: 'color 0.3s' }}>{animScore}%</div>
-        <div style={{ fontSize: 15, color: theme === 'dark' ? '#e2e8f0' : '#1e293b', marginTop: 4 }}>Score de conformit{'\u00E9'}</div>
+        <div style={{ fontSize: 15, color: theme === 'dark' ? '#e2e8f0' : '#1e293b', marginTop: 4 }}>Score de conformit{'é'}</div>
         {/* Barre de score */}
         <div style={{ width: '80%', height: 10, background: theme === 'dark' ? '#1e293b' : '#e2e8f0', borderRadius: 5, margin: '12px auto 0', overflow: 'hidden' }}>
           <div style={{ width: animScore + '%', height: '100%', background: scC, borderRadius: 5, transition: 'width 0.8s ease-out' }} />
         </div>
         <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 8 }}>{data.resume}</div>
         {data.periode && data.periode !== 'N/A' && (
-          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>P{'\u00E9'}riode : {data.periode} ({data.nombre_jours} jour(s))</div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>P{'é'}riode : {data.periode} ({data.nombre_jours} jour(s))</div>
         )}
       </div>
 
@@ -999,9 +999,9 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
       {/* AMENDE */}
       {data.amende_estimee > 0 && (
         <div style={S.amendeBox}>
-          <div style={{ fontSize: 13, color: '#fca5a5' }}>Amende totale estim{'\u00E9'}e</div>
+          <div style={{ fontSize: 13, color: '#fca5a5' }}>Amende totale estim{'é'}e</div>
           <div style={{ fontSize: 38, fontWeight: 800, color: '#ef4444' }}>{data.amende_estimee} {EURO}</div>
-          <div style={{ fontSize: 11, color: '#fca5a5', marginTop: 4 }}>Estimation amendes forfaitaires {'\u2014'} Montant r{'\u00E9'}el fix{'\u00E9'} par le tribunal</div>
+          <div style={{ fontSize: 11, color: '#fca5a5', marginTop: 4 }}>Estimation amendes forfaitaires {'—'} Montant r{'é'}el fix{'é'} par le tribunal</div>
         </div>
       )}
 
@@ -1034,9 +1034,9 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
           <div style={S.sGrid}>
             {[
               { label: 'Conduite', val: data.statistiques.conduite_totale_h + 'h', c: '#3b82f6', I: IconeConduite },
-              { label: 'Autre t\u00E2che', val: data.statistiques.travail_autre_total_h + 'h', c: '#f59e0b', I: IconeAutreTache },
+              { label: 'Autre tâche', val: data.statistiques.travail_autre_total_h + 'h', c: '#f59e0b', I: IconeAutreTache },
               { label: 'Pauses', val: data.statistiques.pause_totale_h + 'h', c: '#10b981', I: IconeRepos },
-              { label: 'Disponibilit\u00E9', val: data.statistiques.disponibilite_totale_h + 'h', c: '#8b5cf6', I: IconeDisponibilite },
+              { label: 'Disponibilité', val: data.statistiques.disponibilite_totale_h + 'h', c: '#8b5cf6', I: IconeDisponibilite },
               { label: 'Moy. conduite/j', val: data.statistiques.moyenne_conduite_jour_h + 'h', c: '#06b6d4', I: null },
               { label: 'Moy. travail/j', val: data.statistiques.moyenne_travail_total_jour_h + 'h', c: '#ec4899', I: null }
             ].map((s, i) => (
@@ -1065,7 +1065,7 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
       {/* INFRACTIONS */}
       {data.infractions && data.infractions.length > 0 && (
         <div style={S.card}>
-          <div style={S.cTitle}>Infractions d{'\u00E9'}tect{'\u00E9'}es ({data.infractions.length})</div>
+          <div style={S.cTitle}>Infractions d{'é'}tect{'é'}es ({data.infractions.length})</div>
           {data.infractions.map((inf, i) => (
             <div key={i} style={S.inf} className="anim-slide">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -1076,8 +1076,8 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
               {inf.detail && <div style={{ fontSize: 12, color: '#fca5a5', marginBottom: 2 }}>{inf.detail}</div>}
               <div style={{ fontSize: 11, color: '#94a3b8' }}>
                 {inf.limite && <span>Limite : {inf.limite}</span>}
-                {inf.constate && <span> | Constat{'\u00E9'} : {inf.constate}</span>}
-                {inf.depassement && <span> | D{'\u00E9'}passement : {inf.depassement}</span>}
+                {inf.constate && <span> | Constat{'é'} : {inf.constate}</span>}
+                {inf.depassement && <span> | D{'é'}passement : {inf.depassement}</span>}
               </div>
             </div>
           ))}
@@ -1100,7 +1100,7 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
       {/* DETAILS PAR JOUR */}
       {data.details_jours && data.details_jours.length > 0 && (
         <div style={S.card}>
-          <div style={S.cTitle}>D{'\u00E9'}tail par jour</div>
+          <div style={S.cTitle}>D{'é'}tail par jour</div>
           {data.details_jours.map((jour, i) => (
             <div key={i} style={{ marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: theme === 'dark' ? '#0f172a' : '#f8fafc', borderRadius: 8, cursor: 'pointer', border: '1px solid ' + (theme === 'dark' ? '#1e293b' : '#e2e8f0') }} onClick={() => toggle(i)}>
@@ -1115,9 +1115,9 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
                 <div style={{ padding: '10px 12px', fontSize: 12, color: '#94a3b8' }} className="anim-fade">
                   {jour.amplitude && <div>Amplitude : {jour.amplitude}</div>}
                   {jour.conduite_continue_max && <div>Conduite continue max : {jour.conduite_continue_max}</div>}
-                  {jour.repos_estime && <div>Repos estim{'\u00E9'} : {jour.repos_estime}</div>}
+                  {jour.repos_estime && <div>Repos estim{'é'} : {jour.repos_estime}</div>}
                   {jour.travail_nuit_min > 0 && <div>Travail de nuit : {jour.travail_nuit_min} min</div>}
-                  {jour.nombre_activites && <div>Activit{'\u00E9'}s : {jour.nombre_activites}</div>}
+                  {jour.nombre_activites && <div>Activit{'é'}s : {jour.nombre_activites}</div>}
                   {jour.infractions_detail && jour.infractions_detail.length > 0 && (
                     <div style={{ marginTop: 6 }}>
                       {jour.infractions_detail.map((inf2, j) => (
@@ -1142,9 +1142,9 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
         </div>
       )}
 
-      {/* BAR\u00C8ME SANCTIONS */}
+      {/* BARÈME SANCTIONS */}
       <div style={S.card}>
-        <div style={S.cTitle}>Bar{'\u00E8'}me des sanctions</div>
+        <div style={S.cTitle}>Bar{'è'}me des sanctions</div>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
@@ -1156,13 +1156,13 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
             </thead>
             <tbody>
               {[
-                ['Conduite continue > 4h30', 'D\u00E9p. < 1h30 : 135\u20AC (max 750\u20AC)', 'D\u00E9p. \u2265 1h30 : 1500\u20AC (3000\u20AC r\u00E9c.)'],
-                ['Conduite journali\u00E8re > 9h/10h', 'D\u00E9p. < 2h : 135\u20AC (max 750\u20AC)', 'D\u00E9p. \u2265 2h : 1500\u20AC (3000\u20AC r\u00E9c.)'],
-                ['Conduite hebdo > 56h', 'D\u00E9p. < 14h : 135\u20AC (max 750\u20AC)', 'D\u00E9p. \u2265 14h : 1500\u20AC'],
-                ['Repos journalier < 11h/9h', 'Insuf. < 2h30 : 135\u20AC (max 750\u20AC)', 'Insuf. \u2265 2h30 : 1500\u20AC'],
-                ['Repos hebdo < 45h/24h', 'Insuf. < 9h : 135\u20AC (max 750\u20AC)', 'Insuf. \u2265 9h : 1500\u20AC'],
-                ['Falsification tachygraphe', '\u2014', '1 an prison + 30 000\u20AC'],
-                ['Carte conducteur non conforme', '\u2014', '6 mois prison + 3 750\u20AC']
+                ['Conduite continue > 4h30', 'Dép. < 1h30 : 135€ (max 750€)', 'Dép. ≥ 1h30 : 1500€ (3000€ réc.)'],
+                ['Conduite journalière > 9h/10h', 'Dép. < 2h : 135€ (max 750€)', 'Dép. ≥ 2h : 1500€ (3000€ réc.)'],
+                ['Conduite hebdo > 56h', 'Dép. < 14h : 135€ (max 750€)', 'Dép. ≥ 14h : 1500€'],
+                ['Repos journalier < 11h/9h', 'Insuf. < 2h30 : 135€ (max 750€)', 'Insuf. ≥ 2h30 : 1500€'],
+                ['Repos hebdo < 45h/24h', 'Insuf. < 9h : 135€ (max 750€)', 'Insuf. ≥ 9h : 1500€'],
+                ['Falsification tachygraphe', '—', '1 an prison + 30 000€'],
+                ['Carte conducteur non conforme', '—', '6 mois prison + 3 750€']
               ].map((row, i) => (
                 <tr key={i} style={{ borderBottom: '1px solid ' + (theme === 'dark' ? '#1e293b' : '#e2e8f0') }}>
                   <td style={{ padding: 8 }}>{row[0]}</td>
@@ -1174,7 +1174,7 @@ function ResultPanel({ data, S, theme, animScore, EURO, imprimerRapport }) {
           </table>
         </div>
         <div style={{ fontSize: 10, color: '#64748b', marginTop: 8 }}>
-          Sources : dan-dis-scan.fr | inodis.fr | D{'\u00E9'}cret 2010-855 | R{'\u00E8'}glement CE 561/2006
+          Sources : dan-dis-scan.fr | inodis.fr | D{'é'}cret 2010-855 | R{'è'}glement CE 561/2006
         </div>
       </div>
     </div>
