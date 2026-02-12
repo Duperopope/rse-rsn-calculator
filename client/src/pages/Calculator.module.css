@@ -77,35 +77,3 @@
 @media (max-width: 600px) { .main { padding: 12px; gap: 14px; } }
 @media print { .analyseSection, .historique { display: none; } .main { max-width: 100%; padding: 0; } }
 .equipageInfo { text-align: center; color: #00d4ff; font-size: 0.85rem; margin-top: 0.5rem; }
-
-/* Onglets conducteur multi-equipage */
-.conducteurTabs {
-  display: flex;
-  gap: 0;
-  margin: 1rem 0;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.tab, .tabActive {
-  flex: 1;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-}
-.tab {
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.5);
-}
-.tab:hover {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.7);
-}
-.tabActive {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(102,126,234,0.3);
-}

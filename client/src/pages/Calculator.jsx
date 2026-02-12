@@ -1,190 +1,185 @@
-import React, { useState, useMemo } from 'react';
-import { useAnalysis } from '../hooks/useAnalysis';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { useTheme } from '../hooks/useTheme';
-import { useServerHealth } from '../hooks/useServerHealth';
-import { Header } from '../components/layout/Header';
-import { Footer } from '../components/layout/Footer';
-import { Onboarding } from '../components/layout/Onboarding';
-import { ParametresPanel } from '../components/forms/ParametresPanel';
-import { JourFormulaire } from '../components/forms/JourFormulaire';
-import { CsvInput } from '../components/forms/CsvInput';
-import { PanneauJauges } from '../components/gauges/PanneauJauges';
-import { Timeline24h } from '../components/timeline/Timeline24h';
-import { ResultPanel } from '../components/results/ResultPanel';
-import { Loader } from '../components/common/Loader';
-import { Button } from '../components/common/Button';
-import { Badge } from '../components/common/Badge';
-import { calculerStatsJour } from '../utils/stats';
-import { activitesToCSV } from '../utils/csv';
+import React, { useState, useEffect } from 'react';
+import { useAnalysis } from '../hooks/useAnalysis.js';
+import { useLocalStorage } from '../hooks/useLocalStorage.js';
+import { useTheme } from '../hooks/useTheme.js';
+import { useServerHealth } from '../hooks/useServerHealth.js';
+import { STORAGE_KEY, HISTORIQUE_MAX } from '../config/constants.js';
+import { activitesToCSV } from '../utils/csv.js';
+import { calculerStatsJour } from '../utils/stats.js';
+import { Header } from '../components/layout/Header.jsx';
+import { Footer } from '../components/layout/Footer.jsx';
+import { Onboarding } from '../components/layout/Onboarding.jsx';
+import { ParametresPanel } from '../components/forms/ParametresPanel.jsx';
+import { JourFormulaire } from '../components/forms/JourFormulaire.jsx';
+import { CsvInput } from '../components/forms/CsvInput.jsx';
+import { PanneauJauges } from '../components/gauges/PanneauJauges.jsx';
+import { Timeline24h } from '../components/timeline/Timeline24h.jsx';
+import { ResultPanel } from '../components/results/ResultPanel.jsx';
+import { Loader } from '../components/common/Loader.jsx';
+import { Button } from '../components/common/Button.jsx';
+import { Card } from '../components/common/Card.jsx';
+import { Badge } from '../components/common/Badge.jsx';
 import styles from './Calculator.module.css';
 
+/**
+ * Page principale du calculateur RSE/RSN v6.2.0
+ */
 export default function Calculator() {
   const { theme, toggleTheme } = useTheme();
-  const { online, version } = useServerHealth();
-  const { analyser, chargement, erreur, resultat } = useAnalysis();
-  const [historique, setHistorique] = useLocalStorage('rse_rsn_historique', []);
-  const [showOnboarding, setShowOnboarding] = useState(!localStorage.getItem('rse_onboarding_done'));
+  const { online, version: serverVersion, loading: healthLoading } = useServerHealth();
+  const { analyser, resultat, erreur, chargement, reset } = useAnalysis();
+  const [historique, setHistorique] = useLocalStorage(STORAGE_KEY, []);
+  const [onboardingDone, setOnboardingDone] = useLocalStorage('rse_onboarding_done', false);
+
   const [typeService, setTypeService] = useState('REGULIER');
   const [pays, setPays] = useState('FR');
   const [equipage, setEquipage] = useState('solo');
   const [mode, setMode] = useState('formulaire');
-  const [csvText, setCsvText] = useState('');
-  const [csvText2, setCsvText2] = useState('');
-  const [showHistorique, setShowHistorique] = useState(false);
+  const [csvTexte, setCsvTexte] = useState('');
+  const [voirHistorique, setVoirHistorique] = useState(false);
+  const [statsJour, setStatsJour] = useState(null);
 
-  const [activitesJour, setActivitesJour] = useState([{
-    date: new Date().toISOString().slice(0, 10),
-    activites: [{ debut: '06:00', fin: '10:30', type: 'C' }, { debut: '10:30', fin: '11:15', type: 'P' }, { debut: '11:15', fin: '14:30', type: 'C' }]
+  const today = new Date().toISOString().slice(0, 10);
+  const [jours, setJours] = useState([{
+    date: today,
+    activites: [
+      { debut: '06:00', fin: '06:15', type: 'T' },
+      { debut: '06:15', fin: '10:45', type: 'C' },
+      { debut: '10:45', fin: '11:30', type: 'P' },
+      { debut: '11:30', fin: '14:30', type: 'C' },
+      { debut: '14:30', fin: '14:45', type: 'T' }
+    ]
   }]);
-  const [activitesJour2, setActivitesJour2] = useState([{
-    date: new Date().toISOString().slice(0, 10),
-    activites: [{ debut: '06:00', fin: '10:30', type: 'D' }, { debut: '10:30', fin: '11:15', type: 'T' }, { debut: '11:15', fin: '14:30', type: 'D' }]
-  }]);
-  const [conducteurActif, setConducteurActif] = useState(1);
 
-  const joursActifs = conducteurActif === 1 ? activitesJour : activitesJour2;
-  const setJoursActifs = conducteurActif === 1 ? setActivitesJour : setActivitesJour2;
+  useEffect(() => {
+    if (mode === 'formulaire' && jours.length > 0 && jours[0].activites) {
+      setStatsJour(calculerStatsJour(jours[0].activites));
+    }
+  }, [jours, mode]);
 
-  const stats = useMemo(function() {
-    if (joursActifs.length === 0) return null;
-    return calculerStatsJour(joursActifs[0] ? joursActifs[0].activites : []);
-  }, [joursActifs]);
+  function updateJour(index, newJour) {
+    setJours(prev => prev.map((j, i) => i === index ? newJour : j));
+  }
 
   function ajouterJour() {
-    var dernierDate = joursActifs.length > 0 ? joursActifs[joursActifs.length - 1].date : new Date().toISOString().slice(0, 10);
-    var d = new Date(dernierDate);
+    const lastDate = jours[jours.length - 1]?.date || today;
+    const d = new Date(lastDate);
     d.setDate(d.getDate() + 1);
-    setJoursActifs(joursActifs.concat([{ date: d.toISOString().slice(0, 10), activites: [{ debut: '06:00', fin: '06:15', type: 'C' }] }]));
+    setJours(prev => [...prev, {
+      date: d.toISOString().slice(0, 10),
+      activites: [{ debut: '06:00', fin: '06:15', type: 'T' }]
+    }]);
   }
 
-  function supprimerJour(idx) {
-    setJoursActifs(joursActifs.filter(function(_, i) { return i !== idx; }));
+  function supprimerJour(index) {
+    if (jours.length <= 1) return;
+    setJours(prev => prev.filter((_, i) => i !== index));
   }
 
-  function dupliquerJour(idx) {
-    var copie = JSON.parse(JSON.stringify(joursActifs[idx]));
-    var d = new Date(copie.date);
+  function dupliquerJour(index) {
+    const src = jours[index];
+    const d = new Date(src.date);
     d.setDate(d.getDate() + 1);
-    copie.date = d.toISOString().slice(0, 10);
-    var nv = joursActifs.slice();
-    nv.splice(idx + 1, 0, copie);
-    setJoursActifs(nv);
-  }
-
-  function majJour(idx, jour) {
-    var nv = joursActifs.slice();
-    nv[idx] = jour;
-    setJoursActifs(nv);
+    const copy = { date: d.toISOString().slice(0, 10), activites: src.activites.map(a => ({ ...a })) };
+    setJours(prev => { const arr = [...prev]; arr.splice(index + 1, 0, copy); return arr; });
   }
 
   async function lancerAnalyse() {
-    var csv1, c2;
-    if (mode === 'csv') {
-      csv1 = csvText;
-      c2 = equipage === 'double' ? csvText2 : null;
-    } else {
-      csv1 = activitesToCSV(activitesJour);
-      c2 = equipage === 'double' ? activitesToCSV(activitesJour2) : null;
+    let csv = csvTexte;
+    if (mode === 'formulaire') csv = activitesToCSV(jours);
+    if (!csv || !csv.trim()) return;
+    const data = await analyser(csv, typeService, pays, equipage);
+    if (data) {
+      const entry = {
+        date: new Date().toISOString(),
+        score: data.score || 0,
+        infractions: (data.infractions || []).length,
+        typeService, pays, equipage
+      };
+      setHistorique(prev => [entry, ...(prev || [])].slice(0, HISTORIQUE_MAX));
     }
-    var res = await analyser(csv1, c2, typeService, pays, equipage);
-    if (res && res.score !== undefined) {
-      var entry = { date: new Date().toISOString(), score: res.score, infractions: res.infractions ? res.infractions.length : 0, equipage: equipage };
-      setHistorique(function(h) { return [entry].concat(h).slice(0, 50); });
-    }
-  }
-
-  function finOnboarding() {
-    localStorage.setItem('rse_onboarding_done', '1');
-    setShowOnboarding(false);
   }
 
   return (
-    <div className={styles.container} data-theme={theme}>
-      {showOnboarding && <Onboarding onClose={finOnboarding} />}
-      <Header online={online} serverVersion={version} theme={theme} onToggleTheme={toggleTheme} />
+    <div className={styles.app}>
+      {!onboardingDone ? <Onboarding onClose={() => setOnboardingDone(true)} /> : null}
+
+      <Header online={online} serverVersion={serverVersion} theme={theme} onToggleTheme={toggleTheme} />
 
       <main className={styles.main}>
         <ParametresPanel
-          typeService={typeService} onTypeService={setTypeService}
-          pays={pays} onPays={setPays}
-          equipage={equipage} onEquipage={setEquipage}
-          mode={mode} onMode={setMode}
+          typeService={typeService} onTypeServiceChange={setTypeService}
+          pays={pays} onPaysChange={setPays}
+          equipage={equipage} onEquipageChange={setEquipage}
+          mode={mode} onModeChange={(m) => { setMode(m); reset(); }}
         />
 
-        {equipage === 'double' && (
-          <div className={styles.conducteurTabs}>
-            <button
-              className={conducteurActif === 1 ? styles.tabActive : styles.tab}
-              onClick={function() { setConducteurActif(1); }}
-            >Conducteur 1</button>
-            <button
-              className={conducteurActif === 2 ? styles.tabActive : styles.tab}
-              onClick={function() { setConducteurActif(2); }}
-            >Conducteur 2</button>
-          </div>
-        )}
-
-        {mode === 'formulaire' ? (
-          <div className={styles.formulaire}>
-            {joursActifs.map(function(jour, idx) {
-              return (
+        <div className={styles.inputSection}>
+          {mode === 'formulaire' ? (
+            <div className={styles.formulaire}>
+              {jours.map((jour, i) => (
                 <JourFormulaire
-                  key={conducteurActif + '-' + idx}
-                  jour={jour}
-                  index={idx}
-                  onUpdate={function(j) { majJour(idx, j); }}
-                  onRemove={function() { supprimerJour(idx); }}
-                  onDuplicate={function() { dupliquerJour(idx); }}
-                  canRemove={joursActifs.length > 1}
+                  key={jour.date + '-' + i}
+                  jour={jour} index={i}
+                  onUpdate={updateJour}
+                  onRemove={supprimerJour}
+                  onDuplicate={dupliquerJour}
+                  canRemove={jours.length > 1}
                 />
-              );
-            })}
-            <button className={styles.addDay} onClick={ajouterJour}>+ Ajouter un jour</button>
+              ))}
+              <Button variant='secondary' onClick={ajouterJour}>+ Ajouter un jour</Button>
+            </div>
+          ) : (
+            <Card><CsvInput value={csvTexte} onChange={setCsvTexte} /></Card>
+          )}
+        </div>
+
+        {mode === 'formulaire' && statsJour ? (
+          <div className={styles.realtime}>
+            <PanneauJauges stats={statsJour} typeService={typeService} />
+            {jours[0] && jours[0].activites.length > 0 ? (
+              <Card><Timeline24h activites={jours[0].activites} theme={theme} /></Card>
+            ) : null}
           </div>
-        ) : (
-          <div className={styles.csvZone}>
-            <CsvInput value={conducteurActif === 1 ? csvText : csvText2} onChange={conducteurActif === 1 ? setCsvText : setCsvText2} />
-          </div>
-        )}
+        ) : null}
 
-        {stats && joursActifs.length > 0 && (
-          <React.Fragment>
-            <PanneauJauges stats={stats} typeService={typeService} />
-            <Timeline24h activites={joursActifs[0] ? joursActifs[0].activites : []} />
-          </React.Fragment>
-        )}
+        <div className={styles.analyseSection}>
+          <Button variant='primary' size='lg' fullWidth loading={chargement} disabled={!online || chargement} onClick={lancerAnalyse}>
+            {chargement ? 'Analyse en cours...' : 'Analyser la conformite'}
+          </Button>
+          {equipage === 'double' ? (
+            <p className={styles.equipageInfo}>Mode double equipage : repos 9h dans les 30h (Art.8 par.5)</p>
+          ) : null}
+          {!online && !healthLoading ? (
+            <p className={styles.offlineMsg}>Serveur hors ligne. Verifiez que le backend est demarre.</p>
+          ) : null}
+        </div>
 
-        <Button onClick={lancerAnalyse} disabled={!online || chargement} className={styles.analyseBtn}>
-          {chargement ? 'Analyse en cours...' : 'Analyser la conformite'}
-        </Button>
+        {erreur ? <Card variant='danger' animate><p className={styles.erreur}>{erreur}</p></Card> : null}
+        {chargement ? <Loader /> : null}
+        {resultat && !chargement ? <ResultPanel resultat={resultat} /> : null}
 
-        {erreur && <div className={styles.error}>{erreur}</div>}
-        {chargement && <Loader />}
-
-        {resultat && <ResultPanel resultat={resultat} />}
-
-        {historique.length > 0 && (
+        {historique && historique.length > 0 ? (
           <div className={styles.historique}>
-            <button className={styles.histToggle} onClick={function() { setShowHistorique(!showHistorique); }}>
+            <button className={styles.histToggle} onClick={() => setVoirHistorique(!voirHistorique)}>
               Historique ({historique.length})
             </button>
-            {showHistorique && (
+            {voirHistorique ? (
               <div className={styles.histList}>
-                {historique.map(function(h, i) {
-                  return (
-                    <div key={i} className={styles.histItem}>
-                      <Badge variant={h.score >= 80 ? 'success' : h.score >= 50 ? 'warning' : 'danger'}>{h.score}</Badge>
-                      <span>{new Date(h.date).toLocaleString('fr-FR')}</span>
-                      <span>{h.infractions} infraction(s)</span>
-                      {h.equipage === 'double' && <Badge variant='info'>Double</Badge>}
-                    </div>
-                  );
-                })}
+                {historique.slice(0, 10).map((h, i) => (
+                  <div key={i} className={styles.histItem}>
+                    <span className={styles.histDate}>
+                      {new Date(h.date).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <Badge variant={h.score >= 90 ? 'ok' : h.score >= 70 ? 'warning' : 'danger'}>{h.score}%</Badge>
+                    <span className={styles.histMeta}>{h.infractions} inf. {h.equipage === 'double' ? '(2x)' : ''}</span>
+                  </div>
+                ))}
+                <button className={styles.histClear} onClick={() => { setHistorique([]); setVoirHistorique(false); }}>Effacer</button>
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </main>
 
       <Footer />

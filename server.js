@@ -843,7 +843,7 @@ totalConduiteMin += conduiteJour;
 // POST /api/analyze - Analyse un CSV
 app.post('/api/analyze', (req, res) => {
   try {
-    const { csv, csv2, typeService, pays, equipage } = req.body;
+    const { csv, typeService, pays, equipage } = req.body;
 
     if (!csv || csv.trim().length === 0) {
       return res.status(400).json({ error: "Aucun contenu CSV fourni." });
@@ -856,16 +856,6 @@ app.post('/api/analyze', (req, res) => {
     console.log("[ANALYSE] Type service: " + typeServiceValide + ", Pays: " + paysValide + ", Equipage: " + equipageValide + ", Lignes CSV: " + csv.split('\n').length);
 
     const resultat = analyserCSV(csv, typeServiceValide, paysValide, equipageValide);
-
-    // Multi-conducteur : analyser le CSV du conducteur 2 si present
-    let resultat2 = null;
-    if (equipageValide === 'double' && csv2 && csv2.trim().length > 0) {
-      console.log('[ANALYSE] Conducteur 2 detecte, analyse separee...');
-      resultat2 = analyserCSV(csv2.trim(), typeServiceValide, paysValide, equipageValide);
-      resultat2.conducteur = 2;
-    }
-    resultat.conducteur = 1;
-    if (resultat2) { resultat.conducteur2 = resultat2; }
 
     console.log("[RESULTAT] Score: " + resultat.score + "%, Infractions: " + resultat.infractions.length + ", Amende estimee: " + resultat.amende_estimee + " euros");
 
