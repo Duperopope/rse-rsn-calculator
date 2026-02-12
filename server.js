@@ -319,7 +319,25 @@ function analyserCSV(csvTexte, typeService, codePays) {
 
   // Analyser chaque jour
   joursTries.forEach(dateJour => {
-    const activitesJour = joursMap[dateJour].sort((a, b) => a.heure_debut.localeCompare(b.heure_debut));
+    // Tri intelligent : detecte si le service traverse minuit
+    // Si activites avant ET apres 12h sur le meme jour = service de nuit
+    // Dans ce cas, les heures >= 12h passent en premier (debut de service)
+    const activitesJourBrut = joursMap[dateJour];
+    const aDesHeuresAvant12 = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) < 12);
+    const aDesHeuresApres12 = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) >= 12);
+    const estServiceNuit = aDesHeuresAvant12 && aDesHeuresApres12;
+
+    const activitesJour = activitesJourBrut.sort((a, b) => {
+      if (estServiceNuit) {
+        // Service de nuit : les heures >= 12h viennent en premier
+        const hA = parseInt(a.heure_debut.split(':')[0]);
+        const hB = parseInt(b.heure_debut.split(':')[0]);
+        const aEstAprem = hA >= 12 ? 0 : 1;
+        const bEstAprem = hB >= 12 ? 0 : 1;
+        if (aEstAprem !== bEstAprem) return aEstAprem - bEstAprem;
+      }
+      return a.heure_debut.localeCompare(b.heure_debut);
+    });
 
     let conduiteJour = 0;
     let travailJour = 0;
