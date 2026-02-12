@@ -1,5 +1,5 @@
 import React from 'react';
-import { VERSION } from '../../config/constants.js';
+import { APP_NAME } from '../../config/constants.js';
 import styles from './Header.module.css';
 
 /**
@@ -32,10 +32,10 @@ export function Header({ online, serverVersion, theme, onToggleTheme }) {
         </div>
       </div>
       <div className={styles.actions}>
-        <span className={styles.version}>v{VERSION}</span>
+        
         <span className={online ? styles.statusOn : styles.statusOff}>
-          {online ? 'En ligne' : 'Hors ligne'}
-          {serverVersion && online ? ' (v' + serverVersion + ')' : ''}
+          {online ? '' : 'Hors ligne'}
+          {serverVersion && online ? 'v' + serverVersion : ''}
         </span>
         <button
           className={styles.themeBtn}

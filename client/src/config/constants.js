@@ -5,8 +5,8 @@
 // URL API backend
 export const API_URL = '/api';
 
-// Version frontend
-export const VERSION = '6.0.0';
+// Nom de l'application (la version est recuperee du backend via /api/health)
+export const APP_NAME = 'RSE/RSN Calculator';
 
 // Symbole euro (evite problemes encodage)
 export const EURO = '€';

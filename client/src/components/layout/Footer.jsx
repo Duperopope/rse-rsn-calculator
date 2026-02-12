@@ -1,5 +1,5 @@
 import React from 'react';
-import { VERSION } from '../../config/constants.js';
+import { APP_NAME } from '../../config/constants.js';
 import styles from './Footer.module.css';
 
 /**
@@ -23,7 +23,7 @@ export function Footer() {
         </a>
       </div>
       <div className={styles.info}>
-        <span>RSE/RSN Calculator v{VERSION}</span>
+        <span>{APP_NAME}</span>
         <span className={styles.sep}>|</span>
         <span>Samir Medjaher</span>
       </div>
