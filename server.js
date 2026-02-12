@@ -1137,7 +1137,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // 600min = exactement la limite derogatoire, pas infraction
   testerCas('CAT-C', 'CAS 10 - Conduite 10h derogatoire (limite OK)',
     '10h conduite = 600min = limite derog exacte. CE 561/2006 Art.6-1. Pas infraction.',
-    '2025-03-10;05:00;05:15;T\n2025-03-10;05:15;09:45;C\n2025-03-10;09:45;10:30;P\n2025-03-10;10:30;14:45;C\n2025-03-10;14:45;15:30;P\n2025-03-10;15:30;17:00;C\n2025-03-10;17:00;17:15;T',
+    '2025-03-10;05:00;05:15;T\n2025-03-10;05:15;09:45;C\n2025-03-10;09:45;10:30;P\n2025-03-10;10:30;14:30;C\n2025-03-10;14:30;15:15;P\n2025-03-10;15:15;16:45;C\n2025-03-10;16:45;17:00;T',
     'OCCASIONNEL', 'FR',
     { infractions_absent: ['ournali'], avertissements_min: 1, conduite_h: '10.0' }
   );
@@ -1156,7 +1156,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // 720min, depassement 720-540 = 180min > 120 = 5e classe
   testerCas('CAT-C', 'CAS 12 - Conduite 12h (5e classe)',
     '12h conduite = 720min. Depassement 180min > 120min. 5e classe 1500 EUR.',
-    '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;08:45;C\n2025-03-10;08:45;09:30;P\n2025-03-10;09:30;13:30;C\n2025-03-10;13:30;14:15;P\n2025-03-10;14:15;18:15;C\n2025-03-10;18:15;18:30;T',
+    '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;08:45;C\n2025-03-10;08:45;09:30;P\n2025-03-10;09:30;13:30;C\n2025-03-10;13:30;14:15;P\n2025-03-10;14:15;17:45;C\n2025-03-10;17:45;18:00;T',
     'REGULIER', 'FR',
     { infractions_contiennent: ['ournali'], classe_contient: ['5e'], amende_min: 1500, conduite_h: '12.0' }
   );
@@ -1247,9 +1247,9 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // CAS 21 - Travail nuit 8h (conforme, < 10h)
   testerCas('CAT-F', 'CAS 21 - Travail nuit 8h (conforme limite)',
     'Service nuit complet 21h-05h30 = ~8h travail nuit. Sous 10h.',
-    '2025-03-10;20:00;20:30;T\n2025-03-10;20:30;01:00;C\n2025-03-10;01:00;01:30;P\n2025-03-10;01:30;05:00;C\n2025-03-10;05:00;05:30;T',
+    '2025-03-10;20:00;20:30;T\n2025-03-10;20:30;23:59;C\n2025-03-11;00:00;00:45;C\n2025-03-11;00:45;01:15;P\n2025-03-11;01:15;04:45;C\n2025-03-11;04:45;05:00;T',
     'REGULIER', 'FR',
-    { infractions_absent: ['uit'], conduite_h: '8.0' }
+    { infractions_absent: ['ontinue'], conduite_h: '7.7' }
   );
 
   // CAS 22 - Travail nuit >10h (infraction)
