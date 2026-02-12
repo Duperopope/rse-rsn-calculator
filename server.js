@@ -839,6 +839,47 @@ app.get('/api/qa', async (req, res) => {
 });
 
 
+// ============================================================
+// ROUTE QA ETUDES DE CAS REELLES
+// GET /api/qa/cas-reels
+// ============================================================
+app.get('/api/qa/cas-reels', (req, res) => {
+  const rapport = { timestamp: new Date().toISOString(), version: '5.4.0', cas: [], resume: { total: 0, ok: 0, ko: 0, anomalies: [] } };
+  function testerCas(nom, desc, csv, ts, cp, att) {
+    const r = analyserCSV(csv, ts, cp);
+    const v = []; let ok = true;
+    if (att.infractions !== undefined) { const t = r.infractions.length === att.infractions; v.push({test:'Nb infractions',attendu:att.infractions,obtenu:r.infractions.length,ok:t}); if(!t)ok=false; }
+    if (att.infractions_contiennent) { att.infractions_contiennent.forEach(function(m){const t=r.infractions.some(function(i){return i.regle&&i.regle.toLowerCase().includes(m.toLowerCase())}); v.push({test:'Contient '+m,attendu:true,obtenu:t,ok:t}); if(!t)ok=false;}); }
+    if (att.score_min !== undefined) { const t = r.score >= att.score_min; v.push({test:'Score>='+att.score_min,attendu:att.score_min,obtenu:r.score,ok:t}); if(!t)ok=false; }
+    if (att.score_max !== undefined) { const t = r.score <= att.score_max; v.push({test:'Score<='+att.score_max,attendu:att.score_max,obtenu:r.score,ok:t}); if(!t)ok=false; }
+    if (att.amende_min !== undefined) { const t = r.amende_estimee >= att.amende_min; v.push({test:'Amende>='+att.amende_min,attendu:att.amende_min,obtenu:r.amende_estimee,ok:t}); if(!t)ok=false; }
+    if (att.amende_exacte !== undefined) { const t = r.amende_estimee === att.amende_exacte; v.push({test:'Amende='+att.amende_exacte,attendu:att.amende_exacte,obtenu:r.amende_estimee,ok:t}); if(!t)ok=false; }
+    if (att.jours !== undefined) { const t = r.nombre_jours === att.jours; v.push({test:'Nb jours',attendu:att.jours,obtenu:r.nombre_jours,ok:t}); if(!t)ok=false; }
+    if (att.conduite_h) { const t = r.statistiques.conduite_totale_h === att.conduite_h; v.push({test:'Conduite',attendu:att.conduite_h+'h',obtenu:r.statistiques.conduite_totale_h+'h',ok:t}); if(!t)ok=false; }
+    rapport.cas.push({ nom:nom, description:desc, type_service:ts, pays:cp, verdict:ok?'OK':'ANOMALIE', verifications:v,
+      resultat_brut:{ score:r.score, infractions:r.infractions.length, avertissements:r.avertissements.length, amende:r.amende_estimee, jours:r.nombre_jours, conduite_h:r.statistiques.conduite_totale_h,
+        infractions_detail:r.infractions.map(function(i){return{regle:i.regle,classe:i.classe,limite:i.limite,constate:i.constate,depassement:i.depassement}}),
+        avertissements_detail:r.avertissements.map(function(a){return{regle:a.regle,message:a.message}}) }
+    });
+    rapport.resume.total++; if(ok)rapport.resume.ok++;else{rapport.resume.ko++;rapport.resume.anomalies.push(nom);}
+  }
+  testerCas('CAS 1 - Journee parfaite autocar','Conducteur Paris-Lyon 8h conduite pause 45min. CE 561/2006 Art.6-7','2025-03-10;05:45;06:00;T\n2025-03-10;06:00;10:15;C\n2025-03-10;10:15;11:00;P\n2025-03-10;11:00;14:45;C\n2025-03-10;14:45;15:00;T','REGULIER','FR',{infractions:0,score_min:80,amende_exacte:0,jours:1,conduite_h:'8.0'});
+  testerCas('CAS 2 - Oubli pause 4h30 (continue 6h)','Conduit 6h sans pause. CE 561/2006 Art.7 + R3312-9','2025-03-10;06:00;06:15;T\n2025-03-10;06:15;12:15;C\n2025-03-10;12:15;13:00;P\n2025-03-10;13:00;15:00;C\n2025-03-10;15:00;15:15;T','OCCASIONNEL','FR',{infractions_contiennent:['ontinue'],amende_min:135,conduite_h:'8.0'});
+  testerCas('CAS 3 - Conduite 12h48 (depassement derog)','Navette aeroport depasse 10h derog. CE 561/2006 Art.6 + R3312-11','2025-03-10;04:30;04:45;T\n2025-03-10;04:45;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;14:00;C\n2025-03-10;14:00;14:45;P\n2025-03-10;14:45;19:15;C\n2025-03-10;19:15;19:30;T','REGULIER','FR',{infractions_contiennent:['ournali'],amende_min:135});
+  testerCas('CAS 4 - Repos insuffisant (6h)','Finit 22h amplitude 17h repos 6h. CE 561/2006 Art.8 + R3312-28','2025-03-10;05:00;05:30;T\n2025-03-10;05:30;09:30;C\n2025-03-10;09:30;10:15;P\n2025-03-10;10:15;13:15;C\n2025-03-10;13:15;14:00;P\n2025-03-10;14:00;17:00;C\n2025-03-10;17:00;17:30;T\n2025-03-10;17:30;20:00;D\n2025-03-10;20:00;22:00;C','OCCASIONNEL','FR',{infractions_contiennent:['epos'],amende_min:135});
+  testerCas('CAS 5 - Semaine conforme 5j','Ligne reguliere 8h/j x5. CE 561/2006 Art.6','2025-03-10;06:00;06:15;T\n2025-03-10;06:15;10:30;C\n2025-03-10;10:30;11:15;P\n2025-03-10;11:15;15:00;C\n2025-03-10;15:00;15:15;T\n2025-03-11;06:00;06:15;T\n2025-03-11;06:15;10:30;C\n2025-03-11;10:30;11:15;P\n2025-03-11;11:15;15:00;C\n2025-03-11;15:00;15:15;T\n2025-03-12;06:00;06:15;T\n2025-03-12;06:15;10:30;C\n2025-03-12;10:30;11:15;P\n2025-03-12;11:15;15:00;C\n2025-03-12;15:00;15:15;T\n2025-03-13;06:00;06:15;T\n2025-03-13;06:15;10:30;C\n2025-03-13;10:30;11:15;P\n2025-03-13;11:15;15:00;C\n2025-03-13;15:00;15:15;T\n2025-03-14;06:00;06:15;T\n2025-03-14;06:15;10:30;C\n2025-03-14;10:30;11:15;P\n2025-03-14;11:15;15:00;C\n2025-03-14;15:00;15:15;T','REGULIER','FR',{infractions:0,jours:5,score_min:80,amende_exacte:0});
+  testerCas('CAS 6 - Nuit depassement >10h','Navette CDG 21h-07h30. L3312-1','2025-03-10;20:30;21:00;T\n2025-03-10;21:00;01:30;C\n2025-03-10;01:30;02:15;P\n2025-03-10;02:15;06:15;C\n2025-03-10;06:15;07:30;C','REGULIER','FR',{infractions_contiennent:['uit'],amende_min:135});
+  testerCas('CAS 7 - Repos reduit legal 9h30','Repos 9h30 legal reduit 3x/sem. CE 561/2006 Art.8','2025-03-10;06:00;06:30;T\n2025-03-10;06:30;10:30;C\n2025-03-10;10:30;11:15;P\n2025-03-10;11:15;14:15;C\n2025-03-10;14:15;15:00;P\n2025-03-10;15:00;18:30;C','STANDARD','FR',{infractions:0,score_min:80,amende_exacte:0});
+  testerCas('CAS 8 - Espagne ete UTC+2','Autocar Espagne juillet. CE 561/2006 + Dir 2000/84/CE','2025-07-15;07:00;07:15;T\n2025-07-15;07:15;11:30;C\n2025-07-15;11:30;12:15;P\n2025-07-15;12:15;16:00;C\n2025-07-15;16:00;16:15;T','OCCASIONNEL','ES',{infractions:0,score_min:80,amende_exacte:0,jours:1});
+  testerCas('CAS 9 - Cumul graves 14h continue','Catastrophe 14h conduite. CE 561/2006 + R3315-10/11','2025-03-10;04:00;04:15;T\n2025-03-10;04:15;10:15;C\n2025-03-10;10:15;10:30;P\n2025-03-10;10:30;16:30;C\n2025-03-10;16:30;16:45;P\n2025-03-10;16:45;22:45;C\n2025-03-10;22:45;23:00;T','STANDARD','FR',{infractions_contiennent:['ontinue','ournali'],amende_min:270,score_max:50});
+  testerCas('CAS 10 - Amplitude >13h regulier','Amplitude 04:30-19:00=14h30. L3312-2','2025-03-10;04:30;05:00;T\n2025-03-10;05:00;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;13:00;C\n2025-03-10;13:00;14:00;P\n2025-03-10;14:00;17:30;C\n2025-03-10;17:30;18:30;D\n2025-03-10;18:30;19:00;T','REGULIER','FR',{infractions_contiennent:['mplitude'],amende_min:135});
+  rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round((rapport.resume.ok / rapport.resume.total) * 100) : 0;
+  rapport.resume.status = rapport.resume.ko === 0 ? 'TOUS LES CAS PASSENT' : rapport.resume.ko + ' CAS EN ANOMALIE';
+  console.log('[QA CAS REELS] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%)');
+  res.json(rapport);
+});
+
+
 // Fallback : servir le frontend pour toutes les routes non-API
 app.get('*', (req, res) => {
   const indexPath = path.join(distPath, 'index.html');
