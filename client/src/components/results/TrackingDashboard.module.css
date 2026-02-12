@@ -1,0 +1,364 @@
+/* TrackingDashboard.module.css - Dashboard de suivi reglementaire v7.1.0 */
+/* Source: CE 561/2006, 2020/1054, 2024/1258 */
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.5s ease;
+}
+
+.dashTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent, #00d4ff);
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashIcon {
+  font-size: 1.2rem;
+}
+
+/* --- Grille de metriques principales --- */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.metricCard {
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.3s, transform 0.2s;
+}
+.metricCard:hover {
+  border-color: var(--accent, #00d4ff);
+  transform: translateY(-2px);
+}
+
+.metricLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metricValue {
+  font-size: 1.8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.metricSub {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #888);
+}
+
+/* Couleurs par statut */
+.metricOk { color: var(--accent-green, #00ff88); border-color: rgba(0, 255, 136, 0.15); }
+.metricWarning { color: var(--accent-orange, #ffaa00); border-color: rgba(255, 170, 0, 0.15); }
+.metricDanger { color: var(--accent-red, #ff4444); border-color: rgba(255, 68, 68, 0.15); }
+.metricInfo { color: var(--accent, #00d4ff); border-color: rgba(0, 212, 255, 0.15); }
+
+/* --- Jauge repos reduits (barre segmentee) --- */
+.gaugeSection {
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.gaugeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.gaugeTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #e0e0e0);
+}
+
+.gaugeBadge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.gaugeBadgeOk { background: rgba(0,255,136,0.15); color: #00ff88; }
+.gaugeBadgeWarning { background: rgba(255,170,0,0.15); color: #ffaa00; }
+.gaugeBadgeDanger { background: rgba(255,68,68,0.15); color: #ff4444; }
+
+.gaugeTrack {
+  height: 24px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  overflow: hidden;
+}
+
+.gaugeSegment {
+  flex: 1;
+  border-radius: 9px;
+  transition: background 0.4s ease;
+}
+
+.segmentFilled { background: var(--accent-orange, #ffaa00); }
+.segmentFilledDanger { background: var(--accent-red, #ff4444); }
+.segmentEmpty { background: rgba(255,255,255,0.08); }
+
+.gaugeLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: var(--text-secondary, #888);
+}
+
+/* --- Timeline dette compensation --- */
+.detteSection {
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.detteTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #e0e0e0);
+  margin-bottom: 10px;
+}
+
+.detteTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detteItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255,170,0,0.06);
+  border: 1px solid rgba(255,170,0,0.12);
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.detteDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.detteDotPending { background: var(--accent-orange, #ffaa00); }
+.detteDotOk { background: var(--accent-green, #00ff88); }
+
+.detteDate { font-weight: 600; color: var(--text, #e0e0e0); min-width: 80px; }
+.detteAmount { color: var(--accent-orange, #ffaa00); font-weight: 700; }
+.detteEcheance { color: var(--text-secondary, #888); font-size: 0.75rem; }
+
+.detteTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(255,170,0,0.1);
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.detteTotalLabel { color: var(--text, #e0e0e0); font-size: 0.85rem; }
+.detteTotalValue { color: var(--accent-orange, #ffaa00); font-size: 1.1rem; }
+
+/* --- Section derogations --- */
+.derogSection {
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.derogTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #e0e0e0);
+  margin-bottom: 10px;
+}
+
+.derogGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.derogItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+.derogActive {
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.15);
+  color: var(--accent, #00d4ff);
+}
+.derogInactive {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-secondary, #888);
+}
+
+.derogDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.derogDotOn { background: var(--accent, #00d4ff); }
+.derogDotOff { background: var(--text-secondary, #888); opacity: 0.4; }
+
+/* --- Rappels reglementaires --- */
+.rappelsSection {
+  background: var(--bg-card, #12121a);
+  border: 1px solid rgba(0,212,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.rappelsTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent, #00d4ff);
+  margin-bottom: 8px;
+}
+
+.rappelItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  color: var(--text, #e0e0e0);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.rappelItem:last-child { border-bottom: none; }
+
+.rappelBullet {
+  color: var(--accent, #00d4ff);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* --- Conduite nuit detail --- */
+.nuitSection {
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.nuitTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #e0e0e0);
+  margin-bottom: 10px;
+}
+
+.nuitGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.nuitDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+}
+.nuitDayOk { background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.1); }
+.nuitDayWarn { background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.15); }
+.nuitDayDanger { background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.15); }
+
+.nuitDayDate { font-weight: 600; color: var(--text, #e0e0e0); }
+.nuitDayValue { font-size: 1rem; font-weight: 700; margin: 2px 0; }
+.nuitDayLimit { color: var(--text-secondary, #888); font-size: 0.65rem; }
+
+/* --- Repos fractionnes --- */
+.fracSection {
+  background: var(--bg-card, #12121a);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.fracTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text, #e0e0e0);
+  margin-bottom: 10px;
+}
+
+.fracItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(0,255,136,0.05);
+  border: 1px solid rgba(0,255,136,0.1);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.fracDate { font-weight: 600; color: var(--text, #e0e0e0); min-width: 80px; }
+.fracParts { color: var(--accent-green, #00ff88); }
+.fracTotal { color: var(--text-secondary, #888); font-size: 0.75rem; }
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .metricsGrid { grid-template-columns: repeat(2, 1fr); }
+  .nuitGrid { grid-template-columns: repeat(2, 1fr); }
+  .derogGrid { grid-template-columns: 1fr; }
+  .metricValue { font-size: 1.4rem; }
+}
+
+@media print {
+  .dashboard { gap: 8px; }
+  .metricCard, .gaugeSection, .detteSection, .derogSection, .rappelsSection, .nuitSection, .fracSection {
+    border-color: #ccc !important;
+    background: white !important;
+  }
+  .metricValue, .gaugeTitle, .detteDate, .nuitDayDate { color: black !important; }
+}

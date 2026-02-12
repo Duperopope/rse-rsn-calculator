@@ -3,6 +3,7 @@ import { EURO } from '../../config/constants.js';
 import { InfractionCard } from './InfractionCard.jsx';
 import { RecommandationList } from './RecommandationList.jsx';
 import { SanctionTable } from './SanctionTable.jsx';
+import { TrackingDashboard } from './TrackingDashboard.jsx';
 import styles from './ResultPanel.module.css';
 
 /**
@@ -35,6 +36,7 @@ export function ResultPanel({ resultat }) {
   const stats = resultat.statistiques || {};
   const amende = resultat.amende_estimee || 0;
   const equipage = resultat.equipage || 'solo';
+  const tracking = resultat.tracking || null;
   const periode = resultat.periode || '';
 
   function getScoreColor() {
@@ -148,6 +150,8 @@ export function ResultPanel({ resultat }) {
           ) : null}
         </div>
       ) : null}
+
+      {tracking ? <TrackingDashboard tracking={tracking} /> : null}
 
       <SanctionTable />
       <button className={styles.printBtn} onClick={() => window.print()}>Imprimer le rapport</button>
