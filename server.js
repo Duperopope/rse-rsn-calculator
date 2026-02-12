@@ -1137,9 +1137,9 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // 600min = exactement la limite derogatoire, pas infraction
   testerCas('CAT-C', 'CAS 10 - Conduite 10h derogatoire (limite OK)',
     '10h conduite = 600min = limite derog exacte. CE 561/2006 Art.6-1. Pas infraction.',
-    '2025-03-10;05:00;05:15;T\n2025-03-10;05:15;09:45;C\n2025-03-10;09:45;10:30;P\n2025-03-10;10:30;14:30;C\n2025-03-10;14:30;15:15;P\n2025-03-10;15:15;16:30;C\n2025-03-10;16:30;16:45;T',
+    '2025-03-10;06:00;10:15;C\n2025-03-10;10:15;11:00;P\n2025-03-10;11:00;14:30;C\n2025-03-10;14:30;15:15;P\n2025-03-10;15:15;17:15;C',
     'OCCASIONNEL', 'FR',
-    { infractions_absent: ['ournali'], avertissements_min: 1, conduite_h: '9.8' }
+    { infractions_absent: ['ournali', 'ravail'], infractions: 0, avertissements_min: 1, conduite_h: '9.8', score_min: 80 }
   );
 
   // CAS 11 - Conduite 11h (4e classe, depassement 120min sur 540 = 2h)
