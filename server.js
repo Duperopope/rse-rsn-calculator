@@ -323,12 +323,11 @@ function analyserCSV(csvTexte, typeService, codePays) {
     // Si activites avant ET apres 12h sur le meme jour = service de nuit
     // Dans ce cas, les heures >= 12h passent en premier (debut de service)
     const activitesJourBrut = joursMap[dateJour];
-    // Detection service de nuit : activites APRES 18h ET activites AVANT 6h sur le meme jour CSV
-    // Un jour normal (ex: 06:45-16:00) a des heures avant et apres 12h mais n'est PAS un service de nuit
-    // Un vrai service de nuit (ex: 20:00-04:30) a des heures >= 18h ET des heures < 6h
-    const aDesHeuresMatinales = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) < 6);
-    const aDesHeuresSoiree = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) >= 18);
-    const estServiceNuit = aDesHeuresMatinales && aDesHeuresSoiree;
+    // Detection service de nuit : une activite traverse minuit (heure_fin <= heure_debut en string)
+    // Ex: 20:30 -> 00:30 a heure_fin "00:30" < heure_debut "20:30"
+    // Cela ne se declenche PAS pour un jour normal (04:30->19:00) car heure_fin > heure_debut
+    // Source: CE 561/2006 Art.8 - repos journalier dans les 24h suivant le debut de service
+    const estServiceNuit = activitesJourBrut.some(a => a.heure_fin.localeCompare(a.heure_debut) < 0);
 
     const activitesJour = activitesJourBrut.sort((a, b) => {
       if (estServiceNuit) {
@@ -460,12 +459,25 @@ function analyserCSV(csvTexte, typeService, codePays) {
     }
 
     // Verification travail de nuit (L3312-1)
-    if (travailNuitMin > REGLES.TRAVAIL_NUIT_MAX_H * 60) {
+    // Source: ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-marchandises
+    // "La duree quotidienne du travail d un travailleur de nuit ou d un salarie
+    //  qui accomplit sur une periode de 24h une partie de son travail dans
+    //  l intervalle compris entre 24h et 5h ne peut exceder 10 heures"
+    // => Ce n est PAS le temps en zone nuit qui est limite a 10h,
+    //    c est le TRAVAIL TOTAL DE LA JOURNEE qui est limite a 10h
+    //    des que le conducteur a travaille entre 0h et 5h.
+    const aTravailleEntreMinuitEt5h = activitesJour.some(a => {
+      if (a.type === "pause") return false;
+      const h = parseInt(a.heure_debut.split(":")[0]);
+      return h >= 0 && h < 5;
+    });
+    const travailTotalNuitJour = conduiteJour + travailJour;
+    if (aTravailleEntreMinuitEt5h && travailTotalNuitJour > REGLES.TRAVAIL_NUIT_MAX_H * 60) {
       infractionsJour.push({
-        regle: "Travail de nuit (L3312-1)",
-        limite: REGLES.TRAVAIL_NUIT_MAX_H + "h",
-        constate: (travailNuitMin / 60).toFixed(1) + "h",
-        depassement: ((travailNuitMin / 60) - REGLES.TRAVAIL_NUIT_MAX_H).toFixed(1) + "h",
+        regle: "Travail de nuit - duree totale journee (L3312-1)",
+        limite: REGLES.TRAVAIL_NUIT_MAX_H + "h de travail total",
+        constate: (travailTotalNuitJour / 60).toFixed(1) + "h",
+        depassement: ((travailTotalNuitJour / 60) - REGLES.TRAVAIL_NUIT_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
         amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros"
       });
@@ -1274,11 +1286,13 @@ app.get('/api/qa/cas-reels', (req, res) => {
     { infractions_absent: ['ontinue'], conduite_h: '7.7' }
   );
 
-  // CAS 22 - Travail nuit >10h (infraction)
-  // 20:30-07:30 = 11h activite dont la majorite en zone nuit
+  // CAS 22 - Travail nuit >10h (infraction L3312-1)
+  // L3312-1: si travail entre 0h-5h, travail TOTAL journee <= 10h
+  // Source: ecologie.gouv.fr - "ne peut exceder 10 heures"
+  // 20:00-08:00: conduite 10h + taches 45min = 10h45 > 10h
   testerCas('CAT-F', 'CAS 22 - Travail nuit >10h (infraction)',
-    'Service 20h30-07h30 = 11h. Travail nuit > 10h. L3312-1. 4e classe.',
-    '2025-03-10;20:30;21:00;T\n2025-03-10;21:00;01:30;C\n2025-03-10;01:30;02:00;P\n2025-03-10;02:00;05:30;C\n2025-03-10;05:30;06:00;P\n2025-03-10;06:00;07:00;C\n2025-03-10;07:00;07:30;T',
+    'Service 20h-08h. Travail entre 0h-5h. Total travail 10h45 > 10h. L3312-1. 4e classe.',
+    '2025-03-10;20:00;20:30;T\n2025-03-10;20:30;01:00;C\n2025-03-10;01:00;01:45;P\n2025-03-10;01:45;05:45;C\n2025-03-10;05:45;06:15;P\n2025-03-10;06:15;07:45;C\n2025-03-10;07:45;08:00;T',
     'REGULIER', 'FR',
     { infractions_min: 1, amende_min: 135 }
   );
@@ -1336,7 +1350,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
       pause_reset: '>= 30min remet conduite continue a 0'
     }
   };
-  console.log('[QA v5.6.0] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
+  console.log('[QA v5.7.3] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
   res.json(rapport);
 });
 
@@ -1355,7 +1369,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  RSE/RSN Calculator v5.0.0");
+  console.log("  RSE/RSN Calculator v5.7.3");
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
