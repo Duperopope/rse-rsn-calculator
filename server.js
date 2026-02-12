@@ -80,7 +80,13 @@ const REGLES = {
   // Duree max travail hebdomadaire (Code du travail)
   TRAVAIL_HEBDO_MAX_H: 48,
   // Duree max travail hebdomadaire moyenne sur 12 semaines
-  TRAVAIL_HEBDO_MOYENNE_MAX_H: 44
+  TRAVAIL_HEBDO_MOYENNE_MAX_H: 44,
+  // Multi-equipage (CE 561/2006 Art.8 par.5)
+  MULTI_REPOS_JOURNALIER_MIN_H: 9,  // 9h dans les 30h (pas 24h)
+  MULTI_DELAI_REPOS_H: 30,           // Delai 30h au lieu de 24h
+  // Bi-hebdomadaire (CE 561/2006 Art.6 par.3)
+  // Derogation conduite journaliere (CE 561/2006 Art.6 par.1)
+  CONDUITE_DEROG_MAX_PAR_SEMAINE: 2  // Max 2 jours a 10h par semaine
 };
 
 // ============================================================
@@ -273,7 +279,8 @@ function parseCSVLigne(ligne, numeroLigne) {
 /**
  * Analyse complete d'un CSV
  */
-function analyserCSV(csvTexte, typeService, codePays) {
+function analyserCSV(csvTexte, typeService, codePays, equipage) {
+  equipage = equipage || 'solo';
   const lignes = csvTexte.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('#') && !l.startsWith('date'));
 
   const activites = [];
@@ -554,7 +561,7 @@ function analyserCSV(csvTexte, typeService, codePays) {
     } else if (reposEstime < REGLES.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= REGLES.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
       avertissementsJour.push({
         regle: "Repos journalier en mode reduit",
-        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + REGLES.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + REGLES.REPOS_JOURNALIER_REDUIT_H + "h, max 3x entre 2 repos hebdo)"
+        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + REGLES.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + REGLES.REPOS_JOURNALIER_REDUIT_H + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
       });
     }
 
@@ -651,7 +658,152 @@ totalConduiteMin += conduiteJour;
     }
   }
 
-  // Calcul du score de conformite
+  
+  // Verification conduite bi-hebdomadaire 90h (CE 561/2006 Art.6 par.3)
+  // Total conduite sur 2 semaines consecutives ne doit pas depasser 90h
+  if (joursTries.length >= 10) {
+    // Calculer la conduite des 2 semaines
+    const conduiteParJour = detailsJours.map(j => j.conduite_min);
+    // Verifier chaque fenetre de 14 jours glissante
+    for (let i = 0; i <= conduiteParJour.length - 10; i++) {
+      const fenetre = conduiteParJour.slice(i, Math.min(i + 14, conduiteParJour.length));
+      const totalFenetre = fenetre.reduce((a, b) => a + b, 0);
+      if (totalFenetre > REGLES.CONDUITE_BIHEBDO_MAX_MIN) {
+        const depassement = totalFenetre - REGLES.CONDUITE_BIHEBDO_MAX_MIN;
+        const classe = depassement > (22.5 * 60) ? '5e classe' : '4e classe';
+        infractions.push({
+          regle: 'Conduite bi-hebdomadaire (CE 561/2006 Art.6 par.3)',
+          limite: '90h (' + REGLES.CONDUITE_BIHEBDO_MAX_MIN + ' min) sur 2 semaines consecutives',
+          constate: (totalFenetre / 60).toFixed(1) + 'h sur ' + fenetre.length + ' jours',
+          depassement: (depassement / 60).toFixed(1) + 'h',
+          classe: classe,
+          amende: classe === '5e classe'
+            ? SANCTIONS.classe_5.amende_max + ' euros (max)'
+            : SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire)'
+        });
+        amendeEstimee += classe === '5e classe' ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
+        break; // Une seule infraction bi-hebdo suffit
+      }
+    }
+  }
+
+
+  // ============================================================
+  // Verification repos hebdomadaire (CE 561/2006 Art.8 par.6)
+  // ============================================================
+  if (joursTries.length >= 6) {
+    // Calculer le repos entre chaque journee de travail
+    // Repos = temps entre fin derniere activite jour N et debut premiere activite jour N+1
+    const reposEntreJours = [];
+    for (let i = 0; i < detailsJours.length - 1; i++) {
+      const jourActuel = detailsJours[i];
+      const jourSuivant = detailsJours[i + 1];
+      const finActuel = joursMap[jourActuel.date]
+        .sort((a, b) => a.heure_fin.localeCompare(b.heure_fin))
+        .pop();
+      const debutSuivant = joursMap[jourSuivant.date]
+        .sort((a, b) => a.heure_debut.localeCompare(b.heure_debut))[0];
+      
+      // Calculer le temps entre les deux en heures
+      const finH = parseInt(finActuel.heure_fin.split(":")[0]) * 60 + parseInt(finActuel.heure_fin.split(":")[1]);
+      const debutH = parseInt(debutSuivant.heure_debut.split(":")[0]) * 60 + parseInt(debutSuivant.heure_debut.split(":")[1]);
+      
+      // Jours entre les deux dates
+      const d1 = new Date(jourActuel.date + "T00:00:00");
+      const d2 = new Date(jourSuivant.date + "T00:00:00");
+      const joursEcart = Math.round((d2 - d1) / (24 * 60 * 60 * 1000));
+      
+      // Repos en minutes = (jours ecart * 24h * 60) - finH + debutH
+      const reposMin = (joursEcart * 24 * 60) - finH + debutH;
+      const reposH = reposMin / 60;
+      
+      reposEntreJours.push({
+        entre: jourActuel.date + " -> " + jourSuivant.date,
+        repos_h: reposH,
+        repos_min: reposMin,
+        jours_ecart: joursEcart
+      });
+    }
+    
+    // Verifier s il y a au moins un repos >= 24h (reduit) ou >= 45h (normal)
+    // dans chaque periode de 6 jours consecutifs
+    const reposHebdosDetectes = reposEntreJours.filter(r => r.repos_h >= REGLES.REPOS_HEBDO_REDUIT_H);
+    const reposHebdoNormaux = reposEntreJours.filter(r => r.repos_h >= REGLES.REPOS_HEBDO_NORMAL_H);
+    const reposHebdoReduits = reposEntreJours.filter(r => r.repos_h >= REGLES.REPOS_HEBDO_REDUIT_H && r.repos_h < REGLES.REPOS_HEBDO_NORMAL_H);
+    
+    // Regle Art.8 par.6 : en 2 semaines, au moins 2 repos normaux OU 1 normal + 1 reduit
+    if (joursTries.length >= 12 && reposHebdosDetectes.length < 2) {
+      infractions.push({
+        regle: "Repos hebdomadaire insuffisant (CE 561/2006 Art.8 par.6)",
+        limite: "2 repos hebdo en 2 semaines (min 1 normal 45h + 1 reduit 24h)",
+        constate: reposHebdosDetectes.length + " repos hebdo detecte(s) sur " + joursTries.length + " jours",
+        depassement: "Manque " + (2 - reposHebdosDetectes.length) + " repos hebdomadaire(s)",
+        classe: "4e classe",
+        amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), max " + SANCTIONS.classe_4.amende_max + " euros"
+      });
+      amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
+    }
+    
+    // Verifier la regle des 6 periodes de 24h (144h max entre 2 repos hebdo)
+    // Art.8 par.6 : "A weekly rest period shall start no later than at the end
+    //                of six 24-hour periods from the end of the previous weekly rest period"
+    let joursConsecutifsSansReposHebdo = 0;
+    for (let i = 0; i < detailsJours.length; i++) {
+      joursConsecutifsSansReposHebdo++;
+      // Verifier si le repos apres ce jour est un repos hebdo
+      if (i < reposEntreJours.length && reposEntreJours[i].repos_h >= REGLES.REPOS_HEBDO_REDUIT_H) {
+        joursConsecutifsSansReposHebdo = 0;
+      }
+      if (joursConsecutifsSansReposHebdo > 6) {
+        infractions.push({
+          regle: "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6)",
+          limite: "Repos hebdo au plus tard apres 6 periodes de 24h (6 jours de travail)",
+          constate: joursConsecutifsSansReposHebdo + " jours consecutifs sans repos hebdomadaire",
+          depassement: (joursConsecutifsSansReposHebdo - 6) + " jour(s) de trop",
+          classe: "5e classe",
+          amende: SANCTIONS.classe_5.amende_max + " euros (max), " + SANCTIONS.classe_5.amende_recidive + " euros en recidive"
+        });
+        amendeEstimee += SANCTIONS.classe_5.amende_max;
+        break; // Une seule infraction suffit
+      }
+    }
+    
+    // Avertissement si repos hebdo reduit detecte (compensation requise)
+    if (reposHebdoReduits.length > 0) {
+      reposHebdoReduits.forEach(r => {
+        const compensation = REGLES.REPOS_HEBDO_NORMAL_H - r.repos_h;
+        avertissements.push({
+          regle: "Repos hebdomadaire reduit - compensation requise (Art.8 par.6b)",
+          message: "Repos de " + r.repos_h.toFixed(1) + "h detecte (" + r.entre + "). Compensation de " + compensation.toFixed(1) + "h a prendre avant fin de la 3e semaine suivante, attachee a un repos de min 9h."
+        });
+      });
+    }
+  }
+
+  // Verification derogation 10h : max 2 jours par semaine (CE 561/2006 Art.6 par.1)
+  if (joursTries.length >= 5) {
+    // Regrouper par semaine ISO
+    const semainesMap = {};
+    detailsJours.forEach(j => {
+      const d = new Date(j.date + 'T12:00:00');
+      // Calcul semaine ISO simplifiee
+      const jan1 = new Date(d.getFullYear(), 0, 1);
+      const semaine = Math.ceil(((d - jan1) / 86400000 + jan1.getDay()) / 7);
+      const cleSemaine = d.getFullYear() + '-S' + semaine;
+      if (!semainesMap[cleSemaine]) semainesMap[cleSemaine] = [];
+      semainesMap[cleSemaine].push(j);
+    });
+    Object.entries(semainesMap).forEach(([semaine, jours]) => {
+      const joursDerog = jours.filter(j => j.conduite_min > REGLES.CONDUITE_JOURNALIERE_MAX_MIN);
+      if (joursDerog.length > REGLES.CONDUITE_DEROG_MAX_PAR_SEMAINE) {
+        avertissements.push({
+          regle: 'Derogation 10h depassee (CE 561/2006 Art.6 par.1)',
+          message: joursDerog.length + ' jours a plus de 9h de conduite en ' + semaine + ' (max autorise: ' + REGLES.CONDUITE_DEROG_MAX_PAR_SEMAINE + ' jours/semaine)'
+        });
+      }
+    });
+  }
+// Calcul du score de conformite
   const nbChecks = joursTries.length * 6; // 6 verifications par jour
   const nbInfractions = infractions.length;
   const score = nbChecks > 0 ? Math.max(0, Math.round(((nbChecks - nbInfractions) / nbChecks) * 100)) : 100;
@@ -662,6 +814,7 @@ totalConduiteMin += conduiteJour;
       ? "Aucune infraction detectee. Activite conforme a la reglementation."
       : infractions.length + " infraction(s) detectee(s) sur " + joursTries.length + " jour(s) analyses.",
     type_service: typeService,
+    equipage: equipage || 'solo',
     pays: codePays,
     periode: joursTries.length > 0 ? joursTries[0] + " au " + joursTries[joursTries.length - 1] : "N/A",
     nombre_jours: joursTries.length,
@@ -690,7 +843,7 @@ totalConduiteMin += conduiteJour;
 // POST /api/analyze - Analyse un CSV
 app.post('/api/analyze', (req, res) => {
   try {
-    const { csv, typeService, pays } = req.body;
+    const { csv, typeService, pays, equipage } = req.body;
 
     if (!csv || csv.trim().length === 0) {
       return res.status(400).json({ error: "Aucun contenu CSV fourni." });
@@ -698,10 +851,11 @@ app.post('/api/analyze', (req, res) => {
 
     const typeServiceValide = ['STANDARD', 'REGULIER', 'OCCASIONNEL', 'SLO'].includes(typeService) ? typeService : 'STANDARD';
     const paysValide = PAYS[pays] ? pays : 'FR';
+    const equipageValide = equipage === 'double' ? 'double' : 'solo';
 
-    console.log("[ANALYSE] Type service: " + typeServiceValide + ", Pays: " + paysValide + ", Lignes CSV: " + csv.split('\n').length);
+    console.log("[ANALYSE] Type service: " + typeServiceValide + ", Pays: " + paysValide + ", Equipage: " + equipageValide + ", Lignes CSV: " + csv.split('\n').length);
 
-    const resultat = analyserCSV(csv, typeServiceValide, paysValide);
+    const resultat = analyserCSV(csv, typeServiceValide, paysValide, equipageValide);
 
     console.log("[RESULTAT] Score: " + resultat.score + "%, Infractions: " + resultat.infractions.length + ", Amende estimee: " + resultat.amende_estimee + " euros");
 
@@ -766,7 +920,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: "6.1.0",
+    version: "6.2.0",
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
