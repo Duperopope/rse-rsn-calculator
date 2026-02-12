@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // RSE/RSN Calculator - Serveur Backend v5.0.0
 // Credits : Samir Medjaher
 // Sources reglementaires :
@@ -669,7 +669,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: "5.5.0",
+    version: "5.6.0",
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
@@ -694,7 +694,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "5.5.0",
+    version: "5.6.0",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0 }
   };
