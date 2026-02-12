@@ -3,21 +3,13 @@ import { TYPES_SERVICE, PAYS_LISTE } from '../../config/constants.js';
 import styles from './ParametresPanel.module.css';
 
 /**
- * Panneau de parametres : type de service, pays, mode de saisie
- * @param {string} typeService - Code type service
- * @param {Function} onTypeServiceChange
- * @param {string} pays - Code pays
- * @param {Function} onPaysChange
- * @param {string} mode - 'formulaire' ou 'csv'
- * @param {Function} onModeChange
+ * Panneau de parametres : type de service, pays, equipage, mode de saisie
  */
 export function ParametresPanel({
-  typeService,
-  onTypeServiceChange,
-  pays,
-  onPaysChange,
-  mode,
-  onModeChange
+  typeService, onTypeServiceChange,
+  pays, onPaysChange,
+  equipage, onEquipageChange,
+  mode, onModeChange
 }) {
   return (
     <div className={styles.panel}>
@@ -44,6 +36,23 @@ export function ParametresPanel({
             <option key={p.code} value={p.code}>{p.drapeau} {p.label}</option>
           ))}
         </select>
+      </div>
+      <div className={styles.group}>
+        <label className={styles.label}>Equipage (CE 561/2006 Art.8 par.5)</label>
+        <div className={styles.modeSwitch}>
+          <button
+            className={equipage === 'solo' ? styles.modeActive : styles.modeBtn}
+            onClick={() => onEquipageChange('solo')}
+          >
+            Solo
+          </button>
+          <button
+            className={equipage === 'double' ? styles.modeActive : styles.modeBtn}
+            onClick={() => onEquipageChange('double')}
+          >
+            Double equipage
+          </button>
+        </div>
       </div>
       <div className={styles.group}>
         <label className={styles.label}>Mode de saisie</label>

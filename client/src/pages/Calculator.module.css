@@ -76,3 +76,4 @@
 
 @media (max-width: 600px) { .main { padding: 12px; gap: 14px; } }
 @media print { .analyseSection, .historique { display: none; } .main { max-width: 100%; padding: 0; } }
+.equipageInfo { text-align: center; color: #00d4ff; font-size: 0.85rem; margin-top: 0.5rem; }

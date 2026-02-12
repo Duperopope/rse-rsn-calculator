@@ -22,8 +22,7 @@ import { Badge } from '../components/common/Badge.jsx';
 import styles from './Calculator.module.css';
 
 /**
- * Page principale du calculateur RSE/RSN v6.0.0
- * Assemble : parametres, formulaire/CSV, jauges temps reel, resultats
+ * Page principale du calculateur RSE/RSN v6.2.0
  */
 export default function Calculator() {
   const { theme, toggleTheme } = useTheme();
@@ -34,6 +33,7 @@ export default function Calculator() {
 
   const [typeService, setTypeService] = useState('REGULIER');
   const [pays, setPays] = useState('FR');
+  const [equipage, setEquipage] = useState('solo');
   const [mode, setMode] = useState('formulaire');
   const [csvTexte, setCsvTexte] = useState('');
   const [voirHistorique, setVoirHistorique] = useState(false);
@@ -51,7 +51,6 @@ export default function Calculator() {
     ]
   }]);
 
-  // Stats temps reel premier jour
   useEffect(() => {
     if (mode === 'formulaire' && jours.length > 0 && jours[0].activites) {
       setStatsJour(calculerStatsJour(jours[0].activites));
@@ -89,13 +88,13 @@ export default function Calculator() {
     let csv = csvTexte;
     if (mode === 'formulaire') csv = activitesToCSV(jours);
     if (!csv || !csv.trim()) return;
-    const data = await analyser(csv, typeService, pays);
+    const data = await analyser(csv, typeService, pays, equipage);
     if (data) {
       const entry = {
         date: new Date().toISOString(),
         score: data.score || 0,
         infractions: (data.infractions || []).length,
-        typeService, pays
+        typeService, pays, equipage
       };
       setHistorique(prev => [entry, ...(prev || [])].slice(0, HISTORIQUE_MAX));
     }
@@ -111,6 +110,7 @@ export default function Calculator() {
         <ParametresPanel
           typeService={typeService} onTypeServiceChange={setTypeService}
           pays={pays} onPaysChange={setPays}
+          equipage={equipage} onEquipageChange={setEquipage}
           mode={mode} onModeChange={(m) => { setMode(m); reset(); }}
         />
 
@@ -127,7 +127,7 @@ export default function Calculator() {
                   canRemove={jours.length > 1}
                 />
               ))}
-              <Button variant="secondary" onClick={ajouterJour}>+ Ajouter un jour</Button>
+              <Button variant='secondary' onClick={ajouterJour}>+ Ajouter un jour</Button>
             </div>
           ) : (
             <Card><CsvInput value={csvTexte} onChange={setCsvTexte} /></Card>
@@ -144,15 +144,18 @@ export default function Calculator() {
         ) : null}
 
         <div className={styles.analyseSection}>
-          <Button variant="primary" size="lg" fullWidth loading={chargement} disabled={!online || chargement} onClick={lancerAnalyse}>
+          <Button variant='primary' size='lg' fullWidth loading={chargement} disabled={!online || chargement} onClick={lancerAnalyse}>
             {chargement ? 'Analyse en cours...' : 'Analyser la conformite'}
           </Button>
+          {equipage === 'double' ? (
+            <p className={styles.equipageInfo}>Mode double equipage : repos 9h dans les 30h (Art.8 par.5)</p>
+          ) : null}
           {!online && !healthLoading ? (
             <p className={styles.offlineMsg}>Serveur hors ligne. Verifiez que le backend est demarre.</p>
           ) : null}
         </div>
 
-        {erreur ? <Card variant="danger" animate><p className={styles.erreur}>{erreur}</p></Card> : null}
+        {erreur ? <Card variant='danger' animate><p className={styles.erreur}>{erreur}</p></Card> : null}
         {chargement ? <Loader /> : null}
         {resultat && !chargement ? <ResultPanel resultat={resultat} /> : null}
 
@@ -169,7 +172,7 @@ export default function Calculator() {
                       {new Date(h.date).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </span>
                     <Badge variant={h.score >= 90 ? 'ok' : h.score >= 70 ? 'warning' : 'danger'}>{h.score}%</Badge>
-                    <span className={styles.histMeta}>{h.infractions} inf.</span>
+                    <span className={styles.histMeta}>{h.infractions} inf. {h.equipage === 'double' ? '(2x)' : ''}</span>
                   </div>
                 ))}
                 <button className={styles.histClear} onClick={() => { setHistorique([]); setVoirHistorique(false); }}>Effacer</button>

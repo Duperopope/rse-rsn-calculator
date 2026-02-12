@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { EURO } from '../../config/constants.js';
-import { fmtMin, fmtH } from '../../utils/time.js';
 import { InfractionCard } from './InfractionCard.jsx';
 import { RecommandationList } from './RecommandationList.jsx';
 import { SanctionTable } from './SanctionTable.jsx';
@@ -9,7 +8,6 @@ import styles from './ResultPanel.module.css';
 /**
  * Panneau de resultats complet apres analyse
  * Score anime, infractions, avertissements, details par jour, sanctions
- * @param {Object} resultat - Reponse de POST /api/analyze
  */
 export function ResultPanel({ resultat }) {
   const [animScore, setAnimScore] = useState(0);
@@ -22,10 +20,7 @@ export function ResultPanel({ resultat }) {
     const step = Math.max(1, Math.floor(target / 30));
     const timer = setInterval(() => {
       current += step;
-      if (current >= target) {
-        current = target;
-        clearInterval(timer);
-      }
+      if (current >= target) { current = target; clearInterval(timer); }
       setAnimScore(current);
     }, 30);
     return () => clearInterval(timer);
@@ -36,9 +31,11 @@ export function ResultPanel({ resultat }) {
   const score = resultat.score || 0;
   const infractions = resultat.infractions || [];
   const avertissements = resultat.avertissements || [];
-  const recommandations = resultat.recommandations || [];
-  const details = resultat.details || resultat.detail_jours || [];
-  const amende = resultat.amende_estimee || resultat.amendeEstimee || 0;
+  const details = resultat.details_jours || [];
+  const stats = resultat.statistiques || {};
+  const amende = resultat.amende_estimee || 0;
+  const equipage = resultat.equipage || 'solo';
+  const periode = resultat.periode || '';
 
   function getScoreColor() {
     if (score >= 90) return 'var(--accent-green, #00ff88)';
@@ -57,36 +54,42 @@ export function ResultPanel({ resultat }) {
       {/* Score principal */}
       <div className={styles.scoreSection}>
         <div className={styles.scoreCircle} style={{ borderColor: getScoreColor() }}>
-          <span className={styles.scoreValue} style={{ color: getScoreColor() }}>
-            {animScore}
-          </span>
+          <span className={styles.scoreValue} style={{ color: getScoreColor() }}>{animScore}</span>
           <span className={styles.scoreUnit}>%</span>
         </div>
         <div className={styles.scoreMeta}>
-          <span className={styles.scoreLabel} style={{ color: getScoreColor() }}>
-            {getScoreLabel()}
-          </span>
+          <span className={styles.scoreLabel} style={{ color: getScoreColor() }}>{getScoreLabel()}</span>
           {amende > 0 ? (
-            <span className={styles.amende}>
-              Amende estimee : {amende.toLocaleString('fr-FR')} {EURO}
-            </span>
+            <span className={styles.amende}>Amende estimee : {amende.toLocaleString('fr-FR')} {EURO}</span>
           ) : null}
           <span className={styles.scoreSummary}>
             {infractions.length} infraction(s), {avertissements.length} avertissement(s)
           </span>
+          {equipage === 'double' ? (
+            <span className={styles.equipageBadge}>Double equipage (Art.8 par.5)</span>
+          ) : null}
+          {periode ? <span className={styles.periode}>Periode : {periode}</span> : null}
         </div>
       </div>
+
+      {/* Statistiques globales */}
+      {stats.conduite_totale_h ? (
+        <div className={styles.statsGrid}>
+          <div className={styles.statItem}><span className={styles.statLabel}>Conduite totale</span><span className={styles.statValue}>{stats.conduite_totale_h}h</span></div>
+          <div className={styles.statItem}><span className={styles.statLabel}>Autre travail</span><span className={styles.statValue}>{stats.travail_autre_total_h}h</span></div>
+          <div className={styles.statItem}><span className={styles.statLabel}>Pauses</span><span className={styles.statValue}>{stats.pause_totale_h}h</span></div>
+          <div className={styles.statItem}><span className={styles.statLabel}>Disponibilite</span><span className={styles.statValue}>{stats.disponibilite_totale_h}h</span></div>
+          <div className={styles.statItem}><span className={styles.statLabel}>Moy. conduite/jour</span><span className={styles.statValue}>{stats.moyenne_conduite_jour_h}h</span></div>
+          <div className={styles.statItem}><span className={styles.statLabel}>Moy. travail/jour</span><span className={styles.statValue}>{stats.moyenne_travail_total_jour_h}h</span></div>
+        </div>
+      ) : null}
 
       {/* Infractions */}
       {infractions.length > 0 ? (
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>
-            Infractions ({infractions.length})
-          </h3>
+          <h3 className={styles.sectionTitle}>Infractions ({infractions.length})</h3>
           <div className={styles.infractions}>
-            {infractions.map((inf, i) => (
-              <InfractionCard key={i} infraction={inf} index={i} />
-            ))}
+            {infractions.map((inf, i) => <InfractionCard key={i} infraction={inf} index={i} />)}
           </div>
         </div>
       ) : null}
@@ -94,32 +97,25 @@ export function ResultPanel({ resultat }) {
       {/* Avertissements */}
       {avertissements.length > 0 ? (
         <div className={styles.section}>
-          <h3 className={styles.sectionTitleWarn}>
-            Avertissements ({avertissements.length})
-          </h3>
+          <h3 className={styles.sectionTitleWarn}>Avertissements ({avertissements.length})</h3>
           <div className={styles.avertissements}>
             {avertissements.map((av, i) => (
               <div key={i} className={styles.avertissement}>
                 <span className={styles.warnIcon}>!</span>
-                <span>{typeof av === 'string' ? av : av.message || av.description || JSON.stringify(av)}</span>
+                <div>
+                  <strong>{av.regle || ''}</strong>
+                  <p>{av.message || av.description || JSON.stringify(av)}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       ) : null}
 
-      {/* Recommandations */}
-      {recommandations.length > 0 ? (
-        <RecommandationList recommandations={recommandations} />
-      ) : null}
-
       {/* Details par jour */}
       {details.length > 0 ? (
         <div className={styles.section}>
-          <button
-            className={styles.toggleBtn}
-            onClick={() => setShowDetails(!showDetails)}
-          >
+          <button className={styles.toggleBtn} onClick={() => setShowDetails(!showDetails)}>
             {showDetails ? 'Masquer' : 'Afficher'} les details ({details.length} jour(s))
           </button>
           {showDetails ? (
@@ -127,18 +123,25 @@ export function ResultPanel({ resultat }) {
               {details.map((jour, i) => (
                 <div key={i} className={styles.detailJour}>
                   <div className={styles.detailHeader}>
-                    <strong>{jour.date || 'Jour ' + (i + 1)}</strong>
-                    <span style={{ color: (jour.score || 0) >= 90 ? 'var(--accent-green)' : 'var(--accent-orange)' }}>
-                      {jour.score || 0}%
-                    </span>
+                    <strong>{jour.date}</strong>
+                    <span>{jour.fuseau}</span>
                   </div>
-                  {jour.conduite_totale !== undefined ? (
-                    <div className={styles.detailStats}>
-                      <span>Conduite : {fmtH(jour.conduite_totale || jour.conduiteTotale || 0)}</span>
-                      <span>Amplitude : {fmtH(jour.amplitude || 0)}</span>
-                      <span>Travail : {fmtH(jour.travail_total || jour.travailTotal || 0)}</span>
+                  <div className={styles.detailStats}>
+                    <span>Conduite : {jour.conduite_h}h</span>
+                    <span>Travail : {jour.travail_h}h</span>
+                    <span>Pause : {jour.pause_h}h</span>
+                    <span>Amplitude : {jour.amplitude_estimee_h}h</span>
+                    <span>Conduite continue max : {jour.conduite_continue_max_min} min</span>
+                    <span>Repos estime : {jour.repos_estime_h}h</span>
+                    {parseFloat(jour.ferry_h) > 0 ? <span>Ferry : {jour.ferry_h}h</span> : null}
+                  </div>
+                  {jour.infractions && jour.infractions.length > 0 ? (
+                    <div className={styles.detailInf}>
+                      {jour.infractions.map((inf, j) => (
+                        <span key={j} className={styles.detailInfItem}>{inf.regle}</span>
+                      ))}
                     </div>
-                  ) : null}
+                  ) : <span className={styles.detailOk}>Conforme</span>}
                 </div>
               ))}
             </div>
@@ -146,13 +149,8 @@ export function ResultPanel({ resultat }) {
         </div>
       ) : null}
 
-      {/* Tableau sanctions */}
       <SanctionTable />
-
-      {/* Bouton imprimer */}
-      <button className={styles.printBtn} onClick={() => window.print()}>
-        Imprimer le rapport
-      </button>
+      <button className={styles.printBtn} onClick={() => window.print()}>Imprimer le rapport</button>
     </div>
   );
 }
