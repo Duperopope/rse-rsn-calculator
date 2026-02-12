@@ -16,7 +16,7 @@ export function parseCSV(csvText) {
   }
 
   const rawLines = csvText.trim().split('\n');
-  const typesValides = ['C', 'T', 'P', 'D', 'R'];
+  const typesValides = ['C', 'T', 'D', 'P', 'R', 'O', 'F'];
 
   for (let i = 0; i < rawLines.length; i++) {
     const line = rawLines[i].trim();

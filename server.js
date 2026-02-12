@@ -217,7 +217,7 @@ function parseCSVLigne(ligne, numeroLigne) {
   const typeCode = parts[3].toUpperCase();
 
   // Validation du type
-  const typesValides = { C: 'conduite', T: 'autre_tache', D: 'disponibilite', P: 'pause' };
+  const typesValides = { C: 'conduite', T: 'autre_tache', D: 'disponibilite', P: 'pause', R: 'repos', O: 'hors_champ', F: 'ferry' };
   if (!typesValides[typeCode]) {
     erreurs.push("Ligne " + numeroLigne + " : type '" + typeCode + "' inconnu. Utiliser C, T, D ou P");
     return { activite: null, erreurs };
@@ -348,6 +348,7 @@ function analyserCSV(csvTexte, typeService, codePays) {
     let conduiteContinue = 0;
     let maxConduiteContinue = 0;
     let travailNuitMin = 0;
+    let ferryJour = 0;
     let infractionsJour = [];
     let avertissementsJour = [];
 
@@ -373,6 +374,32 @@ function analyserCSV(csvTexte, typeService, codePays) {
         case 'pause':
           pauseJour += a.duree_min;
           // Une pause >= 30 min remet la conduite continue a zero (CE 561/2006 Art.7)
+          if (a.duree_min >= REGLES.PAUSE_OBLIGATOIRE_MIN) {
+            conduiteContinue = 0;
+          }
+          break;
+        case 'repos':
+          pauseJour += a.duree_min;
+          if (a.duree_min >= REGLES.PAUSE_OBLIGATOIRE_MIN) {
+            conduiteContinue = 0;
+          }
+          break;
+        case 'hors_champ':
+          // OUT - Art.9 par.3 CE 561/2006
+          // Temps hors champ d'application : ne compte ni en conduite,
+          // ni en travail effectif, ni en repos. Suspend le calcul.
+          // Note: conduire un vehicule hors scope pour rejoindre un vehicule
+          // soumis au CE 561 = 'autre tache' (Art.9 par.3)
+          dispoJour += a.duree_min; // Comptabilise comme dispo pour le suivi
+          break;
+        case 'ferry':
+          // FERRY/TRAIN - Art.9 par.1 CE 561/2006 (version 2020/1054)
+          // Le repos peut etre interrompu max 2 fois, total max 1h
+          // Conditions: acces couchette/cabine
+          // Pour repos hebdo: ferry programme >= 8h + acces couchette
+          // Le temps ferry avec couchette = repos (pas travail/dispo)
+          pauseJour += a.duree_min;
+          ferryJour += a.duree_min;
           if (a.duree_min >= REGLES.PAUSE_OBLIGATOIRE_MIN) {
             conduiteContinue = 0;
           }
@@ -531,7 +558,42 @@ function analyserCSV(csvTexte, typeService, codePays) {
       });
     }
 
-    totalConduiteMin += conduiteJour;
+    
+    // Verification ferry Art.9 CE 561/2006
+    if (ferryJour > 0) {
+      // Compter les segments ferry (interruptions potentielles du repos)
+      const segmentsFerry = activitesJour.filter(a => a.type === 'ferry');
+      const interruptionsFerry = segmentsFerry.length;
+      const totalInterruptionMin = activitesJour
+        .filter(a => a.type !== 'ferry' && a.type !== 'pause' && a.type !== 'repos')
+        .reduce((sum, a) => {
+          // Verifier si l'activite est entre deux segments ferry
+          const isEntreDeuxFerry = segmentsFerry.some((f, i) => {
+            const next = segmentsFerry[i + 1];
+            return next && a.heure_debut >= f.heure_fin && a.heure_fin <= next.heure_debut;
+          });
+          return isEntreDeuxFerry ? sum + a.duree_min : sum;
+        }, 0);
+      
+      if (totalInterruptionMin > 60) {
+        infractionsJour.push({
+          regle: 'Interruption repos ferry (CE 561/2006 Art.9 par.1)',
+          limite: 'Max 1h d\'interruption totale pendant repos sur ferry/train',
+          constate: totalInterruptionMin + ' min d\'interruption',
+          depassement: (totalInterruptionMin - 60) + ' min',
+          classe: '4e classe',
+          amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), max ' + SANCTIONS.classe_4.amende_max + ' euros'
+        });
+        amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
+      }
+      if (interruptionsFerry > 1) {
+        avertissementsJour.push({
+          regle: 'Segments ferry multiples (Art.9)',
+          message: interruptionsFerry + ' segments ferry detectes. Le repos peut etre interrompu max 2 fois.'
+        });
+      }
+    }
+totalConduiteMin += conduiteJour;
     totalTravailMin += travailJour;
     totalPauseMin += pauseJour;
     totalDispoMin += dispoJour;
@@ -562,6 +624,8 @@ function analyserCSV(csvTexte, typeService, codePays) {
       conduite_continue_max_min: maxConduiteContinue,
       repos_estime_h: totalActiviteJour > 0 ? ((24 * 60 - totalActiviteJour) / 60).toFixed(1) : "N/A",
       travail_nuit_min: travailNuitMin,
+      ferry_min: ferryJour,
+      ferry_h: (ferryJour / 60).toFixed(1),
       nombre_activites: activitesJour.length,
       infractions: infractionsJour,
       avertissements: avertissementsJour
@@ -702,7 +766,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: "5.7.4",
+    version: "6.1.0",
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,

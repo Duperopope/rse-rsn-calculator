@@ -16,8 +16,10 @@ export const TYPES_ACTIVITE = [
   { code: 'C', label: 'Conduite', couleur: '#4CAF50', icone: 'conduite' },
   { code: 'T', label: 'Autre tache', couleur: '#2196F3', icone: 'tache' },
   { code: 'D', label: 'Disponibilite', couleur: '#FF9800', icone: 'disponibilite' },
-  { code: 'P', label: 'Pause / Repos', couleur: '#9C27B0', icone: 'repos' },
-  { code: 'R', label: 'Repos', couleur: '#607D8B', icone: 'repos' }
+  { code: 'P', label: 'Pause / Repos', couleur: '#9C27B0', icone: 'pause' },
+  { code: 'R', label: 'Repos', couleur: '#607D8B', icone: 'repos' },
+  { code: 'O', label: 'Hors champ (OUT)', couleur: '#795548', icone: 'out' },
+  { code: 'F', label: 'Ferry / Train', couleur: '#00BCD4', icone: 'ferry' }
 ];
 
 // Types de service (CE 561/2006 Art.4)
