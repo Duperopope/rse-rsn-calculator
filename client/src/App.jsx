@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // ============================================================
 // ICÔNES SVG OFFICIELLES DU TACHYGRAPHE (CE 3821/85 Annexe IB)
@@ -6,7 +6,7 @@ import React, { useState, useCallback } from 'react';
 // Source: https://www.webfleet.com/en_gb/webfleet/fleet-management/glossary/digi-tacho-symbols/
 // ============================================================
 
-function IconeConduite({ size = 28, color = '#1a73e8' }) {
+function IconeConduite({ size = 28, color = '#3b82f6' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="50" cy="50" r="45" stroke={color} strokeWidth="6" fill="none" />
@@ -23,7 +23,7 @@ function IconeConduite({ size = 28, color = '#1a73e8' }) {
   );
 }
 
-function IconeAutreTache({ size = 28, color = '#e67e22' }) {
+function IconeAutreTache({ size = 28, color = '#f59e0b' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <line x1="20" y1="80" x2="50" y2="30" stroke={color} strokeWidth="8" strokeLinecap="round" />
@@ -35,7 +35,7 @@ function IconeAutreTache({ size = 28, color = '#e67e22' }) {
   );
 }
 
-function IconeDisponibilite({ size = 28, color = '#9b59b6' }) {
+function IconeDisponibilite({ size = 28, color = '#a855f7' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="10" y="10" width="80" height="80" stroke={color} strokeWidth="6" fill="none" rx="4" />
@@ -44,7 +44,7 @@ function IconeDisponibilite({ size = 28, color = '#9b59b6' }) {
   );
 }
 
-function IconeRepos({ size = 28, color = '#27ae60' }) {
+function IconeRepos({ size = 28, color = '#22c55e' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="5" y="70" width="90" height="6" rx="3" fill={color} />
@@ -57,652 +57,455 @@ function IconeRepos({ size = 28, color = '#27ae60' }) {
 }
 
 // ============================================================
-// CONSTANTES RÉGLEMENTAIRES
-// Sources :
-// - Règlement CE 561/2006 (temps de conduite)
-//   https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32006R0561
-// - Code des transports français (sanctions)
-//   https://www.legifrance.gouv.fr/codes/id/LEGITEXT000023086525/
-// - Règlement UE 165/2014 (tachygraphe)
-//   https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32014R0165
+// CONSTANTES & CONFIGURATION
 // ============================================================
 
 const TYPES_ACTIVITE = [
-  { id: 'conduite', label: 'Conduite', icone: IconeConduite, couleur: '#1a73e8' },
-  { id: 'autre_tache', label: 'Autre tâche', icone: IconeAutreTache, couleur: '#e67e22' },
-  { id: 'disponibilite', label: 'Disponibilité', icone: IconeDisponibilite, couleur: '#9b59b6' },
-  { id: 'repos', label: 'Repos / Pause', icone: IconeRepos, couleur: '#27ae60' },
+  { id: 'conduite', code: 'C', label: 'Conduite', Icone: IconeConduite, color: '#3b82f6' },
+  { id: 'autre_tache', code: 'T', label: 'Autre tâche', Icone: IconeAutreTache, color: '#f59e0b' },
+  { id: 'disponibilite', code: 'D', label: 'Disponibilité', Icone: IconeDisponibilite, color: '#a855f7' },
+  { id: 'repos', code: 'P', label: 'Repos / Pause', Icone: IconeRepos, color: '#22c55e' },
 ];
 
-const LIMITES = {
-  conduiteContinu: { minutes: 270, label: '4h30 de conduite continue max' },
-  conduiteJour: { minutes: 540, label: '9h de conduite journalière max (10h dérogatoire 2x/sem)' },
-  conduiteSemaine: { minutes: 3360, label: '56h de conduite hebdomadaire max' },
-  conduiteBiHebdo: { minutes: 5400, label: '90h de conduite bi-hebdomadaire max' },
-  reposJournalier: { minutes: 660, label: '11h de repos journalier min (9h réduit 3x/sem)' },
-  reposHebdo: { minutes: 2700, label: '45h de repos hebdomadaire min (24h réduit)' },
-  travailJournalier: { minutes: 600, label: '10h de travail journalier max' },
-  pause45: { minutes: 45, label: '45 min de pause après 4h30 de conduite' },
-};
-
-const AMENDES = {
-  classe4: { min: 135, max: 750, label: 'Contravention 4ème classe' },
-  classe5: { min: 1500, max: 3000, label: 'Contravention 5ème classe' },
-};
+const CSV_EXEMPLE = [
+  '# Exemple CSV - Semaine type conducteur transport de personnes',
+  '# Format : date;heure_debut;heure_fin;type (C=Conduite, T=Autre tâche, D=Disponibilité, P=Pause)',
+  '2025-01-06;06:00;06:30;T',
+  '2025-01-06;06:30;10:30;C',
+  '2025-01-06;10:30;11:00;P',
+  '2025-01-06;11:00;13:00;C',
+  '2025-01-06;13:00;14:00;P',
+  '2025-01-06;14:00;17:30;C',
+  '2025-01-06;17:30;18:00;T',
+  '2025-01-07;05:30;06:00;T',
+  '2025-01-07;06:00;10:00;C',
+  '2025-01-07;10:00;10:30;P',
+  '2025-01-07;10:30;13:00;C',
+  '2025-01-07;13:00;13:45;P',
+  '2025-01-07;13:45;17:00;C',
+  '2025-01-07;17:00;17:30;T',
+  '2025-01-08;06:00;06:15;T',
+  '2025-01-08;06:15;10:30;C',
+  '2025-01-08;10:30;11:00;P',
+  '2025-01-08;11:00;14:00;C',
+  '2025-01-08;14:00;14:45;P',
+  '2025-01-08;14:45;18:00;C',
+  '2025-01-08;18:00;18:15;T',
+].join('\n');
 
 // ============================================================
-// STYLES
+// STYLES (thème sombre, cohérent avec index.html body #0f172a)
 // ============================================================
 
-const styles = {
-  container: {
-    fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
-    maxWidth: 900,
-    margin: '0 auto',
-    padding: '20px 16px',
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-    minHeight: '100vh',
-  },
-  header: {
-    textAlign: 'center',
-    marginBottom: 24,
-    padding: '20px',
-    background: 'white',
-    borderRadius: 16,
-    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-  },
-  title: {
-    fontSize: '1.6em',
-    fontWeight: 700,
-    color: '#1a1a2e',
-    margin: '0 0 8px 0',
-  },
-  subtitle: {
-    fontSize: '0.95em',
-    color: '#666',
-    margin: 0,
-  },
-  card: {
-    background: 'white',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-  },
-  cardTitle: {
-    fontSize: '1.1em',
-    fontWeight: 600,
-    color: '#1a1a2e',
-    marginBottom: 16,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  },
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: '0.85em',
-    fontWeight: 600,
-    color: '#555',
-    marginBottom: 4,
-  },
-  input: {
-    padding: '10px 14px',
-    borderRadius: 8,
-    border: '1.5px solid #ddd',
-    fontSize: '1em',
-    transition: 'border-color 0.2s',
-    outline: 'none',
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  activiteRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    padding: '10px 0',
-    borderBottom: '1px solid #f0f0f0',
-  },
-  activiteLabel: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    fontSize: '0.95em',
-    fontWeight: 500,
-  },
-  heureInput: {
-    width: 70,
-    padding: '8px 10px',
-    borderRadius: 8,
-    border: '1.5px solid #ddd',
-    fontSize: '0.95em',
-    textAlign: 'center',
-  },
-  btnPrimary: {
-    background: 'linear-gradient(135deg, #1a73e8, #0d47a1)',
-    color: 'white',
-    border: 'none',
-    borderRadius: 10,
-    padding: '14px 28px',
-    fontSize: '1em',
-    fontWeight: 600,
-    cursor: 'pointer',
-    width: '100%',
-    transition: 'transform 0.15s, box-shadow 0.15s',
-    boxShadow: '0 4px 12px rgba(26,115,232,0.3)',
-  },
-  btnSecondary: {
-    background: '#f0f0f0',
-    color: '#333',
-    border: 'none',
-    borderRadius: 8,
-    padding: '8px 16px',
-    fontSize: '0.85em',
-    fontWeight: 500,
-    cursor: 'pointer',
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  resultSection: {
-    background: 'white',
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 16,
-    boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-  },
-  infractionCard: {
-    background: '#fff5f5',
-    border: '1px solid #ffcccc',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 12,
-  },
-  warningCard: {
-    background: '#fffbeb',
-    border: '1px solid #fde68a',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 12,
-  },
-  okCard: {
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 12,
-  },
-  badge: {
-    display: 'inline-block',
-    padding: '3px 10px',
-    borderRadius: 20,
-    fontSize: '0.75em',
-    fontWeight: 600,
-    marginRight: 6,
-  },
-  badgeRed: { background: '#fee2e2', color: '#dc2626' },
-  badgeOrange: { background: '#fef3c7', color: '#d97706' },
-  badgeGreen: { background: '#dcfce7', color: '#16a34a' },
-  totalAmende: {
-    textAlign: 'center',
-    padding: 20,
-    background: 'linear-gradient(135deg, #dc2626, #991b1b)',
-    borderRadius: 12,
-    color: 'white',
-    marginTop: 16,
-  },
-  totalAmendeOk: {
-    textAlign: 'center',
-    padding: 20,
-    background: 'linear-gradient(135deg, #16a34a, #15803d)',
-    borderRadius: 12,
-    color: 'white',
-    marginTop: 16,
-  },
-  legend: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  legendItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    fontSize: '0.82em',
-    color: '#555',
-  },
-  scaleSection: {
-    background: '#f8fafc',
-    borderRadius: 10,
-    padding: 14,
-    marginTop: 16,
-    border: '1px solid #e2e8f0',
-  },
-  scaleTitle: {
-    fontWeight: 600,
-    fontSize: '0.95em',
-    marginBottom: 10,
-    color: '#334155',
-  },
-  scaleRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '6px 0',
-    borderBottom: '1px solid #f0f0f0',
-    fontSize: '0.85em',
-  },
-  footer: {
-    textAlign: 'center',
-    marginTop: 24,
-    padding: 16,
-    fontSize: '0.8em',
-    color: '#999',
-  },
-  templateBtn: {
-    background: '#e8f0fe',
-    color: '#1a73e8',
-    border: '1px solid #c5d9f7',
-    borderRadius: 8,
-    padding: '8px 14px',
-    fontSize: '0.82em',
-    fontWeight: 500,
-    cursor: 'pointer',
-    marginRight: 8,
-    marginBottom: 8,
-  },
+const S = {
+  page: { maxWidth: 920, margin: '0 auto', padding: 16, minHeight: '100vh' },
+  header: { textAlign: 'center', padding: '24px 16px', marginBottom: 20, background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: 16, border: '1px solid #334155' },
+  h1: { fontSize: '1.5em', fontWeight: 700, color: '#f1f5f9', margin: '0 0 6px 0' },
+  sub: { fontSize: '0.9em', color: '#94a3b8', margin: 0 },
+  card: { background: '#1e293b', borderRadius: 12, padding: 20, marginBottom: 16, border: '1px solid #334155' },
+  cardTitle: { fontSize: '1.05em', fontWeight: 600, color: '#f1f5f9', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 },
+  label: { fontSize: '0.85em', fontWeight: 600, color: '#94a3b8', marginBottom: 6, display: 'block' },
+  select: { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #334155', background: '#0f172a', color: '#e2e8f0', fontSize: '0.95em', marginBottom: 12 },
+  textarea: { width: '100%', minHeight: 180, padding: 12, borderRadius: 8, border: '1px solid #334155', background: '#0f172a', color: '#e2e8f0', fontSize: '0.85em', fontFamily: "'Courier New', monospace", resize: 'vertical', marginBottom: 12, boxSizing: 'border-box' },
+  btnPrimary: { background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: 'white', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: '1em', fontWeight: 600, cursor: 'pointer', width: '100%', boxShadow: '0 4px 12px rgba(59,130,246,0.3)', minHeight: 48 },
+  btnSmall: { background: '#1e3a5f', color: '#93c5fd', border: '1px solid #2563eb', borderRadius: 8, padding: '8px 14px', fontSize: '0.82em', fontWeight: 500, cursor: 'pointer', marginRight: 8, marginBottom: 8, minHeight: 40 },
+  legend: { display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center', padding: '12px 0' },
+  legendItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82em', color: '#cbd5e1' },
+  resultCard: { background: '#1e293b', borderRadius: 12, padding: 20, marginBottom: 16, border: '1px solid #334155' },
+  scoreBar: { height: 12, borderRadius: 6, background: '#0f172a', overflow: 'hidden', marginBottom: 8 },
+  infrCard: { background: '#2d1215', border: '1px solid #7f1d1d', borderRadius: 10, padding: 14, marginBottom: 10 },
+  warnCard: { background: '#2d2305', border: '1px solid #854d0e', borderRadius: 10, padding: 14, marginBottom: 10 },
+  okCard: { background: '#052e16', border: '1px solid #166534', borderRadius: 10, padding: 14, marginBottom: 10 },
+  badge: { display: 'inline-block', padding: '3px 10px', borderRadius: 20, fontSize: '0.72em', fontWeight: 700, marginRight: 8 },
+  badgeRed: { background: '#450a0a', color: '#fca5a5' },
+  badgeOrg: { background: '#451a03', color: '#fde68a' },
+  badgeGrn: { background: '#052e16', color: '#86efac' },
+  totalBad: { textAlign: 'center', padding: 20, background: 'linear-gradient(135deg, #dc2626, #991b1b)', borderRadius: 12, color: 'white', marginTop: 16 },
+  totalGood: { textAlign: 'center', padding: 20, background: 'linear-gradient(135deg, #16a34a, #15803d)', borderRadius: 12, color: 'white', marginTop: 16 },
+  statGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 16 },
+  statBox: { background: '#0f172a', borderRadius: 10, padding: 12, textAlign: 'center', border: '1px solid #334155' },
+  statVal: { fontSize: '1.3em', fontWeight: 700, color: '#f1f5f9' },
+  statLbl: { fontSize: '0.75em', color: '#94a3b8', marginTop: 4 },
+  dayCard: { background: '#0f172a', borderRadius: 10, padding: 14, marginBottom: 10, border: '1px solid #334155' },
+  dayHdr: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, cursor: 'pointer' },
+  dayTitle: { fontWeight: 600, color: '#f1f5f9', fontSize: '0.95em' },
+  dayGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 8 },
+  dayStat: { display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8, background: '#1e293b', border: '1px solid #334155' },
+  scaleSection: { background: '#0f172a', borderRadius: 10, padding: 14, marginTop: 16, border: '1px solid #334155' },
+  scaleRow: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #1e293b', fontSize: '0.85em', color: '#cbd5e1' },
+  errBox: { background: '#2d1215', border: '1px solid #7f1d1d', borderRadius: 10, padding: 14, marginBottom: 12, color: '#fca5a5', fontSize: '0.85em' },
+  footer: { textAlign: 'center', marginTop: 24, padding: 20, fontSize: '0.8em', color: '#64748b' },
+  tabs: { display: 'flex', gap: 0, marginBottom: 16, borderRadius: 10, overflow: 'hidden', border: '1px solid #334155' },
+  tab: { flex: 1, padding: '12px 8px', textAlign: 'center', cursor: 'pointer', fontSize: '0.85em', fontWeight: 600, background: '#0f172a', color: '#94a3b8', border: 'none', minHeight: 44 },
+  tabOn: { flex: 1, padding: '12px 8px', textAlign: 'center', cursor: 'pointer', fontSize: '0.85em', fontWeight: 600, background: '#1e3a5f', color: '#93c5fd', border: 'none', minHeight: 44 },
+  fileInput: { display: 'block', width: '100%', padding: 10, marginBottom: 12, background: '#0f172a', border: '1px solid #334155', borderRadius: 8, color: '#e2e8f0', fontSize: '0.9em', minHeight: 48, boxSizing: 'border-box' },
 };
 
 // ============================================================
-// COMPOSANT PRINCIPAL
+// APP PRINCIPAL
 // ============================================================
 
 export default function App() {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [activites, setActivites] = useState({
-    conduite: '',
-    autre_tache: '',
-    disponibilite: '',
-    repos: '',
-  });
+  const [onglet, setOnglet] = useState('csv');
+  const [csv, setCsv] = useState('');
+  const [typeService, setTypeService] = useState('STANDARD');
+  const [pays, setPays] = useState('FR');
+  const [listePays, setListePays] = useState({});
   const [resultats, setResultats] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [erreur, setErreur] = useState('');
+  const [serverInfo, setServerInfo] = useState(null);
 
-  const handleChange = useCallback((type, val) => {
-    const cleaned = val.replace(',', '.').replace(/[^0-9.]/g, '');
-    setActivites(prev => ({ ...prev, [type]: cleaned }));
+  useEffect(() => {
+    fetch('/api/health')
+      .then(r => r.json())
+      .then(d => { setServerInfo(d); console.log('[RSE/RSN] Serveur OK:', d.version); })
+      .catch(() => console.warn('[RSE/RSN] Serveur non disponible'));
+    fetch('/api/pays')
+      .then(r => r.json())
+      .then(d => setListePays(d))
+      .catch(() => { });
   }, []);
 
-  const chargerTemplate = useCallback((template) => {
-    const templates = {
-      normal: { conduite: '8', autre_tache: '1', disponibilite: '0.5', repos: '14.5' },
-      long: { conduite: '10', autre_tache: '2', disponibilite: '1', repos: '11' },
-      infraction: { conduite: '14', autre_tache: '0', disponibilite: '0', repos: '10' },
-      nuit: { conduite: '5', autre_tache: '3', disponibilite: '1', repos: '15' },
-    };
-    if (templates[template]) {
-      setActivites(templates[template]);
-      setResultats(null);
-    }
+  const chargerExemple = useCallback(() => {
+    fetch('/api/example-csv')
+      .then(r => r.text())
+      .then(t => { setCsv(t); setResultats(null); setErreur(''); })
+      .catch(() => { setCsv(CSV_EXEMPLE); setResultats(null); setErreur(''); });
+  }, []);
+
+  const handleUpload = useCallback((e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('fichier', file);
+    fetch('/api/upload', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(d => {
+        if (d.csv) { setCsv(d.csv); setResultats(null); setErreur(''); }
+        else if (d.error) setErreur(d.error);
+      })
+      .catch(() => {
+        const reader = new FileReader();
+        reader.onload = (ev) => { setCsv(ev.target.result); setResultats(null); setErreur(''); };
+        reader.readAsText(file, 'UTF-8');
+      });
   }, []);
 
   const analyser = useCallback(() => {
-    setLoading(true);
-    const heures = {};
-    let totalH = 0;
-    for (const type of Object.keys(activites)) {
-      const val = parseFloat(activites[type]) || 0;
-      heures[type] = val;
-      totalH += val;
-    }
-    const minutes = {};
-    for (const type of Object.keys(heures)) {
-      minutes[type] = Math.round(heures[type] * 60);
-    }
-
-    const infractions = [];
-    const avertissements = [];
-
-    // Vérification conduite continue > 4h30
-    if (minutes.conduite > LIMITES.conduiteContinu.minutes) {
-      const depassement = minutes.conduite - LIMITES.conduiteContinu.minutes;
-      infractions.push({
-        titre: 'Dépassement conduite continue (4h30)',
-        detail: `Enregistré : ${minutes.conduite} min, limite : ${LIMITES.conduiteContinu.minutes} min, dépassement : ${depassement} min`,
-        classe: 5,
-        amende: AMENDES.classe5.min,
-        amendeMax: AMENDES.classe5.max,
-        gravite: 'grave',
-      });
-    }
-
-    // Vérification conduite journalière > 9h (10h dérogatoire)
-    if (minutes.conduite > LIMITES.conduiteJour.minutes) {
-      const depassement = minutes.conduite - LIMITES.conduiteJour.minutes;
-      const derog = minutes.conduite > 600;
-      infractions.push({
-        titre: `Dépassement conduite journalière (${derog ? '10h dérogatoire dépassé aussi' : '9h'})`,
-        detail: `Enregistré : ${heures.conduite}h (${minutes.conduite} min), limite : ${LIMITES.conduiteJour.minutes} min, dépassement : ${depassement} min`,
-        classe: 5,
-        amende: AMENDES.classe5.min,
-        amendeMax: AMENDES.classe5.max,
-        gravite: 'grave',
-      });
-    }
-
-    // Vérification temps de travail journalier > 10h
-    const travailTotal = minutes.conduite + minutes.autre_tache;
-    if (travailTotal > LIMITES.travailJournalier.minutes) {
-      const depassement = travailTotal - LIMITES.travailJournalier.minutes;
-      infractions.push({
-        titre: 'Dépassement temps de travail journalier (10h)',
-        detail: `Travail total : ${(travailTotal / 60).toFixed(1)}h (conduite ${heures.conduite}h + autre tâche ${heures.autre_tache}h), dépassement : ${(depassement / 60).toFixed(1)}h`,
-        classe: 4,
-        amende: AMENDES.classe4.min,
-        amendeMax: AMENDES.classe4.max,
-        gravite: 'modéré',
-      });
-    }
-
-    // Vérification repos journalier
-    if (minutes.repos < LIMITES.reposJournalier.minutes) {
-      if (minutes.repos >= 540) {
-        avertissements.push({
-          titre: 'Repos journalier réduit',
-          detail: `Repos estimé : ${heures.repos}h. Norme : 11h, réduit autorisé : 9h (max 3 fois par semaine).`,
-        });
-      } else {
-        infractions.push({
-          titre: 'Repos journalier insuffisant',
-          detail: `Repos estimé : ${heures.repos}h (${minutes.repos} min). Minimum absolu : 9h (réduit) ou 11h (normal).`,
-          classe: 4,
-          amende: AMENDES.classe4.min,
-          amendeMax: AMENDES.classe4.max,
-          gravite: 'modéré',
-        });
-      }
-    }
-
-    // Vérification pause après conduite
-    if (minutes.conduite > LIMITES.conduiteContinu.minutes && minutes.repos < LIMITES.pause45.minutes) {
-      avertissements.push({
-        titre: 'Pause de 45 min recommandée',
-        detail: `Après 4h30 de conduite, une pause de 45 min (ou 15+30 min fractionnée) est obligatoire.`,
-      });
-    }
-
-    // Calcul total amendes
-    const totalAmende = infractions.reduce((sum, inf) => sum + inf.amende, 0);
-
-    setResultats({
-      date,
-      heures,
-      minutes,
-      totalHeures: totalH,
-      infractions,
-      avertissements,
-      totalAmende,
-      nbInfractions: infractions.length,
-    });
-    setLoading(false);
-  }, [activites, date]);
+    if (!csv.trim()) { setErreur('Veuillez coller du contenu CSV ou charger un fichier.'); return; }
+    setLoading(true); setErreur(''); setResultats(null);
+    fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ csv, typeService, pays }),
+    })
+      .then(r => r.json())
+      .then(d => { if (d.error) setErreur(d.error); else setResultats(d); setLoading(false); })
+      .catch(err => { setErreur('Erreur de connexion : ' + err.message); setLoading(false); });
+  }, [csv, typeService, pays]);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>Calculateur RSE / RSN</h1>
-        <p style={styles.subtitle}>
-          Analyse de conformité des temps de conduite et repos
-          — Règlement CE 561/2006
-        </p>
+    <div style={S.page}>
+      <div style={S.header}>
+        <h1 style={S.h1}>Calculateur RSE / RSN</h1>
+        <p style={S.sub}>Analyse de conformité — Règlement CE 561/2006 — Transport routier de personnes</p>
+        {serverInfo && serverInfo.version && (
+          <p style={{ fontSize: '0.75em', color: '#475569', marginTop: 8 }}>
+            Serveur v{serverInfo.version} — {serverInfo.pays_supportes} pays supportés
+          </p>
+        )}
       </div>
 
-      {/* Légende des icônes officielles */}
-      <div style={styles.card}>
-        <div style={styles.cardTitle}>Pictogrammes officiels du tachygraphe</div>
-        <div style={styles.legend}>
-          {TYPES_ACTIVITE.map(t => {
-            const Icone = t.icone;
-            return (
-              <div key={t.id} style={styles.legendItem}>
-                <Icone size={22} color={t.couleur} />
-                <span>{t.label}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Saisie */}
-      <div style={styles.card}>
-        <div style={styles.cardTitle}>Saisie des activités</div>
-
-        <div style={{ marginBottom: 12 }}>
-          <div style={styles.label}>Date</div>
-          <input
-            type="date"
-            value={date}
-            onChange={e => { setDate(e.target.value); setResultats(null); }}
-            style={styles.input}
-          />
-        </div>
-
-        {TYPES_ACTIVITE.map(t => {
-          const Icone = t.icone;
-          return (
-            <div key={t.id} style={styles.activiteRow}>
-              <div style={styles.activiteLabel}>
-                <Icone size={24} color={t.couleur} />
-                <span>{t.label}</span>
-              </div>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="0"
-                value={activites[t.id]}
-                onChange={e => handleChange(t.id, e.target.value)}
-                style={styles.heureInput}
-              />
-              <span style={{ fontSize: '0.85em', color: '#888' }}>h</span>
+      {/* Pictogrammes */}
+      <div style={S.card}>
+        <div style={S.cardTitle}>Pictogrammes officiels du tachygraphe</div>
+        <div style={S.legend}>
+          {TYPES_ACTIVITE.map(t => (
+            <div key={t.id} style={S.legendItem}>
+              <t.Icone size={22} color={t.color} />
+              <span>{t.label} ({t.code})</span>
             </div>
-          );
-        })}
+          ))}
+        </div>
+      </div>
 
-        <div style={{ marginTop: 16 }}>
-          <div style={styles.label}>Exemples rapides :</div>
-          <button style={styles.templateBtn} onClick={() => chargerTemplate('normal')}>
-            Journée normale
-          </button>
-          <button style={styles.templateBtn} onClick={() => chargerTemplate('long')}>
-            Journée longue
-          </button>
-          <button style={styles.templateBtn} onClick={() => chargerTemplate('infraction')}>
-            Infraction type
-          </button>
-          <button style={styles.templateBtn} onClick={() => chargerTemplate('nuit')}>
-            Service de nuit
-          </button>
+      {/* Paramètres */}
+      <div style={S.card}>
+        <div style={S.cardTitle}>Paramètres d'analyse</div>
+        <label style={S.label}>Type de service</label>
+        <select style={S.select} value={typeService} onChange={e => setTypeService(e.target.value)}>
+          <option value="STANDARD">Standard</option>
+          <option value="REGULIER">Service régulier (&gt; 50 km)</option>
+          <option value="OCCASIONNEL">Service occasionnel</option>
+          <option value="SLO">Service librement organisé (SLO)</option>
+        </select>
+        <label style={S.label}>Pays</label>
+        <select style={S.select} value={pays} onChange={e => setPays(e.target.value)}>
+          {Object.keys(listePays).length > 0
+            ? Object.entries(listePays).map(([code, info]) => (
+              <option key={code} value={code}>{info.nom} (UTC+{info.utc_hiver}/{info.utc_ete})</option>
+            ))
+            : <option value="FR">France (UTC+1/+2)</option>
+          }
+        </select>
+      </div>
+
+      {/* Données CSV */}
+      <div style={S.card}>
+        <div style={S.cardTitle}>Données d'activité</div>
+        <div style={S.tabs}>
+          <button style={onglet === 'csv' ? S.tabOn : S.tab} onClick={() => setOnglet('csv')}>Coller du CSV</button>
+          <button style={onglet === 'fichier' ? S.tabOn : S.tab} onClick={() => setOnglet('fichier')}>Charger un fichier</button>
         </div>
 
-        <button
-          style={{
-            ...styles.btnPrimary,
-            marginTop: 20,
-            opacity: loading ? 0.7 : 1,
-          }}
-          onClick={analyser}
-          disabled={loading}
-        >
+        {onglet === 'csv' && (
+          <div>
+            <label style={S.label}>Format : date;heure_début;heure_fin;type (C/T/D/P)</label>
+            <textarea style={S.textarea} value={csv} onChange={e => { setCsv(e.target.value); setResultats(null); }}
+              placeholder={'2025-01-06;06:00;10:30;C\n2025-01-06;10:30;11:00;P\n2025-01-06;11:00;14:00;C'} />
+            <div>
+              <button style={S.btnSmall} onClick={chargerExemple}>Charger l'exemple</button>
+              <button style={S.btnSmall} onClick={() => { setCsv(''); setResultats(null); setErreur(''); }}>Effacer</button>
+            </div>
+          </div>
+        )}
+
+        {onglet === 'fichier' && (
+          <div>
+            <label style={S.label}>Sélectionner un fichier .csv ou .txt</label>
+            <input type="file" accept=".csv,.txt" onChange={handleUpload} style={S.fileInput} />
+            {csv && <p style={{ fontSize: '0.8em', color: '#22c55e', marginTop: 8 }}>
+              Fichier chargé — {csv.split('\n').filter(l => l.trim() && !l.startsWith('#')).length} lignes de données
+            </p>}
+          </div>
+        )}
+
+        {erreur && <div style={S.errBox}>{erreur}</div>}
+
+        <button style={{ ...S.btnPrimary, marginTop: 16, opacity: loading ? 0.7 : 1 }} onClick={analyser} disabled={loading}>
           {loading ? 'Analyse en cours...' : 'Analyser la conformité'}
         </button>
       </div>
 
       {/* Résultats */}
-      {resultats && <ResultPanel r={resultats} />}
+      {resultats && <PanneauResultats r={resultats} />}
 
       {/* Barème */}
-      <div style={styles.scaleSection}>
-        <div style={styles.scaleTitle}>Barème des sanctions (Code des transports)</div>
-        <div style={styles.scaleRow}>
-          <span>Contravention 4ème classe</span>
-          <span style={{ fontWeight: 600 }}>135 € à 750 €</span>
+      <div style={S.scaleSection}>
+        <div style={{ fontWeight: 600, fontSize: '0.95em', marginBottom: 12, color: '#f1f5f9' }}>
+          Barème des sanctions (Code des transports)
         </div>
-        <div style={styles.scaleRow}>
-          <span>Contravention 5ème classe</span>
-          <span style={{ fontWeight: 600 }}>1 500 € à 3 000 €</span>
-        </div>
-        <div style={styles.scaleRow}>
-          <span>Falsification tachygraphe</span>
-          <span style={{ fontWeight: 600 }}>1 an prison + 30 000 €</span>
-        </div>
-        <div style={styles.scaleRow}>
-          <span>Absence de tachygraphe</span>
-          <span style={{ fontWeight: 600 }}>1 500 € (5ème classe)</span>
-        </div>
-        <div style={styles.scaleRow}>
-          <span>Carte conducteur non conforme</span>
-          <span style={{ fontWeight: 600 }}>1 500 € (5ème classe)</span>
-        </div>
-        <div style={styles.scaleRow}>
-          <span>Refus de contrôle</span>
-          <span style={{ fontWeight: 600 }}>6 mois prison + 7 500 €</span>
-        </div>
+        <div style={S.scaleRow}><span>Contravention 4ème classe</span><span style={{ fontWeight: 600, color: '#fde68a' }}>135 € à 750 €</span></div>
+        <div style={S.scaleRow}><span>Contravention 5ème classe</span><span style={{ fontWeight: 600, color: '#fca5a5' }}>1 500 € à 3 000 €</span></div>
+        <div style={S.scaleRow}><span>Falsification tachygraphe</span><span style={{ fontWeight: 600, color: '#fca5a5' }}>1 an prison + 30 000 €</span></div>
+        <div style={S.scaleRow}><span>Absence de tachygraphe</span><span style={{ fontWeight: 600, color: '#fca5a5' }}>1 500 € (5ème classe)</span></div>
+        <div style={S.scaleRow}><span>Carte conducteur non conforme</span><span style={{ fontWeight: 600, color: '#fde68a' }}>6 mois prison + 3 750 €</span></div>
+        <div style={S.scaleRow}><span>Refus de contrôle</span><span style={{ fontWeight: 600, color: '#fca5a5' }}>6 mois prison + 7 500 €</span></div>
       </div>
 
-      <div style={styles.footer}>
+      <div style={S.footer}>
         <p>Calculateur RSE/RSN v5.3.0 — Créé par Samir Medjaher</p>
-        <p>
-          Sources : Règlement CE 561/2006 | Règlement UE 165/2014 | Code des transports français
-        </p>
-        <p>
-          Cet outil est informatif. Les montants réels sont fixés par le tribunal.
-        </p>
+        <p>Sources : Règlement CE 561/2006 | Règlement UE 165/2014 | Code des transports français</p>
+        <p>Cet outil est informatif. Les montants réels sont fixés par le tribunal.</p>
       </div>
     </div>
   );
 }
 
 // ============================================================
-// PANNEAU DE RÉSULTATS
+// PANNEAU DE RÉSULTATS (exploite toute la réponse API du backend)
 // ============================================================
 
-function ResultPanel({ r }) {
+function PanneauResultats({ r }) {
+  const [jourOuvert, setJourOuvert] = useState(null);
+  const scoreColor = r.score >= 80 ? '#22c55e' : r.score >= 50 ? '#f59e0b' : '#ef4444';
+
   return (
-    <div style={styles.resultSection}>
-      <div style={styles.cardTitle}>
-        Résultats de l'analyse — {r.date}
+    <div style={S.resultCard}>
+      <div style={S.cardTitle}>Résultats de l'analyse</div>
+
+      {/* Score */}
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <div style={{ fontSize: '2.5em', fontWeight: 700, color: scoreColor }}>{r.score}%</div>
+        <div style={{ fontSize: '0.85em', color: '#94a3b8' }}>Score de conformité</div>
+        <div style={S.scoreBar}>
+          <div style={{ height: '100%', width: r.score + '%', background: scoreColor, borderRadius: 6, transition: 'width 0.5s ease' }} />
+        </div>
+        <div style={{ fontSize: '0.85em', color: '#cbd5e1', marginTop: 8 }}>{r.resume}</div>
+        {r.periode && r.periode !== 'N/A' && (
+          <div style={{ fontSize: '0.8em', color: '#64748b', marginTop: 4 }}>
+            Période : {r.periode} — {r.nombre_jours} jour{r.nombre_jours > 1 ? 's' : ''} — Service : {r.type_service}
+          </div>
+        )}
       </div>
 
-      {/* Résumé des heures */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-        {TYPES_ACTIVITE.map(t => {
-          const Icone = t.icone;
-          return (
-            <div
-              key={t.id}
-              style={{
-                flex: '1 1 45%',
-                background: '#f8fafc',
-                borderRadius: 10,
-                padding: '10px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                border: '1px solid #e2e8f0',
-              }}
-            >
-              <Icone size={20} color={t.couleur} />
-              <span style={{ fontSize: '0.85em', color: '#555' }}>{t.label}</span>
-              <span style={{ marginLeft: 'auto', fontWeight: 700, color: '#1a1a2e' }}>
-                {r.heures[t.id]}h
-              </span>
+      {/* Statistiques */}
+      {r.statistiques && (
+        <div>
+          <div style={{ fontWeight: 600, color: '#f1f5f9', marginBottom: 10, fontSize: '0.95em' }}>Statistiques globales</div>
+          <div style={S.statGrid}>
+            <div style={S.statBox}>
+              <IconeConduite size={20} color="#3b82f6" />
+              <div style={S.statVal}>{r.statistiques.conduite_totale_h}h</div>
+              <div style={S.statLbl}>Conduite totale</div>
             </div>
-          );
-        })}
-      </div>
+            <div style={S.statBox}>
+              <IconeAutreTache size={20} color="#f59e0b" />
+              <div style={S.statVal}>{r.statistiques.travail_autre_total_h}h</div>
+              <div style={S.statLbl}>Autre tâche</div>
+            </div>
+            <div style={S.statBox}>
+              <IconeRepos size={20} color="#22c55e" />
+              <div style={S.statVal}>{r.statistiques.pause_totale_h}h</div>
+              <div style={S.statLbl}>Pauses totales</div>
+            </div>
+            <div style={S.statBox}>
+              <IconeDisponibilite size={20} color="#a855f7" />
+              <div style={S.statVal}>{r.statistiques.disponibilite_totale_h}h</div>
+              <div style={S.statLbl}>Disponibilité</div>
+            </div>
+            <div style={S.statBox}>
+              <div style={S.statVal}>{r.statistiques.moyenne_conduite_jour_h}h</div>
+              <div style={S.statLbl}>Moy. conduite/jour</div>
+            </div>
+            <div style={S.statBox}>
+              <div style={S.statVal}>{r.statistiques.moyenne_travail_total_jour_h}h</div>
+              <div style={S.statLbl}>Moy. travail total/jour</div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div style={{ textAlign: 'center', marginBottom: 16, fontSize: '0.9em', color: '#666' }}>
-        Total : {r.totalHeures.toFixed(1)}h sur 24h
-      </div>
+      {/* Erreurs parsing */}
+      {r.erreurs_analyse && r.erreurs_analyse.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontWeight: 600, color: '#fca5a5', marginBottom: 8, fontSize: '0.9em' }}>
+            Erreurs de parsing ({r.erreurs_analyse.length})
+          </div>
+          {r.erreurs_analyse.map((err, i) => <div key={i} style={S.errBox}>{err}</div>)}
+        </div>
+      )}
 
       {/* Infractions */}
-      {r.infractions.length > 0 && (
-        <div>
-          <div style={{ fontWeight: 600, color: '#dc2626', marginBottom: 10, fontSize: '0.95em' }}>
+      {r.infractions && r.infractions.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontWeight: 600, color: '#fca5a5', marginBottom: 10, fontSize: '0.95em' }}>
             {r.infractions.length} infraction{r.infractions.length > 1 ? 's' : ''} détectée{r.infractions.length > 1 ? 's' : ''}
           </div>
           {r.infractions.map((inf, i) => (
-            <div key={i} style={styles.infractionCard}>
-              <div style={{ fontWeight: 600, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ ...styles.badge, ...styles.badgeRed }}>
-                  {inf.classe}ème classe
-                </span>
-                {inf.titre}
+            <div key={i} style={S.infrCard}>
+              <div style={{ fontWeight: 600, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', color: '#fca5a5' }}>
+                <span style={{ ...S.badge, ...S.badgeRed }}>{inf.classe}</span>
+                {inf.regle}
               </div>
-              <div style={{ fontSize: '0.85em', color: '#666', marginBottom: 6 }}>
-                {inf.detail}
-              </div>
-              <div style={{ fontSize: '0.85em', fontWeight: 600, color: '#dc2626' }}>
-                Amende forfaitaire : {inf.amende} € (max {inf.amendeMax} € en récidive)
-              </div>
+              <div style={{ fontSize: '0.83em', color: '#94a3b8', marginBottom: 4 }}>Limite : {inf.limite} — Constaté : {inf.constate}</div>
+              <div style={{ fontSize: '0.83em', color: '#94a3b8', marginBottom: 4 }}>Dépassement : {inf.depassement}</div>
+              <div style={{ fontSize: '0.83em', fontWeight: 600, color: '#fca5a5' }}>Amende : {inf.amende}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Avertissements */}
-      {r.avertissements.length > 0 && (
-        <div>
-          <div style={{ fontWeight: 600, color: '#d97706', marginBottom: 10, marginTop: 10, fontSize: '0.95em' }}>
-            Avertissement{r.avertissements.length > 1 ? 's' : ''}
+      {r.avertissements && r.avertissements.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontWeight: 600, color: '#fde68a', marginBottom: 10, fontSize: '0.95em' }}>
+            {r.avertissements.length} avertissement{r.avertissements.length > 1 ? 's' : ''}
           </div>
           {r.avertissements.map((av, i) => (
-            <div key={i} style={styles.warningCard}>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>
-                <span style={{ ...styles.badge, ...styles.badgeOrange }}>Attention</span>
-                {av.titre}
+            <div key={i} style={S.warnCard}>
+              <div style={{ fontWeight: 600, marginBottom: 6, color: '#fde68a' }}>
+                <span style={{ ...S.badge, ...S.badgeOrg }}>Attention</span>{av.regle}
               </div>
-              <div style={{ fontSize: '0.85em', color: '#666' }}>{av.detail}</div>
+              <div style={{ fontSize: '0.83em', color: '#94a3b8' }}>{av.message}</div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Si aucune infraction */}
-      {r.infractions.length === 0 && (
-        <div style={styles.okCard}>
-          <div style={{ fontWeight: 600, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ ...styles.badge, ...styles.badgeGreen }}>Conforme</span>
-            Aucune infraction détectée
+      {/* OK */}
+      {r.infractions && r.infractions.length === 0 && (
+        <div style={S.okCard}>
+          <div style={{ fontWeight: 600, color: '#86efac', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ ...S.badge, ...S.badgeGrn }}>Conforme</span>Aucune infraction détectée
           </div>
-          <div style={{ fontSize: '0.85em', color: '#666', marginTop: 6 }}>
+          <div style={{ fontSize: '0.83em', color: '#94a3b8', marginTop: 6 }}>
             Les temps enregistrés respectent les limites réglementaires CE 561/2006.
           </div>
         </div>
       )}
 
-      {/* Total amendes */}
-      {r.totalAmende > 0 ? (
-        <div style={styles.totalAmende}>
+      {/* Détails par jour */}
+      {r.details_jours && r.details_jours.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontWeight: 600, color: '#f1f5f9', marginBottom: 10, fontSize: '0.95em' }}>
+            Détail par journée ({r.details_jours.length} jour{r.details_jours.length > 1 ? 's' : ''})
+          </div>
+          {r.details_jours.map((jour, idx) => (
+            <div key={idx} style={S.dayCard}>
+              <div style={S.dayHdr} onClick={() => setJourOuvert(jourOuvert === idx ? null : idx)}>
+                <div style={S.dayTitle}>{jour.date} — {jour.fuseau}</div>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {jour.infractions.length > 0 && <span style={{ ...S.badge, ...S.badgeRed }}>{jour.infractions.length} infr.</span>}
+                  {jour.avertissements.length > 0 && <span style={{ ...S.badge, ...S.badgeOrg }}>{jour.avertissements.length} avert.</span>}
+                  {jour.infractions.length === 0 && jour.avertissements.length === 0 && <span style={{ ...S.badge, ...S.badgeGrn }}>OK</span>}
+                  <span style={{ color: '#94a3b8', fontSize: '1.2em' }}>{jourOuvert === idx ? '\u25B2' : '\u25BC'}</span>
+                </div>
+              </div>
+
+              {jourOuvert === idx && (
+                <div>
+                  <div style={S.dayGrid}>
+                    <div style={S.dayStat}><IconeConduite size={16} color="#3b82f6" /><span style={{ fontSize: '0.8em', color: '#cbd5e1' }}>{jour.conduite_h}h</span></div>
+                    <div style={S.dayStat}><IconeAutreTache size={16} color="#f59e0b" /><span style={{ fontSize: '0.8em', color: '#cbd5e1' }}>{jour.travail_h}h</span></div>
+                    <div style={S.dayStat}><IconeRepos size={16} color="#22c55e" /><span style={{ fontSize: '0.8em', color: '#cbd5e1' }}>{jour.pause_h}h</span></div>
+                    <div style={S.dayStat}><IconeDisponibilite size={16} color="#a855f7" /><span style={{ fontSize: '0.8em', color: '#cbd5e1' }}>{jour.disponibilite_h}h</span></div>
+                  </div>
+                  <div style={{ fontSize: '0.8em', color: '#94a3b8', marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                    <span>Amplitude : {jour.amplitude_estimee_h}h</span>
+                    <span>Conduite continue max : {jour.conduite_continue_max_min} min</span>
+                    <span>Repos estimé : {jour.repos_estime_h}h</span>
+                    <span>Activités : {jour.nombre_activites}</span>
+                  </div>
+                  {jour.infractions.length > 0 && <div style={{ marginTop: 10 }}>
+                    {jour.infractions.map((inf, j) => (
+                      <div key={j} style={{ ...S.infrCard, padding: 10, marginBottom: 6 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.82em', color: '#fca5a5', marginBottom: 4 }}>
+                          <span style={{ ...S.badge, ...S.badgeRed, fontSize: '0.7em' }}>{inf.classe}</span>{inf.regle}
+                        </div>
+                        <div style={{ fontSize: '0.78em', color: '#94a3b8' }}>
+                          Limite : {inf.limite} — Constaté : {inf.constate} — Dépassement : {inf.depassement}
+                        </div>
+                      </div>
+                    ))}
+                  </div>}
+                  {jour.avertissements.length > 0 && <div style={{ marginTop: 8 }}>
+                    {jour.avertissements.map((av, j) => (
+                      <div key={j} style={{ ...S.warnCard, padding: 10, marginBottom: 6 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.82em', color: '#fde68a', marginBottom: 4 }}>{av.regle}</div>
+                        <div style={{ fontSize: '0.78em', color: '#94a3b8' }}>{av.message}</div>
+                      </div>
+                    ))}
+                  </div>}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Total amende */}
+      {r.amende_estimee > 0 ? (
+        <div style={S.totalBad}>
           <div style={{ fontSize: '0.85em', opacity: 0.9 }}>Amende totale estimée</div>
-          <div style={{ fontSize: '2em', fontWeight: 700, margin: '8px 0' }}>
-            {r.totalAmende} €
-          </div>
-          <div style={{ fontSize: '0.8em', opacity: 0.8 }}>
-            Estimation basée sur les amendes forfaitaires — Montant réel fixé par le tribunal
-          </div>
+          <div style={{ fontSize: '2.2em', fontWeight: 700, margin: '8px 0' }}>{r.amende_estimee.toLocaleString('fr-FR')} €</div>
+          <div style={{ fontSize: '0.8em', opacity: 0.8 }}>Estimation basée sur les amendes forfaitaires — Montant réel fixé par le tribunal</div>
         </div>
       ) : (
-        <div style={styles.totalAmendeOk}>
-          <div style={{ fontSize: '1.2em', fontWeight: 700 }}>Aucune amende</div>
-          <div style={{ fontSize: '0.85em', opacity: 0.9, marginTop: 4 }}>
-            Situation conforme à la réglementation
-          </div>
+        <div style={S.totalGood}>
+          <div style={{ fontSize: '1.3em', fontWeight: 700 }}>Aucune amende</div>
+          <div style={{ fontSize: '0.85em', opacity: 0.9, marginTop: 6 }}>Situation conforme à la réglementation</div>
         </div>
       )}
     </div>
