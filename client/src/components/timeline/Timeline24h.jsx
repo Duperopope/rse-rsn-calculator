@@ -29,7 +29,7 @@ function analyserInfractions(activites) {
       const avant = conduiteAcc;
       conduiteAcc += duree;
 
-      if (conduiteAcc > LIMITES.CONDUITE_CONTINUE_MAX && avant <= LIMITES.CONDUITE_CONTINUE_MAX) {
+      if (conduiteAcc >= LIMITES.CONDUITE_CONTINUE_MAX && avant < LIMITES.CONDUITE_CONTINUE_MAX) {
         const minuteSeuil = start + (LIMITES.CONDUITE_CONTINUE_MAX - avant);
         depassementDebut = minuteSeuil;
         marqueurs.push({
@@ -43,14 +43,14 @@ function analyserInfractions(activites) {
           startMin: Math.min(minuteSeuil, 1440),
           endMin: Math.min(end, 1440),
           type: 'conduite_continue',
-          label: 'D\u00e9passement conduite continue'
+          label: 'Dépassement conduite continue'
         });
-      } else if (conduiteAcc > LIMITES.CONDUITE_CONTINUE_MAX) {
+      } else if (conduiteAcc >= LIMITES.CONDUITE_CONTINUE_MAX) {
         zones.push({
           startMin: Math.min(start, 1440),
           endMin: Math.min(end, 1440),
           type: 'conduite_continue',
-          label: 'D\u00e9passement conduite continue'
+          label: 'Dépassement conduite continue'
         });
       }
     } else if (act.type === 'P' || act.type === 'R') {
@@ -72,14 +72,20 @@ function analyserInfractions(activites) {
       const avant = conduiteJour;
       conduiteJour += duree;
 
-      if (conduiteJour > LIMITES.CONDUITE_JOURNALIERE_MAX && avant <= LIMITES.CONDUITE_JOURNALIERE_MAX) {
+      if (conduiteJour >= LIMITES.CONDUITE_JOURNALIERE_MAX && avant < LIMITES.CONDUITE_JOURNALIERE_MAX) {
         const minuteSeuil = start + (LIMITES.CONDUITE_JOURNALIERE_MAX - avant);
         marqueurs.push({
           minute: Math.min(minuteSeuil, 1440),
           type: 'conduite_journaliere',
-          label: 'Conduite journali\u00e8re > 9h',
-          detail: '4e classe : 135 \u20ac (CE 561/2006 Art.6)',
+          label: 'Conduite journalière > 9h',
+          detail: '4e classe : 135 € (CE 561/2006 Art.6)',
           severity: 'danger'
+        });
+        zones.push({
+          startMin: Math.min(minuteSeuil, 1440),
+          endMin: Math.min(end, 1440),
+          type: 'conduite_journaliere',
+          label: 'Dépassement conduite journalière'
         });
       }
     }
@@ -98,14 +104,14 @@ function analyserInfractions(activites) {
         minute: Math.min(seuil, 1440),
         type: 'amplitude',
         label: 'Amplitude > 13h',
-        detail: 'Arr\u00eat obligatoire (CE 561/2006 Art.8)',
+        detail: 'Arrêt obligatoire (CE 561/2006 Art.8)',
         severity: 'warning'
       });
       zones.push({
         startMin: Math.min(seuil, 1440),
         endMin: Math.min(derniere, 1440),
         type: 'amplitude',
-        label: 'D\u00e9passement amplitude'
+        label: 'Dépassement amplitude'
       });
     }
   }
@@ -185,7 +191,7 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
       {infractions.length > 0 && (
         <div className={styles.infractionBar}>
           <span className={styles.infractionCount}>
-            {'\u26D4'} {infractions.length} infraction{infractions.length > 1 ? 's' : ''} d\u00e9tect\u00e9e{infractions.length > 1 ? 's' : ''}
+            {'⛔'} {infractions.length} infraction{infractions.length > 1 ? 's' : ''} détectée{infractions.length > 1 ? 's' : ''}
           </span>
         </div>
       )}
@@ -290,9 +296,9 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
       {selectedMarqueur !== null && typeof selectedMarqueur === 'number' && infractions[selectedMarqueur] && (
         <div className={styles.infractionDetail}>
           <div className={styles.infractionHeader}>
-            <span className={styles.infractionIcon}>{infractions[selectedMarqueur].severity === 'danger' ? '\u26A0' : '\u23F1'}</span>
+            <span className={styles.infractionIcon}>{infractions[selectedMarqueur].severity === 'danger' ? '⚠' : '⏱'}</span>
             <span className={styles.infractionLabel}>{infractions[selectedMarqueur].label}</span>
-            <span className={styles.infractionTime}>{'\u00e0'} {formatMinute(infractions[selectedMarqueur].minute)}</span>
+            <span className={styles.infractionTime}>{'à'} {formatMinute(infractions[selectedMarqueur].minute)}</span>
           </div>
           <div className={styles.infractionBody}>{infractions[selectedMarqueur].detail}</div>
         </div>
@@ -301,14 +307,14 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
       {selectedMarqueur !== null && typeof selectedMarqueur === 'string' && selectedMarqueur.startsWith('zone') && (
         <div className={styles.infractionDetail}>
           <div className={styles.infractionHeader}>
-            <span className={styles.infractionIcon}>{'\u26A0'}</span>
-            <span className={styles.infractionLabel}>{zones[parseInt(selectedMarqueur.replace('zone',''))]?.label || 'Zone de d\u00e9passement'}</span>
+            <span className={styles.infractionIcon}>{'⚠'}</span>
+            <span className={styles.infractionLabel}>{zones[parseInt(selectedMarqueur.replace('zone',''))]?.label || 'Zone de dépassement'}</span>
           </div>
           <div className={styles.infractionBody}>
             {(() => {
               const z = zones[parseInt(selectedMarqueur.replace('zone',''))];
               if (!z) return '';
-              return formatMinute(z.startMin) + ' \u2192 ' + formatMinute(z.endMin) + ' (' + (z.endMin - z.startMin) + ' min en infraction)';
+              return formatMinute(z.startMin) + ' → ' + formatMinute(z.endMin) + ' (' + (z.endMin - z.startMin) + ' min en infraction)';
             })()}
           </div>
         </div>
@@ -324,7 +330,7 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
         {zones.length > 0 && (
           <span className={styles.legendeItem}>
             <span className={styles.legendeDot + ' ' + styles.legendeDepassement} />
-            D\u00e9passement
+            Dépassement
           </span>
         )}
       </div>
