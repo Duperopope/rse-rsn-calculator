@@ -24,6 +24,9 @@ export function calculerStatsJour(activites) {
   let conduiteTotale = 0;
   let conduiteBloc = 0;
   let conduiteMax = 0;
+  // v7.5.0 : Accumulateur pause fractionnee (CE 561/2006 Art.7)
+  let pausePhase1Done = false;
+  let conduiteAvantPhase1 = 0;
   let travailTotal = 0;
   let pauseTotale = 0;
   let premierDebut = null;
@@ -53,7 +56,20 @@ export function calculerStatsJour(activites) {
       case 'P':
       case 'R':
         pauseTotale += d;
-        if (d >= 45) conduiteBloc = 0; // Pause >= 45min reset conduite continue (CE 561/2006 Art.7)
+        // v7.5.0 : Pause fractionnee CE 561/2006 Art.7
+        // 45min d'un bloc = reset | 15min (phase1) + 30min (phase2) = reset
+        if (d >= 45) {
+          conduiteBloc = 0;
+          pausePhase1Done = false;
+          conduiteAvantPhase1 = 0;
+        } else if (d >= 30 && pausePhase1Done) {
+          conduiteBloc = 0;
+          pausePhase1Done = false;
+          conduiteAvantPhase1 = 0;
+          pausePhase1Done = true;
+          conduiteAvantPhase1 = conduiteBloc;
+        }
+        // Pause < 15min = aucun reset
         break;
       default:
         break;
