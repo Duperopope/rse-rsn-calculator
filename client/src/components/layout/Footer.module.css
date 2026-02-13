@@ -21,8 +21,10 @@
   color: var(--accent, #00d4ff);
   transition: opacity 0.2s;
 }
-.sources a:hover {
+@media (hover: hover) {
+  .sources a:hover {
   opacity: 0.8;
+}
 }
 
 .label {

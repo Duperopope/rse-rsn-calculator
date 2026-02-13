@@ -66,7 +66,8 @@
   justify-content: center;
   transition: border-color 0.2s;
 }
-.actionBtn:hover { border-color: var(--accent, #00d4ff); }
+@media (hover: hover) { .actionBtn:hover { border-color: var(--accent, #00d4ff); } }
+.actionBtn:active { border-color: var(--accent, #00d4ff); opacity: 0.85; }
 
 .removeBtn {
   width: 28px;
@@ -82,7 +83,8 @@
   justify-content: center;
   transition: border-color 0.2s;
 }
-.removeBtn:hover { border-color: var(--accent-red, #ff4444); }
+@media (hover: hover) { .removeBtn:hover { border-color: var(--accent-red, #ff4444); } }
+.removeBtn:active { border-color: var(--accent-red, #ff4444); opacity: 0.85; }
 
 .activites {
   display: flex;
@@ -146,7 +148,8 @@
   flex-shrink: 0;
   transition: color 0.2s;
 }
-.deleteActBtn:hover:not(:disabled) { color: var(--accent-red, #ff4444); }
+@media (hover: hover) { .deleteActBtn:hover:not(:disabled) { color: var(--accent-red, #ff4444); } }
+.deleteActBtn:active:not(:disabled) { color: var(--accent-red, #ff4444); opacity: 0.85; }
 .deleteActBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .addActBtn {
@@ -160,9 +163,11 @@
   font-size: 0.82rem;
   transition: border-color 0.2s, color 0.2s;
 }
-.addActBtn:hover {
+@media (hover: hover) {
+  .addActBtn:hover {
   border-color: var(--accent, #00d4ff);
   color: var(--accent, #00d4ff);
+}
 }
 
 @keyframes fadeIn {

@@ -67,7 +67,7 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
   }
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <div className={styles.container} onTouchStart={(e) => { /* touch-dismiss */ if (e.target === e.currentTarget) setTooltip(null); }} ref={containerRef}>
       <div className={styles.labels}>
         {heures.map(h => (
           <span
@@ -100,6 +100,15 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
                 left: left + '%',
                 width: Math.max(w, 0.3) + '%',
                 background: getCouleur(bloc.type)
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltip(prev => prev && prev.text === (getLabel(bloc.type) + ' : ' + bloc.debut + ' - ' + bloc.fin) ? null : {
+                  text: getLabel(bloc.type) + ' : ' + bloc.debut + ' - ' + bloc.fin,
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 8
+                });
               }}
               onMouseEnter={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();

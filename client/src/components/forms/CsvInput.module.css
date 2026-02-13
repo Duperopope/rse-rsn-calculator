@@ -31,9 +31,11 @@
   border: 1px solid var(--border, #2a2a3e);
   transition: border-color 0.2s, color 0.2s;
 }
-.btn:hover {
+@media (hover: hover) {
+  .btn:hover {
   border-color: var(--accent, #00d4ff);
   color: var(--accent, #00d4ff);
+}
 }
 
 .textarea {

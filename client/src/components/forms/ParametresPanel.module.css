@@ -56,8 +56,10 @@
   color: var(--text-secondary, #888);
   transition: all 0.2s;
 }
-.modeBtn:hover {
+@media (hover: hover) {
+  .modeBtn:hover {
   color: var(--text, #e0e0e0);
+}
 }
 
 .modeActive {

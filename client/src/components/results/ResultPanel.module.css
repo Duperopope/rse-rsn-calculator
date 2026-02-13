@@ -133,7 +133,8 @@
   transition: border-color 0.2s;
   align-self: flex-start;
 }
-.toggleBtn:hover { border-color: var(--accent, #00d4ff); }
+@media (hover: hover) { .toggleBtn:hover { border-color: var(--accent, #00d4ff); } }
+.toggleBtn:active { border-color: var(--accent, #00d4ff); opacity: 0.85; }
 
 .details {
   display: flex;
@@ -173,9 +174,11 @@
   transition: border-color 0.2s, color 0.2s;
   align-self: center;
 }
-.printBtn:hover {
+@media (hover: hover) {
+  .printBtn:hover {
   border-color: var(--accent, #00d4ff);
   color: var(--accent, #00d4ff);
+}
 }
 
 @keyframes fadeIn {

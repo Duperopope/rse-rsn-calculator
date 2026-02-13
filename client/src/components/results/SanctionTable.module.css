@@ -15,9 +15,11 @@
   transition: border-color 0.2s, color 0.2s;
   align-self: flex-start;
 }
-.toggleBtn:hover {
+@media (hover: hover) {
+  .toggleBtn:hover {
   border-color: var(--accent, #00d4ff);
   color: var(--accent, #00d4ff);
+}
 }
 
 .tableWrap {
@@ -47,8 +49,10 @@
   color: var(--text, #e0e0e0);
 }
 
-.table tr:hover td {
+@media (hover: hover) {
+  .table tr:hover td {
   background: rgba(0, 212, 255, 0.03);
+}
 }
 
 .classe {

@@ -38,7 +38,8 @@
   transition: border-color 0.2s, color 0.2s;
   align-self: flex-start;
 }
-.histToggle:hover { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); }
+@media (hover: hover) { .histToggle:hover { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); } }
+.histToggle:active { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); opacity: 0.85; }
 
 .histList {
   display: flex;
@@ -72,7 +73,8 @@
   transition: background 0.2s;
   align-self: flex-end;
 }
-.histClear:hover { background: rgba(255, 68, 68, 0.08); }
+@media (hover: hover) { .histClear:hover { background: rgba(255, 68, 68, 0.08); } }
+.histClear:active { background: rgba(255, 68, 68, 0.08); opacity: 0.85; }
 
 @media (max-width: 600px) { .main { padding: 12px; gap: 14px; } }
 @media print { .analyseSection, .historique { display: none; } .main { max-width: 100%; padding: 0; } }
@@ -82,5 +84,6 @@
 .conducteurTabs{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)}
 .tab,.tabActive{flex:1;padding:.75rem 1.5rem;border:none;cursor:pointer;font-weight:600;font-size:.95rem;transition:all .2s}
 .tab{background:rgba(255,255,255,.05);color:rgba(255,255,255,.5)}
-.tab:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+@media(hover:hover){.tab:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}}
+.tab:active{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);opacity:0.85}
 .tabActive{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 2px 8px rgba(102,126,234,.3)}

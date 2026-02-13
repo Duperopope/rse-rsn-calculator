@@ -49,10 +49,12 @@
   min-width: 2px;
 }
 
-.bloc:hover {
+@media (hover: hover) {
+  .bloc:hover {
   opacity: 0.85;
   transform: scaleY(1.15);
   z-index: 2;
+}
 }
 
 .legende {

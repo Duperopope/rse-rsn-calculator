@@ -41,9 +41,11 @@
   gap: 8px;
   transition: border-color 0.3s, transform 0.2s;
 }
-.metricCard:hover {
+@media (hover: hover) {
+  .metricCard:hover {
   border-color: var(--accent, #00d4ff);
   transform: translateY(-2px);
+}
 }
 
 .metricLabel {
