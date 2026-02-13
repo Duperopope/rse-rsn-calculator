@@ -23,10 +23,6 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-
-// === FIX-ENGINE v7.6.9 - Correcteur post-traitement ===
-const { corrigerResultat } = require('./fix-engine.js');
-// === FIN FIX-ENGINE IMPORT ===
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
@@ -187,168 +183,6 @@ const REGLES_OCCASIONNEL = Object.assign({}, REGLES_SLO, {
   // Report 12 jours (Art.8 par.6bis)
   DEROG_12_JOURS_MAX_PERIODES: 12
 });
-// ============================================================
-// [PATCH v7.6.8] HELPER : Calcul repos journalier inter-jour
-// Source : CE 561/2006 Art.8§2, Art.4§g
-// Repos normal >= 11h, repos reduit >= 9h (max 3 reduits entre 2 hebdo)
-// Ref: https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02006R0561-20240522
-// ============================================================
-function calculerReposJournalier(jourPrecedent, jourCourant) {
-  // jourPrecedent = { derniere_fin_minutes: Number } (minutes depuis 00:00)
-  // jourCourant   = { premier_debut_minutes: Number } (minutes depuis 00:00)
-  // Retourne le repos en heures (float)
-  
-  if (!jourPrecedent || jourPrecedent.derniere_fin_minutes === undefined) {
-    return 24; // Premier jour => pas de contrainte
-  }
-  if (!jourCourant || jourCourant.premier_debut_minutes === undefined) {
-    return 24; // Jour de repos complet => 24h
-  }
-  
-  // Gap = (24h - fin jour precedent) + debut jour courant
-  const finPrecedentMin = jourPrecedent.derniere_fin_minutes;
-  const debutCourantMin = jourCourant.premier_debut_minutes;
-  const gapMinutes = (1440 - finPrecedentMin) + debutCourantMin;
-  const gapHeures = gapMinutes / 60;
-  
-  console.log(`[v7.6.8] Repos inter-jour: fin=${finPrecedentMin}min -> debut=${debutCourantMin}min = ${gapHeures.toFixed(1)}h`);
-  return gapHeures;
-}
-
-// [PATCH v7.6.8] HELPER : Detecter jours de repos complets
-function estJourReposComplet(activitesJour) {
-  if (!activitesJour || activitesJour.length === 0) return true;
-  // Si la seule activite est "Repos" couvrant 00:00-24:00
-  if (activitesJour.length === 1 && activitesJour[0].type === 'Repos') {
-    return true;
-  }
-  // Aucune conduite ni travail
-  const aConduite = activitesJour.some(a => a.type === 'Conduite');
-  const aTravail = activitesJour.some(a => a.type === 'Travail' || a.type === 'Autre tache');
-  return !aConduite && !aTravail;
-}
-// ============================================================
-// [PATCH v7.6.8] HELPER : Grouper les jours par semaine ISO
-// CE 561/2006 Art.4§i : semaine = lundi 00:00 -> dimanche 24:00
-// Art.6§2 : conduite hebdo <= 56h
-// Art.6§3 : conduite bi-hebdo <= 90h
-// ============================================================
-function getISOWeekNumber(dateStr) {
-  const d = new Date(dateStr);
-  const dayNum = d.getUTCDay() || 7; // Lundi = 1, Dimanche = 7
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-}
-
-function grouperParSemaineISO(detailsJours) {
-  const semaines = {};
-  for (const jour of detailsJours) {
-    const weekNum = getISOWeekNumber(jour.date);
-    const yearWeekKey = `${new Date(jour.date).getUTCFullYear()}-W${String(weekNum).padStart(2, '0')}`;
-    if (!semaines[yearWeekKey]) {
-      semaines[yearWeekKey] = {
-        semaine: yearWeekKey,
-        jours: [],
-        totalConduiteMinutes: 0,
-        totalTravailMinutes: 0
-      };
-    }
-    semaines[yearWeekKey].jours.push(jour);
-    semaines[yearWeekKey].totalConduiteMinutes += (jour.conduite_minutes || 0);
-    semaines[yearWeekKey].totalTravailMinutes += (jour.travail_minutes || 0);
-  }
-  return Object.values(semaines);
-}
-
-// [PATCH v7.6.8] HELPER : Verification conduite hebdo + bi-hebdo
-function verifierConduiteHebdomadaire(semaines) {
-  const infractions = [];
-  const LIMITE_HEBDO_H = 56;
-  const LIMITE_BIHEBDO_H = 90;
-  
-  for (let i = 0; i < semaines.length; i++) {
-    const sem = semaines[i];
-    const conduiteH = sem.totalConduiteMinutes / 60;
-    
-    // Conduite hebdomadaire > 56h (CE 561/2006 Art.6§2)
-    if (conduiteH > LIMITE_HEBDO_H) {
-      const depassement = conduiteH - LIMITE_HEBDO_H;
-      const classe = depassement < 14 ? '4e' : '5e';
-      infractions.push({
-        regle: 'Conduite hebdomadaire',
-        semaine: sem.semaine,
-        limite: `${LIMITE_HEBDO_H}h`,
-        constate: `${conduiteH.toFixed(1)}h`,
-        depassement: `${depassement.toFixed(1)}h`,
-        classe: classe,
-        amende: classe === '4e' ? { forfaitaire: 135, maximale: 750 } : { forfaitaire: 1500, maximale: 3000 },
-        ref_legale: 'CE 561/2006 Art.6§2 + Code transports R3315-10/R3315-11',
-        url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02006R0561-20240522#d1e888-1-1'
-      });
-    }
-    
-    // Conduite bi-hebdomadaire > 90h (CE 561/2006 Art.6§3)
-    if (i > 0) {
-      const totalBiHebdo = (semaines[i-1].totalConduiteMinutes + sem.totalConduiteMinutes) / 60;
-      if (totalBiHebdo > LIMITE_BIHEBDO_H) {
-        const depassement = totalBiHebdo - LIMITE_BIHEBDO_H;
-        const classe = depassement < 22.5 ? '4e' : '5e';
-        infractions.push({
-          regle: 'Conduite bi-hebdomadaire',
-          semaines: `${semaines[i-1].semaine} + ${sem.semaine}`,
-          limite: `${LIMITE_BIHEBDO_H}h`,
-          constate: `${totalBiHebdo.toFixed(1)}h`,
-          depassement: `${depassement.toFixed(1)}h`,
-          classe: classe,
-          amende: classe === '4e' ? { forfaitaire: 135, maximale: 750 } : { forfaitaire: 1500, maximale: 3000 },
-          ref_legale: 'CE 561/2006 Art.6§3',
-          url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02006R0561-20240522#d1e888-1-1'
-        });
-      }
-    }
-  }
-  return infractions;
-}
-
-// [PATCH v7.6.8] HELPER : Verification repos hebdomadaire
-// CE 561/2006 Art.8§6 : au moins 2 repos hebdo normaux (45h) OU 1 normal + 1 reduit (24h)
-// Repos hebdo doit commencer au plus tard apres 6 periodes de 24h (= 144h)
-function verifierReposHebdomadaire(detailsJours) {
-  const infractions = [];
-  let dernierReposHebdo = null;
-  let joursDepuisDernierRepos = 0;
-  
-  for (let i = 0; i < detailsJours.length; i++) {
-    const jour = detailsJours[i];
-    
-    // Detecter un bloc de repos >= 24h (repos hebdo reduit) ou >= 45h (normal)
-    if (jour.repos_cumule_heures && jour.repos_cumule_heures >= 24) {
-      dernierReposHebdo = jour;
-      joursDepuisDernierRepos = 0;
-    } else {
-      joursDepuisDernierRepos++;
-    }
-    
-    // Apres 6 periodes de 24h sans repos hebdo => infraction
-    if (joursDepuisDernierRepos > 6) {
-      const depassementH = (joursDepuisDernierRepos - 6) * 24;
-      const classe = depassementH < 12 ? '4e' : '5e';
-      infractions.push({
-        regle: 'Repos hebdomadaire insuffisant',
-        date: jour.date,
-        message: `${joursDepuisDernierRepos} jours sans repos hebdomadaire (max 6 periodes de 24h)`,
-        classe: classe,
-        amende: classe === '4e' ? { forfaitaire: 135, maximale: 750 } : { forfaitaire: 1500, maximale: 3000 },
-        ref_legale: 'CE 561/2006 Art.8§6 + Code transports R3315-10§5',
-        url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02006R0561-20240522#d1e982-1-1'
-      });
-    }
-  }
-  return infractions;
-}
-
-
 function getRegles(typeService) {
   switch (typeService) {
     case "REGULIER": return REGLES_REGULIER;
@@ -1859,13 +1693,13 @@ app.post('/api/analyze', (req, res) => {
 
     console.log("[ANALYSE] Type service: " + typeServiceValide + ", Pays: " + paysValide + ", Equipage: " + equipageValide + ", Lignes CSV: " + csv.split('\n').length);
 
-    const resultat = corrigerResultat(analyserCSV(csv, typeServiceValide, paysValide, equipageValide));
+    const resultat = analyserCSV(csv, typeServiceValide, paysValide, equipageValide);
 
     // Multi-conducteur: analyser CSV conducteur 2 si present
     let resultat2 = null;
     if (equipageValide === "double" && csv2 && csv2.trim().length > 0) {
       console.log("[ANALYSE] Conducteur 2 detecte, analyse separee...");
-      resultat2 = corrigerResultat(analyserCSV(csv2.trim(), typeServiceValide, paysValide, equipageValide));
+      resultat2 = analyserCSV(csv2.trim(), typeServiceValide, paysValide, equipageValide);
       resultat2.conducteur = 2;
     }
     resultat.conducteur = 1;
@@ -1948,9 +1782,9 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.9',
+    version: '7.6.7',
     auteur: "Samir Medjaher",
-    regles_version: "v7.6.9 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
+    regles_version: "v7.6.7 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
     timestamp: new Date().toISOString()
   });
@@ -1967,7 +1801,7 @@ app.get('/api/pays', (req, res) => {
 // ============================================================
 app.get("/api/qa/avance", (req, res) => {
   const tests = [];
-  const version = "7.6.9";
+  const version = "7.6.7";
   const date = new Date().toISOString().split("T")[0];
 
   function runTest(id, nom, csv, options, attendu) {
@@ -2180,7 +2014,7 @@ app.get('/api/regles', (req, res) => {
 // ============================================================
 // ROUTE QA NIVEAU 1 - TESTS REGLEMENTAIRES SOURCES
 // GET /api/qa
-// Version: 7.6.9
+// Version: 7.6.7
 // Sources primaires:
 //   [EUR-1] CE 561/2006 Art.6 - Durees de conduite
 //   [EUR-2] CE 561/2006 Art.7 - Pauses
@@ -2196,7 +2030,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.7',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2357,7 +2191,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.7',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2806,7 +2640,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
       pause_reset: '>= 30min remet conduite continue a 0'
     }
   };
-  console.log('[QA v7.6.8] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
+  console.log('[QA v7.6.7] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
   res.json(rapport);
 });
 
@@ -2823,7 +2657,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: "7.6.7",
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -3022,7 +2856,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: "7.6.7",
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3469,7 +3303,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.7',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
@@ -3491,7 +3325,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  RSE/RSN Calculator v7.6.8");
+  console.log("  RSE/RSN Calculator v7.6.7");
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);

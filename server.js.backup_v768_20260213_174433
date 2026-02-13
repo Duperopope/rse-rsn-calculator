@@ -23,10 +23,6 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-
-// === FIX-ENGINE v7.6.9 - Correcteur post-traitement ===
-const { corrigerResultat } = require('./fix-engine.js');
-// === FIN FIX-ENGINE IMPORT ===
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
@@ -1859,13 +1855,13 @@ app.post('/api/analyze', (req, res) => {
 
     console.log("[ANALYSE] Type service: " + typeServiceValide + ", Pays: " + paysValide + ", Equipage: " + equipageValide + ", Lignes CSV: " + csv.split('\n').length);
 
-    const resultat = corrigerResultat(analyserCSV(csv, typeServiceValide, paysValide, equipageValide));
+    const resultat = analyserCSV(csv, typeServiceValide, paysValide, equipageValide);
 
     // Multi-conducteur: analyser CSV conducteur 2 si present
     let resultat2 = null;
     if (equipageValide === "double" && csv2 && csv2.trim().length > 0) {
       console.log("[ANALYSE] Conducteur 2 detecte, analyse separee...");
-      resultat2 = corrigerResultat(analyserCSV(csv2.trim(), typeServiceValide, paysValide, equipageValide));
+      resultat2 = analyserCSV(csv2.trim(), typeServiceValide, paysValide, equipageValide);
       resultat2.conducteur = 2;
     }
     resultat.conducteur = 1;
@@ -1948,9 +1944,9 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.9',
+    version: '7.6.8',
     auteur: "Samir Medjaher",
-    regles_version: "v7.6.9 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
+    regles_version: "v7.6.8 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
     timestamp: new Date().toISOString()
   });
@@ -1967,7 +1963,7 @@ app.get('/api/pays', (req, res) => {
 // ============================================================
 app.get("/api/qa/avance", (req, res) => {
   const tests = [];
-  const version = "7.6.9";
+  const version = "7.6.8";
   const date = new Date().toISOString().split("T")[0];
 
   function runTest(id, nom, csv, options, attendu) {
@@ -2180,7 +2176,7 @@ app.get('/api/regles', (req, res) => {
 // ============================================================
 // ROUTE QA NIVEAU 1 - TESTS REGLEMENTAIRES SOURCES
 // GET /api/qa
-// Version: 7.6.9
+// Version: 7.6.8
 // Sources primaires:
 //   [EUR-1] CE 561/2006 Art.6 - Durees de conduite
 //   [EUR-2] CE 561/2006 Art.7 - Pauses
@@ -2196,7 +2192,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.8',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2357,7 +2353,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.8',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2823,7 +2819,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.8',
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -3022,7 +3018,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.8',
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3469,7 +3465,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.6.9',
+    version: '7.6.8',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,

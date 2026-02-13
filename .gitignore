@@ -10,3 +10,10 @@ uploads/
 *_pre_*
 
 *.backup
+
+# Fichiers de resultats de test (ne pas deployer en prod)
+test_56jours_resultat_*.json
+server_stdout.log
+server_stderr.log
+_patch_*.js
+
