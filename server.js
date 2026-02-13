@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // RSE/RSN Calculator - Serveur Backend v7.1.0
 // Credits : Samir Medjaher
 // Sources reglementaires :
