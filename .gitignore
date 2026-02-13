@@ -17,3 +17,6 @@ server_stdout.log
 server_stderr.log
 _patch_*.js
 
+server.js.backup_*
+test_56jours.csv
+test_56jours_resultat.json
