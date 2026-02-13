@@ -27,7 +27,7 @@ import styles from './Calculator.module.css';
 export default function Calculator() {
   const { theme, toggleTheme } = useTheme();
   const { online, version: serverVersion, loading: healthLoading } = useServerHealth();
-  const { analyser, resultat, erreur, chargement, reset } = useAnalysis();
+  const { analyser, resultat, setResultat, erreur, chargement, reset } = useAnalysis();
   const [historique, setHistorique] = useLocalStorage(STORAGE_KEY, []);
   const [onboardingDone, setOnboardingDone] = useLocalStorage('rse_onboarding_done', false);
 
@@ -99,13 +99,13 @@ export default function Calculator() {
     if (mode === 'formulaire') csv = activitesToCSV(jours);
     if (!csv || !csv.trim()) return;
     const csv2 = equipage === "double" ? (mode === "csv" ? csvTexte2 : activitesToCSV(jours2)) : null;
-    const data = await analyser(csv, csv2, typeService, pays, equipage);
+    const data = await analyser(csv, csv2, typeService, pays, equipage, data);
     if (data) {
       const entry = {
         date: new Date().toISOString(),
         score: data.score || 0,
         infractions: (data.infractions || []).length,
-        typeService, pays, equipage
+        typeService, pays, equipage, data
       };
       setHistorique(prev => [entry, ...(prev || [])].slice(0, HISTORIQUE_MAX));
     }
@@ -203,7 +203,7 @@ export default function Calculator() {
             {voirHistorique ? (
               <div className={styles.histList}>
                 {historique.slice(0, 10).map((h, i) => (
-                  <div key={i} className={styles.histItem}>
+                  <div key={i} className={styles.histItem} onClick={() => { if (h.data) { setResultat(h.data); window.scrollTo({ top: 0, behavior: "smooth" }); } }} style={{ cursor: "pointer" }}>
                     <span className={styles.histDate}>
                       {new Date(h.date).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </span>

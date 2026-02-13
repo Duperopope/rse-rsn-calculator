@@ -52,5 +52,5 @@ export function useAnalysis() {
     setChargement(false);
   }
 
-  return { analyser, resultat, erreur, chargement, reset };
+  return { analyser, resultat, setResultat, erreur, chargement, reset };
 }
