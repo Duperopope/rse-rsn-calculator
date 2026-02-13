@@ -87,3 +87,40 @@
 @media(hover:hover){.tab:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}}
 .tab:active{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);opacity:0.85}
 .tabActive{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 2px 8px rgba(102,126,234,.3)}
+
+
+/* === Onglets sélection jour (jauges/timeline) === */
+.jourTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.jourTab {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.jourTab:active {
+  transform: scale(0.96);
+}
+
+.jourTabActive {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.2), rgba(0, 122, 255, 0.35));
+  border-color: rgba(0, 122, 255, 0.5);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+}

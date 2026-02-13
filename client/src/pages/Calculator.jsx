@@ -40,6 +40,7 @@ export default function Calculator() {
   const [conducteurActif, setConducteurActif] = useState(1);
   const [voirHistorique, setVoirHistorique] = useState(false);
   const [statsJour, setStatsJour] = useState(null);
+  const [jourActifIndex, setJourActifIndex] = useState(0);
 
   const today = new Date().toISOString().slice(0, 10);
   const [jours, setJours] = useState(() => {
@@ -69,10 +70,13 @@ export default function Calculator() {
   }, [jours2]);
 
 useEffect(() => {
-    if (mode === 'formulaire' && jours.length > 0 && jours[0].activites) {
-      setStatsJour(calculerStatsJour(jours[0].activites));
+    if (mode === 'formulaire' && jours.length > 0) {
+      const idx = Math.min(jourActifIndex, jours.length - 1);
+      if (jours[idx] && jours[idx].activites) {
+        setStatsJour(calculerStatsJour(jours[idx].activites));
+      }
     }
-  }, [jours, mode]);
+  }, [jours, mode, jourActifIndex]);
 
   function updateJour(index, newJour) {
     setJours(prev => prev.map((j, i) => i === index ? newJour : j));
@@ -179,9 +183,22 @@ useEffect(() => {
 
         {mode === 'formulaire' && statsJour ? (
           <div className={styles.realtime}>
+            {jours.length > 1 ? (
+              <div className={styles.jourTabs}>
+                {jours.map((j, i) => (
+                  <button
+                    key={i}
+                    className={styles.jourTab + (i === jourActifIndex ? ' ' + styles.jourTabActive : '')}
+                    onClick={() => setJourActifIndex(i)}
+                  >
+                    Jour {i + 1} — {j.date}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <PanneauJauges stats={statsJour} typeService={typeService} />
-            {jours[0] && jours[0].activites.length > 0 ? (
-              <Card><Timeline24h activites={jours[0].activites} theme={theme} /></Card>
+            {jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
+              <Card><Timeline24h activites={jours[jourActifIndex].activites} theme={theme} /></Card>
             ) : null}
           </div>
         ) : null}
