@@ -29,7 +29,7 @@ function analyserInfractions(activites) {
       const avant = conduiteAcc;
       conduiteAcc += duree;
 
-      if (conduiteAcc >= LIMITES.CONDUITE_CONTINUE_MAX && avant < LIMITES.CONDUITE_CONTINUE_MAX) {
+      if (conduiteAcc > LIMITES.CONDUITE_CONTINUE_MAX && avant <= LIMITES.CONDUITE_CONTINUE_MAX) {
         const minuteSeuil = start + (LIMITES.CONDUITE_CONTINUE_MAX - avant);
         depassementDebut = minuteSeuil;
         marqueurs.push({
@@ -45,7 +45,7 @@ function analyserInfractions(activites) {
           type: 'conduite_continue',
           label: 'Dépassement conduite continue'
         });
-      } else if (conduiteAcc >= LIMITES.CONDUITE_CONTINUE_MAX) {
+      } else if (conduiteAcc > LIMITES.CONDUITE_CONTINUE_MAX) {
         zones.push({
           startMin: Math.min(start, 1440),
           endMin: Math.min(end, 1440),
@@ -72,7 +72,7 @@ function analyserInfractions(activites) {
       const avant = conduiteJour;
       conduiteJour += duree;
 
-      if (conduiteJour >= LIMITES.CONDUITE_JOURNALIERE_MAX && avant < LIMITES.CONDUITE_JOURNALIERE_MAX) {
+      if (conduiteJour > LIMITES.CONDUITE_JOURNALIERE_MAX && avant <= LIMITES.CONDUITE_JOURNALIERE_MAX) {
         const minuteSeuil = start + (LIMITES.CONDUITE_JOURNALIERE_MAX - avant);
         marqueurs.push({
           minute: Math.min(minuteSeuil, 1440),
