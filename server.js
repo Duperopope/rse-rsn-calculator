@@ -48,7 +48,7 @@ const REGLES = {
   // Conduite continue max avant pause obligatoire (CE 561/2006 Art.7)
   CONDUITE_CONTINUE_MAX_MIN: 270, // 4h30
   // Pause minimale apres conduite continue (CE 561/2006 Art.7)
-  PAUSE_OBLIGATOIRE_MIN: 30,
+  PAUSE_OBLIGATOIRE_MIN: 45, // v7.5.0: CE 561/2006 Art.7 pause complete = 45min
   // Conduite journaliere max (CE 561/2006 Art.6)
   CONDUITE_JOURNALIERE_MAX_MIN: 540, // 9h
   // Conduite journaliere max avec derogation (2x par semaine) (CE 561/2006 Art.6)
@@ -794,6 +794,11 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     let dispoJour = 0;
     let conduiteContinue = 0;
     let maxConduiteContinue = 0;
+    // v7.5.0 : Accumulateur pause fractionnee (CE 561/2006 Art.7)
+    // Regle: 45min bloc OU 15min puis 30min (ordre obligatoire)
+    // Source: eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:02006R0561-20200820
+    let pausePhase1Done = false;
+    let conduiteAvantPhase1 = 0;
     let travailNuitMin = 0;
     let ferryJour = 0;
     let infractionsJour = [];
@@ -820,15 +825,38 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           break;
         case 'pause':
           pauseJour += a.duree_min;
-          // Une pause >= 30 min remet la conduite continue a zero (CE 561/2006 Art.7)
-          if (a.duree_min >= REGLES.PAUSE_OBLIGATOIRE_MIN) {
+          // v7.5.0 : Gestion pause fractionnee CE 561/2006 Art.7
+          if (a.duree_min >= 45) {
+            // Cas 1 : Pause complete >= 45min = reset immediat
             conduiteContinue = 0;
+            pausePhase1Done = false;
+            conduiteAvantPhase1 = 0;
+          } else if (a.duree_min >= 30 && pausePhase1Done) {
+            // Cas 2 : Phase 2 du split (30min apres 15min) = reset
+            conduiteContinue = 0;
+            pausePhase1Done = false;
+            conduiteAvantPhase1 = 0;
+          } else if (a.duree_min >= 15 && !pausePhase1Done) {
+            // Cas 3 : Phase 1 du split (15min) = marquer
+            pausePhase1Done = true;
+            conduiteAvantPhase1 = conduiteContinue;
           }
+          // Cas 4 : Pause < 15min = aucun effet
           break;
         case 'repos':
           pauseJour += a.duree_min;
-          if (a.duree_min >= REGLES.PAUSE_OBLIGATOIRE_MIN) {
+          // v7.5.0 : Pause fractionnee repos
+          if (a.duree_min >= 45) {
             conduiteContinue = 0;
+            pausePhase1Done = false;
+            conduiteAvantPhase1 = 0;
+          } else if (a.duree_min >= 30 && pausePhase1Done) {
+            conduiteContinue = 0;
+            pausePhase1Done = false;
+            conduiteAvantPhase1 = 0;
+          } else if (a.duree_min >= 15 && !pausePhase1Done) {
+            pausePhase1Done = true;
+            conduiteAvantPhase1 = conduiteContinue;
           }
           break;
         case 'hors_champ':
@@ -847,8 +875,17 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           // Le temps ferry avec couchette = repos (pas travail/dispo)
           pauseJour += a.duree_min;
           ferryJour += a.duree_min;
-          if (a.duree_min >= REGLES.PAUSE_OBLIGATOIRE_MIN) {
+          if (a.duree_min >= 45) {
             conduiteContinue = 0;
+            pausePhase1Done = false;
+            conduiteAvantPhase1 = 0;
+          } else if (a.duree_min >= 30 && pausePhase1Done) {
+            conduiteContinue = 0;
+            pausePhase1Done = false;
+            conduiteAvantPhase1 = 0;
+          } else if (a.duree_min >= 15 && !pausePhase1Done) {
+            pausePhase1Done = true;
+            conduiteAvantPhase1 = conduiteContinue;
           }
           break;
       }
@@ -1272,8 +1309,17 @@ totalConduiteMin += conduiteJour;
   }
 // Calcul du score de conformite
   const nbChecks = joursTries.length * 6; // 6 verifications par jour
-  const nbInfractions = infractions.length;
-  const score = nbChecks > 0 ? Math.max(0, Math.round(((nbChecks - nbInfractions) / nbChecks) * 100)) : 100;
+  // v7.5.0 : Score pondere par classe (5e=poids 3, 4e=poids 1)
+  // Source: baremes R3315-4 (4e classe 750 EUR) / R3315-10 (5e classe 1500 EUR)
+  let poidsInfractions = 0;
+  infractions.forEach(function(inf) {
+    if (inf.classe && inf.classe.includes('5')) {
+      poidsInfractions += 3;
+    } else {
+      poidsInfractions += 1;
+    }
+  });
+  const score = nbChecks > 0 ? Math.max(0, Math.round(((nbChecks - poidsInfractions) / nbChecks) * 100)) : 100;
 
 
   // === APPEL ANALYSE MULTI-SEMAINES v7.0.0 ===
