@@ -44,159 +44,77 @@ const upload = multer({ dest: uploadsDir, limits: { fileSize: 5 * 1024 * 1024 } 
 // ============================================================
 // CONSTANTES REGLEMENTAIRES
 // ============================================================
-// ============================================================
-// REGLES PAR TYPE DE SERVICE v7.6.0
-// ============================================================
-// REGULIER <=50km : Decret 2006-925, 2000-118, R3312-28, R3312-11, D3312-6
-//   https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000423284/
-//   https://www.domformateur.com/pages/transport-de-voyageurs/duree-de-travail-du-transport-urbain.html
-// SLO >50km : CE 561/2006, R3312-9, R3312-11
-//   https://eur-lex.europa.eu/FR/legal-content/summary/driving-time-and-rest-periods-in-the-road-transport-sector.html
-//   https://www.domformateur.com/pages/tronc-commun/durees-de-conduite-temps-de-pause-et-temps-de-repos.html
-// OCCASIONNEL : CE 561/2006 + 2024/1258
-//   https://eur-lex.europa.eu/eli/reg/2024/1258/oj
-// ============================================================
-
-const REGLES_COMMUN = {
-  NUIT_DEBUT_H: 21,
-  NUIT_FIN_H: 6,
-  TRAVAIL_NUIT_MAX_H: 10,
-  CONDUITE_NUIT_CONTINUE_MAX_MIN: 240,
-  NUIT_CONDUITE_DEBUT_H: 21,
-  NUIT_CONDUITE_FIN_H: 6,
-  REPOS_JOURNALIER_FRACTIONNE_PART1_MIN_H: 3,
-  REPOS_JOURNALIER_FRACTIONNE_PART2_MIN_H: 9,
-  REPOS_JOURNALIER_FRACTIONNE_TOTAL_H: 12,
-  DEPASSEMENT_EXCEPTIONNEL_1H_MIN: 60,
-  DEPASSEMENT_EXCEPTIONNEL_2H_MIN: 120,
-  REPOS_HEBDO_RETARD_SEUIL_4E_CLASSE_H: 12,
-  COMPENSATION_ECHEANCE_SEMAINES: 3,
-  RETOUR_DOMICILE_MAX_SEMAINES: 4
-};
-
-// REGULIER <=50km — EXEMPT CE 561/2006 Art.3 par.1(a)
-const REGLES_REGULIER = {
-  ID: "REGULIER",
-  LABEL: "Service regulier (<=50 km) - Droit national FR",
-  EXEMPTION_CE_561: true,
-  // Amplitude (Decret 2006-925 art.6 + R3312-28)
-  AMPLITUDE_MAX_H: 11,
-  AMPLITUDE_DEROGATOIRE_MAX_H: 13,
-  // Travail quotidien (R3312-11 + D3312-6)
-  TRAVAIL_JOURNALIER_MAX_H: 9,
-  TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H: 10,
-  TRAVAIL_DEROG_MAX_PAR_SEMAINE: 2,
-  // Pause (Decret 2006-925 art.9)
-  PAUSE_APRES_TRAVAIL_CONTINU_MIN: 360,
-  PAUSE_MINIMALE_APRES_6H_MIN: 20,
-  PAUSE_FRACTIONNEMENT_MIN: 5,
-  PAUSE_REPAS_MIN: 45,
-  PAUSE_REPAS_DEBUT_H: 11.5,
-  PAUSE_REPAS_FIN_H: 14,
-  MAX_COUPURES_COMPTEES: 2,
-  COUPURE_MAX_COMPTEE_MIN: 30,
-  // PAS de conduite continue/journaliere/hebdo CE 561 (exempt)
-  CONDUITE_CONTINUE_MAX_MIN: null,
-  PAUSE_OBLIGATOIRE_MIN: null,
-  CONDUITE_JOURNALIERE_MAX_MIN: null,
-  CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN: null,
-  CONDUITE_HEBDOMADAIRE_MAX_MIN: null,
-  CONDUITE_BIHEBDO_MAX_MIN: null,
-  CONDUITE_DEROG_MAX_PAR_SEMAINE: null,
-  // Repos journalier (Decret 2006-925 art.7)
+const REGLES = {
+  // Conduite continue max avant pause obligatoire (CE 561/2006 Art.7)
+  CONDUITE_CONTINUE_MAX_MIN: 270, // 4h30
+  // Pause minimale apres conduite continue (CE 561/2006 Art.7)
+  PAUSE_OBLIGATOIRE_MIN: 45, // v7.5.0: CE 561/2006 Art.7 pause complete = 45min
+  // Conduite journaliere max (CE 561/2006 Art.6)
+  CONDUITE_JOURNALIERE_MAX_MIN: 540, // 9h
+  // Conduite journaliere max avec derogation (2x par semaine) (CE 561/2006 Art.6)
+  CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN: 600, // 10h
+  // Conduite hebdomadaire max (CE 561/2006 Art.6)
+  CONDUITE_HEBDOMADAIRE_MAX_MIN: 3360, // 56h
+  // Conduite bi-hebdomadaire max (CE 561/2006 Art.6)
+  CONDUITE_BIHEBDO_MAX_MIN: 5400, // 90h
+  // Repos journalier normal (CE 561/2006 Art.8)
   REPOS_JOURNALIER_NORMAL_H: 11,
-  REPOS_JOURNALIER_REDUIT_H: 10,
-  REPOS_JOURNALIER_3x8_H: 9,
-  REPOS_REDUIT_MAX_ENTRE_HEBDO: 3,
-  // Repos hebdo (Decret 2006-925 art.8)
-  REPOS_HEBDO_NORMAL_H: 35,
+  // Repos journalier reduit (CE 561/2006 Art.8)
+  REPOS_JOURNALIER_REDUIT_H: 9,
+  // Repos hebdomadaire normal (CE 561/2006 Art.8)
+  REPOS_HEBDO_NORMAL_H: 45,
+  // Repos hebdomadaire reduit (CE 561/2006 Art.8)
   REPOS_HEBDO_REDUIT_H: 24,
-  // Hebdo travail (Decret 2000-118)
-  TRAVAIL_HEBDO_MAX_H: 46,
-  TRAVAIL_HEBDO_MOYENNE_MAX_H: 42,
-  TRAVAIL_HEBDO_MOYENNE_SEMAINES: 12,
-  // Multi-equipage
-  MULTI_REPOS_JOURNALIER_MIN_H: 9,
-  MULTI_DELAI_REPOS_H: 30
-};
-
-// SLO >50km — CE 561/2006 complet
-const REGLES_SLO = {
-  ID: "SLO",
-  LABEL: "Service Librement Organise (>50 km) - CE 561/2006",
-  EXEMPTION_CE_561: false,
-  // Amplitude (R3312-9 + R3312-11)
-  AMPLITUDE_MAX_H: 12,
-  AMPLITUDE_DEROGATOIRE_MAX_H: 14,
+  // Amplitude journaliere max services reguliers >50km (L3312-2)
+  AMPLITUDE_MAX_REGULIER_H: 13,
+  // Amplitude journaliere max services occasionnels (L3312-2)
+  AMPLITUDE_MAX_OCCASIONNEL_H: 14,
+  AMPLITUDE_MAX_SLO_H: 14,
   SLO_COUPURE_12_13_MIN: 150,
   SLO_COUPURE_13_14_MIN: 180,
-  // Travail quotidien (D3312-6)
+  // Heure debut travail de nuit (L3312-1)
+  NUIT_DEBUT_H: 21,
+  // Heure fin travail de nuit (L3312-1)
+  NUIT_FIN_H: 6,
+  // Duree max travail de nuit (L3312-1)
+  TRAVAIL_NUIT_MAX_H: 10,
+  // Duree max travail journalier (Code du travail)
   TRAVAIL_JOURNALIER_MAX_H: 10,
-  TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H: 12,
-  TRAVAIL_DEROG_MAX_PAR_SEMAINE: 2,
-  // Pause conduite continue (CE 561/2006 Art.7)
-  PAUSE_APRES_TRAVAIL_CONTINU_MIN: null,
-  PAUSE_MINIMALE_APRES_6H_MIN: null,
-  PAUSE_FRACTIONNEMENT_MIN: null,
-  PAUSE_REPAS_MIN: null,
-  PAUSE_REPAS_DEBUT_H: null,
-  PAUSE_REPAS_FIN_H: null,
-  MAX_COUPURES_COMPTEES: null,
-  COUPURE_MAX_COMPTEE_MIN: null,
-  // Conduite continue (CE 561/2006 Art.7)
-  CONDUITE_CONTINUE_MAX_MIN: 270,
-  PAUSE_OBLIGATOIRE_MIN: 45,
-  // Conduite journaliere (CE 561/2006 Art.6)
-  CONDUITE_JOURNALIERE_MAX_MIN: 540,
-  CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN: 600,
-  CONDUITE_DEROG_MAX_PAR_SEMAINE: 2,
-  // Conduite hebdomadaire (CE 561/2006 Art.6)
-  CONDUITE_HEBDOMADAIRE_MAX_MIN: 3360,
-  CONDUITE_BIHEBDO_MAX_MIN: 5400,
-  // Repos journalier (CE 561/2006 Art.8)
-  REPOS_JOURNALIER_NORMAL_H: 11,
-  REPOS_JOURNALIER_REDUIT_H: 9,
-  REPOS_JOURNALIER_3x8_H: null,
-  REPOS_REDUIT_MAX_ENTRE_HEBDO: 3,
-  // Repos hebdo (CE 561/2006 Art.8)
-  REPOS_HEBDO_NORMAL_H: 45,
-  REPOS_HEBDO_REDUIT_H: 24,
-  // Travail hebdo (Code du travail)
+  // Duree max travail hebdomadaire (Code du travail)
   TRAVAIL_HEBDO_MAX_H: 48,
+  // Duree max travail hebdomadaire moyenne sur 12 semaines
   TRAVAIL_HEBDO_MOYENNE_MAX_H: 44,
-  TRAVAIL_HEBDO_MOYENNE_SEMAINES: 12,
-  // Multi-equipage (Art.8 par.5)
-  MULTI_REPOS_JOURNALIER_MIN_H: 9,
-  MULTI_DELAI_REPOS_H: 30
+  // Multi-equipage (CE 561/2006 Art.8 par.5)
+  MULTI_REPOS_JOURNALIER_MIN_H: 9,  // 9h dans les 30h (pas 24h)
+  MULTI_DELAI_REPOS_H: 30,           // Delai 30h au lieu de 24h
+  // Bi-hebdomadaire (CE 561/2006 Art.6 par.3)
+  // Derogation conduite journaliere (CE 561/2006 Art.6 par.1)
+  CONDUITE_DEROG_MAX_PAR_SEMAINE: 2,
+  // === NOUVELLES REGLES v7.0.0 ===
+  // Repos journalier fractionne (CE 561/2006 Art.4 par.g)
+  REPOS_JOURNALIER_FRACTIONNE_PART1_MIN_H: 3,  // Premiere partie >= 3h
+  REPOS_JOURNALIER_FRACTIONNE_PART2_MIN_H: 9,  // Deuxieme partie >= 9h
+  REPOS_JOURNALIER_FRACTIONNE_TOTAL_H: 12,     // Total = 12h (bonus 1h)
+  // Max repos journaliers reduits entre 2 repos hebdo (CE 561/2006 Art.8 par.4)
+  REPOS_REDUIT_MAX_ENTRE_HEBDO: 3,
+  // Conduite continue de nuit 21h-6h (pratique RSE + Reglement 561/2006)
+  CONDUITE_NUIT_CONTINUE_MAX_MIN: 240, // 4h max entre 21h et 6h
+  NUIT_CONDUITE_DEBUT_H: 21,
+  NUIT_CONDUITE_FIN_H: 6,
+  // Derogation 12 jours transport occasionnel voyageurs (Art.8 par.6bis - 2020/1054 + 2024/1258)
+  DEROG_12_JOURS_MAX_PERIODES: 12,
+  // Retour domicile (Art.8 par.8bis - 2020/1054)
+  RETOUR_DOMICILE_MAX_SEMAINES: 4,
+  // Depassement exceptionnel (Art.12 - 2020/1054)
+  DEPASSEMENT_EXCEPTIONNEL_1H_MIN: 60,
+  DEPASSEMENT_EXCEPTIONNEL_2H_MIN: 120,
+  // Pause fractionnee occasionnel (Art.7 - 2024/1258)
+  PAUSE_FRACTIONNEE_OCCASIONNEL_MIN: 15, // 2x15 min au lieu de 15+30
+  // Report repos hebdo delai retard (Decret 2020-1088)
+  REPOS_HEBDO_RETARD_SEUIL_4E_CLASSE_H: 12, // < 12h retard = 4e classe
+  // Dette compensation repos hebdo reduit (Art.8 par.6)
+  COMPENSATION_ECHEANCE_SEMAINES: 3  // Max 2 jours a 10h par semaine
 };
-
-// OCCASIONNEL — CE 561/2006 + Regl. 2024/1258
-const REGLES_OCCASIONNEL = Object.assign({}, REGLES_SLO, {
-  ID: "OCCASIONNEL",
-  LABEL: "Service occasionnel - CE 561/2006 + 2024/1258",
-  // Amplitude (R3312-28)
-  AMPLITUDE_MAX_H: 12,
-  AMPLITUDE_DEROGATOIRE_MAX_H: 14,
-  // Pause fractionnee 2x15min (Art.7 - 2024/1258)
-  PAUSE_FRACTIONNEE_OCCASIONNEL_MIN: 15,
-  // Report 12 jours (Art.8 par.6bis)
-  DEROG_12_JOURS_MAX_PERIODES: 12
-});
-
-// Routeur de regles
-function getRegles(typeService) {
-  switch (typeService) {
-    case "REGULIER": return REGLES_REGULIER;
-    case "SLO": return REGLES_SLO;
-    case "OCCASIONNEL": return REGLES_OCCASIONNEL;
-    default: return REGLES_SLO;
-  }
-}
-
-// Alias retro-compatible : REGLES pointe vers SLO par defaut
-// pour ne pas casser les references existantes hors analyserCSV
-const REGLES = Object.assign({}, REGLES_COMMUN, REGLES_SLO);
-
 
 // ============================================================
 // BAREME DES SANCTIONS
@@ -424,11 +342,8 @@ function parseCSVLigne(ligne, numeroLigne) {
 //   https://www.domformateur.com/pages/tronc-commun/durees-de-conduite-temps-de-pause-et-temps-de-repos.html
 // ============================================================
 function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, equipage, infractions, avertissements) {
-  // v7.6.0 : Selection des regles par type de service
-  const R_MULTI = getRegles(typeService);
-  const RC_MULTI = REGLES_COMMUN;
   const tracking = {
-    repos_reduits_journaliers: { compteur: 0, max: R_MULTI.REPOS_REDUIT_MAX_ENTRE_HEBDO, details: [] },
+    repos_reduits_journaliers: { compteur: 0, max: REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO, details: [] },
     repos_hebdomadaires: [],
     dette_compensation: { total_h: 0, details: [] },
     repos_journaliers_fractionnes: [],
@@ -460,8 +375,8 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
       for (let i = 0; i < blocsRepos.length - 1; i++) {
         const part1 = blocsRepos[i];
         const part2 = blocsRepos[i + 1];
-        if (part1.duree_h >= RC_MULTI.REPOS_JOURNALIER_FRACTIONNE_PART1_MIN_H &&
-            part2.duree_h >= RC_MULTI.REPOS_JOURNALIER_FRACTIONNE_PART2_MIN_H) {
+        if (part1.duree_h >= REGLES.REPOS_JOURNALIER_FRACTIONNE_PART1_MIN_H &&
+            part2.duree_h >= REGLES.REPOS_JOURNALIER_FRACTIONNE_PART2_MIN_H) {
           tracking.repos_journaliers_fractionnes.push({
             date: dateJour,
             partie1_h: parseFloat(part1.duree_h.toFixed(1)),
@@ -515,12 +430,12 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
 
     if (estJourReposHebdo) {
       // Reset compteur repos reduits
-      if (compteurReduits > R_MULTI.REPOS_REDUIT_MAX_ENTRE_HEBDO) {
+      if (compteurReduits > REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO) {
         infractions.push({
           regle: 'Trop de repos journaliers reduits (CE 561/2006 Art.8 par.4)',
-          limite: R_MULTI.REPOS_REDUIT_MAX_ENTRE_HEBDO + ' repos reduits max entre 2 repos hebdomadaires',
+          limite: REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO + ' repos reduits max entre 2 repos hebdomadaires',
           constate: compteurReduits + ' repos reduits detectes',
-          depassement: (compteurReduits - R_MULTI.REPOS_REDUIT_MAX_ENTRE_HEBDO) + ' de trop',
+          depassement: (compteurReduits - REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO) + ' de trop',
           classe: '4e classe',
           amende: amendeObj('4e classe'),
           dates_concernees: [...datesAvecReposReduit]
@@ -533,7 +448,7 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
     }
 
     // Repos journalier reduit : entre 9h et 11h
-    if (reposH >= R_MULTI.REPOS_JOURNALIER_REDUIT_H && reposH < R_MULTI.REPOS_JOURNALIER_NORMAL_H && !estFractionneValide) {
+    if (reposH >= REGLES.REPOS_JOURNALIER_REDUIT_H && reposH < REGLES.REPOS_JOURNALIER_NORMAL_H && !estFractionneValide) {
       compteurReduits++;
       datesAvecReposReduit.push(dateJour);
       tracking.repos_reduits_journaliers.details.push({
@@ -544,12 +459,12 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
     }
   });
   // Verifier le dernier segment aussi
-  if (compteurReduits > R_MULTI.REPOS_REDUIT_MAX_ENTRE_HEBDO) {
+  if (compteurReduits > REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO) {
     infractions.push({
       regle: 'Trop de repos journaliers reduits (CE 561/2006 Art.8 par.4)',
-      limite: R_MULTI.REPOS_REDUIT_MAX_ENTRE_HEBDO + ' repos reduits max entre 2 repos hebdomadaires',
+      limite: REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO + ' repos reduits max entre 2 repos hebdomadaires',
       constate: compteurReduits + ' repos reduits detectes',
-      depassement: (compteurReduits - R_MULTI.REPOS_REDUIT_MAX_ENTRE_HEBDO) + ' de trop',
+      depassement: (compteurReduits - REGLES.REPOS_REDUIT_MAX_ENTRE_HEBDO) + ' de trop',
       classe: '4e classe',
       amende: amendeObj('4e classe'),
       dates_concernees: [...datesAvecReposReduit]
@@ -593,8 +508,8 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
         }
       }
 
-      const typeRepos = dureeReposTotal >= R_MULTI.REPOS_HEBDO_NORMAL_H ? 'normal' :
-                        dureeReposTotal >= R_MULTI.REPOS_HEBDO_REDUIT_H ? 'reduit' : 'insuffisant';
+      const typeRepos = dureeReposTotal >= REGLES.REPOS_HEBDO_NORMAL_H ? 'normal' :
+                        dureeReposTotal >= REGLES.REPOS_HEBDO_REDUIT_H ? 'reduit' : 'insuffisant';
 
       const entry = {
         date_debut: dateJour,
@@ -604,7 +519,7 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
       };
 
       if (typeRepos === 'reduit') {
-        const dette = R_MULTI.REPOS_HEBDO_NORMAL_H - dureeReposTotal;
+        const dette = REGLES.REPOS_HEBDO_NORMAL_H - dureeReposTotal;
         entry.dette_h = parseFloat(dette.toFixed(1));
         entry.echeance_compensation = 'avant fin semaine +' + REGLES.COMPENSATION_ECHEANCE_SEMAINES;
         entry.statut_compensation = 'en_cours';
@@ -805,9 +720,6 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
 }
 
 function analyserCSV(csvTexte, typeService, codePays, equipage) {
-  // v7.6.0 : Selection des regles par type de service
-  const R = getRegles(typeService);
-  const RC = REGLES_COMMUN;
   equipage = equipage || 'solo';
   const lignes = csvTexte.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('#') && !l.startsWith('date'));
 
@@ -999,7 +911,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       if (amplitudeMin < 0) amplitudeMin += 24 * 60;
       const amplitudeH = amplitudeMin / 60;
 
-      const amplitudeMax = R.EXEMPTION_CE_561 ? R.AMPLITUDE_DEROGATOIRE_MAX_H : R.AMPLITUDE_DEROGATOIRE_MAX_H; // v7.6.0: utilise R
+      const amplitudeMax = typeService === 'REGULIER' ? REGLES.AMPLITUDE_MAX_REGULIER_H : (typeService === 'SLO' ? REGLES.AMPLITUDE_MAX_SLO_H : REGLES.AMPLITUDE_MAX_OCCASIONNEL_H);
       if (amplitudeH > amplitudeMax) {
         const depassement = (amplitudeH - amplitudeMax).toFixed(1);
         infractionsJour.push({
@@ -1045,9 +957,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       }
     }
 
-        // v7.6.0 : Conduite continue CE 561/2006 — NON applicable en REGULIER <=50km (exempt Art.3§1a)
-    if (!R.EXEMPTION_CE_561) {
-// Verification conduite continue (CE 561/2006 Art.7 + R3312-9)
+    // Verification conduite continue (CE 561/2006 Art.7 + R3312-9)
     if (maxConduiteContinue > REGLES.CONDUITE_CONTINUE_MAX_MIN) {
       const depassement = maxConduiteContinue - REGLES.CONDUITE_CONTINUE_MAX_MIN;
       const classe = depassement > 90 ? "5e classe" : "4e classe";
@@ -1062,12 +972,8 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       });
       amendeEstimee += depassement > 90 ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
     }
-    } // fin garde CE 561 conduite continue
 
-
-        // v7.6.0 : Conduite journaliere CE 561/2006 — NON applicable en REGULIER <=50km
-    if (!R.EXEMPTION_CE_561) {
-// Verification conduite journaliere (CE 561/2006 Art.6 + R3312-11)
+    // Verification conduite journaliere (CE 561/2006 Art.6 + R3312-11)
     if (conduiteJour > REGLES.CONDUITE_JOURNALIERE_MAX_MIN) {
       const depassement = conduiteJour - REGLES.CONDUITE_JOURNALIERE_MAX_MIN;
       if (conduiteJour > REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN) {
@@ -1090,8 +996,6 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       }
     }
 
-        } // fin garde CE 561 conduite journaliere
-
     // Verification travail de nuit (L3312-1)
     // Source: ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-marchandises
     // "La duree quotidienne du travail d un travailleur de nuit ou d un salarie
@@ -1106,12 +1010,12 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       return h >= 0 && h < 5;
     });
     const travailTotalNuitJour = conduiteJour + travailJour;
-    if (aTravailleEntreMinuitEt5h && travailTotalNuitJour > RC.TRAVAIL_NUIT_MAX_H * 60) {
+    if (aTravailleEntreMinuitEt5h && travailTotalNuitJour > REGLES.TRAVAIL_NUIT_MAX_H * 60) {
       infractionsJour.push({
         regle: "Travail de nuit - duree totale journee (L3312-1)",
-        limite: RC.TRAVAIL_NUIT_MAX_H + "h de travail total",
+        limite: REGLES.TRAVAIL_NUIT_MAX_H + "h de travail total",
         constate: (travailTotalNuitJour / 60).toFixed(1) + "h",
-        depassement: ((travailTotalNuitJour / 60) - RC.TRAVAIL_NUIT_MAX_H).toFixed(1) + "h",
+        depassement: ((travailTotalNuitJour / 60) - REGLES.TRAVAIL_NUIT_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
         amende: amendeObj("4e classe")
       });
@@ -1122,108 +1026,27 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     // Guard : ne pas doubler si infraction travail de nuit déjà comptée (même limite 10h)
     const dejaInfractionNuit = infractionsJour.some(inf => inf.regle && inf.regle.includes('nuit'));
     const travailTotalJour = conduiteJour + travailJour;
-    if (travailTotalJour > R.TRAVAIL_JOURNALIER_MAX_H * 60 && !dejaInfractionNuit) {
+    if (travailTotalJour > REGLES.TRAVAIL_JOURNALIER_MAX_H * 60 && !dejaInfractionNuit) {
       infractionsJour.push({
         regle: "Durée maximale de travail journalier (Code du travail)",
-        limite: R.TRAVAIL_JOURNALIER_MAX_H + "h",
+        limite: REGLES.TRAVAIL_JOURNALIER_MAX_H + "h",
         constate: (travailTotalJour / 60).toFixed(1) + "h",
-        depassement: ((travailTotalJour / 60) - R.TRAVAIL_JOURNALIER_MAX_H).toFixed(1) + "h",
+        depassement: ((travailTotalJour / 60) - REGLES.TRAVAIL_JOURNALIER_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
         amende: amendeObj("4e classe")
       });
       amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
     }
 
-    
-    // ============================================================
-    // v7.6.0 — CHECKS SPECIFIQUES REGULIER <=50km
-    // Decret 2006-925 + R3312-28 + R3312-11 + D3312-6
-    // ============================================================
-    if (R.EXEMPTION_CE_561) {
-      // CHECK R1 : Amplitude <=11h (Decret 2006-925 art.6)
-      // Note: le check amplitude general (ligne ~914) utilise deja amplitudeMax via typeService
-      // Ici on ajoute un avertissement specifique si >11h et <=13h (derogation possible)
-      if (typeof amplitudeH !== 'undefined' && amplitudeH > R.AMPLITUDE_MAX_H && amplitudeH <= R.AMPLITUDE_DEROGATOIRE_MAX_H) {
-        avertissementsJour.push({
-          regle: "Amplitude > " + R.AMPLITUDE_MAX_H + "h en service regulier (Decret 2006-925 art.6)",
-          message: "Amplitude " + amplitudeH.toFixed(1) + "h. Derogation 13h possible si <5j/semaine et conditions justifiees. Verifier accord d entreprise."
-        });
-      }
-
-      // CHECK R3 : Duree de travail quotidienne <=9h (R3312-11 §1)
-      const travailTotalRegulier = conduiteJour + travailJour;
-      const travailRegulierH = travailTotalRegulier / 60;
-      if (travailRegulierH > R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H) {
-        infractionsJour.push({
-          regle: "Duree de travail quotidienne (R3312-11 + D3312-6)",
-          limite: R.TRAVAIL_JOURNALIER_MAX_H + "h (derogatoire " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h, 2x/semaine)",
-          constate: travailRegulierH.toFixed(1) + "h",
-          depassement: (travailRegulierH - R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H).toFixed(1) + "h",
-          classe: "4e classe",
-          amende: amendeObj("4e classe")
-        });
-        amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
-      } else if (travailRegulierH > R.TRAVAIL_JOURNALIER_MAX_H) {
-        avertissementsJour.push({
-          regle: "Travail quotidien > " + R.TRAVAIL_JOURNALIER_MAX_H + "h (R3312-11)",
-          message: "Travail de " + travailRegulierH.toFixed(1) + "h. Depassement 9h admis jusqu a " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h max 2x/semaine (D3312-6). Verifier le compteur hebdo."
-        });
-      }
-
-      // CHECK R4 : Pause apres 6h de travail continu (Decret 2006-925 art.9)
-      let travailContinu = 0;
-      let maxTravailContinu = 0;
-      activitesJour.forEach(function(act) {
-        if (act.type === 'conduite' || act.type === 'autre_tache') {
-          travailContinu += act.duree_min;
-          if (travailContinu > maxTravailContinu) maxTravailContinu = travailContinu;
-        } else if (act.type === 'pause' || act.type === 'repos') {
-          if (act.duree_min >= R.PAUSE_MINIMALE_APRES_6H_MIN) {
-            travailContinu = 0;
-          }
-        }
-      });
-      if (maxTravailContinu > R.PAUSE_APRES_TRAVAIL_CONTINU_MIN) {
-        infractionsJour.push({
-          regle: "Pause apres 6h de travail continu (Decret 2006-925 art.9)",
-          limite: "6h (" + R.PAUSE_APRES_TRAVAIL_CONTINU_MIN + " min) de travail continu, puis pause >= " + R.PAUSE_MINIMALE_APRES_6H_MIN + " min",
-          constate: maxTravailContinu + " min de travail continu sans pause >= " + R.PAUSE_MINIMALE_APRES_6H_MIN + " min",
-          depassement: (maxTravailContinu - R.PAUSE_APRES_TRAVAIL_CONTINU_MIN) + " min",
-          classe: "4e classe",
-          amende: amendeObj("4e classe")
-        });
-        amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
-      }
-
-      // CHECK R5 : Pause repas 45 min entre 11h30-14h00 (Decret 2006-925 art.9)
-      var aPauseRepas = false;
-      activitesJour.forEach(function(act) {
-        if (act.type === 'pause' || act.type === 'repos') {
-          var debutH = parseInt(act.heure_debut.split(':')[0]) + parseInt(act.heure_debut.split(':')[1]) / 60;
-          var finH = parseInt(act.heure_fin.split(':')[0]) + parseInt(act.heure_fin.split(':')[1]) / 60;
-          // La pause chevauche la plage 11h30-14h et dure >= 45 min
-          if (debutH < R.PAUSE_REPAS_FIN_H && finH > R.PAUSE_REPAS_DEBUT_H && act.duree_min >= R.PAUSE_REPAS_MIN) {
-            aPauseRepas = true;
-          }
-        }
-      });
-      if (!aPauseRepas && (conduiteJour + travailJour) > 0) {
-        avertissementsJour.push({
-          regle: "Pause repas (Decret 2006-925 art.9)",
-          message: "Aucune pause >= " + R.PAUSE_REPAS_MIN + " min detectee entre " + R.PAUSE_REPAS_DEBUT_H + "h et " + R.PAUSE_REPAS_FIN_H + "h. Droit a contrepartie selon accord."
-        });
-      }
-    }
-
-// Repos journalier (approximation sur les donnees disponibles)
+    // Repos journalier (approximation sur les donnees disponibles)
     const totalActiviteJour = conduiteJour + travailJour + dispoJour + pauseJour;
     const reposEstime = (24 * 60) - totalActiviteJour;
-    if (reposEstime < R.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
-      const manqueMin = (R.REPOS_JOURNALIER_REDUIT_H * 60) - reposEstime;
+    if (reposEstime < REGLES.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
+      const manqueMin = (REGLES.REPOS_JOURNALIER_REDUIT_H * 60) - reposEstime;
       if (manqueMin > 150) { // > 2h30 sous le minimum = classe 5
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-          limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+          limite: REGLES.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "5e classe",
@@ -1233,7 +1056,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       } else {
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-          limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+          limite: REGLES.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "4e classe",
@@ -1241,10 +1064,10 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
-    } else if (reposEstime < R.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= R.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
+    } else if (reposEstime < REGLES.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= REGLES.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
       avertissementsJour.push({
         regle: "Repos journalier en mode reduit",
-        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + R.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + R.REPOS_JOURNALIER_REDUIT_H + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
+        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + REGLES.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + REGLES.REPOS_JOURNALIER_REDUIT_H + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
       });
     }
 
@@ -1412,15 +1235,15 @@ totalConduiteMin += conduiteJour;
       });
       
       // Verifier repos journalier minimum
-      if (reposH < R.REPOS_JOURNALIER_REDUIT_H) {
+      if (reposH < REGLES.REPOS_JOURNALIER_REDUIT_H) {
         // Repos < 9h = infraction
-        const manqueH = R.REPOS_JOURNALIER_REDUIT_H - reposH;
+        const manqueH = REGLES.REPOS_JOURNALIER_REDUIT_H - reposH;
         const manqueMin = manqueH * 60;
         if (manqueMin > 150) {
           // > 2h30 manquantes = 5e classe
           infractions.push({
             regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-            limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            limite: REGLES.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
             constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
             depassement: "Manque " + manqueH.toFixed(1) + "h",
             classe: "5e classe",
@@ -1430,7 +1253,7 @@ totalConduiteMin += conduiteJour;
         } else {
           infractions.push({
             regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-            limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            limite: REGLES.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
             constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
             depassement: "Manque " + manqueH.toFixed(1) + "h",
             classe: "4e classe",
@@ -1438,7 +1261,7 @@ totalConduiteMin += conduiteJour;
           });
           amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
         }
-      } else if (reposH < R.REPOS_JOURNALIER_NORMAL_H) {
+      } else if (reposH < REGLES.REPOS_JOURNALIER_NORMAL_H) {
         // Repos 9h-11h = repos reduit (avertissement, max 3x entre 2 repos hebdo)
         avertissements.push({
           regle: "Repos journalier reduit inter-jours",
@@ -1703,9 +1526,9 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.0',
+    version: '7.5.1',
     auteur: "Samir Medjaher",
-    regles_version: "v7.6.0 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
+    regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
     timestamp: new Date().toISOString()
   });
@@ -1990,8 +1813,8 @@ app.get('/api/qa', async (req, res) => {
   test('R2-PAUSES', 'Pause min pour reset = 30 min', REGLES.PAUSE_OBLIGATOIRE_MIN === 30, 'EUR-2', 'CE 561/2006 Art.7 (fractionnement 15+30)', 'Attendu: 30. Obtenu: ' + REGLES.PAUSE_OBLIGATOIRE_MIN + '. Pause complete=45min fractionnable 15+30');
 
   // === R3-REPOS : CE 561/2006 Art.8 ===
-  test('R3-REPOS', 'Repos journalier normal = 11h', R.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + R.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
-  test('R3-REPOS', 'Repos journalier reduit = 9h', R.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + R.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
+  test('R3-REPOS', 'Repos journalier normal = 11h', REGLES.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + REGLES.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
+  test('R3-REPOS', 'Repos journalier reduit = 9h', REGLES.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + REGLES.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
   test('R3-REPOS', 'Repos hebdo normal = 45h', REGLES.REPOS_HEBDO_NORMAL_H === 45, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 45. Obtenu: ' + REGLES.REPOS_HEBDO_NORMAL_H + '. Cross-check: Wayground Q7');
   test('R3-REPOS', 'Repos hebdo reduit = 24h', REGLES.REPOS_HEBDO_REDUIT_H === 24, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 24. Obtenu: ' + REGLES.REPOS_HEBDO_REDUIT_H);
 
@@ -2000,8 +1823,8 @@ app.get('/api/qa', async (req, res) => {
   test('R4-AMPLITUDE', 'Amplitude occasionnel = 14h', REGLES.AMPLITUDE_MAX_OCCASIONNEL_H === 14, 'FR-2', 'L3312-2 / R3312-11', 'Attendu: 14. Obtenu: ' + REGLES.AMPLITUDE_MAX_OCCASIONNEL_H);
   test('R4-AMPLITUDE', 'Nuit debut = 21h', REGLES.NUIT_DEBUT_H === 21, 'FR-1', 'L3312-1', 'Attendu: 21. Obtenu: ' + REGLES.NUIT_DEBUT_H);
   test('R4-AMPLITUDE', 'Nuit fin = 6h', REGLES.NUIT_FIN_H === 6, 'FR-1', 'L3312-1', 'Attendu: 6. Obtenu: ' + REGLES.NUIT_FIN_H);
-  test('R4-AMPLITUDE', 'Travail nuit max = 10h', RC.TRAVAIL_NUIT_MAX_H === 10, 'FR-1', 'L3312-1', 'Attendu: 10. Obtenu: ' + RC.TRAVAIL_NUIT_MAX_H);
-  test('R4-AMPLITUDE', 'Travail journalier max = 10h', R.TRAVAIL_JOURNALIER_MAX_H === 10, 'FR-2', 'Code du travail transport', 'Attendu: 10. Obtenu: ' + R.TRAVAIL_JOURNALIER_MAX_H + '. Cross-check: legistrans Q15');
+  test('R4-AMPLITUDE', 'Travail nuit max = 10h', REGLES.TRAVAIL_NUIT_MAX_H === 10, 'FR-1', 'L3312-1', 'Attendu: 10. Obtenu: ' + REGLES.TRAVAIL_NUIT_MAX_H);
+  test('R4-AMPLITUDE', 'Travail journalier max = 10h', REGLES.TRAVAIL_JOURNALIER_MAX_H === 10, 'FR-2', 'Code du travail transport', 'Attendu: 10. Obtenu: ' + REGLES.TRAVAIL_JOURNALIER_MAX_H + '. Cross-check: legistrans Q15');
   test('R4-AMPLITUDE', 'Travail hebdo max = 48h', REGLES.TRAVAIL_HEBDO_MAX_H === 48, 'FR-2', 'Code du travail / R3312-11', 'Attendu: 48. Obtenu: ' + REGLES.TRAVAIL_HEBDO_MAX_H + '. Cross-check: legistrans Q17');
   test('R4-AMPLITUDE', 'Travail hebdo moyenne = 44h', REGLES.TRAVAIL_HEBDO_MOYENNE_MAX_H === 44, 'FR-2', 'Code du travail (moy 12 semaines)', 'Attendu: 44. Obtenu: ' + REGLES.TRAVAIL_HEBDO_MOYENNE_MAX_H);
 
