@@ -12,7 +12,7 @@
 //   Guide ecologie.gouv.fr :
 //     https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-personnes
 //   Bareme sanctions :
-//     https://www.dan-dis-scan.fr/les-sanctions
+//     https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046177522
 //     https://www.sinari.com/blog/infractions-transport-routier
 // ============================================================
 
@@ -255,7 +255,7 @@ function trouverLienLegal(texteRegle) {
 // BAREME DES SANCTIONS
 // Source : R3315-10 (contravention 4e classe)
 //          R3315-11 (contravention 5e classe)
-//          https://www.dan-dis-scan.fr/les-sanctions
+//          https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046177522
 // ============================================================
 const SANCTIONS = {
   classe_4: {
@@ -1770,9 +1770,9 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.4',
+    version: '7.6.6',
     auteur: "Samir Medjaher",
-    regles_version: "v7.6.4 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
+    regles_version: "v7.6.6 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
     timestamp: new Date().toISOString()
   });
@@ -1789,7 +1789,7 @@ app.get('/api/pays', (req, res) => {
 // ============================================================
 app.get("/api/qa/avance", (req, res) => {
   const tests = [];
-  const version = "7.6.4";
+  const version = "7.6.6";
   const date = new Date().toISOString().split("T")[0];
 
   function runTest(id, nom, csv, options, attendu) {
@@ -2002,7 +2002,7 @@ app.get('/api/regles', (req, res) => {
 // ============================================================
 // ROUTE QA NIVEAU 1 - TESTS REGLEMENTAIRES SOURCES
 // GET /api/qa
-// Version: 7.6.4
+// Version: 7.6.6
 // Sources primaires:
 //   [EUR-1] CE 561/2006 Art.6 - Durees de conduite
 //   [EUR-2] CE 561/2006 Art.7 - Pauses
@@ -2018,7 +2018,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.4',
+    version: '7.6.6',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2027,8 +2027,8 @@ app.get('/api/qa', async (req, res) => {
       { id: "EUR-3", ref: "CE 561/2006 Art.8", sujet: "Temps de repos" },
       { id: "FR-1", ref: "L3312-1 Code des transports", sujet: "Travail de nuit", url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/" },
       { id: "FR-2", ref: "L3312-2 Code des transports", sujet: "Amplitude journaliere" },
-      { id: "FR-4", ref: "R3315-10 Decret 2010-855", sujet: "Seuils 4e classe", url: "https://www.dan-dis-scan.fr/les-sanctions" },
-      { id: "FR-5", ref: "R3315-11 Decret 2010-855", sujet: "Seuils 5e classe", url: "http://www.chronocaraibes.com/wp-content/uploads/Infractions_RSE_depliant" },
+      { id: "FR-4", ref: "R3315-10 Decret 2010-855", sujet: "Seuils 4e classe", url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046177522" },
+      { id: "FR-5", ref: "R3315-11 Decret 2010-855", sujet: "Seuils 5e classe", url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000033450515/" },
       { id: "FR-6", ref: "Code penal transport", sujet: "Delits" },
       { id: "EU-TZ", ref: "Directive 2000/84/CE", sujet: "Heure ete/hiver" },
       { id: "QCM-1", ref: "legistrans.com", sujet: "QCM FIMO/FCO 100Q", url: "http://alainfrancis.free.fr/exercicesetqcm/QCMpar100Q.htm" },
@@ -2179,7 +2179,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.4',
+    version: '7.6.6',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2202,7 +2202,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
     sources: [
       'CE 561/2006 Art.6-8 (EUR-Lex)',
       'Code des transports L3312-1, L3312-2, R3312-9, R3312-11, R3312-28 (Legifrance)',
-      'https://www.dan-dis-scan.fr/les-sanctions',
+      'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046177522',
       'https://inodis.fr/infractions-tachygraphe/',
       'https://www.domformateur.com/pages/tronc-commun/durees-de-conduite-temps-de-pause-et-temps-de-repos.html',
       'https://www.ecologie.gouv.fr/politiques-publiques/temps-travail-conducteurs-routiers-transport-personnes',
@@ -2628,7 +2628,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
       pause_reset: '>= 30min remet conduite continue a 0'
     }
   };
-  console.log('[QA v7.6.4] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
+  console.log('[QA v7.6.6] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
   res.json(rapport);
 });
 
@@ -2645,7 +2645,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.4",
+    version: "7.6.6",
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -2844,7 +2844,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.4",
+    version: "7.6.6",
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3291,7 +3291,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.6.4',
+    version: '7.6.6',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
@@ -3313,7 +3313,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  RSE/RSN Calculator v7.6.4");
+  console.log("  RSE/RSN Calculator v7.6.6");
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
