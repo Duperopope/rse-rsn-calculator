@@ -1193,6 +1193,84 @@ totalConduiteMin += conduiteJour;
   // ============================================================
   // Verification repos hebdomadaire (CE 561/2006 Art.8 par.6)
   // ============================================================
+
+  // ============================================================
+  // v7.5.0 : Verification repos JOURNALIER inter-jours (CE 561/2006 Art.8)
+  // Calcule le repos reel entre chaque paire de jours consecutifs
+  // Source: https://eur-lex.europa.eu/FR/legal-content/summary/driving-time-and-rest-periods-in-the-road-transport-sector.html
+  // Source: https://www.domformateur.com/pages/transport-de-voyageurs/duree-de-travail-du-transport-urbain.html
+  // Regle: repos journalier normal = 11h, reduit = 9h (max 3x entre 2 repos hebdo)
+  // Derogation transport urbain: 10h (convention collective), 9h (3x8/passage soiree-matinee)
+  // ============================================================
+  if (detailsJours.length >= 2) {
+    const reposInterJours = [];
+    for (let i = 0; i < detailsJours.length - 1; i++) {
+      const jourActuel = detailsJours[i];
+      const jourSuivant = detailsJours[i + 1];
+      const activitesActuel = joursMap[jourActuel.date] || [];
+      const activitesSuivant = joursMap[jourSuivant.date] || [];
+      
+      if (activitesActuel.length === 0 || activitesSuivant.length === 0) continue;
+      
+      const finActuel = activitesActuel
+        .sort(function(a, b) { return a.heure_fin.localeCompare(b.heure_fin); })
+        .pop();
+      const debutSuivant = activitesSuivant
+        .sort(function(a, b) { return a.heure_debut.localeCompare(b.heure_debut); })[0];
+      
+      const finH = parseInt(finActuel.heure_fin.split(":")[0]) * 60 + parseInt(finActuel.heure_fin.split(":")[1]);
+      const debutH = parseInt(debutSuivant.heure_debut.split(":")[0]) * 60 + parseInt(debutSuivant.heure_debut.split(":")[1]);
+      
+      const d1 = new Date(jourActuel.date + "T00:00:00");
+      const d2 = new Date(jourSuivant.date + "T00:00:00");
+      const joursEcart = Math.round((d2 - d1) / (24 * 60 * 60 * 1000));
+      
+      const reposMin = (joursEcart * 24 * 60) - finH + debutH;
+      const reposH = reposMin / 60;
+      
+      reposInterJours.push({
+        entre: jourActuel.date + " -> " + jourSuivant.date,
+        repos_h: reposH,
+        repos_min: reposMin
+      });
+      
+      // Verifier repos journalier minimum
+      if (reposH < REGLES.REPOS_JOURNALIER_REDUIT_H) {
+        // Repos < 9h = infraction
+        const manqueH = REGLES.REPOS_JOURNALIER_REDUIT_H - reposH;
+        const manqueMin = manqueH * 60;
+        if (manqueMin > 150) {
+          // > 2h30 manquantes = 5e classe
+          infractions.push({
+            regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
+            limite: REGLES.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
+            depassement: "Manque " + manqueH.toFixed(1) + "h",
+            classe: "5e classe",
+            amende: amendeObj("5e classe")
+          });
+          amendeEstimee += SANCTIONS.classe_5.amende_max;
+        } else {
+          infractions.push({
+            regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
+            limite: REGLES.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
+            depassement: "Manque " + manqueH.toFixed(1) + "h",
+            classe: "4e classe",
+            amende: amendeObj("4e classe")
+          });
+          amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
+        }
+      } else if (reposH < REGLES.REPOS_JOURNALIER_NORMAL_H) {
+        // Repos 9h-11h = repos reduit (avertissement, max 3x entre 2 repos hebdo)
+        avertissements.push({
+          regle: "Repos journalier reduit inter-jours",
+          message: "Repos de " + reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date + " (norme 11h, reduit admis 9h, max 3x entre 2 repos hebdo)"
+        });
+      }
+    }
+  }
+
   if (joursTries.length >= 6) {
     // Calculer le repos entre chaque journee de travail
     // Repos = temps entre fin derniere activite jour N et debut premiere activite jour N+1
@@ -1448,7 +1526,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.5.0',
+    version: '7.5.1',
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
@@ -1696,7 +1774,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.5.0',
+    version: '7.5.1',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2969,7 +3047,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.5.0',
+    version: '7.5.1',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
