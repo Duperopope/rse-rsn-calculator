@@ -71,7 +71,8 @@ const REGLES_COMMUN = {
   DEPASSEMENT_EXCEPTIONNEL_2H_MIN: 120,
   REPOS_HEBDO_RETARD_SEUIL_4E_CLASSE_H: 12,
   COMPENSATION_ECHEANCE_SEMAINES: 3,
-  RETOUR_DOMICILE_MAX_SEMAINES: 4
+  RETOUR_DOMICILE_MAX_SEMAINES: 4,
+  DEROG_12_JOURS_MAX_PERIODES: 12,                // Regle 12 jours occasionnel - Art.8 para.6bis
 };
 
 // REGULIER <=50km — EXEMPT CE 561/2006 Art.3 par.1(a)
@@ -182,8 +183,6 @@ const REGLES_OCCASIONNEL = Object.assign({}, REGLES_SLO, {
   // Report 12 jours (Art.8 par.6bis)
   DEROG_12_JOURS_MAX_PERIODES: 12
 });
-
-// Routeur de regles
 function getRegles(typeService) {
   switch (typeService) {
     case "REGULIER": return REGLES_REGULIER;
@@ -1703,9 +1702,9 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.1',
+    version: '7.6.4',
     auteur: "Samir Medjaher",
-    regles_version: "v7.6.1 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
+    regles_version: "v7.6.4 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
     timestamp: new Date().toISOString()
   });
@@ -1722,7 +1721,7 @@ app.get('/api/pays', (req, res) => {
 // ============================================================
 app.get("/api/qa/avance", (req, res) => {
   const tests = [];
-  const version = "7.6.1";
+  const version = "7.6.4";
   const date = new Date().toISOString().split("T")[0];
 
   function runTest(id, nom, csv, options, attendu) {
@@ -1935,7 +1934,7 @@ app.get('/api/regles', (req, res) => {
 // ============================================================
 // ROUTE QA NIVEAU 1 - TESTS REGLEMENTAIRES SOURCES
 // GET /api/qa
-// Version: 7.6.1
+// Version: 7.6.4
 // Sources primaires:
 //   [EUR-1] CE 561/2006 Art.6 - Durees de conduite
 //   [EUR-2] CE 561/2006 Art.7 - Pauses
@@ -1951,7 +1950,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.1',
+    version: '7.6.4',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2112,7 +2111,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.1',
+    version: '7.6.4',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2561,7 +2560,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
       pause_reset: '>= 30min remet conduite continue a 0'
     }
   };
-  console.log('[QA v7.6.1] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
+  console.log('[QA v7.6.4] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
   res.json(rapport);
 });
 
@@ -2578,7 +2577,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.1",
+    version: "7.6.4",
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -2777,7 +2776,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.1",
+    version: "7.6.4",
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3224,7 +3223,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.6.1',
+    version: '7.6.4',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
@@ -3246,7 +3245,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  RSE/RSN Calculator v7.6.1");
+  console.log("  RSE/RSN Calculator v7.6.4");
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
