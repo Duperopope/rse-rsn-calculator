@@ -170,7 +170,7 @@
 }
 
 .marqueurWarning {
-  background: #ff9f0a;
+  background: #ff4757;
   box-shadow: 0 0 8px rgba(255, 159, 10, 0.6);
 }
 
@@ -183,7 +183,7 @@
   height: 10px;
   border-radius: 50%;
   background: inherit;
-  border: 2px solid var(--bg-card, #16213e);
+  border: 2px solid #fff;
   z-index: 11;
 }
 
@@ -241,7 +241,7 @@
   margin-left: auto;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #ff9f0a;
+  color: #ff4757;
   font-variant-numeric: tabular-nums;
 }
 
@@ -269,9 +269,9 @@
     background: #ff3b30;
   }
   .marqueurWarning {
-    border-left: 3px solid #ff9f0a;
+    border-left: 3px solid #ff4757;
   }
   .marqueurWarning .marqueurPin {
-    background: #ff9f0a;
+    background: #ff4757;
   }
 }

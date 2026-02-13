@@ -42,26 +42,33 @@ export default function Calculator() {
   const [statsJour, setStatsJour] = useState(null);
 
   const today = new Date().toISOString().slice(0, 10);
-  const [jours, setJours] = useState([{
-    date: today,
-    activites: [
-      { debut: '06:00', fin: '06:15', type: 'T' },
-      { debut: '06:15', fin: '10:45', type: 'C' },
-      { debut: '10:45', fin: '11:30', type: 'P' },
-      { debut: '11:30', fin: '14:30', type: 'C' },
-      { debut: '14:30', fin: '14:45', type: 'T' }
-    ]  }]);
+  const [jours, setJours] = useState(() => {
+    const saved = localStorage.getItem('rse_jours');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) { /* ignore */ }
+    }
+    return [{ date: new Date().toISOString().slice(0, 10), activites: [] }];
+  });
 
-  const [jours2, setJours2] = useState([{
-    date: today,
-    activites: [
-      { debut: '06:00', fin: '10:30', type: 'D' },
-      { debut: '10:30', fin: '11:15', type: 'T' },
-      { debut: '11:15', fin: '14:30', type: 'D' }
-    ]
-  }]);
+  const [jours2, setJours2] = useState(() => {
+    const saved = localStorage.getItem('rse_jours2');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) { /* ignore */ }
+    }
+    return [{ date: new Date().toISOString().slice(0, 10), activites: [] }];
+  });
+
+  
+  // Persistence localStorage
+  useEffect(() => {
+    localStorage.setItem('rse_jours', JSON.stringify(jours));
+  }, [jours]);
 
   useEffect(() => {
+    localStorage.setItem('rse_jours2', JSON.stringify(jours2));
+  }, [jours2]);
+
+useEffect(() => {
     if (mode === 'formulaire' && jours.length > 0 && jours[0].activites) {
       setStatsJour(calculerStatsJour(jours[0].activites));
     }
