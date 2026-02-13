@@ -3,16 +3,22 @@ import { TYPES_ACTIVITE, LIMITES } from '../../config/constants.js';
 import { dureeMin } from '../../utils/time.js';
 import styles from './Timeline24h.module.css';
 
-function detecterInfractions(activites) {
+/**
+ * Calcule les zones de depassement pour colorer les blocs en rouge
+ * Retourne {zones: [{startMin, endMin, type, label, detail}], marqueurs: [...]}
+ */
+function analyserInfractions(activites) {
+  const zones = [];
   const marqueurs = [];
-  if (!activites || activites.length === 0) return marqueurs;
+  if (!activites || activites.length === 0) return { zones, marqueurs };
 
   const sorted = [...activites]
     .filter(a => a.debut && a.fin)
     .sort((a, b) => dureeMin(a.debut) - dureeMin(b.debut));
 
-  // Conduite continue > 4h30 sans pause
-  let conduiteAccumulee = 0;
+  // --- Conduite continue > 4h30 ---
+  let conduiteAcc = 0;
+  let depassementDebut = null;
 
   for (const act of sorted) {
     const start = dureeMin(act.debut);
@@ -20,68 +26,91 @@ function detecterInfractions(activites) {
     const duree = end - start;
 
     if (act.type === 'C') {
-      conduiteAccumulee += duree;
-      if (conduiteAccumulee > LIMITES.CONDUITE_CONTINUE_MAX) {
-        const minuteInfraction = start + (LIMITES.CONDUITE_CONTINUE_MAX - (conduiteAccumulee - duree));
-        if (minuteInfraction >= 0 && minuteInfraction <= 1440) {
-          marqueurs.push({
-            minute: Math.min(minuteInfraction, 1440),
-            type: 'conduite_continue',
-            label: 'Conduite continue > 4h30',
-            detail: 'Pause de 45 min obligatoire (CE 561/2006 Art.7)',
-            severity: 'danger'
-          });
-        }
+      const avant = conduiteAcc;
+      conduiteAcc += duree;
+
+      if (conduiteAcc > LIMITES.CONDUITE_CONTINUE_MAX && avant <= LIMITES.CONDUITE_CONTINUE_MAX) {
+        const minuteSeuil = start + (LIMITES.CONDUITE_CONTINUE_MAX - avant);
+        depassementDebut = minuteSeuil;
+        marqueurs.push({
+          minute: Math.min(minuteSeuil, 1440),
+          type: 'conduite_continue',
+          label: 'Conduite continue > 4h30',
+          detail: 'Pause de 45 min obligatoire (CE 561/2006 Art.7)',
+          severity: 'danger'
+        });
+        zones.push({
+          startMin: Math.min(minuteSeuil, 1440),
+          endMin: Math.min(end, 1440),
+          type: 'conduite_continue',
+          label: 'D\u00e9passement conduite continue'
+        });
+      } else if (conduiteAcc > LIMITES.CONDUITE_CONTINUE_MAX) {
+        zones.push({
+          startMin: Math.min(start, 1440),
+          endMin: Math.min(end, 1440),
+          type: 'conduite_continue',
+          label: 'D\u00e9passement conduite continue'
+        });
       }
     } else if (act.type === 'P' || act.type === 'R') {
       if (duree >= 45) {
-        conduiteAccumulee = 0;
+        conduiteAcc = 0;
+        depassementDebut = null;
       }
     }
   }
 
-  // Conduite journalière > 9h
-  let conduiteJournaliere = 0;
+  // --- Conduite journaliere > 9h ---
+  let conduiteJour = 0;
+
   for (const act of sorted) {
     if (act.type === 'C') {
       const start = dureeMin(act.debut);
       const end = dureeMin(act.fin) <= start ? dureeMin(act.fin) + 1440 : dureeMin(act.fin);
-      conduiteJournaliere += (end - start);
-      if (conduiteJournaliere > LIMITES.CONDUITE_JOURNALIERE_MAX) {
-        const minuteInfraction = start + (LIMITES.CONDUITE_JOURNALIERE_MAX - (conduiteJournaliere - (end - start)));
-        if (minuteInfraction >= 0 && minuteInfraction <= 1440) {
-          marqueurs.push({
-            minute: Math.min(minuteInfraction, 1440),
-            type: 'conduite_journaliere',
-            label: 'Conduite journalière > 9h',
-            detail: '4e classe : 135 € (CE 561/2006 Art.6)',
-            severity: 'danger'
-          });
-        }
+      const duree = end - start;
+      const avant = conduiteJour;
+      conduiteJour += duree;
+
+      if (conduiteJour > LIMITES.CONDUITE_JOURNALIERE_MAX && avant <= LIMITES.CONDUITE_JOURNALIERE_MAX) {
+        const minuteSeuil = start + (LIMITES.CONDUITE_JOURNALIERE_MAX - avant);
+        marqueurs.push({
+          minute: Math.min(minuteSeuil, 1440),
+          type: 'conduite_journaliere',
+          label: 'Conduite journali\u00e8re > 9h',
+          detail: '4e classe : 135 \u20ac (CE 561/2006 Art.6)',
+          severity: 'danger'
+        });
       }
     }
   }
 
-  // Amplitude dépassée
+  // --- Amplitude ---
   if (sorted.length >= 2) {
-    const premiereActivite = dureeMin(sorted[0].debut);
-    const derniereActivite = sorted.reduce((max, act) => {
+    const premiere = dureeMin(sorted[0].debut);
+    const derniere = sorted.reduce((max, act) => {
       const fin = dureeMin(act.fin);
       return fin > max ? fin : max;
     }, 0);
-    const amplitude = derniereActivite - premiereActivite;
-    if (amplitude > LIMITES.AMPLITUDE_REGULIER_MAX) {
+    if ((derniere - premiere) > LIMITES.AMPLITUDE_REGULIER_MAX) {
+      const seuil = premiere + LIMITES.AMPLITUDE_REGULIER_MAX;
       marqueurs.push({
-        minute: Math.min(premiereActivite + LIMITES.AMPLITUDE_REGULIER_MAX, 1440),
+        minute: Math.min(seuil, 1440),
         type: 'amplitude',
         label: 'Amplitude > 13h',
         detail: 'Arr\u00eat obligatoire (CE 561/2006 Art.8)',
         severity: 'warning'
       });
+      zones.push({
+        startMin: Math.min(seuil, 1440),
+        endMin: Math.min(derniere, 1440),
+        type: 'amplitude',
+        label: 'D\u00e9passement amplitude'
+      });
     }
   }
 
-  return marqueurs;
+  return { zones, marqueurs };
 }
 
 export function Timeline24h({ activites = [], theme = 'dark' }) {
@@ -101,7 +130,7 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  const infractions = useMemo(() => detecterInfractions(activites), [activites]);
+  const { zones, marqueurs: infractions } = useMemo(() => analyserInfractions(activites), [activites]);
   const totalMin = 1440;
 
   function getCouleur(type) {
@@ -136,9 +165,7 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
   }
 
   const heures = [];
-  for (let h = 0; h <= 24; h += 3) {
-    heures.push(h);
-  }
+  for (let h = 0; h <= 24; h += 3) heures.push(h);
 
   function formatMinute(m) {
     const hh = Math.floor(m / 60);
@@ -158,16 +185,14 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
       {infractions.length > 0 && (
         <div className={styles.infractionBar}>
           <span className={styles.infractionCount}>
-            {'⛔'} {infractions.length} infraction{infractions.length > 1 ? 's' : ''} détectée{infractions.length > 1 ? 's' : ''}
+            {'\u26D4'} {infractions.length} infraction{infractions.length > 1 ? 's' : ''} d\u00e9tect\u00e9e{infractions.length > 1 ? 's' : ''}
           </span>
         </div>
       )}
 
       <div className={styles.labels}>
         {heures.map(h => (
-          <span key={h} className={styles.heure} style={{ left: (h / 24 * 100) + '%' }}>
-            {h}h
-          </span>
+          <span key={h} className={styles.heure} style={{ left: (h / 24 * 100) + '%' }}>{h}h</span>
         ))}
       </div>
 
@@ -176,6 +201,7 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
           <div key={'g' + h} className={styles.gridLine} style={{ left: (h / 24 * 100) + '%' }} />
         ))}
 
+        {/* Blocs normaux */}
         {blocs.map((bloc, i) => {
           const left = (bloc.startMin / totalMin * 100);
           const w = ((bloc.endMin - bloc.startMin) / totalMin * 100);
@@ -213,12 +239,37 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
           );
         })}
 
+        {/* ZONES DE DEPASSEMENT - hachures rouges par dessus les blocs */}
+        {zones.map((zone, i) => {
+          const left = (zone.startMin / totalMin * 100);
+          const w = ((zone.endMin - zone.startMin) / totalMin * 100);
+          return (
+            <div
+              key={'zone' + i}
+              className={styles.zoneDepassement}
+              style={{
+                left: left + '%',
+                width: Math.max(w, 0.5) + '%'
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                setTooltip(null);
+                if (navigator.vibrate) navigator.vibrate(20);
+                setSelectedMarqueur('zone' + i);
+              }}
+            >
+              <div className={styles.zoneHachures} />
+            </div>
+          );
+        })}
+
+        {/* Marqueurs d'infraction */}
         {infractions.map((inf, i) => {
           const leftPct = (inf.minute / totalMin * 100);
           return (
             <div
               key={'inf' + i}
-              className={styles.marqueurInfraction + (inf.severity === 'danger' ? ' ' + styles.marqueurDanger : ' ' + styles.marqueurWarning)}
+              className={styles.marqueurInfraction + ' ' + (inf.severity === 'danger' ? styles.marqueurDanger : styles.marqueurWarning)}
               style={{ left: leftPct + '%' }}
               onTouchStart={(e) => {
                 e.stopPropagation();
@@ -235,15 +286,30 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
         })}
       </div>
 
-      {selectedMarqueur !== null && infractions[selectedMarqueur] && (
+      {/* Detail infraction ou zone */}
+      {selectedMarqueur !== null && typeof selectedMarqueur === 'number' && infractions[selectedMarqueur] && (
         <div className={styles.infractionDetail}>
           <div className={styles.infractionHeader}>
-            <span className={styles.infractionIcon}>{infractions[selectedMarqueur].severity === 'danger' ? '⚠' : '⏱'}</span>
+            <span className={styles.infractionIcon}>{infractions[selectedMarqueur].severity === 'danger' ? '\u26A0' : '\u23F1'}</span>
             <span className={styles.infractionLabel}>{infractions[selectedMarqueur].label}</span>
-            <span className={styles.infractionTime}>{'à'} {formatMinute(infractions[selectedMarqueur].minute)}</span>
+            <span className={styles.infractionTime}>{'\u00e0'} {formatMinute(infractions[selectedMarqueur].minute)}</span>
+          </div>
+          <div className={styles.infractionBody}>{infractions[selectedMarqueur].detail}</div>
+        </div>
+      )}
+
+      {selectedMarqueur !== null && typeof selectedMarqueur === 'string' && selectedMarqueur.startsWith('zone') && (
+        <div className={styles.infractionDetail}>
+          <div className={styles.infractionHeader}>
+            <span className={styles.infractionIcon}>{'\u26A0'}</span>
+            <span className={styles.infractionLabel}>{zones[parseInt(selectedMarqueur.replace('zone',''))]?.label || 'Zone de d\u00e9passement'}</span>
           </div>
           <div className={styles.infractionBody}>
-            {infractions[selectedMarqueur].detail}
+            {(() => {
+              const z = zones[parseInt(selectedMarqueur.replace('zone',''))];
+              if (!z) return '';
+              return formatMinute(z.startMin) + ' \u2192 ' + formatMinute(z.endMin) + ' (' + (z.endMin - z.startMin) + ' min en infraction)';
+            })()}
           </div>
         </div>
       )}
@@ -255,15 +321,15 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
             {t.label}
           </span>
         ))}
-        {infractions.length > 0 && (
+        {zones.length > 0 && (
           <span className={styles.legendeItem}>
-            <span className={styles.legendeDot + ' ' + styles.legendeInfraction} />
-            Infractions
+            <span className={styles.legendeDot + ' ' + styles.legendeDepassement} />
+            D\u00e9passement
           </span>
         )}
       </div>
 
-      {tooltip ? (
+      {tooltip && (
         <div
           className={styles.tooltipBubble}
           style={{
@@ -277,7 +343,7 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
         >
           {tooltip.text}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

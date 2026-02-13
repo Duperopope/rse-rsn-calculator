@@ -275,3 +275,54 @@
     background: #ff4757;
   }
 }
+
+
+/* === ZONES DE DEPASSEMENT === */
+.zoneDepassement {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  cursor: pointer;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.zoneHachures {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 59, 48, 0.5),
+    rgba(255, 59, 48, 0.5) 3px,
+    rgba(255, 59, 48, 0.2) 3px,
+    rgba(255, 59, 48, 0.2) 6px
+  );
+  animation: zonePulse 2s ease-in-out infinite;
+}
+
+@keyframes zonePulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.zoneDepassement:active {
+  transform: scaleY(1.15);
+}
+
+.legendeDepassement {
+  background: repeating-linear-gradient(
+    -45deg,
+    #ff3b30,
+    #ff3b30 2px,
+    rgba(255, 59, 48, 0.3) 2px,
+    rgba(255, 59, 48, 0.3) 4px
+  ) !important;
+  border-radius: 2px !important;
+}
+
+@media (pointer: coarse) {
+  .zoneDepassement {
+    min-width: 12px;
+  }
+}
