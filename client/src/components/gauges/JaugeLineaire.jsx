@@ -49,9 +49,12 @@ export function JaugeLineaire({
 
   let status = 'ok';
   let statusLabel = 'Conforme';
-  if (ratio >= 1) {
+  if (valeur > max) {
     status = 'danger';
-    statusLabel = 'Limite depassee';
+    statusLabel = 'Limite dépassée';
+  } else if (ratio >= 1) {
+    status = 'warning';
+    statusLabel = 'Limite atteinte';
   } else if (ratio >= seuilWarning) {
     status = 'warning';
     statusLabel = 'Attention';
@@ -122,7 +125,7 @@ export function JaugeLineaire({
       {expanded ? (
         <div className={styles.details} data-status={status}>
           <div className={styles.detailRow}>
-            <span className={styles.detailIcon}>{status === 'danger' ? '⚠' : status === 'warning' ? '23f1' : '✅'}</span>
+            <span className={styles.detailIcon}>{status === 'danger' ? '⚠' : status === 'warning' ? '⏱' : '✅'}</span>
             <span>{statusLabel}</span>
             <span className={styles.detailSep}>|</span>
             <span>{pourcent}%</span>
