@@ -99,7 +99,7 @@ export default function Calculator() {
     if (mode === 'formulaire') csv = activitesToCSV(jours);
     if (!csv || !csv.trim()) return;
     const csv2 = equipage === "double" ? (mode === "csv" ? csvTexte2 : activitesToCSV(jours2)) : null;
-    const data = await analyser(csv, csv2, typeService, pays, equipage, data);
+    const data = await analyser(csv, csv2, typeService, pays, equipage);
     if (data) {
       const entry = {
         date: new Date().toISOString(),
