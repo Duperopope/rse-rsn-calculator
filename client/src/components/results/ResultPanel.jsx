@@ -105,7 +105,13 @@ export function ResultPanel({ resultat }) {
               <div key={i} className={styles.avertissement}>
                 <span className={styles.warnIcon}>!</span>
                 <div>
-                  <strong>{av.regle || ''}</strong>
+                  <strong>
+                    {av.url_legale ? (
+                      <a href={av.url_legale} target="_blank" rel="noopener noreferrer" style={{color: 'inherit', textDecoration: 'underline dotted'}}>
+                        {av.regle || ''}
+                      </a>
+                    ) : (av.regle || '')}
+                  </strong>
                   <p>{av.message || av.description || JSON.stringify(av)}</p>
                 </div>
               </div>

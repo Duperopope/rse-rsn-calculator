@@ -198,6 +198,47 @@ const REGLES = Object.assign({}, REGLES_COMMUN, REGLES_SLO);
 
 
 // ============================================================
+// ================================================================
+// LIENS LEGAUX : URLs officielles pour chaque reference juridique
+// Utilises automatiquement dans infractions et avertissements
+// ================================================================
+const LIENS_LEGAUX = {
+  'CE 561/2006': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+  'CE 561/2006 Art.6': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_6',
+  'CE 561/2006 Art.7': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_7',
+  'CE 561/2006 Art.8': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_8',
+  'CE 561/2006 Art.12': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_12',
+  'Reglement 2020/1054': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32020R1054',
+  'Reglement 2024/1258': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1258',
+  'Decret 2006-925': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000609812',
+  'Decret 2006-925 art.6': 'https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006916641',
+  'Decret 2006-925 art.9': 'https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006916644',
+  'Decret 2010-855': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022519042',
+  'Decret 2020-1088': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000042252987',
+  'R3312-9': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021297',
+  'R3312-11': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021293',
+  'R3312-28': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000029751371',
+  'R3315-10': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042573932',
+  'R3315-11': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042573928',
+  'R3315-4': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083678',
+  'L3312-1': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083898',
+  'L3312-2': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083896',
+  'L3313-3': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083886'
+};
+
+// Fonction utilitaire : trouver l'URL pour une reference dans un texte
+function trouverLienLegal(texteRegle) {
+  if (!texteRegle) return null;
+  // Chercher la reference la plus specifique d'abord (plus longue)
+  var keys = Object.keys(LIENS_LEGAUX).sort(function(a, b) { return b.length - a.length; });
+  for (var i = 0; i < keys.length; i++) {
+    if (texteRegle.indexOf(keys[i]) !== -1) {
+      return { ref: keys[i], url: LIENS_LEGAUX[keys[i]] };
+    }
+  }
+  return null;
+}
+
 // BAREME DES SANCTIONS
 // Source : R3315-10 (contravention 4e classe)
 //          R3315-11 (contravention 5e classe)
@@ -1641,6 +1682,20 @@ app.post('/api/analyze', (req, res) => {
 
     console.log("[RESULTAT] Score: " + resultat.score + "%, Infractions: " + resultat.infractions.length + ", Amende estimee: " + resultat.amende_estimee + " euros");
 
+    
+    // Enrichissement automatique : ajouter les liens legaux
+    if (resultat.infractions) {
+      resultat.infractions.forEach(function(inf) {
+        var lien = trouverLienLegal(inf.regle);
+        if (lien) { inf.url_legale = lien.url; inf.ref_legale = lien.ref; }
+      });
+    }
+    if (resultat.avertissements) {
+      resultat.avertissements.forEach(function(av) {
+        var lien = trouverLienLegal(av.regle);
+        if (lien) { av.url_legale = lien.url; av.ref_legale = lien.ref; }
+      });
+    }
     res.json(resultat);
   } catch (err) {
     console.error("[ERREUR ANALYSE]", err);
