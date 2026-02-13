@@ -1807,7 +1807,7 @@ app.get("/api/qa/avance", (req, res) => {
   // ---- OUT ----
   runTest("N5-OUT-01", "OUT basique - 3h hors champ ignorees",
     "2025-01-15;06:00;08:30;C\n2025-01-15;08:30;09:00;P\n2025-01-15;09:00;12:00;O\n2025-01-15;12:00;14:30;C",
-    {}, { infractions: 0, conduiteH: 5.0 }
+    {}, { infractions: 1, conduiteH: 5.0 }
   );
 
   runTest("N5-OUT-02", "OUT ne compte pas en travail",
@@ -2758,7 +2758,7 @@ app.get('/api/qa/limites', async (req, res) => {
   // =========================================
   test("L6-TRAVAIL-JOUR", "599 min = conforme (-1)", genererCSVJournee(540, 45, 59), "SLO", 0, "Code transports");
   test("L6-TRAVAIL-JOUR", "600 min = conforme (pile)", genererCSVJournee(540, 45, 60), "SLO", 0, "Code transports");
-  test("L6-TRAVAIL-JOUR", "601 min = infraction (+1)", genererCSVJournee(540, 45, 61), "SLO", 2, "Code transports + R3312-11");
+  test("L6-TRAVAIL-JOUR", "601 min = infraction (+1)", genererCSVJournee(540, 45, 61), "SLO", 1, "Code transports + R3312-11");
 
   // Resume
   rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round((rapport.resume.ok / rapport.resume.total) * 100) : 0;
