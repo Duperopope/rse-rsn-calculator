@@ -59,6 +59,10 @@ const SOURCES_OFFICIELLES = {
   'R3312-11': {
     url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000023071274/',
     label: 'Légifrance – Code des transports R3312-11'
+  },
+  'Code du travail': {
+    url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021297',
+    label: 'Légifrance – Code des transports L3312-1 (durée travail)'
   }
 };
 
