@@ -1,23 +1,90 @@
 import React, { useState } from 'react';
 import styles from './SanctionTable.module.css';
 
+const sanctions = [
+  {
+    infraction: 'Conduite continue > 4h30',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'CE 561/2006 Art.7',
+    sourceUrl: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    sourceLabel: 'EUR-Lex – Règlement CE 561/2006'
+  },
+  {
+    infraction: 'Conduite journalière > 9h (ou 10h dérog.)',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'CE 561/2006 Art.6',
+    sourceUrl: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    sourceLabel: 'EUR-Lex – Règlement CE 561/2006'
+  },
+  {
+    infraction: 'Repos journalier < 9h (ou 11h)',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'CE 561/2006 Art.8',
+    sourceUrl: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    sourceLabel: 'EUR-Lex – Règlement CE 561/2006'
+  },
+  {
+    infraction: 'Amplitude > 13h (rég.) ou 14h (occ.)',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'Décret 2010-855',
+    sourceUrl: 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022512271',
+    sourceLabel: 'Légifrance – Décret 2010-855'
+  },
+  {
+    infraction: 'Travail de nuit > 10h',
+    classe: '5e', forfait: 200, minore: 150, majore: 450, max: 1500,
+    article: 'L3312-1',
+    sourceUrl: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021297',
+    sourceLabel: 'Légifrance – Art. L3312-1'
+  },
+  {
+    infraction: 'Absence chronotachygraphe',
+    classe: '5e', forfait: 200, minore: 150, majore: 450, max: 1500,
+    article: 'CE 561/2006 Art.13',
+    sourceUrl: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    sourceLabel: 'EUR-Lex – Règlement CE 561/2006'
+  },
+  {
+    infraction: 'Repos hebdo < 24h (ou 45h)',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'CE 561/2006 Art.8',
+    sourceUrl: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    sourceLabel: 'EUR-Lex – Règlement CE 561/2006'
+  },
+  {
+    infraction: 'Conduite hebdomadaire > 56h',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'CE 561/2006 Art.6 + R3312-11',
+    sourceUrl: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    sourceLabel: 'EUR-Lex – Règlement CE 561/2006'
+  },
+  {
+    infraction: 'Conduite bi-hebdomadaire > 90h',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'CE 561/2006 Art.6§3',
+    sourceUrl: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    sourceLabel: 'EUR-Lex – Règlement CE 561/2006'
+  },
+  {
+    infraction: 'Sanctions barème (4e classe)',
+    classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
+    article: 'R3315-10',
+    sourceUrl: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000033450489/',
+    sourceLabel: 'Légifrance – R3315-10 (barème)'
+  }
+];
+
 export function SanctionTable() {
   const [visible, setVisible] = useState(false);
 
-  const sanctions = [
-    { infraction: 'Conduite continue > 4h30', classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750, article: 'CE 561/2006 Art.7' },
-    { infraction: 'Conduite journalière > 9h (ou 10h dérog)', classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750, article: 'CE 561/2006 Art.6' },
-    { infraction: 'Repos journalier < 9h (ou 11h)', classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750, article: 'CE 561/2006 Art.8' },
-    { infraction: 'Amplitude > 13h (rég.) ou 14h (occ.)', classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750, article: 'Décret 2010-855' },
-    { infraction: 'Travail de nuit > 10h', classe: '5e', forfait: 200, minore: 150, majore: 450, max: 1500, article: 'L3312-1' },
-    { infraction: 'Absence chronotachygraphe', classe: '5e', forfait: 200, minore: 150, majore: 450, max: 1500, article: 'CE 561/2006 Art.13' },
-    { infraction: 'Repos hebdo < 24h (ou 45h)', classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750, article: 'CE 561/2006 Art.8' }
-  ];
+  function handleSourceClick(e) {
+    e.stopPropagation();
+  }
 
   return (
     <div className={styles.container}>
       <button className={styles.toggleBtn} onClick={() => setVisible(!visible)}>
-        {visible ? 'Masquer' : 'Afficher'} le barème des sanctions
+        {visible ? 'Masquer' : 'Afficher'} le barème des sanctions ({sanctions.length} infractions référencées)
       </button>
       {visible && (
         <div className={styles.cards}>
@@ -45,7 +112,17 @@ export function SanctionTable() {
                   <span className={styles.amountValue}>{s.max} €</span>
                 </div>
               </div>
-              <span className={styles.sanctionArticle}>{s.article}</span>
+              <a
+                href={s.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.sourceLink}
+                onClick={handleSourceClick}
+              >
+                <span className={styles.sourceLinkIcon}>📜</span>
+                <span className={styles.sourceLinkText}>{s.sourceLabel} — {s.article}</span>
+                <span className={styles.sourceLinkArrow}>↗</span>
+              </a>
             </div>
           ))}
         </div>

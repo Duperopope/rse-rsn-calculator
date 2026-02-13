@@ -6,6 +6,71 @@ const BAREMES = {
   '5e classe': { forfait: 200, minore: 150, majore: 450, max: 1500 }
 };
 
+
+const SOURCES_OFFICIELLES = {
+  'CE 561/2006 Art.6': {
+    url: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    label: 'EUR-Lex – Règlement CE 561/2006 Art.6'
+  },
+  'CE 561/2006 Art.7': {
+    url: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    label: 'EUR-Lex – Règlement CE 561/2006 Art.7'
+  },
+  'CE 561/2006 Art.8': {
+    url: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    label: 'EUR-Lex – Règlement CE 561/2006 Art.8'
+  },
+  'CE 561/2006 Art.8 par.4': {
+    url: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    label: 'EUR-Lex – Règlement CE 561/2006 Art.8§4'
+  },
+  'CE 561/2006 Art.8 par.6': {
+    url: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    label: 'EUR-Lex – Règlement CE 561/2006 Art.8§6'
+  },
+  'CE 561/2006 Art.6 par.3': {
+    url: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    label: 'EUR-Lex – Règlement CE 561/2006 Art.6§3'
+  },
+  'CE 561/2006 Art.13': {
+    url: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
+    label: 'EUR-Lex – Règlement CE 561/2006 Art.13'
+  },
+  'L3312-1': {
+    url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021297',
+    label: 'Légifrance – Code des transports Art. L3312-1'
+  },
+  'L3312-2': {
+    url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000026054561',
+    label: 'Légifrance – Code des transports Art. L3312-2'
+  },
+  'R3315-4': {
+    url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033450503',
+    label: 'Légifrance – Code des transports Art. R3315-4'
+  },
+  'R3315-10': {
+    url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000033450489/',
+    label: 'Légifrance – Code des transports R3315-10'
+  },
+  'Décret 2010-855': {
+    url: 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022512271',
+    label: 'Légifrance – Décret 2010-855'
+  },
+  'R3312-11': {
+    url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000023071274/',
+    label: 'Légifrance – Code des transports R3312-11'
+  }
+};
+
+
+function trouverSource(regle) {
+  if (!regle) return null;
+  for (const [key, val] of Object.entries(SOURCES_OFFICIELLES)) {
+    if (regle.includes(key)) return val;
+  }
+  return null;
+}
+
 export function InfractionCard({ infraction, index, onNavigate }) {
   const inf = infraction || {};
   const message = inf.regle || inf.message || inf.description || 'Infraction';
@@ -17,6 +82,10 @@ export function InfractionCard({ infraction, index, onNavigate }) {
   const dates = inf.dates_concernees || [];
   const bareme = BAREMES[classe] || BAREMES['4e classe'];
 
+  const sourceFromRegle = trouverSource(message);
+  const sourceFromArticle = trouverSource(article);
+  const source = sourceFromRegle || sourceFromArticle;
+
   function handleTap() {
     if (navigator.vibrate) navigator.vibrate(10);
     const timeline = document.querySelector('[class*="Timeline"]') || document.querySelector('[class*="timeline"]');
@@ -27,6 +96,10 @@ export function InfractionCard({ infraction, index, onNavigate }) {
       setTimeout(() => { timeline.style.boxShadow = 'none'; }, 1500);
     }
     if (onNavigate) onNavigate(inf);
+  }
+
+  function handleSourceClick(e) {
+    e.stopPropagation();
   }
 
   return (
@@ -65,6 +138,20 @@ export function InfractionCard({ infraction, index, onNavigate }) {
           <span className={styles.amendeValue}>{bareme.max} €</span>
         </div>
       </div>
+
+      {source && (
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.sourceLink}
+          onClick={handleSourceClick}
+        >
+          <span className={styles.sourceLinkIcon}>📜</span>
+          <span className={styles.sourceLinkText}>{source.label}</span>
+          <span className={styles.sourceLinkArrow}>↗</span>
+        </a>
+      )}
 
       {dates.length > 0 && (
         <div className={styles.dates}>
