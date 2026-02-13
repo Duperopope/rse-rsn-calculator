@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // RSE/RSN Calculator - Serveur Backend v7.1.0
 // Credits : Samir Medjaher
 // Sources reglementaires :
@@ -999,7 +999,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       if (amplitudeMin < 0) amplitudeMin += 24 * 60;
       const amplitudeH = amplitudeMin / 60;
 
-      const amplitudeMax = R.EXEMPTION_CE_561 ? R.AMPLITUDE_DEROGATOIRE_MAX_H : R.AMPLITUDE_DEROGATOIRE_MAX_H; // v7.6.0: utilise R
+      const amplitudeMax = R.AMPLITUDE_DEROGATOIRE_MAX_H; // Derog max: REGULIER=13h(R3312-28), SLO/OCCASIONNEL=14h(R3312-11) // v7.6.0: utilise R
       if (amplitudeH > amplitudeMax) {
         const depassement = (amplitudeH - amplitudeMax).toFixed(1);
         infractionsJour.push({
