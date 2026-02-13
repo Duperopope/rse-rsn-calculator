@@ -2082,12 +2082,12 @@ app.get('/api/qa', async (req, res) => {
   test('R5-SANCTIONS', 'Delit refus controle = 6 mois + 3750 EUR', SANCTIONS.delits.refus_controle === "6 mois emprisonnement + 3 750 euros", 'FR-6', 'Code penal', 'Obtenu: ' + SANCTIONS.delits.refus_controle);
 
   // === R6-SEUILS : Basculement 4e -> 5e classe ===
-  test('R6-SEUILS', 'Seuil conduite continue 4e = dep < 1h30', SANCTIONS.classe_4.seuils.conduite_continue_depassement.includes('1h30'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_continue_depassement);
-  test('R6-SEUILS', 'Seuil conduite journaliere 4e = dep < 2h', SANCTIONS.classe_4.seuils.conduite_journaliere_depassement.includes('2h'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_journaliere_depassement);
-  test('R6-SEUILS', 'Seuil conduite hebdo 4e = dep < 14h', SANCTIONS.classe_4.seuils.conduite_hebdomadaire_depassement.includes('14h'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_hebdomadaire_depassement);
-  test('R6-SEUILS', 'Seuil conduite bihebdo 4e = dep < 22h30', SANCTIONS.classe_4.seuils.conduite_bihebdo_depassement.includes('22h30'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_bihebdo_depassement);
-  test('R6-SEUILS', 'Seuil repos journalier 4e = insuff < 2h30', SANCTIONS.classe_4.seuils.repos_journalier_insuffisant.includes('2h30'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.repos_journalier_insuffisant);
-  test('R6-SEUILS', 'Seuil repos hebdo 4e = insuff < 9h', SANCTIONS.classe_4.seuils.repos_hebdomadaire_insuffisant.includes('9h'), 'FR-4', 'R3315-10 / chronocaraibes.com', 'Texte: ' + SANCTIONS.classe_4.seuils.repos_hebdomadaire_insuffisant);
+  test('R6-SEUILS', 'Seuil conduite continue 4e = dep < 1h30', SANCTIONS.classe_4.seuils.conduite_continue_depassement.includes('1h30'), 'FR-4', 'R3315-10 / R3315-10/11 Legifrance', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_continue_depassement);
+  test('R6-SEUILS', 'Seuil conduite journaliere 4e = dep < 2h', SANCTIONS.classe_4.seuils.conduite_journaliere_depassement.includes('2h'), 'FR-4', 'R3315-10 / R3315-10/11 Legifrance', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_journaliere_depassement);
+  test('R6-SEUILS', 'Seuil conduite hebdo 4e = dep < 14h', SANCTIONS.classe_4.seuils.conduite_hebdomadaire_depassement.includes('14h'), 'FR-4', 'R3315-10 / R3315-10/11 Legifrance', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_hebdomadaire_depassement);
+  test('R6-SEUILS', 'Seuil conduite bihebdo 4e = dep < 22h30', SANCTIONS.classe_4.seuils.conduite_bihebdo_depassement.includes('22h30'), 'FR-4', 'R3315-10 / R3315-10/11 Legifrance', 'Texte: ' + SANCTIONS.classe_4.seuils.conduite_bihebdo_depassement);
+  test('R6-SEUILS', 'Seuil repos journalier 4e = insuff < 2h30', SANCTIONS.classe_4.seuils.repos_journalier_insuffisant.includes('2h30'), 'FR-4', 'R3315-10 / R3315-10/11 Legifrance', 'Texte: ' + SANCTIONS.classe_4.seuils.repos_journalier_insuffisant);
+  test('R6-SEUILS', 'Seuil repos hebdo 4e = insuff < 9h', SANCTIONS.classe_4.seuils.repos_hebdomadaire_insuffisant.includes('9h'), 'FR-4', 'R3315-10 / R3315-10/11 Legifrance', 'Texte: ' + SANCTIONS.classe_4.seuils.repos_hebdomadaire_insuffisant);
 
   // === R7-PAYS : Fuseaux horaires ===
   var nbPays = Object.keys(PAYS).length;
