@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // RSE/RSN Calculator - Serveur Backend v7.1.0
 // Credits : Samir Medjaher
 // Sources reglementaires :
@@ -2341,7 +2341,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   testerCas('CAT-B', 'CAS 6 - Conduite continue 300min (4e classe)',
     '5h continues = depassement 30min sur 270min. Art.7 + R3312-9. 4e classe.',
     '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;11:15;C\n2025-03-10;11:15;12:00;P\n2025-03-10;12:00;14:30;C\n2025-03-10;14:30;14:45;T',
-    'REGULIER', 'FR',
+    'SLO', 'FR',
     { infractions_contiennent: ['ontinue'], conduite_continue_max: 300, classe_contient: ['4e'], classe_absente: ['5e'] }
   );
 
@@ -2359,7 +2359,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   testerCas('CAT-B', 'CAS 8 - Conduite continue 390min (5e classe)',
     '6h30 continues = depassement 120min. >90min = 5e classe 1500 EUR.',
     '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;12:45;C\n2025-03-10;12:45;13:30;P\n2025-03-10;13:30;15:30;C\n2025-03-10;15:30;15:45;T',
-    'REGULIER', 'FR',
+    'SLO', 'FR',
     { infractions_contiennent: ['ontinue'], conduite_continue_max: 390, classe_contient: ['5e'], amende_min: 1500 }
   );
 
@@ -2393,7 +2393,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   testerCas('CAT-C', 'CAS 11 - Conduite 11h (4e classe seuil)',
     '11h conduite = 660min. Depassement 120min = seuil exact. 4e classe.',
     '2025-03-10;04:30;04:45;T\n2025-03-10;04:45;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;14:00;C\n2025-03-10;14:00;14:45;P\n2025-03-10;14:45;17:15;C\n2025-03-10;17:15;17:30;T',
-    'REGULIER', 'FR',
+    'SLO', 'FR',
     { infractions_contiennent: ['ournali'], classe_contient: ['4e'], conduite_h: '11.0' }
   );
 
@@ -2402,7 +2402,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   testerCas('CAT-C', 'CAS 12 - Conduite 12h (5e classe)',
     '12h conduite = 720min. Depassement 180min > 120min. 5e classe 1500 EUR.',
     '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;08:45;C\n2025-03-10;08:45;09:30;P\n2025-03-10;09:30;13:30;C\n2025-03-10;13:30;14:15;P\n2025-03-10;14:15;17:45;C\n2025-03-10;17:45;18:00;T',
-    'REGULIER', 'FR',
+    'SLO', 'FR',
     { infractions_contiennent: ['ournali'], classe_contient: ['5e'], amende_min: 1500, conduite_h: '12.0' }
   );
 
@@ -2515,11 +2515,11 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // CAS 23 - Pause exactement 30min remet compteur continu
   // Conduite 4h + pause 30min + conduite 4h = pas infraction continue
   // Car moteur remet a 0 si pause >= 30min
-  testerCas('CAT-G', 'CAS 23 - Pause 30min reset compteur continu',
-    'Conduite 4h + pause 30min + conduite 4h. Pause >= 30min remet compteur. Pas infraction continue.',
+  testerCas('CAT-G', 'CAS 23 - Pause 30min seule NE reset PAS compteur (CE 561 Art.7 = 15+30)',
+    'Conduite 4h + pause 30min seule + conduite 4h. 30min sans phase1 = pas de reset. 480min continues.',
     '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;10:15;C\n2025-03-10;10:15;10:45;P\n2025-03-10;10:45;14:45;C\n2025-03-10;14:45;15:00;T',
-    'REGULIER', 'FR',
-    { infractions_absent: ['ontinue'], conduite_continue_max: 240, conduite_h: '8.0' }
+    'SLO', 'FR',
+    { infractions_contiennent: ['ontinue'], conduite_continue_max: 480, conduite_h: '8.0' }
   );
 
   // CAS 24 - Pause 25min NE remet PAS le compteur
@@ -2528,7 +2528,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   testerCas('CAT-G', 'CAS 24 - Pause 25min NE reset PAS compteur',
     'Conduite 4h + pause 25min + conduite 1h30. 25min < 30min = pas de reset. 330min continues.',
     '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;10:15;C\n2025-03-10;10:15;10:40;P\n2025-03-10;10:40;12:10;C\n2025-03-10;12:10;12:25;T',
-    'REGULIER', 'FR',
+    'SLO', 'FR',
     { infractions_contiennent: ['ontinue'], conduite_continue_max: 330, conduite_h: '5.5' }
   );
 
@@ -2537,7 +2537,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   testerCas('CAT-G', 'CAS 25 - Catastrophe cumul 18h (toutes infractions)',
     '18h conduite sans repos. Cumul: continue, journaliere 5e, repos 5e, amplitude, travail nuit.',
     '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;10:15;C\n2025-03-10;10:15;10:30;P\n2025-03-10;10:30;16:30;C\n2025-03-10;16:30;16:45;P\n2025-03-10;16:45;22:45;C\n2025-03-10;22:45;23:00;T',
-    'REGULIER', 'FR',
+    'SLO', 'FR',
     { infractions_min: 4, infractions_contiennent: ['ontinue', 'ournali'], amende_min: 270, score_max: 20 }
   );
 
@@ -2684,21 +2684,21 @@ app.get('/api/qa/limites', async (req, res) => {
   // Seuil: > 270 min = infraction
   // Operateur: > (strict)
   // =========================================
-  test("L1-CONDUITE-CONTINUE", "269 min = conforme (-1)", genererCSVContinue(269), "REGULIER", 0, "CE 561/2006 Art.7");
-  test("L1-CONDUITE-CONTINUE", "270 min = conforme (pile)", genererCSVContinue(270), "REGULIER", 0, "CE 561/2006 Art.7");
-  test("L1-CONDUITE-CONTINUE", "271 min = infraction (+1)", genererCSVContinue(271), "REGULIER", 1, "CE 561/2006 Art.7");
+  test("L1-CONDUITE-CONTINUE", "269 min = conforme (-1)", genererCSVContinue(269), "SLO", 0, "CE 561/2006 Art.7");
+  test("L1-CONDUITE-CONTINUE", "270 min = conforme (pile)", genererCSVContinue(270), "SLO", 0, "CE 561/2006 Art.7");
+  test("L1-CONDUITE-CONTINUE", "271 min = infraction (+1)", genererCSVContinue(271), "SLO", 1, "CE 561/2006 Art.7");
 
   // =========================================
   // L2 - CONDUITE JOURNALIERE (CE 561/2006 Art.6)
   // Seuil normal: > 540 min = avertissement/infraction
   // Seuil derog: > 600 min = infraction
   // =========================================
-  test("L2-CONDUITE-JOUR", "539 min = conforme (-1)", genererCSVJournee(539, 45, 15), "REGULIER", 0, "CE 561/2006 Art.6");
-  test("L2-CONDUITE-JOUR", "540 min = conforme (pile)", genererCSVJournee(540, 45, 15), "REGULIER", 0, "CE 561/2006 Art.6");
-  test("L2-CONDUITE-JOUR", "541 min = avertissement derog (0 inf)", genererCSVJournee(541, 45, 15), "REGULIER", 0, "CE 561/2006 Art.6");
-  test("L2-CONDUITE-JOUR", "599 min = 1 infraction >540 seulement", genererCSVJournee(599, 45, 15), "REGULIER", 1, "CE 561/2006 Art.6");
-  test("L2-CONDUITE-JOUR", "600 min = 1 infraction >540, pile derog", genererCSVJournee(600, 45, 15), "REGULIER", 1, "CE 561/2006 Art.6");
-  test("L2-CONDUITE-JOUR", "601 min = 2 infractions >540 + >600", genererCSVJournee(601, 45, 15), "REGULIER", 2, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "539 min = conforme (-1)", genererCSVJournee(539, 45, 15), "SLO", 0, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "540 min = conforme (pile)", genererCSVJournee(540, 45, 15), "SLO", 0, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "541 min = avertissement derog (0 inf)", genererCSVJournee(541, 45, 15), "SLO", 0, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "599 min = 1 infraction >540 seulement", genererCSVJournee(599, 45, 15), "SLO", 1, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "600 min = 1 infraction >540, pile derog", genererCSVJournee(600, 45, 15), "SLO", 1, "CE 561/2006 Art.6");
+  test("L2-CONDUITE-JOUR", "601 min = 2 infractions >540 + >600", genererCSVJournee(601, 45, 15), "SLO", 2, "CE 561/2006 Art.6");
 
   // =========================================
   // L3 - AMPLITUDE REGULIER (L3312-2 / R3312-9)
@@ -2756,9 +2756,9 @@ app.get('/api/qa/limites', async (req, res) => {
   // L6 - TRAVAIL JOURNALIER TOTAL (Code transports)
   // Seuil: > 10h = > 600 min (conduite + taches)
   // =========================================
-  test("L6-TRAVAIL-JOUR", "599 min = conforme (-1)", genererCSVJournee(540, 45, 59), "REGULIER", 0, "Code transports");
-  test("L6-TRAVAIL-JOUR", "600 min = conforme (pile)", genererCSVJournee(540, 45, 60), "REGULIER", 0, "Code transports");
-  test("L6-TRAVAIL-JOUR", "601 min = infraction (+1)", genererCSVJournee(540, 45, 61), "REGULIER", 1, "Code transports");
+  test("L6-TRAVAIL-JOUR", "599 min = conforme (-1)", genererCSVJournee(540, 45, 59), "SLO", 0, "Code transports");
+  test("L6-TRAVAIL-JOUR", "600 min = conforme (pile)", genererCSVJournee(540, 45, 60), "SLO", 0, "Code transports");
+  test("L6-TRAVAIL-JOUR", "601 min = infraction (+1)", genererCSVJournee(540, 45, 61), "SLO", 2, "Code transports + R3312-11");
 
   // Resume
   rapport.resume.pourcentage = rapport.resume.total > 0 ? Math.round((rapport.resume.ok / rapport.resume.total) * 100) : 0;
