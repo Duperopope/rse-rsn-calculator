@@ -69,6 +69,9 @@ const REGLES = {
   AMPLITUDE_MAX_REGULIER_H: 13,
   // Amplitude journaliere max services occasionnels (L3312-2)
   AMPLITUDE_MAX_OCCASIONNEL_H: 14,
+  AMPLITUDE_MAX_SLO_H: 14,
+  SLO_COUPURE_12_13_MIN: 150,
+  SLO_COUPURE_13_14_MIN: 180,
   // Heure debut travail de nuit (L3312-1)
   NUIT_DEBUT_H: 21,
   // Heure fin travail de nuit (L3312-1)
@@ -847,7 +850,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       if (amplitudeMin < 0) amplitudeMin += 24 * 60;
       const amplitudeH = amplitudeMin / 60;
 
-      const amplitudeMax = typeService === 'REGULIER' ? REGLES.AMPLITUDE_MAX_REGULIER_H : REGLES.AMPLITUDE_MAX_OCCASIONNEL_H;
+      const amplitudeMax = typeService === 'REGULIER' ? REGLES.AMPLITUDE_MAX_REGULIER_H : (typeService === 'SLO' ? REGLES.AMPLITUDE_MAX_SLO_H : REGLES.AMPLITUDE_MAX_OCCASIONNEL_H);
       if (amplitudeH > amplitudeMax) {
         const depassement = (amplitudeH - amplitudeMax).toFixed(1);
         infractionsJour.push({
@@ -859,6 +862,37 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           amende: SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros"
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
+      }
+
+      // === CHECK COUPURES SLO (Code des transports R3312-11) ===
+      // Source: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651232
+      if (typeService === 'SLO' && amplitudeH > 12) {
+        const coupuresSLO = activitesJour.filter(a => (a.type === 'pause' || a.type === 'repos') && a.duree_min >= 90);
+        const coupuresLongues = activitesJour.filter(a => (a.type === 'pause' || a.type === 'repos') && a.duree_min >= 120);
+        if (amplitudeH > 13) {
+          const aCoupure3h = activitesJour.some(a => (a.type === 'pause' || a.type === 'repos') && a.duree_min >= 180);
+          const a2x2h = coupuresLongues.length >= 2;
+          if (!aCoupure3h && !a2x2h) {
+            infractionsJour.push({
+              regle: 'Amplitude SLO > 13h sans coupure suffisante (R3312-11 al.2b)',
+              limite: 'Coupure 3h continues ou 2x2h obligatoire',
+              constate: 'Amplitude ' + amplitudeH.toFixed(1) + 'h, coupure insuffisante',
+              depassement: 'Coupure manquante',
+              classe: '4e classe',
+              amende: SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire), minoree ' + SANCTIONS.classe_4.amende_minoree + ' euros, majoree ' + SANCTIONS.classe_4.amende_majoree + ' euros'
+            });
+            amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
+          }
+        } else {
+          const aCoupure2h30 = activitesJour.some(a => (a.type === 'pause' || a.type === 'repos') && a.duree_min >= 150);
+          const a2x1h30 = coupuresSLO.length >= 2;
+          if (!aCoupure2h30 && !a2x1h30) {
+            avertissementsJour.push({
+              regle: 'Amplitude SLO > 12h sans coupure suffisante (R3312-11 al.2a)',
+              message: 'Amplitude ' + amplitudeH.toFixed(1) + 'h. En SLO, amplitude > 12h necessite coupure 2h30 continue ou 2x1h30. Source: R3312-11.'
+            });
+          }
+        }
       }
     }
 
@@ -1350,7 +1384,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.1.2',
+    version: '7.1.3',
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
@@ -1598,7 +1632,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.1.2',
+    version: '7.1.3',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2871,7 +2905,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.1.2',
+    version: '7.1.3',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,

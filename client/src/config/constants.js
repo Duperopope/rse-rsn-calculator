@@ -27,7 +27,8 @@ export const TYPES_SERVICE = [
   { code: 'REGULIER', label: 'Service regulier (<=50km)' },
   { code: 'OCCASIONNEL', label: 'Service occasionnel' },
   { code: 'MARCHANDISES', label: 'Transport de marchandises' },
-  { code: 'INTERURBAIN', label: 'Interurbain (>50km)' }
+  { code: 'INTERURBAIN', label: 'Interurbain (>50km)' },
+  { code: 'SLO', label: 'SLO - Service Librement Organise' }
 ];
 
 // Pays supportes
