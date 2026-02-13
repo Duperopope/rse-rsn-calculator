@@ -53,7 +53,7 @@ export function calculerStatsJour(activites) {
       case 'P':
       case 'R':
         pauseTotale += d;
-        if (d >= 15) conduiteBloc = 0; // Pause >= 15min reset le bloc
+        if (d >= 45) conduiteBloc = 0; // Pause >= 45min reset conduite continue (CE 561/2006 Art.7)
         break;
       default:
         break;

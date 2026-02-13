@@ -54,7 +54,7 @@ function analyserInfractions(activites) {
         });
       }
     } else if (act.type === 'P' || act.type === 'R') {
-      if (duree >= 15) {
+      if (duree >= 45) { // CE 561/2006 Art.7 : seule une pause >= 45min reset la conduite
         conduiteAcc = 0;
         depassementDebut = null;
       }

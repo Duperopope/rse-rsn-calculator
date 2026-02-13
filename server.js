@@ -854,7 +854,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       if (amplitudeH > amplitudeMax) {
         const depassement = (amplitudeH - amplitudeMax).toFixed(1);
         infractionsJour.push({
-          regle: "Amplitude journaliere (L3312-2)",
+          regle: "Amplitude journalière (Décret 2010-855 Art.6)",
           limite: amplitudeMax + "h",
           constate: amplitudeH.toFixed(1) + "h",
           depassement: depassement + "h",
@@ -1384,7 +1384,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.4.0',
+    version: '7.4.1',
     auteur: "Samir Medjaher",
     regles_version: "CE 561/2006 + Code des transports FR",
     pays_supportes: Object.keys(PAYS).length,
@@ -1632,7 +1632,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.4.0',
+    version: '7.4.1',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2905,7 +2905,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.4.0',
+    version: '7.4.1',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
