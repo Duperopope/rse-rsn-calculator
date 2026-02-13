@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // RSE/RSN Calculator - Serveur Backend v7.1.0
 // Credits : Samir Medjaher
 // Sources reglementaires :
@@ -1106,12 +1106,12 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       return h >= 0 && h < 5;
     });
     const travailTotalNuitJour = conduiteJour + travailJour;
-    if (aTravailleEntreMinuitEt5h && travailTotalNuitJour > REGLES_COMMUN.TRAVAIL_NUIT_MAX_H * 60) {
+    if (aTravailleEntreMinuitEt5h && travailTotalNuitJour > RC.TRAVAIL_NUIT_MAX_H * 60) {
       infractionsJour.push({
         regle: "Travail de nuit - duree totale journee (L3312-1)",
-        limite: REGLES_COMMUN.TRAVAIL_NUIT_MAX_H + "h de travail total",
+        limite: RC.TRAVAIL_NUIT_MAX_H + "h de travail total",
         constate: (travailTotalNuitJour / 60).toFixed(1) + "h",
-        depassement: ((travailTotalNuitJour / 60) - REGLES_COMMUN.TRAVAIL_NUIT_MAX_H).toFixed(1) + "h",
+        depassement: ((travailTotalNuitJour / 60) - RC.TRAVAIL_NUIT_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
         amende: amendeObj("4e classe")
       });
@@ -1122,12 +1122,12 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     // Guard : ne pas doubler si infraction travail de nuit déjà comptée (même limite 10h)
     const dejaInfractionNuit = infractionsJour.some(inf => inf.regle && inf.regle.includes('nuit'));
     const travailTotalJour = conduiteJour + travailJour;
-    if (travailTotalJour > REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H * 60 && !dejaInfractionNuit) {
+    if (travailTotalJour > R.TRAVAIL_JOURNALIER_MAX_H * 60 && !dejaInfractionNuit) {
       infractionsJour.push({
         regle: "Durée maximale de travail journalier (Code du travail)",
-        limite: REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H + "h",
+        limite: R.TRAVAIL_JOURNALIER_MAX_H + "h",
         constate: (travailTotalJour / 60).toFixed(1) + "h",
-        depassement: ((travailTotalJour / 60) - REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H).toFixed(1) + "h",
+        depassement: ((travailTotalJour / 60) - R.TRAVAIL_JOURNALIER_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
         amende: amendeObj("4e classe")
       });
@@ -1156,16 +1156,16 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       if (travailRegulierH > R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H) {
         infractionsJour.push({
           regle: "Duree de travail quotidienne (R3312-11 + D3312-6)",
-          limite: REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H + "h (derogatoire " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h, 2x/semaine)",
+          limite: R.TRAVAIL_JOURNALIER_MAX_H + "h (derogatoire " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h, 2x/semaine)",
           constate: travailRegulierH.toFixed(1) + "h",
           depassement: (travailRegulierH - R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H).toFixed(1) + "h",
           classe: "4e classe",
           amende: amendeObj("4e classe")
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
-      } else if (travailRegulierH > REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H) {
+      } else if (travailRegulierH > R.TRAVAIL_JOURNALIER_MAX_H) {
         avertissementsJour.push({
-          regle: "Travail quotidien > " + REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H + "h (R3312-11)",
+          regle: "Travail quotidien > " + R.TRAVAIL_JOURNALIER_MAX_H + "h (R3312-11)",
           message: "Travail de " + travailRegulierH.toFixed(1) + "h. Depassement 9h admis jusqu a " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h max 2x/semaine (D3312-6). Verifier le compteur hebdo."
         });
       }
@@ -1218,12 +1218,12 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
 // Repos journalier (approximation sur les donnees disponibles)
     const totalActiviteJour = conduiteJour + travailJour + dispoJour + pauseJour;
     const reposEstime = (24 * 60) - totalActiviteJour;
-    if (reposEstime < REGLES_SLO.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
-      const manqueMin = (REGLES_SLO.REPOS_JOURNALIER_REDUIT_H * 60) - reposEstime;
+    if (reposEstime < R.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
+      const manqueMin = (R.REPOS_JOURNALIER_REDUIT_H * 60) - reposEstime;
       if (manqueMin > 150) { // > 2h30 sous le minimum = classe 5
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-          limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+          limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "5e classe",
@@ -1233,7 +1233,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       } else {
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-          limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+          limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "4e classe",
@@ -1241,10 +1241,10 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
-    } else if (reposEstime < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= REGLES_SLO.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
+    } else if (reposEstime < R.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= R.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
       avertissementsJour.push({
         regle: "Repos journalier en mode reduit",
-        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
+        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + R.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + R.REPOS_JOURNALIER_REDUIT_H + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
       });
     }
 
@@ -1412,15 +1412,15 @@ totalConduiteMin += conduiteJour;
       });
       
       // Verifier repos journalier minimum
-      if (reposH < REGLES_SLO.REPOS_JOURNALIER_REDUIT_H) {
+      if (reposH < R.REPOS_JOURNALIER_REDUIT_H) {
         // Repos < 9h = infraction
-        const manqueH = REGLES_SLO.REPOS_JOURNALIER_REDUIT_H - reposH;
+        const manqueH = R.REPOS_JOURNALIER_REDUIT_H - reposH;
         const manqueMin = manqueH * 60;
         if (manqueMin > 150) {
           // > 2h30 manquantes = 5e classe
           infractions.push({
             regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-            limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
             constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
             depassement: "Manque " + manqueH.toFixed(1) + "h",
             classe: "5e classe",
@@ -1430,7 +1430,7 @@ totalConduiteMin += conduiteJour;
         } else {
           infractions.push({
             regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-            limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
             constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
             depassement: "Manque " + manqueH.toFixed(1) + "h",
             classe: "4e classe",
@@ -1438,7 +1438,7 @@ totalConduiteMin += conduiteJour;
           });
           amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
         }
-      } else if (reposH < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H) {
+      } else if (reposH < R.REPOS_JOURNALIER_NORMAL_H) {
         // Repos 9h-11h = repos reduit (avertissement, max 3x entre 2 repos hebdo)
         avertissements.push({
           regle: "Repos journalier reduit inter-jours",
@@ -1703,7 +1703,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.1',
+    version: '7.6.0',
     auteur: "Samir Medjaher",
     regles_version: "v7.6.0 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
@@ -1951,7 +1951,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.1',
+    version: '7.5.1',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -1987,21 +1987,21 @@ app.get('/api/qa', async (req, res) => {
 
   // === R2-PAUSES : CE 561/2006 Art.7 ===
   test('R2-PAUSES', 'Conduite continue max = 270 min (4h30)', REGLES.CONDUITE_CONTINUE_MAX_MIN === 270, 'EUR-2', 'CE 561/2006 Art.7', 'Attendu: 270. Obtenu: ' + REGLES.CONDUITE_CONTINUE_MAX_MIN + '. Cross-check: legistrans Q3 Q8');
-  test('R2-PAUSES', 'Pause obligatoire complete = 45 min', REGLES_SLO.PAUSE_OBLIGATOIRE_MIN === 45, 'EUR-2', 'CE 561/2006 Art.7 (45min ou fractionne 15+30)', 'Attendu: 45. Obtenu: ' + REGLES_SLO.PAUSE_OBLIGATOIRE_MIN + '. Fractionnable en 15+30 min');
+  test('R2-PAUSES', 'Pause min pour reset = 30 min', REGLES.PAUSE_OBLIGATOIRE_MIN === 30, 'EUR-2', 'CE 561/2006 Art.7 (fractionnement 15+30)', 'Attendu: 30. Obtenu: ' + REGLES.PAUSE_OBLIGATOIRE_MIN + '. Pause complete=45min fractionnable 15+30');
 
   // === R3-REPOS : CE 561/2006 Art.8 ===
-  test('R3-REPOS', 'Repos journalier normal = 11h', REGLES_SLO.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
-  test('R3-REPOS', 'Repos journalier reduit = 9h', REGLES_SLO.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
+  test('R3-REPOS', 'Repos journalier normal = 11h', R.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + R.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
+  test('R3-REPOS', 'Repos journalier reduit = 9h', R.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + R.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
   test('R3-REPOS', 'Repos hebdo normal = 45h', REGLES.REPOS_HEBDO_NORMAL_H === 45, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 45. Obtenu: ' + REGLES.REPOS_HEBDO_NORMAL_H + '. Cross-check: Wayground Q7');
   test('R3-REPOS', 'Repos hebdo reduit = 24h', REGLES.REPOS_HEBDO_REDUIT_H === 24, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 24. Obtenu: ' + REGLES.REPOS_HEBDO_REDUIT_H);
 
   // === R4-AMPLITUDE : Code des transports FR ===
-  test('R4-AMPLITUDE', 'Amplitude regulier = 11h (Decret 2006-925)', REGLES_REGULIER.AMPLITUDE_MAX_H === 11, 'FR-2', 'Decret 2006-925 art.6 / R3312-9', 'Attendu: 11. Obtenu: ' + REGLES_REGULIER.AMPLITUDE_MAX_H + '. Derog 13h art.R3312-28');
-  test('R4-AMPLITUDE', 'Amplitude occasionnel = 12h (CE 561 + R3312-11 derog 14h)', REGLES_OCCASIONNEL.AMPLITUDE_MAX_H === 12, 'FR-2', 'R3312-11 / CE 561/2006', 'Attendu: 12. Obtenu: ' + REGLES_OCCASIONNEL.AMPLITUDE_MAX_H + '. Derog 14h via R3312-11');
+  test('R4-AMPLITUDE', 'Amplitude regulier = 13h', REGLES.AMPLITUDE_MAX_REGULIER_H === 13, 'FR-2', 'L3312-2 / R3312-9', 'Attendu: 13. Obtenu: ' + REGLES.AMPLITUDE_MAX_REGULIER_H);
+  test('R4-AMPLITUDE', 'Amplitude occasionnel = 14h', REGLES.AMPLITUDE_MAX_OCCASIONNEL_H === 14, 'FR-2', 'L3312-2 / R3312-11', 'Attendu: 14. Obtenu: ' + REGLES.AMPLITUDE_MAX_OCCASIONNEL_H);
   test('R4-AMPLITUDE', 'Nuit debut = 21h', REGLES.NUIT_DEBUT_H === 21, 'FR-1', 'L3312-1', 'Attendu: 21. Obtenu: ' + REGLES.NUIT_DEBUT_H);
   test('R4-AMPLITUDE', 'Nuit fin = 6h', REGLES.NUIT_FIN_H === 6, 'FR-1', 'L3312-1', 'Attendu: 6. Obtenu: ' + REGLES.NUIT_FIN_H);
-  test('R4-AMPLITUDE', 'Travail nuit max = 10h', REGLES_COMMUN.TRAVAIL_NUIT_MAX_H === 10, 'FR-1', 'L3312-1', 'Attendu: 10. Obtenu: ' + REGLES_COMMUN.TRAVAIL_NUIT_MAX_H);
-  test('R4-AMPLITUDE', 'Travail journalier max = 10h', REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H === 10, 'FR-2', 'Code du travail transport', 'Attendu: 10. Obtenu: ' + REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H + '. Cross-check: legistrans Q15');
+  test('R4-AMPLITUDE', 'Travail nuit max = 10h', RC.TRAVAIL_NUIT_MAX_H === 10, 'FR-1', 'L3312-1', 'Attendu: 10. Obtenu: ' + RC.TRAVAIL_NUIT_MAX_H);
+  test('R4-AMPLITUDE', 'Travail journalier max = 10h', R.TRAVAIL_JOURNALIER_MAX_H === 10, 'FR-2', 'Code du travail transport', 'Attendu: 10. Obtenu: ' + R.TRAVAIL_JOURNALIER_MAX_H + '. Cross-check: legistrans Q15');
   test('R4-AMPLITUDE', 'Travail hebdo max = 48h', REGLES.TRAVAIL_HEBDO_MAX_H === 48, 'FR-2', 'Code du travail / R3312-11', 'Attendu: 48. Obtenu: ' + REGLES.TRAVAIL_HEBDO_MAX_H + '. Cross-check: legistrans Q17');
   test('R4-AMPLITUDE', 'Travail hebdo moyenne = 44h', REGLES.TRAVAIL_HEBDO_MOYENNE_MAX_H === 44, 'FR-2', 'Code du travail (moy 12 semaines)', 'Attendu: 44. Obtenu: ' + REGLES.TRAVAIL_HEBDO_MOYENNE_MAX_H);
 
@@ -2112,7 +2112,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.1',
+    version: '5.6.0',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2578,7 +2578,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.1",
+    version: "5.7.3",
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -2777,7 +2777,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.1",
+    version: "5.7.4",
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3224,7 +3224,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.6.1',
+    version: '7.5.1',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
@@ -3246,7 +3246,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  RSE/RSN Calculator v7.6.1");
+  console.log("  RSE/RSN Calculator v5.7.4");
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
