@@ -54,7 +54,7 @@ function analyserInfractions(activites) {
         });
       }
     } else if (act.type === 'P' || act.type === 'R') {
-      if (duree >= 45) {
+      if (duree >= 15) {
         conduiteAcc = 0;
         depassementDebut = null;
       }
