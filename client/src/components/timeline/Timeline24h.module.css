@@ -128,3 +128,150 @@
     min-width: 8px;
   }
 }
+
+
+/* === MARQUEURS D'INFRACTION === */
+.infractionBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(255, 59, 48, 0.12);
+  border-radius: 6px;
+  margin: 0 10px 4px;
+  border-left: 3px solid #ff3b30;
+}
+
+.infractionCount {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #ff6b6b;
+  letter-spacing: 0.02em;
+}
+
+.marqueurInfraction {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 3px;
+  transform: translateX(-50%);
+  z-index: 10;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.marqueurInfraction:active {
+  transform: translateX(-50%) scaleX(2);
+}
+
+.marqueurDanger {
+  background: #ff3b30;
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.6);
+}
+
+.marqueurWarning {
+  background: #ff9f0a;
+  box-shadow: 0 0 8px rgba(255, 159, 10, 0.6);
+}
+
+.marqueurPin {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: inherit;
+  border: 2px solid var(--bg-card, #16213e);
+  z-index: 11;
+}
+
+.marqueurPulse {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  animation: pulseInfraction 2s infinite;
+}
+
+@keyframes pulseInfraction {
+  0% { transform: translateX(-50%) scale(0.5); opacity: 0.4; }
+  50% { transform: translateX(-50%) scale(1.2); opacity: 0; }
+  100% { transform: translateX(-50%) scale(0.5); opacity: 0.4; }
+}
+
+.infractionDetail {
+  margin: 6px 10px 0;
+  padding: 10px 14px;
+  background: rgba(255, 59, 48, 0.08);
+  border: 1px solid rgba(255, 59, 48, 0.25);
+  border-radius: 10px;
+  animation: slideInfraction 0.2s ease;
+}
+
+@keyframes slideInfraction {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.infractionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.infractionIcon {
+  font-size: 1rem;
+}
+
+.infractionLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ff6b6b;
+}
+
+.infractionTime {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ff9f0a;
+  font-variant-numeric: tabular-nums;
+}
+
+.infractionBody {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #888);
+  line-height: 1.4;
+}
+
+.legendeInfraction {
+  background: #ff3b30 !important;
+  box-shadow: 0 0 4px rgba(255, 59, 48, 0.5);
+  animation: pulseInfraction 2s infinite;
+}
+
+@media (pointer: coarse) {
+  .marqueurInfraction {
+    width: 20px;
+    background: transparent;
+  }
+  .marqueurDanger {
+    border-left: 3px solid #ff3b30;
+  }
+  .marqueurDanger .marqueurPin {
+    background: #ff3b30;
+  }
+  .marqueurWarning {
+    border-left: 3px solid #ff9f0a;
+  }
+  .marqueurWarning .marqueurPin {
+    background: #ff9f0a;
+  }
+}

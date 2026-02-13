@@ -1,17 +1,93 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { TYPES_ACTIVITE } from '../../config/constants.js';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
+import { TYPES_ACTIVITE, LIMITES } from '../../config/constants.js';
 import { dureeMin } from '../../utils/time.js';
 import styles from './Timeline24h.module.css';
 
-/**
- * Timeline 24h interactive - visualisation des activites sur une journee
- * Affiche les blocs d'activite sur une barre horizontale de 0h a 24h
- * @param {Array} activites - [{debut:"HH:MM", fin:"HH:MM", type:"C"|"T"|"P"|"D"|"R"}]
- * @param {string} theme - 'dark' ou 'light'
- */
+function detecterInfractions(activites) {
+  const marqueurs = [];
+  if (!activites || activites.length === 0) return marqueurs;
+
+  const sorted = [...activites]
+    .filter(a => a.debut && a.fin)
+    .sort((a, b) => dureeMin(a.debut) - dureeMin(b.debut));
+
+  // Conduite continue > 4h30 sans pause
+  let conduiteAccumulee = 0;
+
+  for (const act of sorted) {
+    const start = dureeMin(act.debut);
+    const end = dureeMin(act.fin) <= start ? dureeMin(act.fin) + 1440 : dureeMin(act.fin);
+    const duree = end - start;
+
+    if (act.type === 'C') {
+      conduiteAccumulee += duree;
+      if (conduiteAccumulee > LIMITES.CONDUITE_CONTINUE_MAX) {
+        const minuteInfraction = start + (LIMITES.CONDUITE_CONTINUE_MAX - (conduiteAccumulee - duree));
+        if (minuteInfraction >= 0 && minuteInfraction <= 1440) {
+          marqueurs.push({
+            minute: Math.min(minuteInfraction, 1440),
+            type: 'conduite_continue',
+            label: 'Conduite continue > 4h30',
+            detail: 'Pause de 45 min obligatoire (CE 561/2006 Art.7)',
+            severity: 'danger'
+          });
+        }
+      }
+    } else if (act.type === 'P' || act.type === 'R') {
+      if (duree >= 45) {
+        conduiteAccumulee = 0;
+      }
+    }
+  }
+
+  // Conduite journalière > 9h
+  let conduiteJournaliere = 0;
+  for (const act of sorted) {
+    if (act.type === 'C') {
+      const start = dureeMin(act.debut);
+      const end = dureeMin(act.fin) <= start ? dureeMin(act.fin) + 1440 : dureeMin(act.fin);
+      conduiteJournaliere += (end - start);
+      if (conduiteJournaliere > LIMITES.CONDUITE_JOURNALIERE_MAX) {
+        const minuteInfraction = start + (LIMITES.CONDUITE_JOURNALIERE_MAX - (conduiteJournaliere - (end - start)));
+        if (minuteInfraction >= 0 && minuteInfraction <= 1440) {
+          marqueurs.push({
+            minute: Math.min(minuteInfraction, 1440),
+            type: 'conduite_journaliere',
+            label: 'Conduite journalière > 9h',
+            detail: '4e classe : 135 € (CE 561/2006 Art.6)',
+            severity: 'danger'
+          });
+        }
+      }
+    }
+  }
+
+  // Amplitude dépassée
+  if (sorted.length >= 2) {
+    const premiereActivite = dureeMin(sorted[0].debut);
+    const derniereActivite = sorted.reduce((max, act) => {
+      const fin = dureeMin(act.fin);
+      return fin > max ? fin : max;
+    }, 0);
+    const amplitude = derniereActivite - premiereActivite;
+    if (amplitude > LIMITES.AMPLITUDE_REGULIER_MAX) {
+      marqueurs.push({
+        minute: Math.min(premiereActivite + LIMITES.AMPLITUDE_REGULIER_MAX, 1440),
+        type: 'amplitude',
+        label: 'Amplitude > 13h',
+        detail: 'Arr\u00eat obligatoire (CE 561/2006 Art.8)',
+        severity: 'warning'
+      });
+    }
+  }
+
+  return marqueurs;
+}
+
 export function Timeline24h({ activites = [], theme = 'dark' }) {
   const containerRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
+  const [selectedMarqueur, setSelectedMarqueur] = useState(null);
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
@@ -25,7 +101,8 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  const totalMin = 1440; // 24h
+  const infractions = useMemo(() => detecterInfractions(activites), [activites]);
+  const totalMin = 1440;
 
   function getCouleur(type) {
     const t = TYPES_ACTIVITE.find(a => a.code === type);
@@ -37,15 +114,13 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
     return t ? t.label : type;
   }
 
-  // Calculer les blocs
   const blocs = [];
   for (const act of activites) {
     if (!act.debut || !act.fin) continue;
     let startMin = dureeMin(act.debut);
     let endMin = dureeMin(act.fin);
-    if (endMin <= startMin) endMin += 1440; // passage minuit
+    if (endMin <= startMin) endMin += 1440;
 
-    // Si le bloc depasse 24h, on le coupe
     if (startMin < 1440 && endMin > 1440) {
       blocs.push({ startMin, endMin: 1440, type: act.type, debut: act.debut, fin: '24:00' });
       blocs.push({ startMin: 0, endMin: endMin - 1440, type: act.type, debut: '00:00', fin: act.fin });
@@ -60,35 +135,47 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
     }
   }
 
-  // Marqueurs d'heures
   const heures = [];
   for (let h = 0; h <= 24; h += 3) {
     heures.push(h);
   }
 
+  function formatMinute(m) {
+    const hh = Math.floor(m / 60);
+    const mm = m % 60;
+    return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+  }
+
   return (
-    <div className={styles.container} onTouchStart={(e) => { /* touch-dismiss */ if (e.target === e.currentTarget) setTooltip(null); }} ref={containerRef}>
+    <div className={styles.container} ref={containerRef}
+      onTouchStart={(e) => {
+        if (e.target === e.currentTarget) {
+          setTooltip(null);
+          setSelectedMarqueur(null);
+        }
+      }}
+    >
+      {infractions.length > 0 && (
+        <div className={styles.infractionBar}>
+          <span className={styles.infractionCount}>
+            {'⛔'} {infractions.length} infraction{infractions.length > 1 ? 's' : ''} détectée{infractions.length > 1 ? 's' : ''}
+          </span>
+        </div>
+      )}
+
       <div className={styles.labels}>
         {heures.map(h => (
-          <span
-            key={h}
-            className={styles.heure}
-            style={{ left: (h / 24 * 100) + '%' }}
-          >
+          <span key={h} className={styles.heure} style={{ left: (h / 24 * 100) + '%' }}>
             {h}h
           </span>
         ))}
       </div>
+
       <div className={styles.track}>
-        {/* Lignes de grille */}
         {heures.map(h => (
-          <div
-            key={'g' + h}
-            className={styles.gridLine}
-            style={{ left: (h / 24 * 100) + '%' }}
-          />
+          <div key={'g' + h} className={styles.gridLine} style={{ left: (h / 24 * 100) + '%' }} />
         ))}
-        {/* Blocs d'activite */}
+
         {blocs.map((bloc, i) => {
           const left = (bloc.startMin / totalMin * 100);
           const w = ((bloc.endMin - bloc.startMin) / totalMin * 100);
@@ -103,11 +190,13 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
               }}
               onTouchStart={(e) => {
                 e.stopPropagation();
+                setSelectedMarqueur(null);
                 const rect = e.currentTarget.getBoundingClientRect();
-                setTooltip(prev => prev && prev.text === (getLabel(bloc.type) + ' : ' + bloc.debut + ' - ' + bloc.fin) ? null : {
+                setTooltip(prev => prev && prev.index === i ? null : {
                   text: getLabel(bloc.type) + ' : ' + bloc.debut + ' - ' + bloc.fin,
                   x: rect.left + rect.width / 2,
-                  y: rect.top - 8
+                  y: rect.top - 8,
+                  index: i
                 });
               }}
               onMouseEnter={(e) => {
@@ -115,16 +204,50 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
                 setTooltip({
                   x: rect.left + rect.width / 2,
                   y: rect.top - 8,
-                  text: getLabel(bloc.type) + ' : ' + bloc.debut + ' - ' + bloc.fin
+                  text: getLabel(bloc.type) + ' : ' + bloc.debut + ' - ' + bloc.fin,
+                  index: i
                 });
               }}
               onMouseLeave={() => setTooltip(null)}
-              title={getLabel(bloc.type) + ' : ' + bloc.debut + ' - ' + bloc.fin}
             />
           );
         })}
+
+        {infractions.map((inf, i) => {
+          const leftPct = (inf.minute / totalMin * 100);
+          return (
+            <div
+              key={'inf' + i}
+              className={styles.marqueurInfraction + (inf.severity === 'danger' ? ' ' + styles.marqueurDanger : ' ' + styles.marqueurWarning)}
+              style={{ left: leftPct + '%' }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                setTooltip(null);
+                if (navigator.vibrate) navigator.vibrate(15);
+                setSelectedMarqueur(prev => prev === i ? null : i);
+              }}
+              onClick={() => setSelectedMarqueur(prev => prev === i ? null : i)}
+            >
+              <div className={styles.marqueurPin} />
+              <div className={styles.marqueurPulse} />
+            </div>
+          );
+        })}
       </div>
-      {/* Legende */}
+
+      {selectedMarqueur !== null && infractions[selectedMarqueur] && (
+        <div className={styles.infractionDetail}>
+          <div className={styles.infractionHeader}>
+            <span className={styles.infractionIcon}>{infractions[selectedMarqueur].severity === 'danger' ? '⚠' : '⏱'}</span>
+            <span className={styles.infractionLabel}>{infractions[selectedMarqueur].label}</span>
+            <span className={styles.infractionTime}>{'à'} {formatMinute(infractions[selectedMarqueur].minute)}</span>
+          </div>
+          <div className={styles.infractionBody}>
+            {infractions[selectedMarqueur].detail}
+          </div>
+        </div>
+      )}
+
       <div className={styles.legende}>
         {TYPES_ACTIVITE.filter(t => blocs.some(b => b.type === t.code)).map(t => (
           <span key={t.code} className={styles.legendeItem}>
@@ -132,9 +255,14 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
             {t.label}
           </span>
         ))}
+        {infractions.length > 0 && (
+          <span className={styles.legendeItem}>
+            <span className={styles.legendeDot + ' ' + styles.legendeInfraction} />
+            Infractions
+          </span>
+        )}
       </div>
 
-      {/* Tooltip tactile */}
       {tooltip ? (
         <div
           className={styles.tooltipBubble}
