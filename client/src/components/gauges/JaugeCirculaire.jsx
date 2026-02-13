@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './JaugeCirculaire.module.css';
 
 /**
@@ -44,9 +44,11 @@ export function JaugeCirculaire({
   }
 
   const center = size / 2;
+  const [showDetail, setShowDetail] = useState(false);
+  const pourcent = Math.round(displayRatio * 100);
 
   return (
-    <div className={styles.container} style={{ width: size, minHeight: size }}>
+    <div className={styles.container} style={{ width: size, minHeight: size }} onClick={() => { if (navigator.vibrate) navigator.vibrate(5); setShowDetail(p => !p); }} role="button" tabIndex={0}>
       <svg width={size} height={size} className={styles.svg}>
         <circle
           cx={center}
@@ -77,7 +79,7 @@ export function JaugeCirculaire({
         {unite ? <span className={styles.unite}>{unite}</span> : null}
       </div>
       {label ? (
-        <span className={styles.label} data-status={status}>{label}</span>
+        <span className={styles.label} data-status={status}>{showDetail ? pourcent + "%" : label}</span>
       ) : null}
     </div>
   );

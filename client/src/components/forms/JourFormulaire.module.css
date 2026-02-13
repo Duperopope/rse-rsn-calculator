@@ -179,3 +179,28 @@
   .activiteLine { flex-wrap: wrap; }
   .timeInput { width: 80px; }
 }
+
+
+/* === QOL 1: Touch targets WCAG 2.2 min 44x44px === */
+/* Source: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html */
+@media (pointer: coarse) {
+  .actionBtn, .removeBtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+  }
+  .deleteActBtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+  .addActBtn {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 1rem;
+  }
+  select, input[type="time"], input[type="text"] {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}

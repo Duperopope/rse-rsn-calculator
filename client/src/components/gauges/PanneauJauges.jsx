@@ -14,7 +14,7 @@ import styles from './PanneauJauges.module.css';
 export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
   if (!stats || stats.nbActivites === 0) return null;
 
-  const limiteAmplitude = (typeService === 'OCCASIONNEL')
+  const limiteAmplitude = (typeService === 'OCCASIONNEL' || typeService === 'SLO' || typeService === 'INTERURBAIN' || typeService === 'MARCHANDISES')
     ? LIMITES.AMPLITUDE_OCCASIONNEL_MAX
     : LIMITES.AMPLITUDE_REGULIER_MAX;
 

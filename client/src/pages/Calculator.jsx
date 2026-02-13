@@ -180,7 +180,7 @@ export default function Calculator() {
         ) : null}
 
         <div className={styles.analyseSection}>
-          <Button variant='primary' size='lg' fullWidth loading={chargement} disabled={!online || chargement} onClick={lancerAnalyse}>
+          <Button variant='primary' size='lg' fullWidth loading={chargement} disabled={!online || chargement} onClick={() => { if (navigator.vibrate) navigator.vibrate(10); lancerAnalyse(); }}>
             {chargement ? 'Analyse en cours...' : 'Analyser la conformite'}
           </Button>
           {equipage === 'double' ? (

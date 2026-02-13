@@ -31,6 +31,8 @@ export function useAnalysis() {
       }
 
       setResultat(data);
+      // QOL 3: Auto-scroll vers resultats apres analyse
+      setTimeout(() => { const el = document.getElementById("resultats"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 300);
       return data;
     } catch (e) {
       if (e.name === 'AbortError' || e.name === 'TimeoutError') {

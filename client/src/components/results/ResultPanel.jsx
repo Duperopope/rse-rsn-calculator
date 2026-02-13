@@ -52,7 +52,7 @@ export function ResultPanel({ resultat }) {
   }
 
   return (
-    <div className={styles.panel}>
+    <div id="resultats" className={styles.panel}>
       {/* Score principal */}
       <div className={styles.scoreSection}>
         <div className={styles.scoreCircle} style={{ borderColor: getScoreColor() }}>

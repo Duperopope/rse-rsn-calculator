@@ -133,6 +133,23 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
           </span>
         ))}
       </div>
+
+      {/* Tooltip tactile */}
+      {tooltip ? (
+        <div
+          className={styles.tooltipBubble}
+          style={{
+            position: 'fixed',
+            left: Math.min(Math.max(tooltip.x, 60), window.innerWidth - 60) + 'px',
+            top: (tooltip.y - 36) + 'px',
+            transform: 'translateX(-50%)',
+            zIndex: 9999
+          }}
+          onClick={() => setTooltip(null)}
+        >
+          {tooltip.text}
+        </div>
+      ) : null}
     </div>
   );
 }

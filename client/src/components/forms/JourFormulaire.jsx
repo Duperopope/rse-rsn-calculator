@@ -12,6 +12,51 @@ import styles from './JourFormulaire.module.css';
  * @param {Function} onDuplicate - (index) => void
  * @param {boolean} canRemove - Peut-on supprimer ce jour
  */
+
+// === QOL 7: Swipe-to-delete (mobile pattern) ===
+// Source: https://blog.logrocket.com/ux-design/accessible-swipe-contextual-action-triggers/
+function useSwipeDelete(onDelete, threshold = 80) {
+  const startX = React.useRef(0);
+  const currentX = React.useRef(0);
+  const swiping = React.useRef(false);
+  const elRef = React.useRef(null);
+
+  const handlers = {
+    onTouchStart(e) {
+      startX.current = e.touches[0].clientX;
+      swiping.current = true;
+      if (elRef.current) elRef.current.style.transition = 'none';
+    },
+    onTouchMove(e) {
+      if (!swiping.current) return;
+      currentX.current = e.touches[0].clientX;
+      const diff = currentX.current - startX.current;
+      if (diff < 0 && elRef.current) {
+        elRef.current.style.transform = 'translateX(' + Math.max(diff, -120) + 'px)';
+        elRef.current.style.opacity = String(1 - Math.min(Math.abs(diff) / 200, 0.5));
+      }
+    },
+    onTouchEnd() {
+      swiping.current = false;
+      const diff = currentX.current - startX.current;
+      if (elRef.current) {
+        elRef.current.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        if (diff < -threshold) {
+          elRef.current.style.transform = 'translateX(-100%)';
+          elRef.current.style.opacity = '0';
+          if (navigator.vibrate) navigator.vibrate(15);
+          setTimeout(onDelete, 300);
+        } else {
+          elRef.current.style.transform = 'translateX(0)';
+          elRef.current.style.opacity = '1';
+        }
+      }
+      currentX.current = 0;
+    }
+  };
+  return { ref: elRef, handlers };
+}
+
 export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, canRemove = true }) {
 
   function updateDate(newDate) {

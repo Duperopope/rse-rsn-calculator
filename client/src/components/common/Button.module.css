@@ -115,3 +115,12 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+
+/* === QOL 10: Double-tap prevention === */
+/* Source: https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action */
+.btn {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}

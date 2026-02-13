@@ -65,3 +65,119 @@
 .fill[data-status="danger"] {
   background: linear-gradient(90deg, var(--accent-red, #ff4444), #cc0000);
 }
+
+
+/* === Jauge interactive tactile === */
+.container {
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin: -6px -8px;
+}
+.container:active {
+  background: rgba(0, 212, 255, 0.05);
+}
+.expanded {
+  background: rgba(0, 212, 255, 0.03);
+}
+.details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  margin-top: 4px;
+  padding: 4px 0;
+  color: var(--text-secondary, #888);
+  animation: detailSlide 0.2s ease;
+}
+.details[data-status="danger"] {
+  color: var(--accent-red, #ff4444);
+}
+.details[data-status="warning"] {
+  color: var(--accent-orange, #ffaa00);
+}
+.details[data-status="ok"] {
+  color: var(--accent-green, #00ff88);
+}
+.detailIcon {
+  font-size: 0.85rem;
+}
+.detailSep {
+  opacity: 0.3;
+}
+@keyframes detailSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fix: supprimer carre focus visible au tap mobile */
+.container:focus {
+  outline: none;
+}
+.container:focus-visible {
+  outline: 2px solid var(--accent, #00d4ff);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+
+/* === Sanction preview au tap === */
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sanctionPreview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 68, 68, 0.08);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-red, #ff4444);
+  font-size: 0.7rem;
+  color: var(--accent-red, #ff4444);
+  animation: detailSlide 0.2s ease;
+}
+.sanctionRef {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sanctionSep {
+  opacity: 0.4;
+}
+.sanctionClass {
+  opacity: 0.9;
+}
+.refLine {
+  margin-top: 2px;
+  font-size: 0.65rem;
+  opacity: 0.5;
+}
+.refText {
+  font-style: italic;
+}
+
+
+/* === Conseil correctif === */
+.conseil {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 5px 8px;
+  background: rgba(0, 212, 255, 0.06);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent, #00d4ff);
+  font-size: 0.7rem;
+  color: var(--accent, #00d4ff);
+  animation: detailSlide 0.2s ease;
+  line-height: 1.4;
+}
+.conseilIcon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}

@@ -56,3 +56,23 @@
 .label[data-status="warning"] {
   color: var(--accent-orange, #ffaa00);
 }
+
+
+/* === Jauge circulaire interactive === */
+.container {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.container:active {
+  transform: scale(0.95);
+}
+
+/* Fix: supprimer carre focus visible au tap mobile */
+.container:focus {
+  outline: none;
+}
+.container:focus-visible {
+  outline: 2px solid var(--accent, #00d4ff);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
