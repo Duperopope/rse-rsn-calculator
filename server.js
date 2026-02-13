@@ -406,7 +406,18 @@ function parseCSVLigne(ligne, numeroLigne) {
   const dateStr = parts[0];
   const heureDebut = parts[1];
   const heureFin = parts[2];
-  const typeCode = parts[3].toUpperCase();
+    // Normalisation des types : accepter codes courts ET noms complets
+    const typeRaw = parts[3].trim().toUpperCase();
+    const NOMS_VERS_CODES = {
+      'CONDUITE': 'C', 'CONDUCT': 'C', 'DRIVING': 'C',
+      'AUTRE TACHE': 'T', 'AUTRE_TACHE': 'T', 'TRAVAIL': 'T', 'OTHER WORK': 'T', 'TACHE': 'T',
+      'DISPONIBILITE': 'D', 'DISPONIBLE': 'D', 'DISPO': 'D', 'AVAILABILITY': 'D',
+      'PAUSE': 'P', 'REPOS': 'P', 'PAUSE / REPOS': 'P', 'PAUSE/REPOS': 'P', 'REST': 'P', 'BREAK': 'P', 'PAUSE REPOS': 'P',
+      'FERRY': 'F', 'TRAVERSEE': 'F',
+      'HORS CHAMP': 'O', 'OUT OF SCOPE': 'O',
+      'C': 'C', 'T': 'T', 'D': 'D', 'P': 'P', 'R': 'R', 'O': 'O', 'F': 'F'
+    };
+    const typeCode = NOMS_VERS_CODES[typeRaw] || typeRaw;
 
   // Validation du type
   const typesValides = { C: 'conduite', T: 'autre_tache', D: 'disponibilite', P: 'pause', R: 'repos', O: 'hors_champ', F: 'ferry' };
@@ -1355,7 +1366,7 @@ totalConduiteMin += conduiteJour;
       pause_h: (pauseJour / 60).toFixed(1),
       disponibilite_min: dispoJour,
       disponibilite_h: (dispoJour / 60).toFixed(1),
-      amplitude_estimee_h: activitesJour.length >= 2
+      amplitude_estimee_h: (activitesJour.length >= 2 && activitesJour[0] && activitesJour[0].heure_debut)
         ? (function () {
           const d = activitesJour[0].heure_debut.split(':').map(Number);
           const f = activitesJour[activitesJour.length - 1].heure_fin.split(':').map(Number);
@@ -1447,6 +1458,7 @@ totalConduiteMin += conduiteJour;
         .pop();
       const debutSuivant = activitesSuivant
         .sort(function(a, b) { return a.heure_debut.localeCompare(b.heure_debut); })[0];
+      if (!finActuel || !debutSuivant) continue;
       
       const finH = parseInt(finActuel.heure_fin.split(":")[0]) * 60 + parseInt(finActuel.heure_fin.split(":")[1]);
       const debutH = parseInt(debutSuivant.heure_debut.split(":")[0]) * 60 + parseInt(debutSuivant.heure_debut.split(":")[1]);
@@ -1508,11 +1520,11 @@ totalConduiteMin += conduiteJour;
     for (let i = 0; i < detailsJours.length - 1; i++) {
       const jourActuel = detailsJours[i];
       const jourSuivant = detailsJours[i + 1];
-      const finActuel = joursMap[jourActuel.date]
-        .sort((a, b) => a.heure_fin.localeCompare(b.heure_fin))
-        .pop();
-      const debutSuivant = joursMap[jourSuivant.date]
-        .sort((a, b) => a.heure_debut.localeCompare(b.heure_debut))[0];
+      const actsA = (joursMap[jourActuel.date] || []).slice(); const actsS = (joursMap[jourSuivant.date] || []).slice();
+      if (actsA.length === 0 || actsS.length === 0) continue;
+      const finActuel = actsA.sort((a, b) => a.heure_fin.localeCompare(b.heure_fin)).pop();
+      const debutSuivant = actsS.sort((a, b) => a.heure_debut.localeCompare(b.heure_debut))[0];
+      if (!finActuel || !debutSuivant) continue;
       
       // Calculer le temps entre les deux en heures
       const finH = parseInt(finActuel.heure_fin.split(":")[0]) * 60 + parseInt(finActuel.heure_fin.split(":")[1]);
@@ -1770,9 +1782,9 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.6',
+    version: '7.6.7',
     auteur: "Samir Medjaher",
-    regles_version: "v7.6.6 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
+    regles_version: "v7.6.7 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
     timestamp: new Date().toISOString()
   });
@@ -1789,7 +1801,7 @@ app.get('/api/pays', (req, res) => {
 // ============================================================
 app.get("/api/qa/avance", (req, res) => {
   const tests = [];
-  const version = "7.6.6";
+  const version = "7.6.7";
   const date = new Date().toISOString().split("T")[0];
 
   function runTest(id, nom, csv, options, attendu) {
@@ -2002,7 +2014,7 @@ app.get('/api/regles', (req, res) => {
 // ============================================================
 // ROUTE QA NIVEAU 1 - TESTS REGLEMENTAIRES SOURCES
 // GET /api/qa
-// Version: 7.6.6
+// Version: 7.6.7
 // Sources primaires:
 //   [EUR-1] CE 561/2006 Art.6 - Durees de conduite
 //   [EUR-2] CE 561/2006 Art.7 - Pauses
@@ -2018,7 +2030,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.6',
+    version: '7.6.7',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2179,7 +2191,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.6',
+    version: '7.6.7',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2628,7 +2640,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
       pause_reset: '>= 30min remet conduite continue a 0'
     }
   };
-  console.log('[QA v7.6.6] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
+  console.log('[QA v7.6.7] ' + rapport.resume.ok + '/' + rapport.resume.total + ' OK (' + rapport.resume.pourcentage + '%) - Categories: ' + JSON.stringify(rapport.resume.categories));
   res.json(rapport);
 });
 
@@ -2645,7 +2657,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.6",
+    version: "7.6.7",
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -2844,7 +2856,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: "7.6.6",
+    version: "7.6.7",
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3291,7 +3303,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.6.6',
+    version: '7.6.7',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
@@ -3313,7 +3325,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  RSE/RSN Calculator v7.6.6");
+  console.log("  RSE/RSN Calculator v7.6.7");
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
