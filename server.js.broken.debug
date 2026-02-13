@@ -151,7 +151,7 @@ const SANCTIONS = {
   }
 };
 
-// Helper: construit un objet amende structure pour chaque infraction (v7.4.5)
+// Helper: construit un objet amende structure pour chaque infraction
 function amendeObj(classe) {
   if (classe === "5e classe") {
     return {
@@ -924,8 +924,10 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     if (maxConduiteContinue > REGLES.CONDUITE_CONTINUE_MAX_MIN) {
       const depassement = maxConduiteContinue - REGLES.CONDUITE_CONTINUE_MAX_MIN;
       const classe = depassement > 90 ? "5e classe" : "4e classe";
-      // [v7.4.5] ancien calcul amende string supprime
-      infractionsJour.push({
+      const amende = depassement > 90
+        ? SANCTIONS.classe_5.amende_max + " euros (max), " + SANCTIONS.classe_5.amende_recidive + " euros en recidive"
+// DEPRECATED:         : SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros";
+// DEPRECATED:       infractionsJour.push({
         regle: "Conduite continue (CE 561/2006 Art.7 + R3312-9)",
         limite: "4h30 (" + REGLES.CONDUITE_CONTINUE_MAX_MIN + " min)",
         constate: maxConduiteContinue + " min",
@@ -941,8 +943,10 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       const depassement = conduiteJour - REGLES.CONDUITE_JOURNALIERE_MAX_MIN;
       if (conduiteJour > REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN) {
         const classe = depassement > 120 ? "5e classe" : "4e classe";
-        // [v7.4.5] ancien calcul amende string supprime
-        infractionsJour.push({
+        const amende = depassement > 120
+          ? SANCTIONS.classe_5.amende_max + " euros (max), " + SANCTIONS.classe_5.amende_recidive + " euros en recidive"
+// DEPRECATED:           : SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire), minoree " + SANCTIONS.classe_4.amende_minoree + " euros, majoree " + SANCTIONS.classe_4.amende_majoree + " euros, max " + SANCTIONS.classe_4.amende_max + " euros";
+// DEPRECATED:         infractionsJour.push({
           regle: "Conduite journaliere (CE 561/2006 Art.6 + R3312-11)",
           limite: "9h (10h derogatoire, 2x/semaine)",
           constate: (conduiteJour / 60).toFixed(1) + "h (" + conduiteJour + " min)",
@@ -1013,7 +1017,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "5e classe",
-          amende: amendeObj('5e classe')
+          amende: amendeObj("5e classe")
         });
         amendeEstimee += SANCTIONS.classe_5.amende_max;
       } else {
@@ -1120,6 +1124,8 @@ totalConduiteMin += conduiteJour;
         depassement: (depassement / 60).toFixed(1) + "h",
         classe: classe,
         amende: amendeObj(classe)
+          ? SANCTIONS.classe_5.amende_max + " euros (max)"
+          : SANCTIONS.classe_4.amende_forfaitaire + " euros (forfaitaire)"
       });
       amendeEstimee += classe === "5e classe" ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
     }
@@ -1145,6 +1151,8 @@ totalConduiteMin += conduiteJour;
           depassement: (depassement / 60).toFixed(1) + 'h',
           classe: classe,
           amende: amendeObj(classe)
+            ? SANCTIONS.classe_5.amende_max + ' euros (max)'
+            : SANCTIONS.classe_4.amende_forfaitaire + ' euros (forfaitaire)'
         });
         amendeEstimee += classe === '5e classe' ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
         break; // Une seule infraction bi-hebdo suffit
@@ -1226,7 +1234,7 @@ totalConduiteMin += conduiteJour;
           constate: joursConsecutifsSansReposHebdo + " jours consecutifs sans repos hebdomadaire",
           depassement: (joursConsecutifsSansReposHebdo - 6) + " jour(s) de trop",
           classe: "5e classe",
-          amende: amendeObj('5e classe')
+          amende: amendeObj("5e classe")
         });
         amendeEstimee += SANCTIONS.classe_5.amende_max;
         break; // Une seule infraction suffit

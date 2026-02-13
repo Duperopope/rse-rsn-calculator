@@ -75,7 +75,9 @@ function trouverSource(regle) {
   return null;
 }
 
-export function InfractionCard({ infraction, index, onNavigate }) {
+export 
+
+function InfractionCard({ infraction, index, onNavigate }) {
   const inf = infraction || {};
   const message = inf.regle || inf.message || inf.description || 'Infraction';
   const article = inf.article || inf.reference || '';
@@ -84,7 +86,12 @@ export function InfractionCard({ infraction, index, onNavigate }) {
   const depassement = inf.depassement || '';
   const limite = inf.limite || '';
   const dates = inf.dates_concernees || [];
-  const bareme = BAREMES[classe] || BAREMES['4e classe'];
+  const baremeBase = BAREMES[classe] || BAREMES['4e classe'];
+  // Override avec les donnees API si disponibles (v7.4.5+)
+  const amendeAPI = infraction.amende;
+  const bareme = (amendeAPI && typeof amendeAPI === 'object' && amendeAPI.amende_forfaitaire !== undefined)
+    ? { forfait: amendeAPI.amende_forfaitaire, minore: amendeAPI.amende_minoree, majore: amendeAPI.amende_majoree, max: amendeAPI.amende_max }
+    : baremeBase;
 
   const sourceFromRegle = trouverSource(message);
   const sourceFromArticle = trouverSource(article);
