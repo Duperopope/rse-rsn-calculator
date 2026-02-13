@@ -203,27 +203,40 @@ const REGLES = Object.assign({}, REGLES_COMMUN, REGLES_SLO);
 // Utilises automatiquement dans infractions et avertissements
 // ================================================================
 const LIENS_LEGAUX = {
+  // ===== REGLEMENT EUROPEEN CE 561/2006 (texte consolidé) =====
   'CE 561/2006': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
-  'CE 561/2006 Art.6': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_6',
-  'CE 561/2006 Art.7': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_7',
-  'CE 561/2006 Art.8': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_8',
-  'CE 561/2006 Art.12': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#art_12',
-  'Reglement 2020/1054': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32020R1054',
-  'Reglement 2024/1258': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1258',
-  'Decret 2006-925': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000609812',
-  'Decret 2006-925 art.6': 'https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006916641',
-  'Decret 2006-925 art.9': 'https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006916644',
-  'Decret 2010-855': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022519042',
-  'Decret 2020-1088': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000042252987',
-  'R3312-9': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021297',
-  'R3312-11': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021293',
-  'R3312-28': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000029751371',
-  'R3315-10': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042573932',
-  'R3315-11': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042573928',
-  'R3315-4': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083678',
-  'L3312-1': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083898',
-  'L3312-2': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083896',
-  'L3313-3': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000023083886'
+  'CE 561/2006 Art.6': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e888-1-1',
+  'CE 561/2006 Art.7': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e940-1-1',
+  'CE 561/2006 Art.8': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e982-1-1',
+  'CE 561/2006 Art.12': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e1157-1-1',
+
+  // ===== REGLEMENT 2020/1054 (modification paquet mobilité) =====
+  'Reglement 2020/1054': 'https://eur-lex.europa.eu/legal-content/FR/ALL/?uri=CELEX:32020R1054',
+
+  // ===== REGLEMENT 2024/1258 (extension tachygraphe) =====
+  'Reglement 2024/1258': 'https://eur-lex.europa.eu/eli/reg/2024/1258/oj',
+
+  // ===== DECRET 2006-925 (transport urbain voyageurs) =====
+  'Decret 2006-925': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000423284/',
+  'Decret 2006-925 Art.9': 'https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000002439868',
+
+  // ===== DECRET 2010-855 (sanctions tachygraphe communautaire) =====
+  'Decret 2010-855': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022512271',
+
+  // ===== CODE DES TRANSPORTS - Partie legislative =====
+  'L3312-1': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033021297',
+  'L3312-2': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000026054561',
+  'L3313-3': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000029234271',
+  'L3315-4': 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000023071312/',
+
+  // ===== CODE DES TRANSPORTS - Partie réglementaire =====
+  'R3312-9': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651238',
+  'R3312-11': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651232',
+  'R3312-13': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033450247',
+  'R3312-28': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651204',
+  'R3315-4': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033450503',
+  'R3315-10': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046177522',
+  'R3315-11': 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000033450515/'
 };
 
 // Fonction utilitaire : trouver l'URL pour une reference dans un texte
