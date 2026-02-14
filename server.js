@@ -314,7 +314,7 @@ function verifierConduiteHebdomadaire(semaines) {
 // [PATCH v7.6.8] HELPER : Verification repos hebdomadaire
 // CE 561/2006 Art.8§6 : au moins 2 repos hebdo normaux (45h) OU 1 normal + 1 reduit (24h)
 // Repos hebdo doit commencer au plus tard apres 6 periodes de 24h (= 144h)
-function verifierReposHebdomadaire(detailsJours) {
+function verifierReposHebdomadaire(detailsJours, typeService) {
   const infractions = [];
   let dernierReposHebdo = null;
   let joursDepuisDernierRepos = 0;
@@ -331,16 +331,19 @@ function verifierReposHebdomadaire(detailsJours) {
     }
     
     // Apres 6 periodes de 24h sans repos hebdo => infraction
-    if (joursDepuisDernierRepos > 6) {
-      const depassementH = (joursDepuisDernierRepos - 6) * 24;
+    // [PATCH UE 2024/1258] Art.8(6a) - 12 jours si occasionnel
+      const isOcc = (typeService === 'SLO' || typeService === 'OCCASIONNEL');
+      const seuilMax = isOcc ? 12 : 6;
+      if (joursDepuisDernierRepos > seuilMax) {
+      const depassementH = (joursDepuisDernierRepos - seuilMax) * 24;
       const classe = depassementH < 12 ? '4e' : '5e';
       infractions.push({
         regle: 'Repos hebdomadaire insuffisant',
         date: jour.date,
-        message: `${joursDepuisDernierRepos} jours sans repos hebdomadaire (max 6 periodes de 24h)`,
+        message: `${joursDepuisDernierRepos} jours sans repos hebdomadaire (max ${seuilMax} periodes de 24h${isOcc ? " - derogation occasionnel Art.8§6a" : ""})`,
         classe: classe,
         amende: classe === '4e' ? { forfaitaire: 135, maximale: 750 } : { forfaitaire: 1500, maximale: 3000 },
-        ref_legale: 'CE 561/2006 Art.8§6 + Code transports R3315-10§5',
+        ref_legale: isOcc ? 'CE 561/2006 Art.8§6a (UE 2024/1258)' : 'CE 561/2006 Art.8§6 + Code transports R3315-10§5',
         url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02006R0561-20240522#d1e982-1-1'
       });
     }
@@ -1000,8 +1003,9 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
   }
 
   // Repos hebdo retard > 6 jours (Decret 2020-1088)
-  if (joursConsecutifsSansRepos > 6) {
-    const retardH = (joursConsecutifsSansRepos - 6) * 24;
+  const seuilReposHebdo1006 = (typeService === 'SLO' || typeService === 'OCCASIONNEL') ? 12 : 6;
+  if (joursConsecutifsSansRepos > seuilReposHebdo1006) {
+    const retardH = (joursConsecutifsSansRepos - seuilReposHebdo1006) * 24;
     const classeRetard = retardH >= REGLES.REPOS_HEBDO_RETARD_SEUIL_4E_CLASSE_H ? '5e classe' : '4e classe';
     // Deja gere par le code existant (repos hebdo), mais on enrichit le tracking
     tracking.rappels.push(
@@ -1293,6 +1297,60 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       amendeEstimee += depassement > 90 ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
     }
     } // fin garde CE 561 conduite continue
+
+    // [PATCH UE 2024/1258] Art.7 al.3 - Pause fractionnee 15+15 pour service occasionnel
+    // "For a driver engaged in an occasional passenger service, the break referred
+    //  to in the first paragraph may also be replaced by two breaks, of at least
+    //  15 minutes each" - CE 561/2006 Art.7 al.3 (consolide 31/12/2024)
+    // Ref: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02006R0561-20241231
+    if (typeService === 'SLO' || typeService === 'OCCASIONNEL') {
+      // Collecter toutes les pauses de la journee
+      const pausesJour = activitesJour.filter(a => a.type === 'pause');
+      const pausesDurees = pausesJour.map(a => a.duree_min);
+
+      // Verifier si le pattern 15+15 (total >= 45) est respecte
+      // Condition: au moins 2 pauses de >= 15min chacune, total >= 45min
+      const pausesSup15 = pausesDurees.filter(d => d >= 15);
+      const totalPausesSup15 = pausesSup15.reduce((s, d) => s + d, 0);
+      const pause1515Valide = pausesSup15.length >= 2 && totalPausesSup15 >= 45;
+
+      if (pause1515Valide) {
+        // Retirer les infractions "Conduite continue" qui sont des faux positifs
+        // car la pause 15+15 est legale en service occasionnel
+        const nbAvant = infractionsJour.length;
+        for (let idx = infractionsJour.length - 1; idx >= 0; idx--) {
+          if (infractionsJour[idx].regle && infractionsJour[idx].regle.includes('Conduite continue')) {
+            infractionsJour.splice(idx, 1);
+          }
+        }
+        const nbRetires = nbAvant - infractionsJour.length;
+        if (nbRetires > 0) {
+          avertissementsJour.push({
+            regle: 'Pause fractionnee 15+15 occasionnel (Art.7 al.3 - UE 2024/1258)',
+            message: 'Pauses de ' + pausesSup15.join('+') + ' min = ' + totalPausesSup15 + ' min (>= 45min, chaque pause >= 15min). Conforme UE 2024/1258 Art.7 al.3.'
+          });
+        }
+      }
+
+      // [PATCH UE 2024/1258] Verification: en occasionnel, chaque pause fractionnee
+      // doit faire AU MOINS 15 minutes. Une pause de 10min ne compte pas.
+      if (pausesDurees.length >= 2 && !pause1515Valide) {
+        const pausesTropCourtes = pausesDurees.filter(d => d > 0 && d < 15);
+        if (pausesTropCourtes.length > 0 && totalPausesSup15 < 45) {
+          infractionsJour.push({
+            regle: 'Pause insuffisante - fractionnement occasionnel (Art.7 al.3 UE 2024/1258)',
+            limite: '2 pauses >= 15min chacune, total >= 45min',
+            constate: 'Pauses: ' + pausesDurees.join(', ') + ' min (pauses < 15min: ' + pausesTropCourtes.join(', ') + ' min)',
+            depassement: 'Pause(s) < 15min non conforme',
+            classe: '4e classe',
+            amende: amendeObj('4e classe'),
+            ref_legale: 'CE 561/2006 Art.7 al.3 (UE 2024/1258)',
+            url_legale: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02006R0561-20241231'
+          });
+          amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
+        }
+      }
+    }
 
 
         // v7.6.0 : Conduite journaliere CE 561/2006 — NON applicable en REGULIER <=50km
@@ -1720,7 +1778,8 @@ totalConduiteMin += conduiteJour;
     const reposHebdoReduits = reposEntreJours.filter(r => r.repos_h >= REGLES.REPOS_HEBDO_REDUIT_H && r.repos_h < REGLES.REPOS_HEBDO_NORMAL_H);
     
     // Regle Art.8 par.6 : en 2 semaines, au moins 2 repos normaux OU 1 normal + 1 reduit
-    if (joursTries.length >= 12 && reposHebdosDetectes.length < 2) {
+    const isServiceOccasionnel1780 = (typeService === 'SLO' || typeService === 'OCCASIONNEL');
+    if (joursTries.length >= 12 && reposHebdosDetectes.length < 2 && !isServiceOccasionnel1780) {
       infractions.push({
         regle: "Repos hebdomadaire insuffisant (CE 561/2006 Art.8 par.6)",
         limite: "2 repos hebdo en 2 semaines (min 1 normal 45h + 1 reduit 24h)",
@@ -1735,6 +1794,7 @@ totalConduiteMin += conduiteJour;
     // Verifier la regle des 6 periodes de 24h (144h max entre 2 repos hebdo)
     // Art.8 par.6 : "A weekly rest period shall start no later than at the end
     //                of six 24-hour periods from the end of the previous weekly rest period"
+    const seuilMaxHebdo = (typeService === 'SLO' || typeService === 'OCCASIONNEL') ? 12 : 6; // UE 2024/1258 Art.8 par.6a
     let joursConsecutifsSansReposHebdo = 0;
     for (let i = 0; i < detailsJours.length; i++) {
       joursConsecutifsSansReposHebdo++;
@@ -1742,12 +1802,12 @@ totalConduiteMin += conduiteJour;
       if (i < reposEntreJours.length && reposEntreJours[i].repos_h >= REGLES.REPOS_HEBDO_REDUIT_H) {
         joursConsecutifsSansReposHebdo = 0;
       }
-      if (joursConsecutifsSansReposHebdo > 6) {
+      if (joursConsecutifsSansReposHebdo > seuilMaxHebdo) {
         infractions.push({
-          regle: "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6)",
-          limite: "Repos hebdo au plus tard apres 6 periodes de 24h (6 jours de travail)",
+          regle: seuilMaxHebdo === 12 ? "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6a - UE 2024/1258)" : "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6)",
+          limite: "Repos hebdo au plus tard apres " + seuilMaxHebdo + " periodes de 24h (" + seuilMaxHebdo + " jours)" + (seuilMaxHebdo === 12 ? " (derogation SLO UE 2024/1258)" : ""),
           constate: joursConsecutifsSansReposHebdo + " jours consecutifs sans repos hebdomadaire",
-          depassement: (joursConsecutifsSansReposHebdo - 6) + " jour(s) de trop",
+          depassement: (joursConsecutifsSansReposHebdo - seuilMaxHebdo) + " jour(s) de trop",
           classe: "5e classe",
           amende: amendeObj('5e classe')
         });
@@ -1948,7 +2008,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.6.10.1',
+    version: '7.6.11',
     auteur: "Samir Medjaher",
     regles_version: "v7.6.10.1 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
@@ -2156,6 +2216,93 @@ app.get("/api/qa/avance", (req, res) => {
     { equipage: "double" }, { equipage: "double", conduiteH: 6.0 }
   );
 
+
+  // ---- TRANSPORT VOYAGEURS - UE 2024/1258 ----
+  // Source: Reglement CE 561/2006 consolide 31/12/2024
+  // Ref: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02006R0561-20241231
+
+  // SCENARIO 1: Regle 12 jours (Art.8 par.6a modifie par UE 2024/1258)
+  // Un conducteur en service occasionnel unique peut reporter le repos
+  // hebdomadaire jusqu'a 12 periodes consecutives de 24h apres un repos
+  // hebdomadaire normal (45h). Conditions: tachygraphe numerique,
+  // conduite 22h-06h limitee a 3h sauf double equipage.
+  runTest("N5-12JOURS-01", "Regle 12 jours - Service occasionnel sans infraction (Art.8 par.6a)",
+    [
+      "2025-02-01;06:00;10:30;C", "2025-02-01;10:30;11:15;P", "2025-02-01;11:15;15:00;C", "2025-02-01;15:00;15:15;T",
+      "2025-02-02;06:00;10:30;C", "2025-02-02;10:30;11:15;P", "2025-02-02;11:15;15:00;C", "2025-02-02;15:00;15:15;T",
+      "2025-02-03;06:00;10:30;C", "2025-02-03;10:30;11:15;P", "2025-02-03;11:15;15:00;C", "2025-02-03;15:00;15:15;T",
+      "2025-02-04;06:00;10:30;C", "2025-02-04;10:30;11:15;P", "2025-02-04;11:15;15:00;C", "2025-02-04;15:00;15:15;T",
+      "2025-02-05;06:00;10:30;C", "2025-02-05;10:30;11:15;P", "2025-02-05;11:15;15:00;C", "2025-02-05;15:00;15:15;T",
+      "2025-02-06;06:00;10:30;C", "2025-02-06;10:30;11:15;P", "2025-02-06;11:15;15:00;C", "2025-02-06;15:00;15:15;T",
+      "2025-02-07;06:00;10:30;C", "2025-02-07;10:30;11:15;P", "2025-02-07;11:15;15:00;C", "2025-02-07;15:00;15:15;T",
+      "2025-02-08;06:00;10:30;C", "2025-02-08;10:30;11:15;P", "2025-02-08;11:15;15:00;C", "2025-02-08;15:00;15:15;T",
+      "2025-02-09;06:00;10:30;C", "2025-02-09;10:30;11:15;P", "2025-02-09;11:15;15:00;C", "2025-02-09;15:00;15:15;T",
+      "2025-02-10;06:00;10:30;C", "2025-02-10;10:30;11:15;P", "2025-02-10;11:15;15:00;C", "2025-02-10;15:00;15:15;T",
+      "2025-02-11;06:00;10:30;C", "2025-02-11;10:30;11:15;P", "2025-02-11;11:15;15:00;C", "2025-02-11;15:00;15:15;T",
+      "2025-02-12;06:00;10:30;C", "2025-02-12;10:30;11:15;P", "2025-02-12;11:15;15:00;C", "2025-02-12;15:00;15:15;T"
+    ].join("\n"),
+    { typeService: "SLO" }, { scoreMin: 50, nbJoursMin: 12, noRegle: "Repos hebdomadaire" }
+  );
+
+  // SCENARIO 2: Pause fractionnee 15+15 (Art.7 al.3 insere par UE 2024/1258)
+  // En service occasionnel, la pause de 45min peut etre remplacee par
+  // 2 pauses d'au moins 15min chacune (total >= 45min).
+  // Ici: 20min + 25min = 45min, LEGAL en occasionnel.
+  // Le moteur ne doit PAS generer d'infraction "pause insuffisante".
+  runTest("N5-PAUSE1515-01", "Pause 15+15 service occasionnel - Pas d'infraction (Art.7 al.3 UE 2024/1258)",
+    [
+      "2025-03-01;06:00;08:15;C",
+      "2025-03-01;08:15;08:35;P",
+      "2025-03-01;08:35;10:30;C",
+      "2025-03-01;10:30;10:55;P",
+      "2025-03-01;10:55;14:00;C",
+      "2025-03-01;14:00;14:15;T"
+    ].join("\n"),
+    { typeService: "SLO" }, { scoreMin: 80, noRegle: "Pause" }
+  );
+
+  runTest("N5-PAUSE1515-02", "Pause 10+35 service occasionnel - Infraction car pause < 15min (Art.7)",
+    [
+      "2025-03-02;06:00;08:15;C",
+      "2025-03-02;08:15;08:25;P",
+      "2025-03-02;08:25;10:30;C",
+      "2025-03-02;10:30;11:05;P",
+      "2025-03-02;11:05;14:00;C",
+      "2025-03-02;14:00;14:15;T"
+    ].join("\n"),
+    { typeService: "SLO" }, { hasRegle: "Pause" }
+  );
+
+  // SCENARIO 3: Report repos journalier +1h / 25h (Art.8 par.2a insere par UE 2024/1258)
+  // Service occasionnel unique >= 6 periodes de 24h: le repos journalier
+  // peut etre pris dans un delai de 25h (au lieu de 24h) UNE FOIS,
+  // a condition que la conduite ce jour-la ne depasse pas 7h.
+  // Jour 3: amplitude 25h avec seulement 5h de conduite -> LEGAL.
+  runTest("N5-REPORT25H-01", "Report repos 25h service occasionnel - Legal si conduite <= 7h (Art.8 par.2a)",
+    [
+      "2025-04-01;06:00;10:30;C", "2025-04-01;10:30;11:15;P", "2025-04-01;11:15;14:00;C", "2025-04-01;14:00;14:15;T",
+      "2025-04-02;06:00;10:30;C", "2025-04-02;10:30;11:15;P", "2025-04-02;11:15;14:00;C", "2025-04-02;14:00;14:15;T",
+      "2025-04-03;06:00;09:00;C", "2025-04-03;09:00;09:45;P", "2025-04-03;09:45;11:45;C", "2025-04-03;11:45;16:00;T",
+      "2025-04-04;07:00;10:30;C", "2025-04-04;10:30;11:15;P", "2025-04-04;11:15;14:00;C", "2025-04-04;14:00;14:15;T",
+      "2025-04-05;06:00;10:30;C", "2025-04-05;10:30;11:15;P", "2025-04-05;11:15;14:00;C", "2025-04-05;14:00;14:15;T",
+      "2025-04-06;06:00;10:30;C", "2025-04-06;10:30;11:15;P", "2025-04-06;11:15;14:00;C", "2025-04-06;14:00;14:15;T"
+    ].join("\n"),
+    { typeService: "SLO" }, { scoreMin: 50, nbJoursMin: 6 }
+  );
+
+  runTest("N5-REPORT25H-02", "Report repos 25h MAIS conduite > 7h - Infraction attendue (Art.8 par.2a)",
+    [
+      "2025-04-08;06:00;10:30;C", "2025-04-08;10:30;11:15;P", "2025-04-08;11:15;15:00;C", "2025-04-08;15:00;15:15;T",
+      "2025-04-09;06:00;10:30;C", "2025-04-09;10:30;11:15;P", "2025-04-09;11:15;15:00;C", "2025-04-09;15:00;15:15;T",
+      "2025-04-10;05:00;10:30;C", "2025-04-10;10:30;11:15;P", "2025-04-10;11:15;16:30;C", "2025-04-10;16:30;17:00;T",
+      "2025-04-11;07:00;10:30;C", "2025-04-11;10:30;11:15;P", "2025-04-11;11:15;15:00;C", "2025-04-11;15:00;15:15;T",
+      "2025-04-12;06:00;10:30;C", "2025-04-12;10:30;11:15;P", "2025-04-12;11:15;15:00;C", "2025-04-12;15:00;15:15;T",
+      "2025-04-13;06:00;10:30;C", "2025-04-13;10:30;11:15;P", "2025-04-13;11:15;15:00;C", "2025-04-13;15:00;15:15;T"
+    ].join("\n"),
+    { typeService: "SLO" }, { infractionsMin: 1 }
+  );
+
+
   // Resume
   const ok = tests.filter(t => t.status === "OK").length;
   const fail = tests.filter(t => t.status === "FAIL").length;
@@ -2196,7 +2343,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.10.1',
+    version: '7.6.11',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2357,7 +2504,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.10.1',
+    version: '7.6.11',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2823,7 +2970,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.10.1',
+    version: '7.6.11',
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -3022,7 +3169,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.6.10.1',
+    version: '7.6.11',
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3469,7 +3616,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.6.10.1',
+    version: '7.6.11',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
