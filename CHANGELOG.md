@@ -1,5 +1,14 @@
 # Changelog
 
+## v7.8.0 (2026-02-14)
+### Export PDF professionnel
+- **Nouveau module** : pdf-generator.js (pdfkit v0.17.2)
+- **Endpoint** : POST /api/rapport/pdf
+- **Contenu** : score, statistiques, fix-engine, infractions, avertissements, tableau par jour, references
+- **Frontend** : bouton Telecharger PDF + bouton Imprimer conserve
+- **Design** : A4, Helvetica, couleurs par severite, sauts de page automatiques
+
+
 ## v7.7.0 (2026-02-14)
 ### Nouveau composant : FixEnginePanel
 - **Comparaison avant/apres** : affiche le delta infractions, score et amende

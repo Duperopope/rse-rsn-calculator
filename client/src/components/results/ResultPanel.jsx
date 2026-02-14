@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { EURO } from '../../config/constants.js';
+import { EURO, API_URL } from '../../config/constants.js';
 import { InfractionCard } from './InfractionCard.jsx';
 import { RecommandationList } from './RecommandationList.jsx';
 import { SanctionTable } from './SanctionTable.jsx';
@@ -14,6 +14,37 @@ import styles from './ResultPanel.module.css';
 export function ResultPanel({ resultat }) {
   const [animScore, setAnimScore] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  function telechargerPDF() {
+    setPdfLoading(true);
+    fetch(API_URL + '/rapport/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resultat: resultat, options: {} })
+    })
+    .then(function(response) {
+      if (!response.ok) throw new Error('Erreur ' + response.status);
+      return response.blob();
+    })
+    .then(function(blob) {
+      var url = window.URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'rapport_rse_rsn_' + new Date().toISOString().slice(0, 10) + '.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(function(err) {
+      console.error('Erreur PDF:', err);
+      alert('Erreur lors de la generation du PDF. Veuillez reessayer.');
+    })
+    .finally(function() {
+      setPdfLoading(false);
+    });
+  }
 
   useEffect(() => {
     if (!resultat) return;
@@ -172,7 +203,14 @@ export function ResultPanel({ resultat }) {
       {tracking ? <TrackingDashboard tracking={tracking} /> : null}
 
       <SanctionTable />
-      <button className={styles.printBtn} onClick={() => window.print()}>Imprimer le rapport</button>
+      <div className={styles.exportBtns}>
+        <button className={styles.pdfBtn} onClick={telechargerPDF} disabled={pdfLoading}>
+          {pdfLoading ? 'Generation...' : 'Telecharger PDF'}
+        </button>
+        <button className={styles.printBtn} onClick={function() { window.print(); }}>
+          Imprimer
+        </button>
+      </div>
     </div>
   );
 }

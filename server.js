@@ -26,6 +26,7 @@ const app = express();
 
 // === FIX-ENGINE v7.6.10.1 - Correcteur post-traitement ===
 const { corrigerResultat } = require('./fix-engine.js');
+const { genererRapportPDF } = require('./pdf-generator.js');
 // === FIN FIX-ENGINE IMPORT ===
 const PORT = process.env.PORT || 3001;
 
@@ -1954,6 +1955,34 @@ app.post('/api/analyze', (req, res) => {
   }
 });
 
+// POST /api/rapport/pdf - Genere un rapport PDF
+app.post('/api/rapport/pdf', function(req, res) {
+  try {
+    var resultat = req.body.resultat;
+    var options = req.body.options || {};
+    
+    if (!resultat || !resultat.score === undefined) {
+      return res.status(400).json({ error: 'Donnees d analyse manquantes' });
+    }
+    
+    console.log('[PDF] Generation rapport - Score: ' + resultat.score + '%, Infractions: ' + (resultat.infractions || []).length);
+    
+    var doc = genererRapportPDF(resultat, options);
+    
+    var filename = 'rapport_rse_rsn_' + new Date().toISOString().slice(0, 10) + '.pdf';
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="' + filename + '"');
+    
+    doc.pipe(res);
+    doc.end();
+    
+    console.log('[PDF] Rapport genere: ' + filename);
+  } catch (err) {
+    console.error('[PDF ERREUR]', err);
+    res.status(500).json({ error: 'Erreur generation PDF: ' + err.message });
+  }
+});
 // POST /api/upload - Upload un fichier CSV
 app.post('/api/upload', upload.single('fichier'), (req, res) => {
   try {
@@ -2008,7 +2037,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.7.0',
+    version: '7.8.0',
     auteur: "Samir Medjaher",
     regles_version: "v7.6.10.1 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
@@ -2343,7 +2372,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.7.0',
+    version: '7.8.0',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2504,7 +2533,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.7.0',
+    version: '7.8.0',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2970,7 +2999,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.7.0',
+    version: '7.8.0',
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -3169,7 +3198,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.7.0',
+    version: '7.8.0',
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3616,7 +3645,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.7.0',
+    version: '7.8.0',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,

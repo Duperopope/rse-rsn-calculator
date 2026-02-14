@@ -42,3 +42,5 @@ v51_backup.jsx
 # IDE
 .vscode/settings.json
 .idea/
+
+tests/*.pdf
