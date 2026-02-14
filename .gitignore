@@ -1,22 +1,44 @@
+# Dependances
 node_modules/
 client/node_modules/
-client/dist/
-uploads/
-.env
-*.log
-.DS_Store
 
+# Build (reconstruit par Render)
+build/
+client/dist/
+
+# Environnement
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+server_stdout.log
+server_stderr.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (runtime)
+uploads/
+
+# Backups server.js (tous les formats)
+server.js.backup*
+server.js.backup.*
 *_backup*
 *_pre_*
 
-*.backup
-
-# Fichiers de resultats de test (ne pas deployer en prod)
-test_56jours_resultat_*.json
-server_stdout.log
-server_stderr.log
+# Fichiers temporaires de patch
 _patch_*.js
 
-server.js.backup_*
+# Resultats de tests (generes localement)
+test_56jours_resultat*.json
 test_56jours.csv
-test_56jours_resultat.json
+
+# Backups JSX
+v51_backup.jsx
+
+# IDE
+.vscode/settings.json
+.idea/
