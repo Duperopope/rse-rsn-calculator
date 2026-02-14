@@ -348,6 +348,76 @@ function phase7(infractions, joursActifs) {
 }
 
 // MAIN
+
+// ============================================================
+// COUCHE 2 - VALIDATIONS INTERNES (auto-diagnostic)
+// ============================================================
+function _valider(condition, message, contexte) {
+  if (!condition) {
+    var errMsg = '[FIX-ENGINE VALIDATION] ' + message;
+    if (contexte) { errMsg += ' | Contexte: ' + JSON.stringify(contexte); }
+    console.error(errMsg);
+    // Ne pas crasher, mais logger l'anomalie
+    if (!global._fix_engine_warnings) { global._fix_engine_warnings = []; }
+    global._fix_engine_warnings.push({ message: message, contexte: contexte, timestamp: new Date().toISOString() });
+  }
+  return condition;
+}
+
+function _validerInfraction(infr, index) {
+  var ok = true;
+  ok = _valider(infr && typeof infr === 'object', 'Infraction ' + index + ' est null ou invalide') && ok;
+  if (!infr) return false;
+  ok = _valider(typeof infr.regle === 'string' && infr.regle.length > 0, 'Infraction ' + index + ' sans regle', { regle: infr.regle }) && ok;
+  ok = _valider(typeof infr.classe === 'string' && (infr.classe.indexOf('4e') !== -1 || infr.classe.indexOf('5e') !== -1), 'Infraction ' + index + ' classe invalide', { classe: infr.classe }) && ok;
+  ok = _valider(infr.limite !== undefined, 'Infraction ' + index + ' sans limite', { regle: infr.regle }) && ok;
+  ok = _valider(infr.constate !== undefined, 'Infraction ' + index + ' sans constate', { regle: infr.regle }) && ok;
+  return ok;
+}
+
+function _validerResultatFinal(resultat) {
+  var warnings = global._fix_engine_warnings || [];
+  
+  // Validations structurelles
+  _valider(Array.isArray(resultat.infractions), 'resultat.infractions doit etre un tableau');
+  _valider(typeof resultat.score === 'number' && resultat.score >= 0 && resultat.score <= 100, 'Score hors bornes [0-100]', { score: resultat.score });
+  _valider(typeof resultat.amende_estimee === 'number' && resultat.amende_estimee >= 0, 'Amende negative', { amende: resultat.amende_estimee });
+  
+  // Validations metier
+  if (resultat.infractions) {
+    var nbInfr = resultat.infractions.length;
+    _valider(nbInfr <= 200, 'Nombre infractions suspect (> 200)', { nb: nbInfr });
+    _valider(resultat.amende_estimee <= 50000, 'Amende suspecte (> 50 000 EUR)', { amende: resultat.amende_estimee });
+    
+    // Valider chaque infraction
+    for (var i = 0; i < resultat.infractions.length; i++) {
+      _validerInfraction(resultat.infractions[i], i);
+    }
+    
+    // Coherence fix-engine
+    if (resultat._fix_engine) {
+      var fe = resultat._fix_engine;
+      _valider(fe.finales === nbInfr, 'fix_engine.finales != infractions.length', { finales: fe.finales, nbInfr: nbInfr });
+      _valider(fe.originales >= fe.retirees, 'Plus de retirees que d originales', { orig: fe.originales, ret: fe.retirees });
+      _valider(fe.retirees >= 0, 'Retirees negatives', { ret: fe.retirees });
+    }
+  }
+  
+  // Ajouter les warnings au resultat pour tracabilite
+  if (warnings.length > 0) {
+    resultat._fix_engine_warnings = warnings;
+    console.warn('[FIX-ENGINE] ' + warnings.length + ' warning(s) de validation detecte(s)');
+  }
+  
+  // Reset pour la prochaine requete
+  global._fix_engine_warnings = [];
+  
+  return resultat;
+}
+// ============================================================
+// FIN COUCHE 2 - VALIDATIONS INTERNES
+// ============================================================
+
 function corrigerResultat(resultat) {
   if (!resultat || !resultat.details_jours || !resultat.infractions) return resultat;
 
@@ -403,7 +473,7 @@ function corrigerResultat(resultat) {
     resultat.amende_estimee = amendes.amendeEstimee;
     resultat.score = score;
     resultat._fix_engine = {
-      version: '7.6.10.1',
+      version: '7.6.10.2',
       date: new Date().toISOString(),
       originales: finales.length + p4.retirees.length,
       retirees: p4.retirees.length + p4bRemoved,
@@ -426,8 +496,11 @@ function corrigerResultat(resultat) {
     return resultat;
   } catch (err) {
     log('ERR', err.message);
-    resultat._fix_engine = { version: '7.6.10.1', error: err.message, stack: err.stack, log: LOG.slice() };
-    return resultat;
+    resultat._fix_engine = { version: '7.6.10.2', error: err.message, stack: err.stack, log: LOG.slice() };
+      // Couche 2: validation finale
+  _validerResultatFinal(resultat);
+
+  return resultat;
   }
 }
 
