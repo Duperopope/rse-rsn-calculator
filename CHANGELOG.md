@@ -1,5 +1,18 @@
 # Changelog - RSE/RSN Calculator
 
+## [7.6.12] - 2026-02-14
+
+### Documentation
+- Compteur de tests mis a jour: 160 -> **203 tests** (100%)
+- Ajout N2 Cas reels (25 tests) et N6 Multi-semaines (18 tests) au decompte officiel
+- README: 6 niveaux QA documentes (N1-N6 + CSV)
+- Endpoint /api/qa/multi-semaines documente
+
+### Tests decouverts (existants mais non documentes)
+- N2 Cas reels: 25/25 OK
+- N6 Multi-semaines: 18/18 OK (tracking, compensation, retour domicile)
+
+---
 ## [7.6.11] - 2026-02-14
 
 ### Ajouts
@@ -76,3 +89,4 @@
 - 21 URLs Legifrance/EUR-Lex
 - Enrichissement auto backend
 - ResultPanel.jsx cliquable
+

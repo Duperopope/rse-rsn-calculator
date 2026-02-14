@@ -8,11 +8,11 @@
 | Element | Valeur |
 |---------|--------|
 | Version | **v7.6.11** |
-| Tests automatises | **160/160 (100%)** |
+| Tests automatises | **203/203 (100%)** |
 | Couverture reglementaire | 100% (standard + transport occasionnel voyageurs) |
 | Demo | [rse-rsn-calculator.onrender.com](https://rse-rsn-calculator.onrender.com/) |
 
-## Tests QA - 5 niveaux
+## Tests QA - 6 niveaux
 
 | Niveau | Endpoint | Tests | Description |
 |--------|----------|-------|-------------|
@@ -21,8 +21,9 @@
 | N3 - Limites | `GET /api/qa/limites` | 21 | Tests aux bornes sur 7 seuils reglementaires |
 | N4 - Robustesse | `GET /api/qa/robustesse` | 29 | Edge cases, inputs malformes, CSV vides, sequences absurdes |
 | N5 - Avances | `GET /api/qa/avance` | 18 | OUT, FERRY, multi-equipage, bi-hebdo 90h, repos hebdo, **transport occasionnel voyageurs** |
+| N6 - Multi-semaines | `GET /api/qa/multi-semaines` | 18 | Tracking multi-semaines, compensation repos, retour domicile, derogations |
 | CSV - Integration | `node tests/run-tests.js` | 36 | Fichiers CSV complets, scores, infractions, fix-engine |
-| **Total** | | **160** | **100% de reussite** |
+| **Total** | | **203** | **100% de reussite** |
 
 ## Transport occasionnel de voyageurs (UE 2024/1258)
 
@@ -90,6 +91,7 @@ Symboles conformes au reglement CE 3821/85 Annexe IB et reglement 165/2014.
 | `GET` | `/api/qa/limites` | Tests QA N3 - Limites (21 tests) |
 | `GET` | `/api/qa/robustesse` | Tests QA N4 - Robustesse (29 tests) |
 | `GET` | `/api/qa/avance` | Tests QA N5 - Avances (18 tests) |
+| `GET` | `/api/qa/multi-semaines` | Tests QA N6 - Multi-semaines (18 tests) |
 | `GET` | `/api/regles` | Reference reglementaire complete |
 
 ## Stack technique
@@ -112,3 +114,4 @@ Symboles conformes au reglement CE 3821/85 Annexe IB et reglement 165/2014.
 ## Licence
 
 Projet prive - Tous droits reserves.
+
