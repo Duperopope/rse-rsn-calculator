@@ -1,4 +1,4 @@
-﻿.panel {
+.panel {
   background: var(--bg-secondary, #1a1a2e);
   border: 1px solid var(--border, #2a2a4a);
   border-radius: 16px;

@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 ## v7.7.0 (2026-02-14)
 ### Nouveau composant : FixEnginePanel
