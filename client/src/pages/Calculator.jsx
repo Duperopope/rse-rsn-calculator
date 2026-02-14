@@ -216,19 +216,6 @@ export default function Calculator() {
         {/* === DASHBOARD STICKY === */}
         {mode === 'formulaire' && statsJour ? (
           <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')}>
-            {jours.length > 1 ? (
-              <div className={styles.jourTabs}>
-                {jours.map((j, i) => (
-                  <button
-                    key={i}
-                    className={styles.jourTab + (i === jourActifIndex ? ' ' + styles.jourTabActive : '')}
-                    onClick={() => setJourActifIndex(i)}
-                  >
-                    Jour {i + 1}  {j.date}
-                  </button>
-                ))}
-              </div>
-            ) : null}
             <PanneauJauges stats={statsJour} typeService={typeService} />
             {jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
               <div className={styles.timelineWrap}>
@@ -236,20 +223,7 @@ export default function Calculator() {
               </div>
             ) : null}
             <button
-              className={styles.expandToggle}
-              onClick={() => setDashExpanded(!dashExpanded)}
-              aria-label={dashExpanded ? 'Reduire le dashboard' : 'Voir jauges et timeline'}
-            >
-              {dashExpanded ? '\u25B2 Reduire' : '\u25BC Voir detail'}
-            </button>
-          </div>
-        ) : null}
-
-        {/* === FORMULAIRE DE SAISIE === */}
-        <div className={styles.inputSection}>
-          {mode === 'formulaire' ? (
-            <div className={styles.formulaire}>
-              {joursActifs.length > 1 ? (
+              {jours.length > 1 ? (
                 <div className={styles.jourNavWrapper}>
                   <button
                     className={styles.jourNavArrow}
@@ -259,7 +233,7 @@ export default function Calculator() {
                     &#8249;
                   </button>
                   <div className={styles.jourNavTabs} ref={jourTabsRef}>
-                    {joursActifs.map((j, i) => (
+                    {jours.map((j, i) => (
                       <button
                         key={i}
                         className={
@@ -281,6 +255,19 @@ export default function Calculator() {
                   </button>
                 </div>
               ) : null}
+              className={styles.expandToggle}
+              onClick={() => setDashExpanded(!dashExpanded)}
+              aria-label={dashExpanded ? 'Reduire le dashboard' : 'Voir jauges et timeline'}
+            >
+              {dashExpanded ? '\u25B2 Reduire' : '\u25BC Voir detail'}
+            </button>
+          </div>
+        ) : null}
+
+        {/* === FORMULAIRE DE SAISIE === */}
+        <div className={styles.inputSection}>
+          {mode === 'formulaire' ? (
+            <div className={styles.formulaire}>
               <JourFormulaire
                 key={joursActifs[safeIndex]?.date + '-' + safeIndex}
                 jour={joursActifs[safeIndex]}
