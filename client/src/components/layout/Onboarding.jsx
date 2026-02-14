@@ -9,7 +9,7 @@ export function Onboarding({ onClose }) {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.title}>Bienvenue sur RSE/RSN Calculator</h2>
+        <h2 className={styles.title}>Bienvenue sur FIMO Check</h2>
         <div className={styles.content}>
           <div className={styles.step}>
             <span className={styles.num}>1</span>

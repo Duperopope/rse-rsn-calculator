@@ -1,4 +1,4 @@
-// RSE/RSN Calculator - Utilitaires temporels
+// FIMO Check - Utilitaires temporels
 // Fonctions de conversion et formatage des durees
 
 /**

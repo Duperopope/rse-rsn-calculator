@@ -1,4 +1,4 @@
-// RSE/RSN Calculator - Calculs statistiques temps reel
+// FIMO Check - Calculs statistiques temps reel
 // Utilise pour les jauges et recommandations cote client
 import { dureeMin, fmtMin, fmtH } from './time.js';
 import { LIMITES } from '../config/constants.js';

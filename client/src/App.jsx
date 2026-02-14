@@ -3,7 +3,7 @@ import Calculator from './pages/Calculator.jsx';
 import './styles/global.css';
 
 /**
- * RSE/RSN Calculator v6.0.0
+ * FIMO Check v7.11.0
  * Shell minimal - tout le contenu est dans Calculator.jsx
  *
  * Architecture :

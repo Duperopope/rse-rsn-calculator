@@ -1,5 +1,5 @@
 // ============================================================
-// RSE/RSN Calculator - Serveur Backend v7.1.0
+// FIMO Check - Serveur Backend v7.11.0
 // Credits : Samir Medjaher
 // Sources reglementaires :
 //   Reglement CE 561/2006 (Art. 6-8) - https://eur-lex.europa.eu

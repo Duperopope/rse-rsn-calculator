@@ -1,4 +1,4 @@
-// RSE/RSN Calculator - Configuration et constantes
+// FIMO Check - Configuration et constantes
 // Source: CE 561/2006, L3312-1, Decret 2010-855
 // Extrait de App.jsx v5.6.0 -> v6.0.0
 

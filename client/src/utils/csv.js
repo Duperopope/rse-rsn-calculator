@@ -1,4 +1,4 @@
-// RSE/RSN Calculator - Utilitaires CSV
+// FIMO Check - Utilitaires CSV
 // Parsing, validation et export des donnees CSV tachygraphe
 
 /**
