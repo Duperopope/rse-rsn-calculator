@@ -1,4 +1,25 @@
-# Changelog - RSE/RSN Calculator
+﻿# Changelog
+
+## v7.7.0 (2026-02-14)
+### Nouveau composant : FixEnginePanel
+- **Comparaison avant/apres** : affiche le delta infractions, score et amende
+- **Detail des corrections** : faux positifs retires groupes par raison
+- **Economie estimee** : calcul automatique de l'amende evitee
+- **Design responsive** : s'adapte au theme dark/light et mobile
+- **Integration** : insere entre les statistiques et les infractions dans ResultPanel
+
+### Donnees fix-engine affichees
+- Infractions originales vs finales
+- Score avant vs apres correction
+- Repos corriges et repos hebdomadaires detectes
+- Detail par categorie (faux positif 0h, estimation imprecise, doublon, etc.)
+
+### Technique
+- FixEnginePanel.jsx (7.3 KB) + FixEnginePanel.module.css (3.6 KB)
+- ResultPanel.jsx mis a jour (import + variable fixEngine + JSX)
+- Build frontend: 83 modules, 222 KB JS + 53 KB CSS
+- Tests backend: 36/36 (203/203 total avec QA)
+ - RSE/RSN Calculator
 
 ## [7.6.12] - 2026-02-14
 

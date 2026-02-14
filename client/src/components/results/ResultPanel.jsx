@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { EURO } from '../../config/constants.js';
 import { InfractionCard } from './InfractionCard.jsx';
 import { RecommandationList } from './RecommandationList.jsx';
 import { SanctionTable } from './SanctionTable.jsx';
+import { FixEnginePanel } from './FixEnginePanel.jsx';
 import { TrackingDashboard } from './TrackingDashboard.jsx';
 import styles from './ResultPanel.module.css';
 
@@ -37,6 +38,7 @@ export function ResultPanel({ resultat }) {
   const amende = resultat.amende_estimee || 0;
   const equipage = resultat.equipage || 'solo';
   const tracking = resultat.tracking || null;
+    const fixEngine = resultat._fix_engine || null;
   const periode = resultat.periode || '';
 
   function getScoreColor() {
@@ -84,6 +86,16 @@ export function ResultPanel({ resultat }) {
           <div className={styles.statItem}><span className={styles.statLabel}>Moy. conduite/jour</span><span className={styles.statValue}>{stats.moyenne_conduite_jour_h}h</span></div>
           <div className={styles.statItem}><span className={styles.statLabel}>Moy. travail/jour</span><span className={styles.statValue}>{stats.moyenne_travail_total_jour_h}h</span></div>
         </div>
+      ) : null}
+
+      {/* Fix-Engine : Comparaison avant/apres */}
+      {fixEngine ? (
+        <FixEnginePanel
+          fixEngine={fixEngine}
+          score={score}
+          amendeFinale={amende}
+          infractions={infractions}
+        />
       ) : null}
 
       {/* Infractions */}
