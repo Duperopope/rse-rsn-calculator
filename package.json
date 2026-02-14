@@ -1,8 +1,8 @@
 {
-  "name": "rse-rsn-calculator",
-  "version": "7.8.0",
+  "name": "fimo-check",
+  "version": "7.11.0",
   "private": true,
-  "description": "Calculateur RSE/RSN - Reglementation sociale europeenne et nationale du transport routier de personnes",
+  "description": "FIMO Check - Driver CPC Compliance Tool - Conformite CE 561/2006",
   "author": "Samir Medjaher",
   "license": "MIT",
   "scripts": {
