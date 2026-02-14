@@ -1,0 +1,33 @@
+{
+  "description": "Resultats de reference valides pour test_56jours.csv",
+  "date_creation": "2026-02-14",
+  "categories_attendues": {
+    "Repos journalier insuffisant": 9,
+    "Conduite journaliere": 18,
+    "Conduite bi-hebdomadaire": 5,
+    "Conduite hebdomadaire": 1,
+    "Amplitude journaliere": 1
+  },
+  "version": "7.6.10.1",
+  "criteres": {
+    "score_exact": 72,
+    "infractions_min": 28,
+    "amende_max": 12000,
+    "score_min": 65,
+    "infractions_max": 35,
+    "amende_min": 9000,
+    "amende_exact": 9375,
+    "infractions_exact": 34,
+    "score_max": 80
+  },
+  "fix_engine": {
+    "originales_min": 125,
+    "version_attendue": "7.6.10.1",
+    "classes": {
+      "5e": 9,
+      "4e": 25
+    },
+    "retirees_min": 90,
+    "originales_max": 140
+  }
+}
