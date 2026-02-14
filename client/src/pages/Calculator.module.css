@@ -55,70 +55,6 @@
 .tabActive{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 2px 8px rgba(102,126,234,.3)}
 
 /* === Onglets jour (dashboard) === */
-.jourTabs { display: flex; gap: 8px; margin-bottom: 8px; overflow-x: auto; padding: 2px; -webkit-overflow-scrolling: touch; }
-.jourTab {
-  flex-shrink: 0; padding: 6px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6);
-  font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-}
-.jourTab:active { transform: scale(0.96); }
-.jourTabActive {
-  background: linear-gradient(135deg, rgba(0, 122, 255, 0.2), rgba(0, 122, 255, 0.35));
-  border-color: rgba(0, 122, 255, 0.5); color: #fff; font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
-}
-
-/* === ONGLETS NAVIGATION JOURS (formulaire) === */
-.jourNavTabs {
-  display: flex; gap: 4px; overflow-x: auto; padding: 4px;
-  -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;
-  background: var(--bg-input, #1a1a2e); border-radius: 14px;
-  border: 1px solid var(--border, #2a2a3e); flex: 1; min-width: 0;
-}
-.jourNavTabs::-webkit-scrollbar { display: none; }
-.jourNavBtn, .jourNavActive {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 8px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 600;
-  cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; border: none;
-}
-.jourNavBtn { background: transparent; color: var(--text-secondary, #888); }
-@media (hover: hover) { .jourNavBtn:hover { color: var(--text, #e0e0e0); background: rgba(255, 255, 255, 0.05); } }
-.jourNavActive {
-  background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
-  color: #fff; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-.jourNavDate { font-size: 0.68rem; font-weight: 400; opacity: 0.7; }
-.jourBottomActions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.jourCount { font-size: 0.8rem; color: var(--text-secondary, #888); font-weight: 600; }
-
-/* === WRAPPER FLECHES === */
-.jourNavWrapper { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; }
-.jourNavArrow {
-  flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.15); background: rgba(30,30,50,0.8);
-  color: #00d4ff; font-size: 20px; font-weight: bold; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; line-height: 1;
-}
-.jourNavArrow:hover { background: rgba(0,212,255,0.15); border-color: #00d4ff; transform: scale(1.1); }
-.jourNavArrow:active { transform: scale(0.95); background: rgba(0,212,255,0.25); }
-
-/* === COULEURS ONGLETS === */
-.jourNav_ok { border-color: #2ecc71 !important; box-shadow: inset 0 -2px 0 #2ecc71; background: rgba(46, 204, 113, 0.1); }
-.jourNav_warning { border-color: #f39c12 !important; box-shadow: inset 0 -2px 0 #f39c12, 0 0 8px rgba(243, 156, 18, 0.3); background: rgba(243, 156, 18, 0.12); animation: pulseWarn 2s infinite; }
-.jourNav_danger { border-color: #e74c3c !important; box-shadow: inset 0 -2px 0 #e74c3c, 0 0 8px rgba(231, 76, 60, 0.3); background: rgba(231, 76, 60, 0.12); animation: pulseDang 2s infinite; }
-.jourNav_neutre { border-color: rgba(255,255,255,0.08) !important; opacity: 0.6; }
-@keyframes pulseWarn {
-  0%, 100% { box-shadow: inset 0 -2px 0 #f39c12; }
-  50% { box-shadow: inset 0 -2px 0 #f39c12, 0 0 8px rgba(243,156,18,0.4); }
-}
-@keyframes pulseDang {
-  0%, 100% { box-shadow: inset 0 -2px 0 #e74c3c; }
-  50% { box-shadow: inset 0 -2px 0 #e74c3c, 0 0 8px rgba(231,76,60,0.4); }
-}
-
-/* === STICKY DASHBOARD — toujours sticky, meme mobile === */
 .realtimeSticky {
   display: flex; flex-direction: column; gap: 12px;
   position: sticky; top: var(--header-height, 70px); z-index: 50;
@@ -165,21 +101,300 @@
   .dashExpanded .timelineWrap {
     display: block;
   }
-
-  .jourNavArrow { width: 38px; height: 38px; font-size: 22px; }
-  .jourNavBtn, .jourNavActive { padding: 8px 14px; font-size: 0.82rem; }
 }
 
-@media (pointer: coarse) {
-  .jourNavBtn, .jourNavActive { min-height: 48px; padding: 10px 18px; }
+
+/* ================================================================
+   BARRE JOURS — Material Design Scrollable Tabs + Apple HIG
+   Standards: 48px touch targets, underline indicator, no glow spam
+   ================================================================ */
+
+/* Container principal */
+.jourNavWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 8px;
+  position: relative;
 }
 
-@media print {
-  .analyseSection, .historique { display: none; }
-  .main { max-width: 100%; padding: 0; }
-  .realtimeSticky { position: static; box-shadow: none; border: none; }
-  .expandToggle { display: none; }
+/* Zone scrollable des onglets */
+.jourNavTabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  min-width: 0;
+  scroll-behavior: smooth;
+}
+.jourNavTabs::-webkit-scrollbar { display: none; }
+
+/* Item wrapper (pour le menu contextuel) */
+.jourNavItem {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
 }
 
-/* BottomBar mobile */
-@media (max-width: 768px) { .app { padding-bottom: 72px; } }
+/* === Onglet de base (inactif) === */
+.jourNavBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 48px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary, #888);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s, background 0.15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Underline indicator — invisible par defaut */
+.jourNavBtn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: transparent;
+  transition: background 0.2s, left 0.2s, right 0.2s;
+}
+
+/* Hover (PC uniquement) */
+@media (hover: hover) and (pointer: fine) {
+  .jourNavBtn:hover {
+    color: var(--text-primary, #e0e0e0);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+/* Pressed state */
+.jourNavBtn:active {
+  background: rgba(0, 132, 255, 0.08);
+  transition: background 0.05s;
+}
+
+/* === Onglet actif === */
+.jourNavActive {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 48px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 0;
+  background: rgba(0, 132, 255, 0.08);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Underline indicator — actif = visible */
+.jourNavActive::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: #0084ff;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sous-texte date */
+.jourNavDate {
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+/* === Couleurs de statut (bordure basse subtile) === */
+.jourNav_ok::after { background: #2ecc71 !important; }
+.jourNav_warning::after { background: #f39c12 !important; }
+.jourNav_danger::after { background: #e74c3c !important; }
+.jourNav_neutre { opacity: 0.5; }
+
+/* Statut sur onglet inactif — point colore */
+.jourNav_ok { color: #2ecc71; }
+.jourNav_warning { color: #f39c12; }
+.jourNav_danger { color: #e74c3c; }
+
+/* Statut sur onglet actif — garde le texte blanc, underline prend la couleur */
+.jourNavActive.jourNav_ok { color: #fff; }
+.jourNavActive.jourNav_warning { color: #fff; }
+.jourNavActive.jourNav_danger { color: #fff; }
+
+
+/* === Fleches scroll PC (masquees sur tactile) === */
+.jourNavArrow {
+  flex-shrink: 0;
+  width: 24px;
+  height: 44px;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+
+.jourNavArrow:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.jourNavArrow:active {
+  color: #0084ff;
+}
+
+.jourNavArrowLeft { margin-right: 2px; }
+.jourNavArrowRight { margin-left: 2px; }
+
+/* Masquer les fleches sur ecran tactile (scroll naturel) */
+@media (hover: none) and (pointer: coarse) {
+  .jourNavArrow { display: none; }
+}
+
+/* === Bouton + dans la barre === */
+.jourNavAddInline {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(0, 132, 255, 0.3);
+  background: transparent;
+  color: rgba(0, 132, 255, 0.6);
+  font-size: 1.3rem;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-left: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .jourNavAddInline:hover {
+    background: rgba(0, 132, 255, 0.08);
+    border-color: rgba(0, 132, 255, 0.5);
+    color: #0084ff;
+  }
+}
+
+.jourNavAddInline:active {
+  transform: scale(0.92);
+  background: rgba(0, 132, 255, 0.12);
+}
+
+/* === Menu contextuel (dupliquer/supprimer) === */
+.jourMenu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  background: var(--bg-card, #1a1a2e);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  animation: menuPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+@keyframes menuPop {
+  from { opacity: 0; transform: translateX(-50%) scale(0.9) translateY(4px); }
+  to { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+.jourMenuBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.jourMenuDup {
+  background: rgba(0, 132, 255, 0.12);
+  color: #0084ff;
+}
+
+.jourMenuDel {
+  background: rgba(255, 68, 68, 0.12);
+  color: #ff4444;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .jourMenuDup:hover { background: rgba(0, 132, 255, 0.2); }
+  .jourMenuDel:hover { background: rgba(255, 68, 68, 0.2); }
+}
+
+.jourMenuBtn:active { transform: scale(0.95); }
+
+/* === Responsive mobile (WCAG 48px targets) === */
+@media (max-width: 480px) {
+  .jourNavBtn, .jourNavActive {
+    min-height: 48px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+  .jourNavAddInline {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+  }
+  .jourMenu {
+    padding: 8px;
+    gap: 8px;
+  }
+  .jourMenuBtn {
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 0.82rem;
+  }
+}
