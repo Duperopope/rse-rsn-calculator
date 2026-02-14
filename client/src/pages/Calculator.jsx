@@ -222,7 +222,6 @@ export default function Calculator() {
                 <Card><Timeline24h activites={jours[jourActifIndex].activites} theme={theme} /></Card>
               </div>
             ) : null}
-            <button
               {jours.length > 1 ? (
                 <div className={styles.jourNavWrapper}>
                   <button
@@ -255,6 +254,7 @@ export default function Calculator() {
                   </button>
                 </div>
               ) : null}
+            <button
               className={styles.expandToggle}
               onClick={() => setDashExpanded(!dashExpanded)}
               aria-label={dashExpanded ? 'Reduire le dashboard' : 'Voir jauges et timeline'}
