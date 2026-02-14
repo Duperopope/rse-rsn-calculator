@@ -1,79 +1,256 @@
+/* FIMO Check — ParametresPanel v7.11.0 — UX Conducteur */
+
 .panel {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  padding: 16px;
   background: var(--bg-card, #12121a);
   border: 1px solid var(--border, #2a2a3e);
-  border-radius: 16px;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.panelOpen {
+  border-color: var(--accent, #00d4ff);
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.1);
+}
+
+/* === Barre de chips === */
+.summaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  gap: 8px;
+}
+.summaryBtn:active {
+  opacity: 0.85;
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Chips de base */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text-secondary, #aaa);
+  border: 1px solid var(--border, #2a2a3e);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* Chip service = plus visible */
+.chipService {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
+  color: #fff;
+  white-space: nowrap;
+  line-height: 1.2;
+  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.25);
+}
+.chipIcon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+/* Chip mode = accent leger */
+.chipMode {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--accent, #00d4ff);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* Chevron SVG */
+.chevron {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary, #666);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* === Contenu depliable === */
+.content {
+  padding: 0 14px 14px 14px;
+  animation: slideDown 0.22s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 160px;
+  gap: 5px;
 }
 
 .label {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--text-secondary, #888);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .select {
   background: var(--bg-input, #1a1a2e);
   color: var(--text, #e0e0e0);
   border: 1px solid var(--border, #2a2a3e);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: border-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
 }
 .select:focus {
   border-color: var(--accent, #00d4ff);
   outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
 }
 
-.modeSwitch {
+/* Toggles Equipage / Saisie */
+.toggle {
   display: flex;
   background: var(--bg-input, #1a1a2e);
   border-radius: 10px;
   padding: 3px;
   border: 1px solid var(--border, #2a2a3e);
+  gap: 2px;
 }
 
-.modeBtn {
+.toggleBtn {
   flex: 1;
-  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 6px;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 600;
   background: transparent;
+  border: none;
   color: var(--text-secondary, #888);
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
-@media (hover: hover) {
-  .modeBtn:hover {
-  color: var(--text, #e0e0e0);
-}
+.toggleBtn:active { opacity: 0.7; }
+@media (hover: hover) and (pointer: fine) {
+  .toggleBtn:hover {
+    color: var(--text, #e0e0e0);
+    background: rgba(255, 255, 255, 0.04);
+  }
 }
 
-.modeActive {
+.toggleActive {
   flex: 1;
-  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 6px;
   border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
   color: white;
-  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
 }
 
+.toggleIcon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* Info contextuelle */
+.detailHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #aaa);
+  line-height: 1.35;
+}
+.detailIcon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* === Responsive === */
 @media (max-width: 600px) {
-  .panel { flex-direction: column; }
-  .group { min-width: 100%; }
+  .summaryBtn { padding: 8px 10px; }
+  .chip, .chipMode { font-size: 0.7rem; padding: 4px 8px; }
+  .chipService { font-size: 0.7rem; padding: 4px 10px; }
+  .grid { grid-template-columns: 1fr; gap: 10px; }
+  .content { padding: 0 10px 12px 10px; }
+}
+
+@media (max-width: 380px) {
+  .chipsRow { gap: 4px; }
+  .chip, .chipMode, .chipService { font-size: 0.65rem; padding: 3px 7px; }
+}
+
+@media (min-width: 900px) {
+  .grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
+}
+
+@media print {
+  .panel { border: 1px solid #ccc; }
+  .summaryBtn { pointer-events: none; }
+  .chevron { display: none; }
 }

@@ -6,7 +6,8 @@
 export const API_URL = '/api';
 
 // Nom de l'application (la version est recuperee du backend via /api/health)
-export const APP_NAME = 'RSE/RSN Calculator';
+export const APP_NAME = 'FIMO Check';
+export const APP_SUBTITLE = 'Driver CPC Compliance Tool';
 
 // Symbole euro (evite problemes encodage)
 export const EURO = '€';
@@ -24,11 +25,11 @@ export const TYPES_ACTIVITE = [
 
 // Types de service (CE 561/2006 Art.4)
 export const TYPES_SERVICE = [
-  { code: 'REGULIER', label: 'Service regulier (<=50km)' },
-  { code: 'OCCASIONNEL', label: 'Service occasionnel' },
-  { code: 'MARCHANDISES', label: 'Transport de marchandises' },
-  { code: 'INTERURBAIN', label: 'Interurbain (>50km)' },
-  { code: 'SLO', label: 'SLO - Service Librement Organise' }
+  { code: 'REGULIER', label: 'Ligne urbaine', short: 'Urbain', detail: 'Trajets en ville, arrets fixes' },
+  { code: 'OCCASIONNEL', label: 'Tourisme / Occasionnel', short: 'Tourisme', detail: 'Sorties, voyages, evenements' },
+  { code: 'MARCHANDISES', label: 'Poids lourd', short: 'Poids lourd', detail: 'Transport de marchandises' },
+  { code: 'INTERURBAIN', label: 'Longue distance', short: 'Long trajet', detail: 'Lignes entre villes' },
+  { code: 'SLO', label: 'Librement organise', short: 'Libre', detail: 'Service librement organise (SLO)' }
 ];
 
 // Pays supportes

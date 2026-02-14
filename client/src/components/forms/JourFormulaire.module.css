@@ -1,206 +1,465 @@
+/* === JourFormulaire v7.9.0 - Refonte UX === */
+
 .jour {
   background: var(--bg-card, #12121a);
   border: 1px solid var(--border, #2a2a3e);
   border-radius: 16px;
-  padding: 16px;
+  padding: 20px;
   animation: fadeIn 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
+/* --- EN-TETE --- */
 .jourHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
 .dateGroup {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.dateLabel {
+.jourBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
+  color: #fff;
   font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--accent, #00d4ff);
+  font-size: 0.82rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
 .dateInput {
   background: var(--bg-input, #1a1a2e);
   color: var(--text, #e0e0e0);
   border: 1px solid var(--border, #2a2a3e);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 0.85rem;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  transition: border-color 0.2s;
 }
+.dateInput:focus { border-color: var(--accent, #00d4ff); outline: none; }
 
 .jourActions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 
-.templateSelect {
+.actionBtn, .removeBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border: 1px solid var(--border, #2a2a3e);
+  background: var(--bg-input, #1a1a2e);
+}
+.actionBtn { color: var(--accent, #00d4ff); }
+.removeBtn { color: var(--accent-red, #ff4444); }
+@media (hover: hover) {
+  .actionBtn:hover { border-color: var(--accent, #00d4ff); background: rgba(0, 212, 255, 0.08); }
+  .removeBtn:hover { border-color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
+}
+
+/* --- TEMPLATES CARTES --- */
+.templates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.templatesLabel {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #888);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.templateCards {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.templateCard, .templateCardActive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 140px;
+  justify-content: center;
+  border: 1px solid var(--border, #2a2a3e);
+}
+
+.templateCard {
   background: var(--bg-input, #1a1a2e);
   color: var(--text-secondary, #888);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 0.78rem;
-  cursor: pointer;
+}
+@media (hover: hover) {
+  .templateCard:hover {
+    border-color: var(--accent, #00d4ff);
+    color: var(--text, #e0e0e0);
+    background: rgba(0, 212, 255, 0.06);
+  }
 }
 
-.actionBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: var(--bg-input, #1a1a2e);
-  border: 1px solid var(--border, #2a2a3e);
-  color: var(--accent, #00d4ff);
-  font-size: 1rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.2s;
+.templateCardActive {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-color: var(--gradient-start, #667eea);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
 }
-@media (hover: hover) { .actionBtn:hover { border-color: var(--accent, #00d4ff); } }
-.actionBtn:active { border-color: var(--accent, #00d4ff); opacity: 0.85; }
 
-.removeBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: var(--bg-input, #1a1a2e);
-  border: 1px solid var(--border, #2a2a3e);
-  color: var(--accent-red, #ff4444);
-  font-size: 0.9rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.2s;
+.templateEmoji {
+  font-size: 1.1rem;
 }
-@media (hover: hover) { .removeBtn:hover { border-color: var(--accent-red, #ff4444); } }
-.removeBtn:active { border-color: var(--accent-red, #ff4444); opacity: 0.85; }
 
+.templateLabel {
+  white-space: nowrap;
+}
+
+/* --- ACTIVITES --- */
 .activites {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 }
+
+.activitesHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 4px;
+}
+
+.colHead {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #888);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.colHead:first-child { flex: 0 0 140px; }
+.colHead:nth-child(2), .colHead:nth-child(4) { width: 95px; text-align: center; }
+.colHead:nth-child(3) { width: 20px; }
+.colHead:nth-child(5) { flex: 1; }
 
 .activiteLine {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 0;
+  gap: 8px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+@media (hover: hover) {
+  .activiteLine:hover { background: rgba(255, 255, 255, 0.03); }
 }
 
-.activiteIcon {
-  flex-shrink: 0;
-  width: 20px;
+/* Bouton type d'activite (remplace le select) */
+.activiteTypeBtn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 0 0 140px;
+  min-height: 36px;
+  background: transparent;
+}
+@media (hover: hover) {
+  .activiteTypeBtn:hover { filter: brightness(1.2); }
+}
+
+.activiteTypeName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .timeInput {
   background: var(--bg-input, #1a1a2e);
   color: var(--text, #e0e0e0);
   border: 1px solid var(--border, #2a2a3e);
-  border-radius: 6px;
-  padding: 5px 8px;
-  font-size: 0.85rem;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.88rem;
   width: 95px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.timeInput:focus { border-color: var(--accent, #00d4ff); outline: none; }
+
+.fleche {
+  color: var(--text-secondary, #888);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.dureeLabel {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #888);
+  min-width: 50px;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.tiret {
-  color: var(--text-secondary, #888);
-  flex-shrink: 0;
-}
-
-.typeSelect {
-  background: var(--bg-input, #1a1a2e);
-  color: var(--text, #e0e0e0);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 6px;
-  padding: 5px 8px;
-  font-size: 0.82rem;
-  flex: 1;
-  min-width: 100px;
-  cursor: pointer;
-}
-
 .deleteActBtn {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: transparent;
+  border: none;
   color: var(--text-secondary, #888);
-  font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  cursor: pointer;
 }
-@media (hover: hover) { .deleteActBtn:hover:not(:disabled) { color: var(--accent-red, #ff4444); } }
-.deleteActBtn:active:not(:disabled) { color: var(--accent-red, #ff4444); opacity: 0.85; }
-.deleteActBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+@media (hover: hover) {
+  .deleteActBtn:hover:not(:disabled) { color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
+}
+.deleteActBtn:disabled { opacity: 0.2; cursor: not-allowed; }
 
-.addActBtn {
-  margin-top: 8px;
-  width: 100%;
-  padding: 8px;
-  border-radius: 8px;
-  background: transparent;
-  border: 1px dashed var(--border, #2a2a3e);
-  color: var(--text-secondary, #888);
+/* --- SELECTEUR DE TYPE (panneau depliable) --- */
+.typeSelectorWrapper {
+  padding: 8px 4px 8px 12px;
+  animation: slideDown 0.2s ease;
+}
+
+.typeSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.typeBtn, .typeBtnActive {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
   font-size: 0.82rem;
-  transition: border-color 0.2s, color 0.2s;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.typeBtn {
+  background: var(--bg-input, #1a1a2e);
+  border: 1px solid var(--border, #2a2a3e);
+  color: var(--text-secondary, #888);
+}
+@media (hover: hover) {
+  .typeBtn:hover { color: var(--text, #e0e0e0); border-color: var(--text-secondary, #888); }
+}
+
+.typeBtnActive {
+  font-weight: 700;
+  border: 2px solid;
+  color: var(--text, #e0e0e0);
+}
+
+.typeBtnLabel {
+  white-space: nowrap;
+}
+
+/* --- BOUTON AJOUTER --- */
+.addActBtn {
+  margin-top: 4px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: transparent;
+  border: 2px dashed var(--border, #2a2a3e);
+  color: var(--text-secondary, #888);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 @media (hover: hover) {
   .addActBtn:hover {
-  border-color: var(--accent, #00d4ff);
-  color: var(--accent, #00d4ff);
-}
+    border-color: var(--accent, #00d4ff);
+    color: var(--accent, #00d4ff);
+    background: rgba(0, 212, 255, 0.04);
+  }
 }
 
+/* --- RESUME DU JOUR --- */
+.resume {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.resumeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resumeLabel {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #888);
+  font-weight: 600;
+}
+
+.resumeValueOk {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-green, #00ff88);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumeValueDanger {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-red, #ff4444);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumeSep {
+  width: 1px;
+  height: 20px;
+  background: var(--border, #2a2a3e);
+}
+
+/* --- ANIMATIONS --- */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 600px) {
-  .activiteLine { flex-wrap: wrap; }
-  .timeInput { width: 80px; }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); max-height: 0; }
+  to { opacity: 1; transform: translateY(0); max-height: 200px; }
 }
 
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .jour { padding: 14px; }
 
-/* === QOL 1: Touch targets WCAG 2.2 min 44x44px === */
-/* Source: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html */
+  .jourHeader { flex-wrap: wrap; gap: 8px; }
+
+  .templateCards { flex-direction: column; }
+  .templateCard, .templateCardActive { min-width: 100%; }
+
+  .activitesHeader { display: none; }
+
+  .activiteLine {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .activiteTypeBtn { flex: 1 1 100%; }
+
+  .timeInput { width: 44%; flex: 1; }
+
+  .fleche { width: auto; }
+
+  .dureeLabel { width: 100%; text-align: left; padding-left: 4px; }
+
+  .resume { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .resumeSep { width: 100%; height: 1px; }
+
+  .typeSelector { gap: 4px; }
+  .typeBtn, .typeBtnActive { padding: 10px 12px; flex: 1; min-width: 45%; justify-content: center; }
+}
+
+/* --- TOUCH TARGETS WCAG 2.2 --- */
 @media (pointer: coarse) {
   .actionBtn, .removeBtn {
     min-width: 44px;
     min-height: 44px;
-    padding: 10px;
   }
   .deleteActBtn {
     min-width: 44px;
     min-height: 44px;
-    padding: 8px 12px;
   }
   .addActBtn {
     min-height: 48px;
-    padding: 12px 16px;
-    font-size: 1rem;
   }
-  select, input[type="time"], input[type="text"] {
+  .activiteTypeBtn {
+    min-height: 48px;
+  }
+  .timeInput {
     min-height: 44px;
     font-size: 16px;
   }
+  .templateCard, .templateCardActive {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+  .typeBtn, .typeBtnActive {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+}
+
+/* --- BOUTONS AVEC LABELS (v7.9.0 fix) --- */
+.actionBtnLabel, .removeBtnLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 1px solid var(--border, #2a2a3e);
+  background: var(--bg-input, #1a1a2e);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.actionBtnLabel {
+  color: var(--accent, #00d4ff);
+}
+.removeBtnLabel {
+  color: var(--accent-red, #ff4444);
+}
+@media (hover: hover) {
+  .actionBtnLabel:hover { border-color: var(--accent, #00d4ff); background: rgba(0, 212, 255, 0.08); }
+  .removeBtnLabel:hover { border-color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
+}
+.actionBtnLabel span, .removeBtnLabel span {
+  font-size: 0.78rem;
+}
+@media (pointer: coarse) {
+  .actionBtnLabel, .removeBtnLabel { min-height: 44px; padding: 8px 16px; }
 }

@@ -24,7 +24,25 @@
 }
 
 @media (max-width: 480px) {
-  .circular {
-    justify-content: center;
+  .circular { justify-content: center; }
+}
+
+/* === MOBILE COMPACT : jauges circulaires cachees, barres compactes === */
+@media (max-width: 768px) {
+  .panneau {
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
   }
+  .circular {
+    display: none;
+  }
+  .linear {
+    gap: 6px;
+  }
+}
+
+/* Quand le parent a la classe dashExpanded, montrer les circulaires */
+:global(.dashExpanded) .circular {
+  display: flex;
 }

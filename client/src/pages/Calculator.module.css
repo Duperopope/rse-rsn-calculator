@@ -13,74 +13,40 @@
 
 .inputSection { display: flex; flex-direction: column; gap: 16px; }
 .formulaire { display: flex; flex-direction: column; gap: 16px; }
-.realtime { display: flex; flex-direction: column; gap: 16px; }
 
-.analyseSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
+/* analyseSection retire — bouton dans le header */
 
 .offlineMsg { font-size: 0.82rem; color: var(--accent-red, #ff4444); text-align: center; margin: 0; }
 .erreur { color: var(--accent-red, #ff4444); font-size: 0.9rem; margin: 0; }
+.equipageInfo { text-align: center; color: #00d4ff; font-size: 0.85rem; margin-top: 0.5rem; }
 
+/* === Historique === */
 .historique { display: flex; flex-direction: column; gap: 10px; }
-
 .histToggle {
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: var(--bg-input, #1a1a2e);
-  color: var(--text-secondary, #888);
-  border: 1px solid var(--border, #2a2a3e);
-  font-size: 0.82rem;
-  font-weight: 600;
-  transition: border-color 0.2s, color 0.2s;
-  align-self: flex-start;
+  padding: 8px 16px; border-radius: 8px;
+  background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888);
+  border: 1px solid var(--border, #2a2a3e); font-size: 0.82rem; font-weight: 600;
+  transition: border-color 0.2s, color 0.2s; align-self: flex-start;
 }
 @media (hover: hover) { .histToggle:hover { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); } }
 .histToggle:active { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); opacity: 0.85; }
-
 .histList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 12px;
+  display: flex; flex-direction: column; gap: 6px; padding: 12px;
+  background: var(--bg-card, #12121a); border: 1px solid var(--border, #2a2a3e); border-radius: 12px;
 }
-
-.histItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(42, 42, 62, 0.3);
-}
-
+.histItem { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(42, 42, 62, 0.3); }
 .histDate { font-size: 0.78rem; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; min-width: 90px; }
 .histMeta { font-size: 0.78rem; color: var(--text-secondary, #888); }
-
 .histClear {
-  margin-top: 8px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--accent-red, #ff4444);
-  border: 1px solid rgba(255, 68, 68, 0.2);
-  font-size: 0.78rem;
-  transition: background 0.2s;
-  align-self: flex-end;
+  margin-top: var(--header-height, 70px); padding: 6px 12px; border-radius: 6px;
+  background: transparent; color: var(--accent-red, #ff4444);
+  border: 1px solid rgba(255, 68, 68, 0.2); font-size: 0.78rem;
+  transition: background 0.2s; align-self: flex-end;
 }
 @media (hover: hover) { .histClear:hover { background: rgba(255, 68, 68, 0.08); } }
 .histClear:active { background: rgba(255, 68, 68, 0.08); opacity: 0.85; }
 
-@media (max-width: 600px) { .main { padding: 12px; gap: 14px; } }
-@media print { .analyseSection, .historique { display: none; } .main { max-width: 100%; padding: 0; } }
-.equipageInfo { text-align: center; color: #00d4ff; font-size: 0.85rem; margin-top: 0.5rem; }
-
-
+/* === Conducteur tabs === */
 .conducteurTabs{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)}
 .tab,.tabActive{flex:1;padding:.75rem 1.5rem;border:none;cursor:pointer;font-weight:600;font-size:.95rem;transition:all .2s}
 .tab{background:rgba(255,255,255,.05);color:rgba(255,255,255,.5)}
@@ -88,39 +54,132 @@
 .tab:active{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);opacity:0.85}
 .tabActive{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 2px 8px rgba(102,126,234,.3)}
 
-
-/* === Onglets sélection jour (jauges/timeline) === */
-.jourTabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-  overflow-x: auto;
-  padding: 2px;
-  -webkit-overflow-scrolling: touch;
-}
-
+/* === Onglets jour (dashboard) === */
+.jourTabs { display: flex; gap: 8px; margin-bottom: 8px; overflow-x: auto; padding: 2px; -webkit-overflow-scrolling: touch; }
 .jourTab {
-  flex-shrink: 0;
-  padding: 8px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.82rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  flex-shrink: 0; padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
-
-.jourTab:active {
-  transform: scale(0.96);
-}
-
+.jourTab:active { transform: scale(0.96); }
 .jourTabActive {
   background: linear-gradient(135deg, rgba(0, 122, 255, 0.2), rgba(0, 122, 255, 0.35));
-  border-color: rgba(0, 122, 255, 0.5);
-  color: #fff;
-  font-weight: 600;
+  border-color: rgba(0, 122, 255, 0.5); color: #fff; font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
 }
+
+/* === ONGLETS NAVIGATION JOURS (formulaire) === */
+.jourNavTabs {
+  display: flex; gap: 4px; overflow-x: auto; padding: 4px;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;
+  background: var(--bg-input, #1a1a2e); border-radius: 14px;
+  border: 1px solid var(--border, #2a2a3e); flex: 1; min-width: 0;
+}
+.jourNavTabs::-webkit-scrollbar { display: none; }
+.jourNavBtn, .jourNavActive {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; border: none;
+}
+.jourNavBtn { background: transparent; color: var(--text-secondary, #888); }
+@media (hover: hover) { .jourNavBtn:hover { color: var(--text, #e0e0e0); background: rgba(255, 255, 255, 0.05); } }
+.jourNavActive {
+  background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
+  color: #fff; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+.jourNavDate { font-size: 0.68rem; font-weight: 400; opacity: 0.7; }
+.jourBottomActions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.jourCount { font-size: 0.8rem; color: var(--text-secondary, #888); font-weight: 600; }
+
+/* === WRAPPER FLECHES === */
+.jourNavWrapper { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; }
+.jourNavArrow {
+  flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(30,30,50,0.8);
+  color: #00d4ff; font-size: 20px; font-weight: bold; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; line-height: 1;
+}
+.jourNavArrow:hover { background: rgba(0,212,255,0.15); border-color: #00d4ff; transform: scale(1.1); }
+.jourNavArrow:active { transform: scale(0.95); background: rgba(0,212,255,0.25); }
+
+/* === COULEURS ONGLETS === */
+.jourNav_ok { border-color: #2ecc71 !important; box-shadow: inset 0 -2px 0 #2ecc71; background: rgba(46, 204, 113, 0.1); }
+.jourNav_warning { border-color: #f39c12 !important; box-shadow: inset 0 -2px 0 #f39c12, 0 0 8px rgba(243, 156, 18, 0.3); background: rgba(243, 156, 18, 0.12); animation: pulseWarn 2s infinite; }
+.jourNav_danger { border-color: #e74c3c !important; box-shadow: inset 0 -2px 0 #e74c3c, 0 0 8px rgba(231, 76, 60, 0.3); background: rgba(231, 76, 60, 0.12); animation: pulseDang 2s infinite; }
+.jourNav_neutre { border-color: rgba(255,255,255,0.08) !important; opacity: 0.6; }
+@keyframes pulseWarn {
+  0%, 100% { box-shadow: inset 0 -2px 0 #f39c12; }
+  50% { box-shadow: inset 0 -2px 0 #f39c12, 0 0 8px rgba(243,156,18,0.4); }
+}
+@keyframes pulseDang {
+  0%, 100% { box-shadow: inset 0 -2px 0 #e74c3c; }
+  50% { box-shadow: inset 0 -2px 0 #e74c3c, 0 0 8px rgba(231,76,60,0.4); }
+}
+
+/* === STICKY DASHBOARD — toujours sticky, meme mobile === */
+.realtimeSticky {
+  display: flex; flex-direction: column; gap: 12px;
+  position: sticky; top: var(--header-height, 70px); z-index: 50;
+  background: var(--bg, #0a0a0f);
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border, #2a2a3e);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  margin: 0 -20px;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Bouton expand/collapse — cache sur desktop */
+.expandToggle {
+  display: none;
+  width: 100%; padding: 6px; border: none; border-radius: 6px;
+  background: rgba(255,255,255,0.04); color: var(--text-secondary, #888);
+  font-size: 0.72rem; font-weight: 500; cursor: pointer;
+  transition: color 0.2s;
+}
+.expandToggle:active { color: #00d4ff; }
+
+/* Timeline wrapper — pour pouvoir le cacher sur mobile */
+.timelineWrap { display: block; }
+
+/* === MOBILE : dashboard compact sticky === */
+@media (max-width: 768px) {
+  .main { padding: 12px; gap: 14px; }
+
+  .realtimeSticky {
+    padding: 8px 12px; top: var(--header-height, 70px);
+    margin: 0 -12px;
+    gap: 6px;
+  }
+
+  /* Cacher jauges circulaires + timeline par defaut sur mobile */
+  .realtimeSticky .timelineWrap {
+    display: none;
+  }
+
+  /* Montrer le bouton toggle */
+  .expandToggle { display: block; }
+
+  /* Quand expanded, montrer tout */
+  .dashExpanded .timelineWrap {
+    display: block;
+  }
+
+  .jourNavArrow { width: 38px; height: 38px; font-size: 22px; }
+  .jourNavBtn, .jourNavActive { padding: 8px 14px; font-size: 0.82rem; }
+}
+
+@media (pointer: coarse) {
+  .jourNavBtn, .jourNavActive { min-height: 48px; padding: 10px 18px; }
+}
+
+@media print {
+  .analyseSection, .historique { display: none; }
+  .main { max-width: 100%; padding: 0; }
+  .realtimeSticky { position: static; box-shadow: none; border: none; }
+  .expandToggle { display: none; }
+}
+
+/* BottomBar mobile */
+@media (max-width: 768px) { .app { padding-bottom: 72px; } }
