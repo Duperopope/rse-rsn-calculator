@@ -791,10 +791,10 @@ export default function Calculator() {
           <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')}>
 
 
-            <PanneauJauges stats={statsJour} typeService={typeService} />
+            {dashExpanded && <PanneauJauges stats={statsJour} typeService={typeService} />}
 
 
-            {jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
+            {dashExpanded && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
 
 
               <div className={styles.timelineWrap}>
@@ -935,7 +935,7 @@ export default function Calculator() {
             >
 
 
-              {dashExpanded ? '\u25B2 Reduire' : '\u25BC Voir detail'}
+              {dashExpanded ? '\u25B2 Replier' : '\u25BC Jauges + Timeline'}
 
 
             </button>
