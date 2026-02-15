@@ -966,7 +966,7 @@ export default function Calculator() {
         {/* === ResultPanel deploye sous le sticky === */}
         {showResultDetail && resultat && !chargement && (
           <div className={styles.resultInlineWrap}>
-            <ResultPanel resultat={resultat} />
+            <ResultPanel resultat={resultat} compact />
           </div>
         )}
         {chargement && <div style={{ padding: '16px', textAlign: 'center' }}><Loader /></div>}

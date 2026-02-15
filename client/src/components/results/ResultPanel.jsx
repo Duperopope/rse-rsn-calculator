@@ -11,7 +11,7 @@ import styles from './ResultPanel.module.css';
  * Panneau de resultats complet apres analyse
  * Score anime, infractions, avertissements, details par jour, sanctions
  */
-export function ResultPanel({ resultat }) {
+export function ResultPanel({ resultat, compact = false }) {
   const [animScore, setAnimScore] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -87,6 +87,7 @@ export function ResultPanel({ resultat }) {
   return (
     <div id="resultats" className={styles.panel}>
       {/* Score principal */}
+      {compact ? null : (
       <div className={styles.scoreSection}>
         <div className={styles.scoreCircle} style={{ borderColor: getScoreColor() }}>
           <span className={styles.scoreValue} style={{ color: getScoreColor() }}>{animScore}</span>
@@ -104,8 +105,9 @@ export function ResultPanel({ resultat }) {
             <span className={styles.equipageBadge}>Double equipage (Art.8 par.5)</span>
           ) : null}
           {periode ? <span className={styles.periode}>Periode : {periode}</span> : null}
-        </div>
+          </div>
       </div>
+      )}
 
       {/* Statistiques globales */}
       {stats.conduite_totale_h ? (
