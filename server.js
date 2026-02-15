@@ -1833,6 +1833,9 @@ totalConduiteMin += conduiteJour;
 
     console.log("[v7.20.1] Repos hebdo: " + reposHebdoNormaux.length + " normaux, " + reposHebdoReduits.length + " reduits sur " + reposEntreJoursTrav.length + " periodes");
 
+
+
+
     // Art.8 par.6 : en 2 semaines, au moins 2 repos hebdo (1 normal + 1 reduit minimum)
     const isOcc = (typeService === "SLO" || typeService === "OCCASIONNEL");
     if (joursTries.length >= 12 && reposHebdosDetectes.length < 2 && !isOcc) {
@@ -1923,6 +1926,11 @@ totalConduiteMin += conduiteJour;
 
   // === APPEL ANALYSE MULTI-SEMAINES v7.0.0 ===
   const tracking = analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, equipage, infractions, avertissements);
+  // v7.20.2 FIX-07a : Log repos hebdo depuis tracking (post analyseMultiSemaines)
+  const trackRH = (tracking && tracking.repos_hebdomadaires) || [];
+  const trackN = trackRH.filter(r => r.type === 'normal').length;
+  const trackR = trackRH.filter(r => r.type === 'reduit').length;
+  console.log('[v7.20.2] Repos hebdo (FIX-06): ' + trackN + ' normaux, ' + trackR + ' reduits sur ' + trackRH.length + ' blocs');
 
   return {
     score,
@@ -2000,6 +2008,12 @@ app.post('/api/analyze', (req, res) => {
         if (lien) { av.url_legale = lien.url; av.ref_legale = lien.ref; }
       });
     }
+
+    // v7.20.2 FIX-07b : Resume post fix-engine (nombre reel d'infractions)
+    resultat.resume = resultat.infractions.length === 0
+      ? 'Aucune infraction detectee. Activite conforme a la reglementation.'
+      : resultat.infractions.length + ' infraction(s) detectee(s) sur ' + (resultat.details_jours ? resultat.details_jours.length : '?') + ' jour(s) analyses.';
+
     res.json(resultat);
   } catch (err) {
     console.error("[ERREUR ANALYSE]", err);
