@@ -3,7 +3,7 @@
   "short_name": "FIMO Check",
   "description": "Calculateur de conformite RSE/RSN tachygraphe",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#12141a",
   "theme_color": "#12141a",
