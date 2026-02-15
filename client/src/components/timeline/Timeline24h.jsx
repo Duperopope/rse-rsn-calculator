@@ -119,7 +119,7 @@ function analyserInfractions(activites) {
   return { zones, marqueurs };
 }
 
-export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick }) {
+export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick, equipage = 'solo' }) {
   const containerRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
   const [selectedMarqueur, setSelectedMarqueur] = useState(null);
@@ -196,6 +196,11 @@ export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick })
         </div>
       )}
 
+            {/* Badge Solo/Duo */}
+      <div className={styles.equipageBadge + ' ' + (equipage === 'double' ? styles.equipageDuo : styles.equipageSolo)}>
+        <span className={styles.equipageIcon}>{equipage === 'double' ? '\u{1F465}' : '\u{1F464}'}</span>
+        <span className={styles.equipageLabel}>{equipage === 'double' ? 'Double equipage' : 'Solo'}</span>
+      </div>
       <div className={styles.labels}>
         {heures.map(h => (
           <span key={h} className={styles.heure} style={{ left: (h / 24 * 100) + '%' }}>{h}h</span>
@@ -360,3 +365,4 @@ export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick })
     </div>
   );
 }
+

@@ -94,7 +94,11 @@ export const LIMITES = {
   REPOS_JOURNALIER_NORMAL: 660,     // 11h en minutes
   TRAVAIL_NUIT_MAX: 600,            // 10h en minutes
   PAUSE_OBLIGATOIRE: 45,            // 45 min apres 4h30
-  TRAVAIL_JOURNALIER_MAX: 720       // 12h en minutes
+  TRAVAIL_JOURNALIER_MAX: 720,
+  // Double equipage (CE 561/2006 Art.8 par.5)
+  MULTI_REPOS_JOURNALIER_MIN: 540,   // 9h en minutes
+  MULTI_AMPLITUDE_MAX: 1260,          // 21h en minutes (30h - 9h repos)
+  MULTI_DELAI_REPOS: 1800             // 30h en minutes
 };
 
 // Couleurs du theme (utilisees par les composants)
@@ -136,3 +140,5 @@ export const STORAGE_KEY = 'rse_rsn_historique';
 
 // Nombre max d'entrees historique
 export const HISTORIQUE_MAX = 50;
+
+

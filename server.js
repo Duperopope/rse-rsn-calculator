@@ -354,11 +354,14 @@ function verifierReposHebdomadaire(detailsJours, typeService) {
 
 
 function getRegles(typeService) {
+  // v7.20: Support de tous les types de service
   switch (typeService) {
     case "REGULIER": return REGLES_REGULIER;
     case "SLO": return REGLES_SLO;
     case "OCCASIONNEL": return REGLES_OCCASIONNEL;
-    default: return REGLES_SLO;
+    case "INTERURBAIN": return REGLES_SLO; // CE 561/2006 complet (lignes >50km entre villes)
+    case "MARCHANDISES": return REGLES_SLO; // CE 561/2006 complet (transport marchandises)
+    case "STANDARD": return REGLES_SLO; // Fallback
   }
 }
 
@@ -460,7 +463,7 @@ const SANCTIONS = {
 function amendeObj(classe) {
   if (classe === "5e classe") {
     return {
-      amende_forfaitaire: null,
+      amende_forfaitaire: SANCTIONS.classe_5.amende_max,
       amende_minoree: null,
       amende_majoree: null,
       amende_max: SANCTIONS.classe_5.amende_max,
@@ -1097,7 +1100,13 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     // Ex: 20:30 -> 00:30 a heure_fin "00:30" < heure_debut "20:30"
     // Cela ne se declenche PAS pour un jour normal (04:30->19:00) car heure_fin > heure_debut
     // Source: CE 561/2006 Art.8 - repos journalier dans les 24h suivant le debut de service
-    const estServiceNuit = activitesJourBrut.some(a => a.heure_fin.localeCompare(a.heure_debut) < 0);
+    // Detection service de nuit v7.20 :
+    // Cas 1: une activite traverse minuit (heure_fin < heure_debut en string)
+    // Cas 2: activites APRES 20h ET activites AVANT 8h sur le meme jour (ex: 21:00->24:00 + 00:00->07:30)
+    const aActiviteApres20h = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) >= 20);
+    const aActiviteAvant8h = activitesJourBrut.some(a => parseInt(a.heure_debut.split(':')[0]) < 8 && a.heure_debut !== '00:00' || (a.heure_debut === '00:00' && a.heure_fin !== '24:00'));
+    const traverseMinuit = activitesJourBrut.some(a => a.heure_fin.localeCompare(a.heure_debut) < 0);
+    const estServiceNuit = traverseMinuit || (aActiviteApres20h && aActiviteAvant8h);
 
     const activitesJour = activitesJourBrut.sort((a, b) => {
       if (estServiceNuit) {
@@ -1224,16 +1233,28 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       }
     });
 
-    // Amplitude journaliere
+    // Amplitude journaliere - v7.20 FIX service de nuit
     if (activitesJour.length >= 2) {
       const premiere = activitesJour[0];
       const derniere = activitesJour[activitesJour.length - 1];
-      const debutJour = premiere.heure_debut.split(':').map(Number);
-      const finJour = derniere.heure_fin.split(':').map(Number);
-      let amplitudeMin = (finJour[0] * 60 + finJour[1]) - (debutJour[0] * 60 + debutJour[1]);
-      if (amplitudeMin < 0) amplitudeMin += 24 * 60;
+      let debutMin = parseInt(premiere.heure_debut.split(":")[0]) * 60 + parseInt(premiere.heure_debut.split(":")[1]);
+      let finMin = parseInt(derniere.heure_fin.split(":")[0]) * 60 + parseInt(derniere.heure_fin.split(":")[1]);
+      // Pour service de nuit: calculer amplitude reelle entre premiere et derniere activite
+      // en tenant compte que les activites >=12h sont triees avant les <12h
+      let amplitudeMin;
+      if (estServiceNuit) {
+        // En mode nuit, debutMin est >= 12h (ex: 21:00=1260) et finMin est <12h (ex: 08:00=480)
+        // Amplitude reelle = (1440 - debutMin) + finMin
+        if (debutMin > finMin) {
+          amplitudeMin = (1440 - debutMin) + finMin;
+        } else {
+          amplitudeMin = finMin - debutMin;
+        }
+      } else {
+        amplitudeMin = finMin - debutMin;
+        if (amplitudeMin < 0) amplitudeMin += 1440;
+      }
       const amplitudeH = amplitudeMin / 60;
-
       const amplitudeMax = R.AMPLITUDE_DEROGATOIRE_MAX_H; // Derog max: REGULIER=13h(R3312-28), SLO/OCCASIONNEL=14h(R3312-11) // v7.6.0: utilise R
       if (amplitudeH > amplitudeMax) {
         const depassement = (amplitudeH - amplitudeMax).toFixed(1);
@@ -1516,14 +1537,17 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     }
 
 // Repos journalier (approximation sur les donnees disponibles)
-    const totalActiviteJour = conduiteJour + travailJour + dispoJour + pauseJour;
+    // v7.20 FIX: Detecter jour de repos complet pour ne pas generer de faux positif
+    const estJourReposCompletCSV = activitesJour.length === 1 && (activitesJour[0].type === 'repos' || activitesJour[0].type === 'pause') && activitesJour[0].heure_debut === '00:00' && (activitesJour[0].heure_fin === '24:00' || activitesJour[0].heure_fin === '23:59');
+    const totalActiviteJour = estJourReposCompletCSV ? 0 : (conduiteJour + travailJour + dispoJour + pauseJour);
     const reposEstime = (24 * 60) - totalActiviteJour;
-    if (reposEstime < REGLES_SLO.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
-      const manqueMin = (REGLES_SLO.REPOS_JOURNALIER_REDUIT_H * 60) - reposEstime;
+    const seuilReposIntraJourH = equipage === "double" ? R.MULTI_REPOS_JOURNALIER_MIN_H : R.REPOS_JOURNALIER_REDUIT_H;
+    if (reposEstime < seuilReposIntraJourH * 60 && totalActiviteJour > 0) {
+      const manqueMin = (seuilReposIntraJourH * 60) - reposEstime;
       if (manqueMin > 150) { // > 2h30 sous le minimum = classe 5
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-          limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+          limite: seuilReposIntraJourH + "h minimum (reduit)",
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "5e classe",
@@ -1533,7 +1557,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       } else {
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-          limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+          limite: seuilReposIntraJourH + "h minimum (reduit)",
           constate: (reposEstime / 60).toFixed(1) + "h estimees",
           depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
           classe: "4e classe",
@@ -1541,10 +1565,10 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
-    } else if (reposEstime < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= REGLES_SLO.REPOS_JOURNALIER_REDUIT_H * 60 && totalActiviteJour > 0) {
+    } else if (reposEstime < R.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= seuilReposIntraJourH * 60 && totalActiviteJour > 0) {
       avertissementsJour.push({
         regle: "Repos journalier en mode reduit",
-        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
+        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + R.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + seuilReposIntraJourH + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
       });
     }
 
@@ -1604,15 +1628,16 @@ totalConduiteMin += conduiteJour;
       disponibilite_h: (dispoJour / 60).toFixed(1),
       amplitude_estimee_h: (activitesJour.length >= 2 && activitesJour[0] && activitesJour[0].heure_debut)
         ? (function () {
-          const d = activitesJour[0].heure_debut.split(':').map(Number);
-          const f = activitesJour[activitesJour.length - 1].heure_fin.split(':').map(Number);
-          let a = (f[0] * 60 + f[1]) - (d[0] * 60 + d[1]);
-          if (a < 0) a += 24 * 60;
-          return (a / 60).toFixed(1);
-        })()
+           const d = parseInt(activitesJour[0].heure_debut.split(":")[0]) * 60 + parseInt(activitesJour[0].heure_debut.split(":")[1]);
+           const f = parseInt(activitesJour[activitesJour.length-1].heure_fin.split(":")[0]) * 60 + parseInt(activitesJour[activitesJour.length-1].heure_fin.split(":")[1]);
+           let a = estServiceNuit && d > f ? (1440 - d) + f : f - d;
+           if (a < 0) a += 1440;
+           return (a / 60).toFixed(1);
+         })()
         : "N/A",
       conduite_continue_max_min: maxConduiteContinue,
       repos_estime_h: totalActiviteJour > 0 ? ((24 * 60 - totalActiviteJour) / 60).toFixed(1) : "N/A",
+      repos_cumule_heures: totalActiviteJour === 0 ? 24 : (totalActiviteJour <= pauseJour ? 24 : Math.max(0, (24 * 60 - totalActiviteJour) / 60)),
       travail_nuit_min: travailNuitMin,
       ferry_min: ferryJour,
       ferry_h: (ferryJour / 60).toFixed(1),
@@ -1688,6 +1713,10 @@ totalConduiteMin += conduiteJour;
       const activitesSuivant = joursMap[jourSuivant.date] || [];
       
       if (activitesActuel.length === 0 || activitesSuivant.length === 0) continue;
+      // v7.20 FIX: Skip les jours de repos complets (00:00->24:00 R/P)
+      const estReposCompletActuel = activitesActuel.length === 1 && (activitesActuel[0].type === 'repos' || activitesActuel[0].type === 'pause') && activitesActuel[0].heure_debut === '00:00' && (activitesActuel[0].heure_fin === '24:00' || activitesActuel[0].heure_fin === '23:59');
+      const estReposCompletSuivant = activitesSuivant.length === 1 && (activitesSuivant[0].type === 'repos' || activitesSuivant[0].type === 'pause') && activitesSuivant[0].heure_debut === '00:00' && (activitesSuivant[0].heure_fin === '24:00' || activitesSuivant[0].heure_fin === '23:59');
+      if (estReposCompletActuel || estReposCompletSuivant) continue;
       
       const finActuel = activitesActuel
         .sort(function(a, b) { return a.heure_fin.localeCompare(b.heure_fin); })
@@ -1713,15 +1742,17 @@ totalConduiteMin += conduiteJour;
       });
       
       // Verifier repos journalier minimum
-      if (reposH < REGLES_SLO.REPOS_JOURNALIER_REDUIT_H) {
+      // v7.20: Seuil repos dynamique selon equipage (CE 561/2006 Art.8 par.5)
+      const seuilReposMinH = equipage === 'double' ? R.MULTI_REPOS_JOURNALIER_MIN_H : R.REPOS_JOURNALIER_REDUIT_H;
+      if (reposH < seuilReposMinH) {
         // Repos < 9h = infraction
-        const manqueH = REGLES_SLO.REPOS_JOURNALIER_REDUIT_H - reposH;
+        const manqueH = seuilReposMinH - reposH;
         const manqueMin = manqueH * 60;
         if (manqueMin > 150) {
           // > 2h30 manquantes = 5e classe
           infractions.push({
             regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-            limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
             constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
             depassement: "Manque " + manqueH.toFixed(1) + "h",
             classe: "5e classe",
@@ -1731,7 +1762,7 @@ totalConduiteMin += conduiteJour;
         } else {
           infractions.push({
             regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
-            limite: REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
+            limite: R.REPOS_JOURNALIER_REDUIT_H + "h minimum (reduit)",
             constate: reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date,
             depassement: "Manque " + manqueH.toFixed(1) + "h",
             classe: "4e classe",
@@ -1739,7 +1770,7 @@ totalConduiteMin += conduiteJour;
           });
           amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
         }
-      } else if (reposH < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H) {
+      } else if (reposH < R.REPOS_JOURNALIER_NORMAL_H) {
         // Repos 9h-11h = repos reduit (avertissement, max 3x entre 2 repos hebdo)
         avertissements.push({
           regle: "Repos journalier reduit inter-jours",
@@ -1758,6 +1789,10 @@ totalConduiteMin += conduiteJour;
       const jourSuivant = detailsJours[i + 1];
       const actsA = (joursMap[jourActuel.date] || []).slice(); const actsS = (joursMap[jourSuivant.date] || []).slice();
       if (actsA.length === 0 || actsS.length === 0) continue;
+      // v7.20 FIX: Skip les jours de repos complets
+      const estReposA = actsA.length === 1 && (actsA[0].type === 'repos' || actsA[0].type === 'pause') && actsA[0].heure_debut === '00:00' && (actsA[0].heure_fin === '24:00' || actsA[0].heure_fin === '23:59');
+      const estReposS = actsS.length === 1 && (actsS[0].type === 'repos' || actsS[0].type === 'pause') && actsS[0].heure_debut === '00:00' && (actsS[0].heure_fin === '24:00' || actsS[0].heure_fin === '23:59');
+      if (estReposA || estReposS) continue;
       const finActuel = actsA.sort((a, b) => a.heure_fin.localeCompare(b.heure_fin)).pop();
       const debutSuivant = actsS.sort((a, b) => a.heure_debut.localeCompare(b.heure_debut))[0];
       if (!finActuel || !debutSuivant) continue;
@@ -1925,7 +1960,7 @@ app.post('/api/analyze', (req, res) => {
       return res.status(400).json({ error: "Aucun contenu CSV fourni." });
     }
 
-    const typeServiceValide = ['STANDARD', 'REGULIER', 'OCCASIONNEL', 'SLO'].includes(typeService) ? typeService : 'STANDARD';
+    const typeServiceValide = ['STANDARD', 'REGULIER', 'OCCASIONNEL', 'SLO', 'INTERURBAIN', 'MARCHANDISES'].includes(typeService) ? typeService : 'SLO';
     const paysValide = PAYS[pays] ? pays : 'FR';
     const equipageValide = equipage === 'double' ? 'double' : 'solo';
 
@@ -2422,8 +2457,8 @@ app.get('/api/qa', async (req, res) => {
   test('R2-PAUSES', 'Pause obligatoire complete = 45 min', REGLES_SLO.PAUSE_OBLIGATOIRE_MIN === 45, 'EUR-2', 'CE 561/2006 Art.7 (45min ou fractionne 15+30)', 'Attendu: 45. Obtenu: ' + REGLES_SLO.PAUSE_OBLIGATOIRE_MIN + '. Fractionnable en 15+30 min');
 
   // === R3-REPOS : CE 561/2006 Art.8 ===
-  test('R3-REPOS', 'Repos journalier normal = 11h', REGLES_SLO.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
-  test('R3-REPOS', 'Repos journalier reduit = 9h', REGLES_SLO.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
+  test('R3-REPOS', 'Repos journalier normal = 11h', R.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + R.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
+  test('R3-REPOS', 'Repos journalier reduit = 9h', R.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + R.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
   test('R3-REPOS', 'Repos hebdo normal = 45h', REGLES.REPOS_HEBDO_NORMAL_H === 45, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 45. Obtenu: ' + REGLES.REPOS_HEBDO_NORMAL_H + '. Cross-check: Wayground Q7');
   test('R3-REPOS', 'Repos hebdo reduit = 24h', REGLES.REPOS_HEBDO_REDUIT_H === 24, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 24. Obtenu: ' + REGLES.REPOS_HEBDO_REDUIT_H);
 

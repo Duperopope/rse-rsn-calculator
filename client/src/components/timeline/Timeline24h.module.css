@@ -326,3 +326,32 @@
     min-width: 12px;
   }
 }
+
+/* === BADGE EQUIPAGE SOLO/DUO === */
+.equipageBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin: 0 10px 4px;
+  width: fit-content;
+}
+.equipageSolo {
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: #00d4ff;
+}
+.equipageDuo {
+  background: rgba(170, 68, 255, 0.1);
+  border: 1px solid rgba(170, 68, 255, 0.3);
+  color: #aa44ff;
+}
+.equipageIcon {
+  font-size: 0.8rem;
+}
+.equipageLabel {
+  letter-spacing: 0.03em;
+}
