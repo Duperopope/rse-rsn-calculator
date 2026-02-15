@@ -1491,12 +1491,23 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           var debutH = parseInt(act.heure_debut.split(':')[0]) + parseInt(act.heure_debut.split(':')[1]) / 60;
           var finH = parseInt(act.heure_fin.split(':')[0]) + parseInt(act.heure_fin.split(':')[1]) / 60;
           // La pause chevauche la plage 11h30-14h et dure >= 45 min
-          if (debutH < R.PAUSE_REPAS_FIN_H && finH > R.PAUSE_REPAS_DEBUT_H && act.duree_min >= R.PAUSE_REPAS_MIN) {
+          if (debutH < R.PAUSE_REPAS_FIN_H && finH >= R.PAUSE_REPAS_DEBUT_H && act.duree_min >= R.PAUSE_REPAS_MIN) {
             aPauseRepas = true;
           }
         }
       });
-      if (!aPauseRepas && (conduiteJour + travailJour) > 0) {
+      // Verifier qu'il y a du travail effectif dans la plage repas
+      var travailDansPlageRepas = false;
+      activitesJour.forEach(function(act) {
+        if (act.type === 'conduite' || act.type === 'travail') {
+          var debutH = parseInt(act.heure_debut.split(':')[0]) + parseInt(act.heure_debut.split(':')[1]) / 60;
+          var finH = parseInt(act.heure_fin.split(':')[0]) + parseInt(act.heure_fin.split(':')[1]) / 60;
+          if (debutH < R.PAUSE_REPAS_FIN_H && finH > R.PAUSE_REPAS_DEBUT_H) {
+            travailDansPlageRepas = true;
+          }
+        }
+      });
+      if (!aPauseRepas && travailDansPlageRepas) {
         avertissementsJour.push({
           regle: "Pause repas (Decret 2006-925 art.9)",
           message: "Aucune pause >= " + R.PAUSE_REPAS_MIN + " min detectee entre " + R.PAUSE_REPAS_DEBUT_H + "h et " + R.PAUSE_REPAS_FIN_H + "h. Droit a contrepartie selon accord."
