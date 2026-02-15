@@ -231,7 +231,13 @@ function phase4(infractions, derogConduite, derogTravail, detailsJours, typeServ
       continue;
     }
     if (!retire && PATTERNS.TRAVAIL_QUOTIDIEN.test(regle)) {
-      travailQuotInfs.push(inf);
+      // REGULIER: le serveur ne cree cette infraction que si > derogatoire (10h)
+      // -> toujours conserver (pas de derog possible au-dela)
+      if (typeService === "REGULIER") {
+        conservees.push(inf);
+      } else {
+        travailQuotInfs.push(inf);
+      }
       continue;
     }
     if (!retire && PATTERNS.CONDUITE_HEBDO.test(regle)) {

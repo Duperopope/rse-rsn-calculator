@@ -1411,12 +1411,12 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     // Guard : ne pas doubler si infraction travail de nuit déjà comptée (même limite 10h)
     const dejaInfractionNuit = infractionsJour.some(inf => inf.regle && inf.regle.includes('nuit'));
     const travailTotalJour = conduiteJour + travailJour;
-    if (travailTotalJour > REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H * 60 && !dejaInfractionNuit) {
+    if (!R.EXEMPTION_CE_561 && travailTotalJour > R.TRAVAIL_JOURNALIER_MAX_H * 60 && !dejaInfractionNuit) {
       infractionsJour.push({
         regle: "Durée maximale de travail journalier (Code du travail)",
-        limite: REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H + "h",
+        limite: R.TRAVAIL_JOURNALIER_MAX_H + "h",
         constate: (travailTotalJour / 60).toFixed(1) + "h",
-        depassement: ((travailTotalJour / 60) - REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H).toFixed(1) + "h",
+        depassement: ((travailTotalJour / 60) - R.TRAVAIL_JOURNALIER_MAX_H).toFixed(1) + "h",
         classe: "4e classe",
         amende: amendeObj("4e classe")
       });
@@ -1445,16 +1445,16 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       if (travailRegulierH > R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H) {
         infractionsJour.push({
           regle: "Duree de travail quotidienne (R3312-11 + D3312-6)",
-          limite: REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H + "h (derogatoire " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h, 2x/semaine)",
+          limite: R.TRAVAIL_JOURNALIER_MAX_H + "h (derogatoire " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h, 2x/semaine)",
           constate: travailRegulierH.toFixed(1) + "h",
           depassement: (travailRegulierH - R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H).toFixed(1) + "h",
           classe: "4e classe",
           amende: amendeObj("4e classe")
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
-      } else if (travailRegulierH > REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H) {
+      } else if (travailRegulierH > R.TRAVAIL_JOURNALIER_MAX_H) {
         avertissementsJour.push({
-          regle: "Travail quotidien > " + REGLES_SLO.TRAVAIL_JOURNALIER_MAX_H + "h (R3312-11)",
+          regle: "Travail quotidien > " + R.TRAVAIL_JOURNALIER_MAX_H + "h (R3312-11)",
           message: "Travail de " + travailRegulierH.toFixed(1) + "h. Depassement 9h admis jusqu a " + R.TRAVAIL_JOURNALIER_DEROGATOIRE_MAX_H + "h max 2x/semaine (D3312-6). Verifier le compteur hebdo."
         });
       }
