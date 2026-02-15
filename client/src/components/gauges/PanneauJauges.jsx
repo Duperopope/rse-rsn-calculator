@@ -62,12 +62,22 @@ export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
           label="Amplitude"
           texteValeur={fmtMin(stats.amplitude) + ' / ' + fmtMin(limiteAmplitude)}
         />
-        <JaugeLineaire
-          valeur={stats.pauseTotale}
-          max={LIMITES.PAUSE_OBLIGATOIRE}
-          label="Pause cumulee"
-          texteValeur={fmtMin(stats.pauseTotale) + ' / ' + fmtMin(LIMITES.PAUSE_OBLIGATOIRE)}
-        />
+        {/* Pause cumulee : seuil dynamique selon conduite (CE 561 Art.7) */}
+        {stats.travailTotal > 0 && (() => {
+          const seuilAtteint = stats.conduiteMax >= LIMITES.CONDUITE_CONTINUE_MAX;
+          const pauseMax = seuilAtteint ? LIMITES.PAUSE_OBLIGATOIRE : 0;
+          const txt = seuilAtteint
+            ? fmtMin(stats.pauseTotale) + ' / ' + fmtMin(LIMITES.PAUSE_OBLIGATOIRE)
+            : fmtMin(stats.pauseTotale) + ' (pas encore requise)';
+          return (
+            <JaugeLineaire
+              valeur={stats.pauseTotale}
+              max={pauseMax || 1}
+              label="Pause cumulee"
+              texteValeur={txt}
+            />
+          );
+        })()}
       </div>
     </div>
   );

@@ -62,7 +62,11 @@ export function JaugeLineaire({
 
   // Pour pause: inverse (valeur doit etre >= max)
   const isPause = label.toLowerCase().includes('pause');
-  if (isPause) {
+  if (isPause && max <= 1) {
+    // Seuil de conduite non atteint : pas encore d obligation de pause
+    status = 'ok';
+    statusLabel = 'Conforme';
+  } else if (isPause) {
     if (valeur >= max) {
       status = 'ok';
       statusLabel = 'Conforme';
