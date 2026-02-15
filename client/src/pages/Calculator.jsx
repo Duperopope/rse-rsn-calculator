@@ -727,6 +727,9 @@ export default function Calculator() {
         voirHistorique={voirHistorique}
 
 
+        onStartTour={() => setShowTour(true)}
+
+
       />
 
 
@@ -1114,6 +1117,9 @@ export default function Calculator() {
 
 
         voirHistorique={voirHistorique}
+
+
+        onStartTour={() => setShowTour(true)}
 
 
         onScrollTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

@@ -230,39 +230,41 @@
   .themeThumb { width: 14px; height: 14px; }
   .themeThumbDark { transform: translateX(14px); }
 }
-/* === Bouton aide "?" === */
+
+/* === Bouton Guide "?" v3 — style unifie avec themeToggle === */
 .helpBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border, #2a2a3e);
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  border: none;
   background: var(--bg-input, #1a1a2e);
+  border: 1px solid var(--border, #2a2a3e);
   color: var(--text-secondary, #888);
+  font-size: 0.72rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
 }
 .helpBtn:hover {
-  border-color: var(--accent, #00d4ff);
   color: var(--accent, #00d4ff);
-  transform: scale(1.08);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
+  border-color: var(--accent, #00d4ff);
+  background: rgba(0, 212, 255, 0.08);
 }
 .helpBtn:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
 @media (max-width: 480px) {
   .helpBtn {
-    width: 28px;
-    height: 28px;
-  }
-  .helpBtn svg {
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
   }
 }

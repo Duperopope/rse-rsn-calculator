@@ -234,21 +234,33 @@
 .deleteActBtn {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary, #888);
+  border-radius: 6px;
+  background: rgba(255, 68, 68, 0.08);
+  border: 1px solid rgba(255, 68, 68, 0.15);
+  color: #ff6b6b;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s;
   cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
 }
 @media (hover: hover) {
-  .deleteActBtn:hover:not(:disabled) { color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
+  .deleteActBtn:hover:not(:disabled) {
+    color: #ff4444;
+    background: rgba(255, 68, 68, 0.18);
+    border-color: rgba(255, 68, 68, 0.35);
+    transform: scale(1.08);
+  }
 }
-.deleteActBtn:disabled { opacity: 0.2; cursor: not-allowed; }
+.deleteActBtn:disabled {
+  opacity: 0.15;
+  cursor: not-allowed;
+  background: transparent;
+  border-color: transparent;
+  transform: none;
+}
 
 /* --- SELECTEUR DE TYPE (panneau depliable) --- */
 .typeSelectorWrapper {
