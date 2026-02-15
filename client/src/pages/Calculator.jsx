@@ -867,17 +867,6 @@ export default function Calculator() {
                       )}
                     </div>
                   ))}
-                  <button
-                    className={styles.jourNavAddInline}
-                    onClick={() => {
-                      ajouterJourActif();
-                      setJourActifIndex(jours.length);
-                      setTimeout(() => {
-                        if (jourTabsRef.current) jourTabsRef.current.scrollLeft = jourTabsRef.current.scrollWidth;
-                      }, 50);
-                    }}
-                    aria-label="Ajouter un jour"
-                  >+</button>
                 </div>
                 <button
                   className={styles.jourNavArrow + ' ' + styles.jourNavArrowRight}
@@ -886,6 +875,39 @@ export default function Calculator() {
                   tabIndex={-1}
                 >&rsaquo;</button>
               </div>
+            {/* -- Mini-jauges compactes (toujours visibles) -- */}
+            {!dashExpanded && dayStats && (
+              <div className={styles.miniJauges}>
+                {[
+                  { label: 'Cond.', icon: '\u{1F698}', val: dayStats.condCont, max: 270, unit: 'min' },
+                  { label: 'Jour', icon: '\u{1F551}', val: dayStats.condJour, max: 600, unit: 'min' },
+                  { label: 'Ampl.', icon: '\u{2194}', val: dayStats.amplitude, max: 780, unit: 'min' },
+                  { label: 'Pause', icon: '\u{2615}', val: dayStats.pauseCum, max: 45, unit: 'min', invert: true }
+                ].map((g, i) => {
+                  const ratio = g.max > 0 ? Math.min(g.val / g.max, 1) : 0;
+                  const isPause = !!g.invert;
+                  let color = '#00ff88';
+                  if (isPause) {
+                    color = g.val >= g.max ? '#00ff88' : g.val >= g.max * 0.5 ? '#ffaa00' : '#ff4444';
+                  } else {
+                    color = ratio >= 1 ? '#ff4444' : ratio >= 0.8 ? '#ffaa00' : '#00ff88';
+                  }
+                  const valH = Math.floor(g.val / 60);
+                  const valM = Math.round(g.val % 60);
+                  const txt = valH > 0 ? valH + 'h' + (valM > 0 ? String(valM).padStart(2, '0') : '') : valM + 'm';
+                  return (
+                    <div key={i} className={styles.miniJauge}>
+                      <span className={styles.miniJaugeLabel}>{g.icon} {g.label}</span>
+                      <div className={styles.miniJaugeTrack}>
+                        <div className={styles.miniJaugeFill} style={{ width: (ratio * 100) + '%', background: color }} />
+                      </div>
+                      <span className={styles.miniJaugeVal} style={{ color: color }}>{txt}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             <button
 
 
