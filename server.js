@@ -2469,7 +2469,12 @@ app.get("/api/qa/avance", (req, res) => {
 
 // GET /api/regles - Constantes reglementaires
 app.get('/api/regles', (req, res) => {
-  res.json({ regles: REGLES, sanctions: SANCTIONS });
+  const typeService = req.query.typeService || 'SLO';
+  const reglesTypees = getRegles(typeService);
+  if (!reglesTypees) {
+    return res.status(400).json({ erreur: 'Type de service inconnu: ' + typeService, types_valides: ['REGULIER','SLO','OCCASIONNEL','INTERURBAIN','MARCHANDISES'] });
+  }
+  res.json({ regles: reglesTypees, sanctions: SANCTIONS });
 });
 
 
