@@ -1887,9 +1887,7 @@ totalConduiteMin += conduiteJour;
     const reposHebdoNormaux = reposEntreJoursTrav.filter(function(r) { return r.repos_h >= R.REPOS_HEBDO_NORMAL_H; });
     const reposHebdoReduits = reposEntreJoursTrav.filter(function(r) { return r.repos_h >= R.REPOS_HEBDO_REDUIT_H && r.repos_h < R.REPOS_HEBDO_NORMAL_H; });
 
-    console.log("[v7.20.1] Repos hebdo: " + reposHebdoNormaux.length + " normaux, " + reposHebdoReduits.length + " reduits sur " + reposEntreJoursTrav.length + " periodes");
-
-
+    // v7.20.4: ancien log desactive - voir FIX-07a ligne ~1987 pour log unifie
 
 
     // Art.8 par.6 : en 2 semaines, au moins 2 repos hebdo (1 normal + 1 reduit minimum)

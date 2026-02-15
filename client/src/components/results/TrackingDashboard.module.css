@@ -1,5 +1,13 @@
-/* TrackingDashboard v9 — Ultra-compact */
-.dashboard { margin: 8px 0; }
+/* TrackingDashboard v10 — Enrichi FIX-08 */
+.dashboard { margin: 12px 0; }
+.sectionTitle {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
 .metricsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -11,7 +19,9 @@
   padding: 8px 6px;
   border-left: 2px solid transparent;
   text-align: center;
+  transition: background 0.15s;
 }
+.metricCard:hover { background: rgba(255,255,255,0.07); }
 .metricOk { border-left-color: var(--accent-green, #00ff88); }
 .metricWarning { border-left-color: var(--accent-orange, #ffaa00); }
 .metricDanger { border-left-color: var(--accent-red, #ff4444); }
@@ -40,6 +50,126 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-@media (max-width: 360px) {
+
+/* Detail sections */
+.detailSection {
+  margin-top: 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 8px;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.detailTitle {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 6px;
+  letter-spacing: 0.04em;
+}
+
+/* Repos table */
+.reposTable { font-size: 0.6rem; }
+.reposHeader {
+  display: grid;
+  grid-template-columns: 50px 50px 70px 35px 45px 45px 45px;
+  gap: 4px;
+  color: rgba(255,255,255,0.35);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 2px;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+.reposRow {
+  display: grid;
+  grid-template-columns: 50px 50px 70px 35px 45px 45px 45px;
+  gap: 4px;
+  padding: 3px 0;
+  color: rgba(255,255,255,0.7);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.reposRowReduit { background: rgba(255,170,0,0.06); }
+.reposRowInsuffisant { background: rgba(255,68,68,0.08); }
+.reposDate { font-weight: 600; color: #fff; }
+.reposDuree { font-weight: 600; }
+.reposResiduel { color: rgba(255,255,255,0.4); font-size: 0.55rem; }
+
+/* Type tags */
+.tagNormal {
+  background: rgba(0,255,136,0.15);
+  color: var(--accent-green, #00ff88);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.5rem;
+  font-weight: 600;
+}
+.tagReduit {
+  background: rgba(255,170,0,0.15);
+  color: var(--accent-orange, #ffaa00);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.5rem;
+  font-weight: 600;
+}
+.tagInsuffisant {
+  background: rgba(255,68,68,0.15);
+  color: var(--accent-red, #ff4444);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.5rem;
+  font-weight: 600;
+}
+.legendeResiduel {
+  font-size: 0.45rem;
+  color: rgba(255,255,255,0.25);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Dette */
+.detteList { font-size: 0.6rem; }
+.detteItem {
+  display: grid;
+  grid-template-columns: 50px 40px 1fr 65px;
+  gap: 6px;
+  padding: 3px 0;
+  color: rgba(255,255,255,0.7);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.detteDate { font-weight: 600; color: #fff; }
+.detteH { font-weight: 600; color: var(--accent-orange, #ffaa00); }
+.detteEcheance { color: rgba(255,255,255,0.4); font-size: 0.55rem; }
+.detteStatut { font-size: 0.5rem; font-weight: 600; }
+.detteEnCours { color: var(--accent-orange, #ffaa00); }
+.detteCompense { color: var(--accent-green, #00ff88); }
+
+/* Rappels */
+.rappelsSection {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: rgba(0,132,255,0.06);
+  border-left: 2px solid var(--accent-blue, #0084ff);
+  border-radius: 0 6px 6px 0;
+}
+.rappelItem {
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.5);
+  padding: 2px 0;
+  line-height: 1.4;
+}
+.rappelItem + .rappelItem {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 2px;
+  padding-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
   .metricsGrid { grid-template-columns: 1fr 1fr; }
+  .reposHeader, .reposRow { grid-template-columns: 40px 40px 60px 30px 40px 40px 40px; font-size: 0.5rem; }
+  .detteItem { grid-template-columns: 45px 35px 1fr 55px; }
+}
+@media (max-width: 360px) {
+  .metricsGrid { grid-template-columns: 1fr; }
 }
