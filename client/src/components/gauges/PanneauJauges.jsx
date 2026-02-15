@@ -64,7 +64,8 @@ export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
         />
         {/* Pause cumulee : seuil dynamique selon conduite (CE 561 Art.7) */}
         {stats.travailTotal > 0 && (() => {
-          const seuilAtteint = stats.conduiteMax >= LIMITES.CONDUITE_CONTINUE_MAX;
+          /* Pause requise si conduite continue >= 4h30 OU conduite totale >= 2h */
+          const seuilAtteint = stats.conduiteMax >= LIMITES.CONDUITE_CONTINUE_MAX || stats.conduiteTotale >= 120;
           const pauseMax = seuilAtteint ? LIMITES.PAUSE_OBLIGATOIRE : 0;
           const txt = seuilAtteint
             ? fmtMin(stats.pauseTotale) + ' / ' + fmtMin(LIMITES.PAUSE_OBLIGATOIRE)
