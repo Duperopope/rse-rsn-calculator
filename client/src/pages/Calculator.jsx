@@ -323,6 +323,18 @@ export default function Calculator() {
       if (jours[idx] && jours[idx].activites) {
 
 
+
+        // Compter les derogations conduite (>9h) deja utilisees dans la semaine (hors jour actif)
+        // CE 561/2006 Art.6 §1 : max 10h de conduite 2x/semaine
+        var nbDerogConduite = 0;
+        for (var di = 0; di < jours.length; di++) {
+          if (di === idx) continue; // exclure le jour en cours
+          var jourStats = calculerStatsJour(jours[di].activites);
+          if (jourStats && jourStats.conduiteTotale > 540) nbDerogConduite++;
+        }
+        // Stocker pour passer aux jauges
+        window.__nbDerogConduite = Math.min(nbDerogConduite, 2);
+
         setStatsJour(calculerStatsJour(jours[idx].activites));
 
 
@@ -813,7 +825,7 @@ export default function Calculator() {
 
 
 
-            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} />}
+            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} nbDerogConduite={window.__nbDerogConduite || 0} />}
 
 
             {(dashExpanded || window.innerWidth >= 769) && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
@@ -918,9 +930,9 @@ export default function Calculator() {
                   <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteBloc >= 270 ? '#ff4444' : statsJour.conduiteBloc >= 216 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteBloc || 0) / 60)}h{String(Math.round((statsJour.conduiteBloc || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteTotale >= 540 ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88'} /> Jour</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteTotale || 0) / 540 * 100, 100) + '%', background: statsJour.conduiteTotale >= 540 ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteTotale >= 540 ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteTotale || 0) / 60)}h{String(Math.round((statsJour.conduiteTotale || 0) % 60)).padStart(2, '0')}</span>
+                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteTotale >= (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88'} /> Jour</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteTotale || 0) / (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) * 100, 100) + '%', background: statsJour.conduiteTotale >= (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteTotale >= (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteTotale || 0) / 60)}h{String(Math.round((statsJour.conduiteTotale || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
                   <span className={styles.miniJaugeLabel}><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke={statsJour.amplitude >= 780 ? '#ff4444' : statsJour.amplitude >= 624 ? '#ffaa00' : '#00ff88'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Ampl.</span>

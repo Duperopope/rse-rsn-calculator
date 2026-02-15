@@ -11,8 +11,18 @@ import styles from './PanneauJauges.module.css';
  * @param {Object} stats - Resultat de calculerStatsJour
  * @param {string} typeService - Code type de service
  */
-export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
+export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite = 0 }) {
   if (!stats || stats.nbActivites === 0) return null;
+
+
+  // Seuil dynamique conduite journaliere (CE 561/2006 Art.6 §1)
+  // Normal: 9h (540 min), Derogatoire: 10h (600 min) max 2x/semaine
+  const derogDisponible = nbDerogConduite < 2;
+  const enModeDerog = derogDisponible && stats.conduiteTotale > LIMITES.CONDUITE_JOURNALIERE_MAX;
+  const limiteConduite = enModeDerog ? LIMITES.CONDUITE_JOURNALIERE_DEROG : LIMITES.CONDUITE_JOURNALIERE_MAX;
+  const labelConduite = enModeDerog
+    ? "Conduite journaliere (derog " + (nbDerogConduite + 1) + "/2)"
+    : (derogDisponible ? "Conduite journaliere" : "Conduite journaliere (2/2 derog)");
 
   const limiteAmplitude = (typeService === 'OCCASIONNEL' || typeService === 'SLO' || typeService === 'INTERURBAIN' || typeService === 'MARCHANDISES')
     ? LIMITES.AMPLITUDE_OCCASIONNEL_MAX
@@ -30,7 +40,7 @@ export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
         />
         <JaugeCirculaire
           valeur={stats.conduiteTotale}
-          max={LIMITES.CONDUITE_JOURNALIERE_MAX}
+          max={limiteConduite}
           label="Journee"
           unite="min"
           size={100}
@@ -52,9 +62,10 @@ export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
         />
         <JaugeLineaire
           valeur={stats.conduiteTotale}
-          max={LIMITES.CONDUITE_JOURNALIERE_MAX}
-          label="Conduite journaliere"
-          texteValeur={fmtMin(stats.conduiteTotale) + ' / ' + fmtMin(LIMITES.CONDUITE_JOURNALIERE_MAX)}
+          max={limiteConduite}
+          label={labelConduite}
+          texteValeur={fmtMin(stats.conduiteTotale) + ' / ' + fmtMin(limiteConduite)}
+          seuilWarning={enModeDerog ? 0.9 : 0.8}
         />
         <JaugeLineaire
           valeur={stats.amplitude}
