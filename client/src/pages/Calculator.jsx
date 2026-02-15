@@ -161,6 +161,7 @@ export default function Calculator() {
 
 
   const [dashExpanded, setDashExpanded] = useState(false);
+  const [showResultDetail, setShowResultDetail] = useState(false);
 
 
 
@@ -792,7 +793,7 @@ export default function Calculator() {
           <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')}>
             {/* -- Score principal compact -- */}
             {resultat && (
-              <div className={styles.scoreStickyRow}>
+              <div className={styles.scoreStickyRow} onClick={() => setShowResultDetail(!showResultDetail)} style={{ cursor: 'pointer' }}>
                 <div className={styles.scoreCircleMini} style={{
                   background: resultat.score >= 90 ? '#00ff88' : resultat.score >= 70 ? '#ffaa00' : '#ff4444',
                   color: resultat.score >= 90 ? '#000' : '#fff'
@@ -802,6 +803,14 @@ export default function Calculator() {
                 <span className={styles.scoreStickyLabel}>
                   Score FIMO {String.fromCharCode(8226)} {resultat.infractions?.length || 0} infraction{(resultat.infractions?.length || 0) > 1 ? 's' : ''}{resultat.avertissements?.length ? ' ' + String.fromCharCode(183) + ' ' + resultat.avertissements.length + ' alerte' + (resultat.avertissements.length > 1 ? 's' : '') : ''}
                 </span>
+                <span className={styles.scoreChevron}>{showResultDetail ? '\u25B2' : '\u25BC'}</span>
+              </div>
+            )}
+
+            {/* === ResultPanel inline sous le score === */}
+            {showResultDetail && resultat && !chargement && (
+              <div className={styles.resultInlineWrap}>
+                <ResultPanel resultat={resultat} />
               </div>
             )}
 
@@ -1070,7 +1079,7 @@ export default function Calculator() {
         {chargement ? <Loader /> : null}
 
 
-        {resultat && !chargement ? <ResultPanel resultat={resultat} /> : null}
+        {/* ResultPanel deplace dans le sticky */}
 
 
 
@@ -1135,7 +1144,6 @@ export default function Calculator() {
 
 
 }
-
 
 
 
