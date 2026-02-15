@@ -291,7 +291,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
       </div>
 
       {/* LISTE DES ACTIVITES */}
-      <div className={styles.activites}>
+      <div data-tour="activite" className={styles.activites}>
         <div className={styles.activitesHeader}>
           <span className={styles.colHead}>Type</span>
           <span className={styles.colHead}>Debut</span>
@@ -323,7 +323,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
 
           return (
             <React.Fragment key={actIdx}>
-              <div id={'activite-' + actIdx} data-activite-index={actIdx} data-tour="activite" className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')} style={{ '--type-color': typeInfo.couleur + '80' }}>
+              <div id={'activite-' + actIdx} data-activite-index={actIdx} className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')} style={{ '--type-color': typeInfo.couleur + '80' }}>
                 <button
                   type="button"
                   className={styles.activiteTypeBtn}

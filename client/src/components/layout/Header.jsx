@@ -59,7 +59,7 @@ function ThemeToggle({ theme, onToggle }) {
   const isDark = theme === 'dark';
   return (
     <button
-      data-tour="theme" className={styles.themeToggle}
+      className={styles.themeToggle}
       onClick={() => { if (navigator.vibrate) navigator.vibrate(5); if (onToggle) onToggle(); }}
       title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
       aria-label={isDark ? 'Mode clair' : 'Mode sombre'}
@@ -122,7 +122,7 @@ export function Header({
 
       {/* === Mobile: status + theme === */}
       <div className={styles.mobileRight}>
-        <span className={online ? styles.statusOn : styles.statusOff} data-tour="status" />
+        <span className={online ? styles.statusOn : styles.statusOff} />
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         <button data-tour="help" className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
       </div>

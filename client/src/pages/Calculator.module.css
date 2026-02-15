@@ -507,3 +507,16 @@
   * { scrollbar-width: none; }
   *::-webkit-scrollbar { display: none; }
 }
+
+/* === Tour guide: masquer le dashboard sticky pendant certaines etapes === */
+
+/* GuidedTour: masque le sticky dashboard pendant les etapes basses */
+.realtimeSticky[data-tour-hidden="true"] {
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+}

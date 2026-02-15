@@ -739,7 +739,7 @@ export default function Calculator() {
       <main className={styles.main}>
 
 
-        <ParametresPanel data-tour="params"
+        <ParametresPanel
 
 
           typeService={typeService} onTypeServiceChange={setTypeService}
@@ -820,7 +820,7 @@ export default function Calculator() {
         {mode === 'formulaire' && statsJour ? (
 
 
-          <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')}>
+          <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')} data-tour-sticky="dashboard">
             {/* -- Score principal compact -- */}
             {resultat && (
               <div className={styles.scoreStickyRow} onClick={() => setShowResultDetail(!showResultDetail)} style={{ cursor: 'pointer' }}>
