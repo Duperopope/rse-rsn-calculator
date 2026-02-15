@@ -256,7 +256,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
 
           return (
             <React.Fragment key={actIdx}>
-              <div className={styles.activiteLine}>
+              <div className={styles.activiteLine} style={{ '--type-color': typeInfo.couleur + '80' }}>
                 <button
                   type="button"
                   className={styles.activiteTypeBtn}
