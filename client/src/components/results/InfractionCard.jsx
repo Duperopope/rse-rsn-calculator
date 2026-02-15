@@ -3,7 +3,7 @@ import styles from './InfractionCard.module.css';
 
 const BAREMES = {
   '4e classe': { forfait: 135, minore: 90, majore: 375, max: 750 },
-  '5e classe': { forfait: 200, minore: 150, majore: 450, max: 1500 }
+  '5e classe': { forfait: 1500, minore: null, majore: null, max: 1500 }
 };
 
 
@@ -150,15 +150,15 @@ function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }
       <div className={styles.amendeGrid}>
         <div className={styles.amendeItem + ' ' + styles.amendeMinore}>
           <span className={styles.amendeLabel}>Minorée</span>
-          <span className={styles.amendeValue}>{bareme.minore} €</span>
+          <span className={styles.amendeValue}>{bareme.minore || "N/A"} €</span>
         </div>
         <div className={styles.amendeItem + ' ' + styles.amendeForfait}>
           <span className={styles.amendeLabel}>Forfait</span>
-          <span className={styles.amendeValue}>{bareme.forfait} €</span>
+          <span className={styles.amendeValue}>{bareme.forfait || "N/A"} €</span>
         </div>
         <div className={styles.amendeItem + ' ' + styles.amendeMajore}>
           <span className={styles.amendeLabel}>Majorée</span>
-          <span className={styles.amendeValue}>{bareme.majore} €</span>
+          <span className={styles.amendeValue}>{bareme.majore || "N/A"} €</span>
         </div>
         <div className={styles.amendeItem + ' ' + styles.amendeMax}>
           <span className={styles.amendeLabel}>Maximum</span>
@@ -175,15 +175,15 @@ function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }
         <div className={styles.amendeConditions}>
           <div className={styles.amendeCondItem}>
             <span className={styles.condBadge + " " + styles.condMinore}>{"\u2193"}</span>
-            <span><strong>Minoree</strong> ({bareme.minore} {"\u20AC"}) : paiement sous 15 jours</span>
+            <span><strong>Minoree</strong> ({bareme.minore || "N/A"} {"\u20AC"}) : paiement sous 15 jours</span>
           </div>
           <div className={styles.amendeCondItem}>
             <span className={styles.condBadge + " " + styles.condForfait}>{"\u2022"}</span>
-            <span><strong>Forfait</strong> ({bareme.forfait} {"\u20AC"}) : paiement sous 45 jours</span>
+            <span><strong>Forfait</strong> ({bareme.forfait || "N/A"} {"\u20AC"}) : paiement sous 45 jours</span>
           </div>
           <div className={styles.amendeCondItem}>
             <span className={styles.condBadge + " " + styles.condMajore}>{"\u2191"}</span>
-            <span><strong>Majoree</strong> ({bareme.majore} {"\u20AC"}) : non-paiement apres 45 jours</span>
+            <span><strong>Majoree</strong> ({bareme.majore || "N/A"} {"\u20AC"}) : non-paiement apres 45 jours</span>
           </div>
           {classe === "5e classe" && (
             <div className={styles.amendeCondItem}>
@@ -224,3 +224,4 @@ function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }
     </div>
   );
 }
+
