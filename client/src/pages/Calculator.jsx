@@ -163,6 +163,8 @@ export default function Calculator() {
   const [dashExpanded, setDashExpanded] = useState(false);
   const [showResultDetail, setShowResultDetail] = useState(() => { try { return !!sessionStorage.getItem('fimo_resultat'); } catch(e) { return false; } });
   const [bottomTab, setBottomTab] = useState('saisie');
+  const touchStartX = React.useRef(0);
+  const touchStartY = React.useRef(0);
 
 
 
@@ -820,7 +822,7 @@ export default function Calculator() {
               <div className={styles.timelineWrap}>
 
 
-                <Card><Timeline24h activites={jours[jourActifIndex].activites} theme={theme} onActiviteClick={function(idx) { var el = document.getElementById('activite-' + idx); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow 0.3s'; el.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.5)'; setTimeout(function() { el.style.boxShadow = 'none'; }, 2000); } }} /></Card>
+                <Card><Timeline24h activites={jours[jourActifIndex].activites} theme={theme} onActiviteClick={function(idx) { setBottomTab('saisie'); setTimeout(function() { var el = document.getElementById('activite-' + idx); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow 0.3s'; el.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.5)'; setTimeout(function() { el.style.boxShadow = 'none'; }, 2000); } }, 100); }} /></Card>
 
 
               </div>
@@ -965,6 +967,17 @@ export default function Calculator() {
 
 
         {/* === ZONE BASSE : Onglets Saisie / Resultats === */}
+        <div
+          onTouchStart={function(e) { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
+          onTouchEnd={function(e) {
+            var dx = e.changedTouches[0].clientX - touchStartX.current;
+            var dy = e.changedTouches[0].clientY - touchStartY.current;
+            if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && resultat) {
+              if (dx < 0 && bottomTab === "saisie") setBottomTab("resultats");
+              if (dx > 0 && bottomTab === "resultats") setBottomTab("saisie");
+            }
+          }}
+        >
         {chargement && <div style={{ padding: "16px", textAlign: "center" }}><Loader /></div>}
         {erreur && <Card variant="danger" animate><p className={styles.erreur}>{erreur}</p></Card>}
 
@@ -1013,6 +1026,7 @@ export default function Calculator() {
           </div>
         )}
 
+        </div>
 
 
 
