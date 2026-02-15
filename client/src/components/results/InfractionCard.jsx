@@ -77,7 +77,7 @@ function trouverSource(regle) {
 
 export 
 
-function InfractionCard({ infraction, index, onNavigate }) {
+function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }) {
   const inf = infraction || {};
   const message = inf.regle || inf.message || inf.description || 'Infraction';
   const article = inf.article || inf.reference || '';
