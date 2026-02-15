@@ -152,23 +152,39 @@ export function ResultPanel({ resultat }) {
       {/* Avertissements */}
       {avertissements.length > 0 ? (
         <div className={styles.section}>
-          <h3 className={styles.sectionTitleWarn}>Avertissements ({avertissements.length})</h3>
+          <h3 className={styles.sectionTitleWarn}>Avertissements</h3>
           <div className={styles.avertissements}>
-            {avertissements.map((av, i) => (
-              <div key={i} className={styles.avertissement}>
-                <span className={styles.warnIcon}>!</span>
-                <div>
-                  <strong>
-                    {av.url_legale ? (
-                      <a href={av.url_legale} target="_blank" rel="noopener noreferrer" style={{color: 'inherit', textDecoration: 'underline dotted'}}>
-                        {av.regle || ''}
-                      </a>
-                    ) : (av.regle || '')}
-                  </strong>
-                  <p>{av.message || av.description || JSON.stringify(av)}</p>
+            {(() => {
+              const grouped = [];
+              const seen = new Map();
+              avertissements.forEach((av) => {
+                const key = (av.regle || av.article || '') + '|' + (av.message || av.description || '');
+                if (seen.has(key)) {
+                  seen.get(key).count++;
+                  if (av.jour) seen.get(key).jours.push(av.jour);
+                } else {
+                  const g = { ...av, count: 1, jours: av.jour ? [av.jour] : [] };
+                  seen.set(key, g);
+                  grouped.push(g);
+                }
+              });
+              return grouped.map((av, i) => (
+                <div key={i} className={styles.avertissement}>
+                  <span className={styles.warnIcon}>!</span>
+                  <div>
+                    <strong>
+                      {av.url_legale ? (
+                        <a href={av.url_legale} target="_blank" rel="noopener noreferrer" style={{color: 'inherit', textDecoration: 'underline dotted'}}>
+                          {av.regle || ''}
+                        </a>
+                      ) : (av.regle || '')}
+                      {av.count > 1 ? <span style={{marginLeft:'6px',padding:'1px 6px',borderRadius:'8px',background:'rgba(255,170,0,0.15)',color:'#ffaa00',fontSize:'0.7rem',fontWeight:600}}>{String.fromCharCode(215)}{av.count}{av.jours.length > 0 ? ' (' + av.jours.join(', ') + ')' : ''}</span> : null}
+                    </strong>
+                    <p>{av.message || av.description || ''}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
         </div>
       ) : null}
