@@ -491,3 +491,10 @@
   transition: transform 0.2s;
 }
 .scoreStickyRow:hover .scoreChevron { opacity: 0.9; }
+/* === Bottom Tabs === */
+.bottomTabs { display: flex; gap: 0; border-radius: 12px; overflow: hidden; margin: 0 0 12px 0; border: 1px solid var(--border, #2a2a3e); }
+.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888); border: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.bottomTab:first-child { border-radius: 12px 0 0 12px; }
+.bottomTab:last-child { border-radius: 0 12px 12px 0; }
+.bottomTabActive { background: var(--accent, #00d4ff); color: #000; }
+.bottomTab:not(.bottomTabActive):hover { background: rgba(0, 212, 255, 0.1); color: #fff; }

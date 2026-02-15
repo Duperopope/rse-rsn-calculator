@@ -162,6 +162,7 @@ export default function Calculator() {
 
   const [dashExpanded, setDashExpanded] = useState(false);
   const [showResultDetail, setShowResultDetail] = useState(() => { try { return !!sessionStorage.getItem('fimo_resultat'); } catch(e) { return false; } });
+  const [bottomTab, setBottomTab] = useState('saisie');
 
 
 
@@ -441,7 +442,7 @@ export default function Calculator() {
 
 
     if (data) {
-      setShowResultDetail(true);
+      setShowResultDetail(true); setBottomTab('resultats');
 
 
       const entry = {
@@ -963,89 +964,54 @@ export default function Calculator() {
 
 
 
-        {/* === ResultPanel deploye sous le sticky === */}
-        {showResultDetail && resultat && !chargement && (
+        {/* === ZONE BASSE : Onglets Saisie / Resultats === */}
+        {chargement && <div style={{ padding: "16px", textAlign: "center" }}><Loader /></div>}
+        {erreur && <Card variant="danger" animate><p className={styles.erreur}>{erreur}</p></Card>}
+
+        {resultat && (
+          <div className={styles.bottomTabs}>
+            <button
+              className={styles.bottomTab + (bottomTab === "saisie" ? " " + styles.bottomTabActive : "")}
+              onClick={() => setBottomTab('saisie')}
+            >Saisie</button>
+            <button
+              className={styles.bottomTab + (bottomTab === "resultats" ? " " + styles.bottomTabActive : "")}
+              onClick={() => setBottomTab('resultats')}
+            >Resultats</button>
+          </div>
+        )}
+
+        {bottomTab === "resultats" && resultat && !chargement ? (
           <div className={styles.resultInlineWrap}>
             <ResultPanel resultat={resultat} compact />
           </div>
+        ) : (
+          <div className={styles.inputSection}>
+            {mode === "formulaire" ? (
+              <div className={styles.formulaire}>
+                <JourFormulaire
+                  key={joursActifs[safeIndex]?.date + "-" + safeIndex}
+                  jour={joursActifs[safeIndex]}
+                  index={safeIndex}
+                  onUpdate={updateJourActif}
+                  onRemove={(idx) => {
+                    supprimerJourActif(idx);
+                    if (jourActifIndex >= joursActifs.length - 1) {
+                      setJourActifIndex(Math.max(0, joursActifs.length - 2));
+                    }
+                  }}
+                  onDuplicate={(idx) => {
+                    dupliquerJourActif(idx);
+                    setJourActifIndex(idx + 1);
+                  }}
+                  canRemove={joursActifs.length > 1}
+                />
+              </div>
+            ) : (
+              <Card><CsvInput value={conducteurActif === 1 ? csvTexte : csvTexte2} onChange={conducteurActif === 1 ? setCsvTexte : setCsvTexte2} /></Card>
+            )}
+          </div>
         )}
-        {chargement && <div style={{ padding: '16px', textAlign: 'center' }}><Loader /></div>}
-        {erreur && <Card variant='danger' animate><p className={styles.erreur}>{erreur}</p></Card>}
-
-        {/* === FORMULAIRE DE SAISIE === */}
-
-
-        <div className={styles.inputSection}>
-
-
-          {mode === 'formulaire' ? (
-
-
-            <div className={styles.formulaire}>
-
-
-              <JourFormulaire
-
-
-                key={joursActifs[safeIndex]?.date + '-' + safeIndex}
-
-
-                jour={joursActifs[safeIndex]}
-
-
-                index={safeIndex}
-
-
-                onUpdate={updateJourActif}
-
-
-                onRemove={(idx) => {
-
-
-                  supprimerJourActif(idx);
-
-
-                  if (jourActifIndex >= joursActifs.length - 1) {
-
-
-                    setJourActifIndex(Math.max(0, joursActifs.length - 2));
-
-
-                  }
-
-
-                }}
-
-
-                onDuplicate={(idx) => {
-
-
-                  dupliquerJourActif(idx);
-
-
-                  setJourActifIndex(idx + 1);
-
-
-                }}
-
-
-                canRemove={joursActifs.length > 1}
-
-
-              />
-            </div>
-
-
-          ) : (
-
-
-            <Card><CsvInput value={conducteurActif === 1 ? csvTexte : csvTexte2} onChange={conducteurActif === 1 ? setCsvTexte : setCsvTexte2} /></Card>
-
-
-          )}
-
-
-        </div>
 
 
 
@@ -1070,23 +1036,6 @@ export default function Calculator() {
 
 
         ) : null}
-
-
-
-
-
-        {/* === Resultats === */}
-
-
-        {erreur ? <Card variant='danger' animate><p className={styles.erreur}>{erreur}</p></Card> : null}
-
-
-        {chargement ? <Loader /> : null}
-
-
-        {/* ResultPanel deplace dans le sticky */}
-
-
 
 
 
