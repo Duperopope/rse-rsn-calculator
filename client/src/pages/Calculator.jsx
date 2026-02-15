@@ -943,7 +943,7 @@ export default function Calculator() {
             >
 
 
-              {dashExpanded ? '\u25B2 Replier' : '\u25BC Jauges + Timeline'}
+              {dashExpanded ? '\u25B2' : '\u25BC'}
 
 
             </button>
