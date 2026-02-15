@@ -287,6 +287,24 @@
   .jourNavArrow { display: none; }
 }
 
+
+/* ── Bouton + ajouter jour ─────────────────────── */
+.jourNavAddInline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--accent, #00d4ff);
+  background: transparent;
+  color: var(--accent, #00d4ff);
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s;
+}
 /* === Bouton + dans la barre === */
 @media (hover: hover) and (pointer: fine) {
   .jourNavAddInline:hover {

@@ -43,6 +43,7 @@ import { JourFormulaire } from '../components/forms/JourFormulaire.jsx';
 import { CsvInput } from '../components/forms/CsvInput.jsx';
 
 
+import { IconeConduite, IconePause } from '../components/icons/TachyIcons.jsx';
 import { PanneauJauges } from '../components/gauges/PanneauJauges.jsx';
 
 
@@ -903,34 +904,26 @@ export default function Calculator() {
             {/* -- Mini-jauges compactes (toujours visibles) -- */}
             {!dashExpanded && statsJour && statsJour.nbActivites > 0 && (
               <div className={styles.miniJauges}>
-                {[
-                  { label: 'Cond.', icon: '\u{1F698}', val: statsJour.conduiteMax, max: 270 },
-                  { label: 'Jour', icon: '\u{1F551}', val: statsJour.conduiteTotale, max: 540 },
-                  { label: 'Ampl.', icon: '\u2194', val: statsJour.amplitude, max: 780 },
-                  { label: 'Pause', icon: '\u2615', val: statsJour.pauseTotale, max: 45, invert: true }
-                ].map((g, i) => {
-                  const ratio = g.max > 0 ? Math.min((g.val || 0) / g.max, 1) : 0;
-                  const isPause = !!g.invert;
-                  let color = '#00ff88';
-                  if (isPause) {
-                    color = (g.val || 0) >= g.max ? '#00ff88' : (g.val || 0) >= g.max * 0.5 ? '#ffaa00' : '#ff4444';
-                  } else {
-                    color = ratio >= 1 ? '#ff4444' : ratio >= 0.8 ? '#ffaa00' : '#00ff88';
-                  }
-                  const v = g.val || 0;
-                  const valH = Math.floor(v / 60);
-                  const valM = Math.round(v % 60);
-                  const txt = valH > 0 ? valH + 'h' + (valM > 0 ? String(valM).padStart(2, '0') : '') : valM + 'm';
-                  return (
-                    <div key={i} className={styles.miniJauge}>
-                      <span className={styles.miniJaugeLabel}>{g.icon} {g.label}</span>
-                      <div className={styles.miniJaugeTrack}>
-                        <div className={styles.miniJaugeFill} style={{ width: (ratio * 100) + '%', background: color }} />
-                      </div>
-                      <span className={styles.miniJaugeVal} style={{ color: color }}>{txt}</span>
-                    </div>
-                  );
-                })}
+                <div className={styles.miniJauge}>
+                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteMax >= 270 ? '#ff4444' : statsJour.conduiteMax >= 216 ? '#ffaa00' : '#00ff88'} /> Cont.</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteMax || 0) / 270 * 100, 100) + '%', background: statsJour.conduiteMax >= 270 ? '#ff4444' : statsJour.conduiteMax >= 216 ? '#ffaa00' : '#00ff88' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteMax >= 270 ? '#ff4444' : statsJour.conduiteMax >= 216 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteMax || 0) / 60)}h{String(Math.round((statsJour.conduiteMax || 0) % 60)).padStart(2, '0')}</span>
+                </div>
+                <div className={styles.miniJauge}>
+                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteTotale >= 540 ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88'} /> Jour</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteTotale || 0) / 540 * 100, 100) + '%', background: statsJour.conduiteTotale >= 540 ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteTotale >= 540 ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteTotale || 0) / 60)}h{String(Math.round((statsJour.conduiteTotale || 0) % 60)).padStart(2, '0')}</span>
+                </div>
+                <div className={styles.miniJauge}>
+                  <span className={styles.miniJaugeLabel}><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke={statsJour.amplitude >= 780 ? '#ff4444' : statsJour.amplitude >= 624 ? '#ffaa00' : '#00ff88'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Ampl.</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.amplitude || 0) / 780 * 100, 100) + '%', background: statsJour.amplitude >= 780 ? '#ff4444' : statsJour.amplitude >= 624 ? '#ffaa00' : '#00ff88' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.amplitude >= 780 ? '#ff4444' : statsJour.amplitude >= 624 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.amplitude || 0) / 60)}h{String(Math.round((statsJour.amplitude || 0) % 60)).padStart(2, '0')}</span>
+                </div>
+                <div className={styles.miniJauge}>
+                  <span className={styles.miniJaugeLabel}><IconePause size={14} color={(statsJour.pauseTotale || 0) >= 45 ? '#00ff88' : (statsJour.pauseTotale || 0) >= 22 ? '#ffaa00' : '#ff4444'} /> Pause</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.pauseTotale || 0) / 45 * 100, 100) + '%', background: (statsJour.pauseTotale || 0) >= 45 ? '#00ff88' : (statsJour.pauseTotale || 0) >= 22 ? '#ffaa00' : '#ff4444' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: (statsJour.pauseTotale || 0) >= 45 ? '#00ff88' : (statsJour.pauseTotale || 0) >= 22 ? '#ffaa00' : '#ff4444' }}>{(statsJour.pauseTotale || 0)}m</span>
+                </div>
               </div>
             )}
 
