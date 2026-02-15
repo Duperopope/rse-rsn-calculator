@@ -876,24 +876,25 @@ export default function Calculator() {
                 >&rsaquo;</button>
               </div>
             {/* -- Mini-jauges compactes (toujours visibles) -- */}
-            {!dashExpanded && dayStats && (
+            {!dashExpanded && statsJour && statsJour.nbActivites > 0 && (
               <div className={styles.miniJauges}>
                 {[
-                  { label: 'Cond.', icon: '\u{1F698}', val: dayStats.condCont, max: 270, unit: 'min' },
-                  { label: 'Jour', icon: '\u{1F551}', val: dayStats.condJour, max: 600, unit: 'min' },
-                  { label: 'Ampl.', icon: '\u{2194}', val: dayStats.amplitude, max: 780, unit: 'min' },
-                  { label: 'Pause', icon: '\u{2615}', val: dayStats.pauseCum, max: 45, unit: 'min', invert: true }
+                  { label: 'Cond.', icon: '\u{1F698}', val: statsJour.conduiteMax, max: 270 },
+                  { label: 'Jour', icon: '\u{1F551}', val: statsJour.conduiteTotale, max: 540 },
+                  { label: 'Ampl.', icon: '\u2194', val: statsJour.amplitude, max: 780 },
+                  { label: 'Pause', icon: '\u2615', val: statsJour.pauseTotale, max: 45, invert: true }
                 ].map((g, i) => {
-                  const ratio = g.max > 0 ? Math.min(g.val / g.max, 1) : 0;
+                  const ratio = g.max > 0 ? Math.min((g.val || 0) / g.max, 1) : 0;
                   const isPause = !!g.invert;
                   let color = '#00ff88';
                   if (isPause) {
-                    color = g.val >= g.max ? '#00ff88' : g.val >= g.max * 0.5 ? '#ffaa00' : '#ff4444';
+                    color = (g.val || 0) >= g.max ? '#00ff88' : (g.val || 0) >= g.max * 0.5 ? '#ffaa00' : '#ff4444';
                   } else {
                     color = ratio >= 1 ? '#ff4444' : ratio >= 0.8 ? '#ffaa00' : '#00ff88';
                   }
-                  const valH = Math.floor(g.val / 60);
-                  const valM = Math.round(g.val % 60);
+                  const v = g.val || 0;
+                  const valH = Math.floor(v / 60);
+                  const valM = Math.round(v % 60);
                   const txt = valH > 0 ? valH + 'h' + (valM > 0 ? String(valM).padStart(2, '0') : '') : valM + 'm';
                   return (
                     <div key={i} className={styles.miniJauge}>
