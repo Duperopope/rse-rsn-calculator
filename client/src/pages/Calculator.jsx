@@ -334,6 +334,14 @@ export default function Calculator() {
         }
         // Stocker pour passer aux jauges
         window.__nbDerogConduite = Math.min(nbDerogConduite, 2);
+        // Seuils amplitude dynamiques (Decret 2006-925 art.6 / R3312-11)
+        var isSLOtype = (typeService === "OCCASIONNEL" || typeService === "SLO" || typeService === "INTERURBAIN" || typeService === "MARCHANDISES");
+        var amplNormal = isSLOtype ? 720 : 660;
+        var amplDerog = isSLOtype ? 840 : 780;
+        var statsAmpl = calculerStatsJour(jours[idx].activites);
+        var amplActuelle = statsAmpl ? statsAmpl.amplitude : 0;
+        window.__amplNormal = amplNormal;
+        window.__amplMax = amplActuelle > amplNormal ? amplDerog : amplNormal;
 
         setStatsJour(calculerStatsJour(jours[idx].activites));
 
@@ -935,9 +943,9 @@ export default function Calculator() {
                   <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteTotale >= (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteTotale || 0) / 60)}h{String(Math.round((statsJour.conduiteTotale || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke={statsJour.amplitude >= 780 ? '#ff4444' : statsJour.amplitude >= 624 ? '#ffaa00' : '#00ff88'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Ampl.</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.amplitude || 0) / 780 * 100, 100) + '%', background: statsJour.amplitude >= 780 ? '#ff4444' : statsJour.amplitude >= 624 ? '#ffaa00' : '#00ff88' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.amplitude >= 780 ? '#ff4444' : statsJour.amplitude >= 624 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.amplitude || 0) / 60)}h{String(Math.round((statsJour.amplitude || 0) % 60)).padStart(2, '0')}</span>
+                  <span className={styles.miniJaugeLabel}><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke={statsJour.amplitude >= (window.__amplMax || 780) ? '#ff4444' : statsJour.amplitude >= (window.__amplNormal || 660) * 0.92 ? '#ffaa00' : '#00ff88'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Ampl.</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.amplitude || 0) / (window.__amplMax || 780) * 100, 100) + '%', background: statsJour.amplitude >= (window.__amplMax || 780) ? '#ff4444' : statsJour.amplitude >= (window.__amplNormal || 660) * 0.92 ? '#ffaa00' : '#00ff88' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.amplitude >= (window.__amplMax || 780) ? '#ff4444' : statsJour.amplitude >= (window.__amplNormal || 660) * 0.92 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.amplitude || 0) / 60)}h{String(Math.round((statsJour.amplitude || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
                   <span className={styles.miniJaugeLabel}><IconePause size={14} color={(statsJour.pauseTotale || 0) >= 45 ? '#00ff88' : (statsJour.pauseTotale || 0) >= 22 ? '#ffaa00' : '#ff4444'} /> Pause</span>

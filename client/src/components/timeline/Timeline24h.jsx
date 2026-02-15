@@ -98,8 +98,8 @@ function analyserInfractions(activites) {
       const fin = dureeMin(act.fin);
       return fin > max ? fin : max;
     }, 0);
-    if ((derniere - premiere) > LIMITES.AMPLITUDE_REGULIER_MAX) {
-      const seuil = premiere + LIMITES.AMPLITUDE_REGULIER_MAX;
+    if ((derniere - premiere) > LIMITES.AMPLITUDE_REGULIER_DEROG) {
+      const seuil = premiere + LIMITES.AMPLITUDE_REGULIER_DEROG;
       marqueurs.push({
         minute: Math.min(seuil, 1440),
         type: 'amplitude',

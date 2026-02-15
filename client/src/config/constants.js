@@ -86,8 +86,10 @@ export const LIMITES = {
   CONDUITE_CONTINUE_MAX: 270,       // 4h30 en minutes
   CONDUITE_JOURNALIERE_MAX: 540,    // 9h en minutes
   CONDUITE_JOURNALIERE_DEROG: 600,  // 10h en minutes (2x/semaine)
-  AMPLITUDE_REGULIER_MAX: 780,      // 13h en minutes
-  AMPLITUDE_OCCASIONNEL_MAX: 840,   // 14h en minutes
+  AMPLITUDE_REGULIER_NORMAL: 660,   // 11h en minutes (Decret 2006-925 art.6)
+  AMPLITUDE_REGULIER_DEROG: 780,     // 13h en minutes (R3312-28 derogation)
+  AMPLITUDE_OCCASIONNEL_NORMAL: 720, // 12h en minutes (CE 561/2006 + R3312-11)
+  AMPLITUDE_OCCASIONNEL_DEROG: 840,  // 14h en minutes (R3312-11 derogation)
   REPOS_JOURNALIER_MIN: 540,        // 9h en minutes (reduit)
   REPOS_JOURNALIER_NORMAL: 660,     // 11h en minutes
   TRAVAIL_NUIT_MAX: 600,            // 10h en minutes

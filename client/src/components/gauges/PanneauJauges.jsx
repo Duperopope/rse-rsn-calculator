@@ -24,9 +24,14 @@ export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite
     ? "Conduite journaliere (derog " + (nbDerogConduite + 1) + "/2)"
     : (derogDisponible ? "Conduite journaliere" : "Conduite journaliere (2/2 derog)");
 
-  const limiteAmplitude = (typeService === 'OCCASIONNEL' || typeService === 'SLO' || typeService === 'INTERURBAIN' || typeService === 'MARCHANDISES')
-    ? LIMITES.AMPLITUDE_OCCASIONNEL_MAX
-    : LIMITES.AMPLITUDE_REGULIER_MAX;
+  const isSLO = (typeService === 'OCCASIONNEL' || typeService === 'SLO' || typeService === 'INTERURBAIN' || typeService === 'MARCHANDISES');
+  const amplNormal = isSLO ? LIMITES.AMPLITUDE_OCCASIONNEL_NORMAL : LIMITES.AMPLITUDE_REGULIER_NORMAL;
+  const amplDerog = isSLO ? LIMITES.AMPLITUDE_OCCASIONNEL_DEROG : LIMITES.AMPLITUDE_REGULIER_DEROG;
+  const enModeDerogAmpl = stats.amplitude > amplNormal;
+  const limiteAmplitude = enModeDerogAmpl ? amplDerog : amplNormal;
+  const labelAmplitude = enModeDerogAmpl
+    ? "Amplitude (derog " + (isSLO ? "14h" : "13h") + ")"
+    : "Amplitude";
 
   return (
     <div className={styles.panneau}>
@@ -48,7 +53,7 @@ export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite
         <JaugeCirculaire
           valeur={stats.amplitude}
           max={limiteAmplitude}
-          label="Amplitude"
+          label={labelAmplitude}
           unite="min"
           size={100}
         />
@@ -71,9 +76,9 @@ export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite
         <JaugeLineaire
           valeur={stats.amplitude}
           max={limiteAmplitude}
-          label="Amplitude"
+          label={labelAmplitude}
           texteValeur={fmtMin(stats.amplitude) + ' / ' + fmtMin(limiteAmplitude)}
-          seuilWarning={0.92}
+          seuilWarning={enModeDerogAmpl ? 0.86 : 0.92}
         />
         {/* Pause cumulee : seuil dynamique selon conduite (CE 561 Art.7) */}
         {stats.travailTotal > 0 && (() => {
