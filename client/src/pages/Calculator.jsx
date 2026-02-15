@@ -441,6 +441,7 @@ export default function Calculator() {
 
 
     if (data) {
+      setShowResultDetail(true);
 
 
       const entry = {
@@ -807,6 +808,9 @@ export default function Calculator() {
               </div>
             )}
 
+            {/* === Loader + Erreur inline === */}
+            {chargement && <div style={{ padding: '12px', textAlign: 'center' }}><Loader /></div>}
+            {erreur && <Card variant='danger' animate><p className={styles.erreur}>{erreur}</p></Card>}
             {/* === ResultPanel inline sous le score === */}
             {showResultDetail && resultat && !chargement && (
               <div className={styles.resultInlineWrap}>
