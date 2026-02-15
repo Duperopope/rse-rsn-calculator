@@ -13,6 +13,7 @@ export function calculerStatsJour(activites) {
     return {
       conduiteTotale: 0,
       conduiteMax: 0,
+    conduiteBloc: 0,
       travailTotal: 0,
       pauseTotale: 0,
       amplitude: 0,
@@ -113,6 +114,7 @@ export function calculerStatsJour(activites) {
   return {
     conduiteTotale,
     conduiteMax,
+    conduiteBloc,
     travailTotal,
     pauseTotale,
     amplitude,

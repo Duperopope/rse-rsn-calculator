@@ -22,7 +22,7 @@ export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
     <div className={styles.panneau}>
       <div className={styles.circular}>
         <JaugeCirculaire
-          valeur={stats.conduiteMax}
+          valeur={stats.conduiteBloc}
           max={LIMITES.CONDUITE_CONTINUE_MAX}
           label="Continue"
           unite="min"
@@ -45,10 +45,10 @@ export function PanneauJauges({ stats, typeService = 'REGULIER' }) {
       </div>
       <div className={styles.linear}>
         <JaugeLineaire
-          valeur={stats.conduiteMax}
+          valeur={stats.conduiteBloc}
           max={LIMITES.CONDUITE_CONTINUE_MAX}
           label="Conduite continue"
-          texteValeur={fmtMin(stats.conduiteMax) + ' / ' + fmtMin(LIMITES.CONDUITE_CONTINUE_MAX)}
+          texteValeur={fmtMin(stats.conduiteBloc) + ' / ' + fmtMin(LIMITES.CONDUITE_CONTINUE_MAX)}
         />
         <JaugeLineaire
           valeur={stats.conduiteTotale}

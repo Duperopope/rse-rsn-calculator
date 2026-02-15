@@ -913,9 +913,9 @@ export default function Calculator() {
             {!dashExpanded && statsJour && statsJour.nbActivites > 0 && (
               <div className={styles.miniJauges}>
                 <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteMax >= 270 ? '#ff4444' : statsJour.conduiteMax >= 216 ? '#ffaa00' : '#00ff88'} /> Cont.</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteMax || 0) / 270 * 100, 100) + '%', background: statsJour.conduiteMax >= 270 ? '#ff4444' : statsJour.conduiteMax >= 216 ? '#ffaa00' : '#00ff88' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteMax >= 270 ? '#ff4444' : statsJour.conduiteMax >= 216 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteMax || 0) / 60)}h{String(Math.round((statsJour.conduiteMax || 0) % 60)).padStart(2, '0')}</span>
+                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteBloc >= 270 ? '#ff4444' : statsJour.conduiteBloc >= 216 ? '#ffaa00' : '#00ff88'} /> Cont.</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteBloc || 0) / 270 * 100, 100) + '%', background: statsJour.conduiteBloc >= 270 ? '#ff4444' : statsJour.conduiteBloc >= 216 ? '#ffaa00' : '#00ff88' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteBloc >= 270 ? '#ff4444' : statsJour.conduiteBloc >= 216 ? '#ffaa00' : '#00ff88' }}>{Math.floor((statsJour.conduiteBloc || 0) / 60)}h{String(Math.round((statsJour.conduiteBloc || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
                   <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteTotale >= 540 ? '#ff4444' : statsJour.conduiteTotale >= 432 ? '#ffaa00' : '#00ff88'} /> Jour</span>
