@@ -156,41 +156,7 @@
   margin-bottom: 6px;
 }
 
-/* ── Swipe actions (derriere la carte) ───────────────────── */
-.swipeActions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: stretch;
-  z-index: 0;
-}
 
-.swipeBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  transition: opacity 0.15s;
-  font-size: 20px;
-}
-
-.swipeBtnRename {
-  background: #0084ff;
-}
-
-.swipeBtnReload {
-  background: #00b8a9;
-}
-
-.swipeBtnDelete {
-  background: #ff3b30;
-}
 
 /* ── Carte principale ────────────────────────────────────── */
 .card {
@@ -469,30 +435,158 @@
     display: none;
   }
 }
-/* Chevron indicateur de swipe (mobile) */
-.swipeHint {
+
+
+/* ── Menu contextuel (appui long mobile) ─────────────────── */
+.contextMenu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  background: rgba(26, 29, 35, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeScale 0.15s ease-out;
+}
+
+@keyframes fadeScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.contextBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  padding: 8px 4px;
+}
+
+.contextBtn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.contextIcon {
+  font-size: 20px;
+}
+
+.contextBtnDanger {
+  color: #ff4444;
+}
+
+/* Carte active (long press) */
+.cardActive {
+  box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.4);
+  border-radius: 12px;
+}
+
+/* Indicateur appui long (3 points, mobile) */
+.longPressHint {
   position: absolute;
   right: 6px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  opacity: 0.3;
-  transition: opacity 0.3s;
+  opacity: 0.25;
 }
 
-.swipeChevron {
-  font-size: 18px;
+.longPressDots {
+  font-size: 16px;
   color: rgba(255, 255, 255, 0.5);
-  animation: pulseChevron 2s ease-in-out infinite;
-}
-
-@keyframes pulseChevron {
-  0%, 100% { transform: translateX(0); opacity: 0.3; }
-  50% { transform: translateX(-3px); opacity: 0.6; }
 }
 
 @media (min-width: 769px) {
-  .swipeHint { display: none; }
+  .longPressHint { display: none; }
+  .contextMenu { display: none; }
 }
 
-.cardSwiped .swipeHint { opacity: 0; }
+/* ── Menu contextuel (appui long mobile) ─────────────────── */
+.contextMenu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  background: rgba(26, 29, 35, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeScale 0.15s ease-out;
+}
+
+@keyframes fadeScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.contextBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  padding: 8px 4px;
+}
+
+.contextBtn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.contextIcon {
+  font-size: 20px;
+}
+
+.contextBtnDanger {
+  color: #ff4444;
+}
+
+/* Carte active (long press) */
+.cardActive {
+  box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.4);
+  border-radius: 12px;
+}
+
+/* Indicateur appui long (3 points, mobile) */
+.longPressHint {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.25;
+}
+
+.longPressDots {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (min-width: 769px) {
+  .longPressHint { display: none; }
+  .contextMenu { display: none; }
+}

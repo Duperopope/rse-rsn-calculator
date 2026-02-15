@@ -47,7 +47,8 @@ export function HistoriquePanel({
   onView,
   onRename
 }) {
-  const [swipedId, setSwipedId] = useState(null);
+  const [longPressId, setLongPressId] = useState(null);
+  const longPressTimer = useRef(null);
   const [seenCount, setSeenCount] = useState(() => {
     try { return parseInt(localStorage.getItem(SEEN_KEY) || '0', 10); } catch { return 0; }
   });
@@ -86,7 +87,7 @@ export function HistoriquePanel({
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
-      setSwipedId(null);
+      setLongPressId(null);
       setConfirmDeleteAll(false);
       setEditingId(null);
     }
@@ -101,31 +102,41 @@ export function HistoriquePanel({
     }
   }, [editingId]);
 
-  /* ── Touch handlers (swipe-to-reveal mobile) ─────────── */
-  const onTouchStart = useCallback((e) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+  /* ── Long press handler (mobile) ─────────────────────── */
+  const onPointerDown = useCallback((e, entryId) => {
+    longPressTimer.current = setTimeout(() => {
+      setLongPressId(prev => prev === entryId ? null : entryId);
+      if (navigator.vibrate) navigator.vibrate(15);
+    }, 500);
   }, []);
 
-  const onTouchEnd = useCallback((e, entryId) => {
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
-    if (dy > 40) return; // scroll vertical, on ignore
-    if (dx < -60) {
-      // Swipe gauche -> révéler actions
-      setSwipedId(entryId);
-      if (navigator.vibrate) navigator.vibrate(10);
-    } else if (dx > 60) {
-      // Swipe droit -> cacher actions
-      setSwipedId(null);
+  const onPointerUp = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
     }
   }, []);
+
+  const onPointerLeave = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  /* Fermer le menu contextuel quand on clique ailleurs */
+  useEffect(() => {
+    if (longPressId === null) return;
+    const close = () => setLongPressId(null);
+    document.addEventListener('pointerdown', close, { once: true });
+    return () => document.removeEventListener('pointerdown', close);
+  }, [longPressId]);
 
   /* ── Renommer ────────────────────────────────────────── */
   const startRename = useCallback((entry) => {
     setEditingId(entry.id || entry.date);
     setEditValue(entry.nom || '');
-    setSwipedId(null);
+    setLongPressId(null);
   }, []);
 
   const confirmRename = useCallback(() => {
@@ -202,7 +213,7 @@ export function HistoriquePanel({
           ) : (
             historique.map((entry) => {
               const key = entryKey(entry);
-              const isSwiped = swipedId === key;
+              const isLongPressed = longPressId === key;
               const isEditing = editingId === key;
               const score = entry.resultat?.score ?? entry.score ?? 0;
               const infractions = entry.resultat?.infractions?.length ?? entry.infractions ?? 0;
@@ -215,42 +226,45 @@ export function HistoriquePanel({
               return (
                 <div
                   key={key}
-                  className={`${styles.cardWrapper} ${isSwiped ? styles.cardSwiped : ''}`}
+                  className={`${styles.cardWrapper} ${isLongPressed ? styles.cardActive : ''}`}
                 >
-                  {/* Actions révélées par swipe (mobile) */}
-                  <div className={styles.swipeActions}>
+                  {/* Menu contextuel (appui long) */}
+                  {isLongPressed && (
+                  <div className={styles.contextMenu} onPointerDown={(e) => e.stopPropagation()}>
                     <button
-                      className={styles.swipeBtn + ' ' + styles.swipeBtnRename}
-                      onClick={() => startRename(entry)}
+                      className={styles.contextBtn}
+                      onClick={() => { startRename(entry); setLongPressId(null); }}
                       aria-label="Renommer"
-                      title="Renommer"
                     >
-                      ✏️
+                      <span className={styles.contextIcon}>✏️</span>
+                      <span>Renommer</span>
                     </button>
                     <button
-                      className={styles.swipeBtn + ' ' + styles.swipeBtnReload}
-                      onClick={() => { onReload(entry); setSwipedId(null); }}
+                      className={styles.contextBtn}
+                      onClick={() => { onReload(entry); setLongPressId(null); }}
                       aria-label="Recharger"
-                      title="Recharger"
                     >
-                      🔄
+                      <span className={styles.contextIcon}>🔄</span>
+                      <span>Recharger</span>
                     </button>
                     <button
-                      className={styles.swipeBtn + ' ' + styles.swipeBtnDelete}
-                      onClick={() => { onDelete(key); setSwipedId(null); if (navigator.vibrate) navigator.vibrate(15); }}
+                      className={styles.contextBtn + ' ' + styles.contextBtnDanger}
+                      onClick={() => { onDelete(key); setLongPressId(null); if (navigator.vibrate) navigator.vibrate(15); }}
                       aria-label="Supprimer"
-                      title="Supprimer"
                     >
-                      🗑️
+                      <span className={styles.contextIcon}>🗑️</span>
+                      <span>Supprimer</span>
                     </button>
                   </div>
+                  )}
 
                   {/* Carte principale */}
                   <div
                     className={styles.card}
                     onClick={() => { if (!isEditing && !isSwiped) onView(entry); }}
-                    onTouchStart={onTouchStart}
-                    onTouchEnd={(e) => onTouchEnd(e, key)}
+                    onPointerDown={(e) => onPointerDown(e, key)}
+                    onPointerUp={onPointerUp}
+                    onPointerLeave={onPointerLeave}
                   >
                     {/* Badge score */}
                     <div
@@ -331,9 +345,9 @@ export function HistoriquePanel({
                       </button>
                     </div>
 
-                    {/* Chevron indicateur de swipe (mobile) */}
-                    <div className={styles.swipeHint} aria-hidden="true">
-                      <span className={styles.swipeChevron}>{String.fromCharCode(8250)}</span>
+                    {/* Indicateur appui long (mobile) */}
+                    <div className={styles.longPressHint} aria-hidden="true">
+                      <span className={styles.longPressDots}>{String.fromCharCode(8942)}</span>
                     </div>
                   </div>
                 </div>
