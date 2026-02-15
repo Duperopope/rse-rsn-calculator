@@ -469,3 +469,30 @@
     display: none;
   }
 }
+/* Chevron indicateur de swipe (mobile) */
+.swipeHint {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.3;
+  transition: opacity 0.3s;
+}
+
+.swipeChevron {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  animation: pulseChevron 2s ease-in-out infinite;
+}
+
+@keyframes pulseChevron {
+  0%, 100% { transform: translateX(0); opacity: 0.3; }
+  50% { transform: translateX(-3px); opacity: 0.6; }
+}
+
+@media (min-width: 769px) {
+  .swipeHint { display: none; }
+}
+
+.cardSwiped .swipeHint { opacity: 0; }

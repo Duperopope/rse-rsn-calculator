@@ -67,7 +67,7 @@ import { Badge } from '../components/common/Badge.jsx';
 import styles from './Calculator.module.css';
 
 
-import { HistoriquePanel } from '../components/history/HistoriquePanel.jsx';
+import { HistoriquePanel, getUnseenCount } from '../components/history/HistoriquePanel.jsx';
 
 
 
@@ -675,7 +675,7 @@ export default function Calculator() {
         analyseDisabled={!online || chargement}
 
 
-        historiqueCount={(historique || []).length}
+        historiqueCount={getUnseenCount((historique || []).length)}
 
 
         onToggleHistorique={() => setVoirHistorique(v => !v)}
@@ -1071,7 +1071,7 @@ export default function Calculator() {
         analyseDisabled={!online || chargement}
 
 
-        historiqueCount={(historique || []).length}
+        historiqueCount={getUnseenCount((historique || []).length)}
 
 
         onToggleHistorique={() => setVoirHistorique(v => !v)}

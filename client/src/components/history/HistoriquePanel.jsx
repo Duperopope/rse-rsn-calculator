@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+
+const SEEN_KEY = 'fimo_historique_seen_count';
 import styles from './HistoriquePanel.module.css';
 
 /* ── Helpers ─────────────────────────────────────────────── */
@@ -28,6 +30,13 @@ function scoreBg(s) {
 }
 
 /* ── Composant principal ─────────────────────────────────── */
+export function getUnseenCount(historiqueLength) {
+  try {
+    const seen = parseInt(localStorage.getItem('fimo_historique_seen_count') || '0', 10);
+    return Math.max(0, historiqueLength - seen);
+  } catch { return historiqueLength; }
+}
+
 export function HistoriquePanel({
   visible,
   historique,
@@ -39,6 +48,19 @@ export function HistoriquePanel({
   onRename
 }) {
   const [swipedId, setSwipedId] = useState(null);
+  const [seenCount, setSeenCount] = useState(() => {
+    try { return parseInt(localStorage.getItem(SEEN_KEY) || '0', 10); } catch { return 0; }
+  });
+
+  useEffect(() => {
+    if (visible && historique && historique.length > 0) {
+      const len = historique.length;
+      if (len !== seenCount) {
+        setSeenCount(len);
+        try { localStorage.setItem(SEEN_KEY, String(len)); } catch {}
+      }
+    }
+  }, [visible, historique]);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
@@ -307,6 +329,11 @@ export function HistoriquePanel({
                       >
                       🗑️
                       </button>
+                    </div>
+
+                    {/* Chevron indicateur de swipe (mobile) */}
+                    <div className={styles.swipeHint} aria-hidden="true">
+                      <span className={styles.swipeChevron}>{String.fromCharCode(8250)}</span>
                     </div>
                   </div>
                 </div>
