@@ -977,26 +977,6 @@ export default function Calculator() {
 
 
               />
-
-
-              <div className={styles.jourBottomActions}>
-
-
-                <Button variant='secondary' onClick={() => { ajouterJourActif(); setJourActifIndex(joursActifs.length); }}>+ Ajouter un jour</Button>
-
-
-                {joursActifs.length > 1 ? (
-
-
-                  <span className={styles.jourCount}>{joursActifs.length} jours</span>
-
-
-                ) : null}
-
-
-              </div>
-
-
             </div>
 
 

@@ -134,7 +134,24 @@ export function ResultPanel({ resultat }) {
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Infractions ({infractions.length})</h3>
           <div className={styles.infractions}>
-            {infractions.map((inf, i) => <InfractionCard key={i} infraction={inf} index={i} />)}
+            {(() => {
+              const grouped = [];
+              const seen = new Map();
+              infractions.forEach((inf, i) => {
+                const groupKey = (inf.regle || '') + '|' + (inf.description || inf.message || '');
+                if (seen.has(groupKey)) {
+                  seen.get(groupKey).jours.push(inf.jour || ('J' + (i + 1)));
+                  seen.get(groupKey).count++;
+                } else {
+                  const group = { ...inf, count: 1, jours: [inf.jour || ('J' + (i + 1))], originalIndex: i };
+                  seen.set(groupKey, group);
+                  grouped.push(group);
+                }
+              });
+              return grouped.map((inf, i) => (
+                <InfractionCard key={i} infraction={inf} index={i} grouped={inf.count > 1} count={inf.count} jours={inf.jours} />
+              ));
+            })()}
           </div>
         </div>
       ) : null}

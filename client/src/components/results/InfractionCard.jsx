@@ -117,6 +117,9 @@ function InfractionCard({ infraction, index, onNavigate }) {
     <div className={styles.card} onClick={handleTap} role="button" tabIndex={0}>
       <div className={styles.header}>
         <span className={styles.badge}>{index + 1}</span>
+              {grouped && count > 1 ? (
+                <span className={styles.groupBadge}>{String.fromCharCode(215)}{count} sur {jours.join(', ')}</span>
+              ) : null}
         <div className={styles.headerText}>
           <span className={styles.message}>{message}</span>
           <span className={styles.classeBadge + (classe === '5e classe' ? ' ' + styles.classe5 : '')}>{classe}</span>

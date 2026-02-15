@@ -227,3 +227,17 @@
   opacity: 0.6;
   flex-shrink: 0;
 }
+
+/* Badge groupement infractions */
+.groupBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(0, 132, 255, 0.15);
+  color: #0084ff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-left: 6px;
+  white-space: nowrap;
+}
