@@ -789,6 +789,20 @@ export default function Calculator() {
 
 
           <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')}>
+            {/* -- Score principal compact -- */}
+            {result && (
+              <div className={styles.scoreStickyRow}>
+                <div className={styles.scoreCircleMini} style={{
+                  background: result.score >= 90 ? '#00ff88' : result.score >= 70 ? '#ffaa00' : '#ff4444',
+                  color: result.score >= 90 ? '#000' : '#fff'
+                }}>
+                  {Math.round(result.score)}
+                </div>
+                <span className={styles.scoreStickyLabel}>
+                  Score FIMO {String.fromCharCode(8226)} {result.infractions?.length || 0} infraction{(result.infractions?.length || 0) > 1 ? 's' : ''}{result.avertissements?.length ? ' ' + String.fromCharCode(183) + ' ' + result.avertissements.length + ' alerte' + (result.avertissements.length > 1 ? 's' : '') : ''}
+                </span>
+              </div>
+            )}
 
 
             {dashExpanded && <PanneauJauges stats={statsJour} typeService={typeService} />}
