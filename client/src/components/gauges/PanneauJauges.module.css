@@ -46,3 +46,20 @@
 :global(.dashExpanded) .circular {
   display: flex;
 }
+/* Cercles switchables */
+.circleWrap { position: relative; display: flex; flex-direction: column; align-items: center; }
+.clickable { cursor: pointer; }
+.clickable:hover { opacity: 0.9; }
+.dots { display: flex; gap: 4px; justify-content: center; margin-top: 2px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+.dotActive { width: 5px; height: 5px; border-radius: 50%; background: #00d4ff; }
+
+/* Jauge hebdo lineaire avec zones */
+.hebdoBar { margin-top: 6px; padding: 6px 0; }
+.hebdoHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.hebdoLabel { font-size: 0.78rem; color: var(--text-primary, #e0e0e0); font-weight: 500; }
+.hebdoVal { font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hebdoTrack { position: relative; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: visible; }
+.hebdoFill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.3s; }
+.hebdoMarker { position: absolute; top: -2px; width: 2px; height: 10px; background: rgba(255,255,255,0.3); border-radius: 1px; z-index: 2; }
+.hebdoZones { position: relative; height: 12px; margin-top: 1px; }
