@@ -335,7 +335,7 @@ export default function Calculator() {
         }
         // Stocker pour passer aux jauges
         window.__nbDerogConduite = Math.min(nbDerogConduite, 2);
-        // Seuils amplitude dynamiques (Decret 2006-925 art.6 / R3312-11)
+        // Seuils amplitude dynamiques (C. transports R3312-9 / R3312-11)
         var isSLOtype = (typeService === "OCCASIONNEL" || typeService === "SLO" || typeService === "INTERURBAIN" || typeService === "MARCHANDISES");
         var amplNormal = isSLOtype ? 720 : 660;
         var amplDerog = isSLOtype ? 840 : 780;

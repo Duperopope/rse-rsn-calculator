@@ -26,9 +26,9 @@ const sanctions = [
   {
     infraction: 'Amplitude > 13h (rég.) ou 14h (occ.)',
     classe: '4e', forfait: 135, minore: 90, majore: 375, max: 750,
-    article: 'Décret 2010-855',
-    sourceUrl: 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022512271',
-    sourceLabel: 'Légifrance – Décret 2010-855'
+    article: 'C. transports R3312-9 / R3312-11',
+    sourceUrl: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651232',
+    sourceLabel: 'Légifrance – C. transports R3312-9 / R3312-11'
   },
   {
     infraction: 'Travail de nuit > 10h',

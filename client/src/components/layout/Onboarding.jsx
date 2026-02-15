@@ -34,7 +34,7 @@ export function Onboarding({ onClose }) {
           </div>
         </div>
         <div className={styles.reglements}>
-          <p>Basee sur le reglement CE 561/2006, L3312-1 et le decret 2010-855</p>
+          <p>Basee sur le reglement CE 561/2006, L3312-1 et C. transports R3312-9</p>
         </div>
         <button className={styles.btn} onClick={onClose}>
           Commencer

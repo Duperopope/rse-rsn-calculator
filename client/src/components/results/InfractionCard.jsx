@@ -57,7 +57,7 @@ const SOURCES_OFFICIELLES = {
     label: 'Légifrance – Décret 2010-855'
   },
   'R3312-11': {
-    url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000023086525/LEGISCTA000023071274/',
+    url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651232',
     label: 'Légifrance – Code des transports R3312-11'
   },
   'Code du travail': {
@@ -194,7 +194,7 @@ function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }
         </div>
         <p className={styles.amendeNote}>
           Art. R49-7 C. proc. pen. (minoration/majoration).
-          {classe === "5e classe" ? " Art. L3315-4 C. transports (employeur)." : " Art. L3315-2 C. transports (conducteur)."}
+          {classe === "5e classe" ? " Art. L3315-4 C. transports (employeur)." : " Art. R3315-4 C. transports (conducteur)."}
         </p>
       </div>
 

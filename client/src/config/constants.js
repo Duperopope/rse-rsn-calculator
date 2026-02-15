@@ -1,5 +1,5 @@
 // FIMO Check - Configuration et constantes
-// Source: CE 561/2006, L3312-1, Decret 2010-855
+// Source: CE 561/2006, L3312-1, C. transports R3312-9
 // Extrait de App.jsx v5.6.0 -> v6.0.0
 
 // URL API backend
@@ -86,7 +86,7 @@ export const LIMITES = {
   CONDUITE_CONTINUE_MAX: 270,       // 4h30 en minutes
   CONDUITE_JOURNALIERE_MAX: 540,    // 9h en minutes
   CONDUITE_JOURNALIERE_DEROG: 600,  // 10h en minutes (2x/semaine)
-  AMPLITUDE_REGULIER_NORMAL: 660,   // 11h en minutes (Decret 2006-925 art.6)
+  AMPLITUDE_REGULIER_NORMAL: 660,   // 11h en minutes (C. transports R3312-9)
   AMPLITUDE_REGULIER_DEROG: 780,     // 13h en minutes (R3312-28 derogation)
   AMPLITUDE_OCCASIONNEL_NORMAL: 720, // 12h en minutes (CE 561/2006 + R3312-11)
   AMPLITUDE_OCCASIONNEL_DEROG: 840,  // 14h en minutes (R3312-11 derogation)
