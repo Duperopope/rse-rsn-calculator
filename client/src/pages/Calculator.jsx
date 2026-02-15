@@ -790,16 +790,16 @@ export default function Calculator() {
 
           <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')}>
             {/* -- Score principal compact -- */}
-            {result && (
+            {resultat && (
               <div className={styles.scoreStickyRow}>
                 <div className={styles.scoreCircleMini} style={{
-                  background: result.score >= 90 ? '#00ff88' : result.score >= 70 ? '#ffaa00' : '#ff4444',
-                  color: result.score >= 90 ? '#000' : '#fff'
+                  background: resultat.score >= 90 ? '#00ff88' : resultat.score >= 70 ? '#ffaa00' : '#ff4444',
+                  color: resultat.score >= 90 ? '#000' : '#fff'
                 }}>
-                  {Math.round(result.score)}
+                  {Math.round(resultat.score)}
                 </div>
                 <span className={styles.scoreStickyLabel}>
-                  Score FIMO {String.fromCharCode(8226)} {result.infractions?.length || 0} infraction{(result.infractions?.length || 0) > 1 ? 's' : ''}{result.avertissements?.length ? ' ' + String.fromCharCode(183) + ' ' + result.avertissements.length + ' alerte' + (result.avertissements.length > 1 ? 's' : '') : ''}
+                  Score FIMO {String.fromCharCode(8226)} {resultat.infractions?.length || 0} infraction{(resultat.infractions?.length || 0) > 1 ? 's' : ''}{resultat.avertissements?.length ? ' ' + String.fromCharCode(183) + ' ' + resultat.avertissements.length + ' alerte' + (resultat.avertissements.length > 1 ? 's' : '') : ''}
                 </span>
               </div>
             )}
