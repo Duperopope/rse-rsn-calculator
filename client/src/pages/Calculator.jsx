@@ -808,15 +808,6 @@ export default function Calculator() {
               </div>
             )}
 
-            {/* === Loader + Erreur inline === */}
-            {chargement && <div style={{ padding: '12px', textAlign: 'center' }}><Loader /></div>}
-            {erreur && <Card variant='danger' animate><p className={styles.erreur}>{erreur}</p></Card>}
-            {/* === ResultPanel inline sous le score === */}
-            {showResultDetail && resultat && !chargement && (
-              <div className={styles.resultInlineWrap}>
-                <ResultPanel resultat={resultat} />
-              </div>
-            )}
 
 
             {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} />}
@@ -970,6 +961,16 @@ export default function Calculator() {
 
 
 
+
+
+        {/* === ResultPanel deploye sous le sticky === */}
+        {showResultDetail && resultat && !chargement && (
+          <div className={styles.resultInlineWrap}>
+            <ResultPanel resultat={resultat} />
+          </div>
+        )}
+        {chargement && <div style={{ padding: '16px', textAlign: 'center' }}><Loader /></div>}
+        {erreur && <Card variant='danger' animate><p className={styles.erreur}>{erreur}</p></Card>}
 
         {/* === FORMULAIRE DE SAISIE === */}
 
@@ -1148,6 +1149,5 @@ export default function Calculator() {
 
 
 }
-
 
 
