@@ -1,33 +1,32 @@
 {
-  "description": "Resultats de reference valides pour test_56jours.csv",
-  "date_creation": "2026-02-14",
+  "description": "Resultats de reference pour test_56jours.csv - v7.20.2",
+  "date_creation": "2026-02-15",
   "categories_attendues": {
-    "Repos journalier insuffisant": 9,
     "Conduite journaliere": 18,
     "Conduite bi-hebdomadaire": 5,
     "Conduite hebdomadaire": 1,
     "Amplitude journaliere": 1
   },
-  "version": "7.6.10.1",
+  "version": "7.20.2",
   "criteres": {
-    "score_exact": 72,
-    "infractions_min": 28,
-    "amende_max": 12000,
-    "score_min": 65,
-    "infractions_max": 35,
-    "amende_min": 9000,
-    "amende_exact": 9375,
-    "infractions_exact": 34,
-    "score_max": 80
+    "score_exact": 81,
+    "score_min": 75,
+    "score_max": 86,
+    "infractions_exact": 25,
+    "infractions_min": 22,
+    "infractions_max": 28,
+    "amende_exact": 8625,
+    "amende_min": 7500,
+    "amende_max": 10000
   },
   "fix_engine": {
-    "originales_min": 125,
-    "version_attendue": "7.6.10.1",
+    "version_attendue": "7.6.10.2",
+    "originales_min": 85,
+    "originales_max": 105,
+    "retirees_min": 60,
     "classes": {
-      "5e": 9,
-      "4e": 25
-    },
-    "retirees_min": 90,
-    "originales_max": 140
+      "5e": 2,
+      "4e": 23
+    }
   }
 }

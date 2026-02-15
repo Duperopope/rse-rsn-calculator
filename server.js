@@ -799,32 +799,42 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
   // dont au moins 1 normal (>= 45h)
   // Repos reduit : compensation dans les 3 semaines suivantes
   // Exception transport international marchandises : 2 reduits consecutifs possibles
+  // --- v7.20.2 FIX-06 : Repos hebdo sans double-comptage ---
+  // On utilise un Set pour marquer les jours deja consommes dans un bloc de repos
   const reposHebdoDetectes = [];
   let joursConsecutifsSansRepos = 0;
+  const joursReposConsommes = new Set();
 
   joursTries.forEach((dateJour, idx) => {
+    // Si ce jour a deja ete inclus dans un bloc de repos precedent, on le saute
+    if (joursReposConsommes.has(dateJour)) return;
+
     const dj = detailsJours.find(d => d.date === dateJour);
     if (!dj) return;
     const conduiteJour = dj.conduite_min || 0;
     const travailJour = dj.travail_min || 0;
-    const reposH = parseFloat(dj.repos_estime_h);
+    const reposH = parseFloat(dj.repos_estime_h) || 0;
     const estJourTravail = (conduiteJour > 0 || travailJour > 0);
 
     if (estJourTravail) {
       joursConsecutifsSansRepos++;
     } else {
-      // Jour sans activite = potentiel repos hebdomadaire
-      // Estimer la duree du repos (simplification : repos estime du jour)
-      // En realite il faudrait cumuler les jours consecutifs sans travail
+      // Jour sans activite = debut d'un bloc de repos potentiel
+      joursReposConsommes.add(dateJour);
       let dureeReposTotal = reposH;
+      let joursInclusDansBloc = 1;
+
       // Cumuler avec les jours suivants sans travail
       for (let j = idx + 1; j < joursTries.length; j++) {
-        const djNext = detailsJours.find(d => d.date === joursTries[j]);
+        const dateNext = joursTries[j];
+        const djNext = detailsJours.find(d => d.date === dateNext);
         if (!djNext) break;
         const cNext = djNext.conduite_min || 0;
         const tNext = djNext.travail_min || 0;
         if (cNext === 0 && tNext === 0) {
           dureeReposTotal += parseFloat(djNext.repos_estime_h) || 0;
+          joursReposConsommes.add(dateNext);
+          joursInclusDansBloc++;
         } else {
           break;
         }
@@ -837,7 +847,8 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
         date_debut: dateJour,
         duree_h: parseFloat(dureeReposTotal.toFixed(1)),
         type: typeRepos,
-        jours_travail_avant: joursConsecutifsSansRepos
+        jours_travail_avant: joursConsecutifsSansRepos,
+        jours_repos_bloc: joursInclusDansBloc
       };
 
       if (typeRepos === 'reduit') {
@@ -859,8 +870,16 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
       }
 
       if (typeRepos === 'insuffisant' && joursConsecutifsSansRepos >= 6) {
-        // Pas assez de repos apres 6 jours = infraction
-        // Deja gere partiellement par le code existant
+        infractions.push({
+          regle: 'Repos hebdomadaire insuffisant (CE 561/2006 Art.8 par.6)',
+          limite: R_MULTI.REPOS_HEBDO_REDUIT_H + 'h minimum (reduit)',
+          constate: dureeReposTotal.toFixed(1) + 'h apres ' + joursConsecutifsSansRepos + ' jours de travail',
+          depassement: 'Manque ' + (R_MULTI.REPOS_HEBDO_REDUIT_H - dureeReposTotal).toFixed(1) + 'h',
+          classe: '5e classe',
+          amende: amendeObj('5e classe'),
+          ref_legale: 'CE 561/2006 Art.8 par.6',
+          url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e1007-1-1'
+        });
       }
 
       reposHebdoDetectes.push(entry);
