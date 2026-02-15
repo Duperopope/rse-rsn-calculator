@@ -176,7 +176,7 @@ export function PanneauJauges({ stats, typeService = "REGULIER", nbDerogConduite
   var pauseLabel = seuilPause > 0 ? "Pause cumulee" : "Pause";
 
   return (
-    <div className={styles.panneau}>
+    <div data-tour="gauges" className={styles.panneau}>
       <div className={styles.circular}>
 
         {/* Cercle 1 : Continue <-> Journee */}

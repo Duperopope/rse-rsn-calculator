@@ -62,7 +62,7 @@ export function TrackingDashboard({ tracking }) {
   }
 
   return (
-    <div className={styles.dashboard}>
+    <div data-tour="tracking" className={styles.dashboard}>
       <div className={styles.sectionTitle}>Suivi reglementaire</div>
 
       {/* --- METRIQUES PRINCIPALES --- */}

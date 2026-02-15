@@ -170,7 +170,7 @@ export function HistoriquePanel({
   const entryKey = (entry) => entry.id || entry.date;
 
   return (
-    <div className={styles.wrapper} role="dialog" aria-modal="true" aria-label="Historique des analyses">
+    <div data-tour="history" className={styles.wrapper} role="dialog" aria-modal="true" aria-label="Historique des analyses">
       {/* Overlay */}
       <div
         className={styles.overlay}

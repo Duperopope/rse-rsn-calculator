@@ -85,7 +85,7 @@ export function ResultPanel({ resultat, compact = false }) {
   }
 
   return (
-    <div id="resultats" className={styles.panel}>
+    <div data-tour="results" id="resultats" className={styles.panel}>
       {/* Score principal */}
       {compact ? null : (
       <div className={styles.scoreSection}>

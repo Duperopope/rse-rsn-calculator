@@ -31,7 +31,7 @@ import { BottomBar } from '../components/layout/BottomBar.jsx';
 import { Footer } from '../components/layout/Footer.jsx';
 
 
-import { Onboarding } from '../components/layout/Onboarding.jsx';
+import { GuidedTour } from '../components/layout/GuidedTour.jsx';
 
 
 import { ParametresPanel } from '../components/forms/ParametresPanel.jsx';
@@ -108,6 +108,7 @@ export default function Calculator() {
 
 
   const [onboardingDone, setOnboardingDone] = useLocalStorage('rse_onboarding_done', false);
+  const [showTour, setShowTour] = useState(false);
 
 
 
@@ -685,7 +686,9 @@ export default function Calculator() {
     <div className={styles.app}>
 
 
-      {!onboardingDone ? <Onboarding onClose={() => setOnboardingDone(true)} /> : null}
+      {(!onboardingDone || showTour) && (
+        <GuidedTour onClose={() => { setOnboardingDone(true); setShowTour(false); }} />
+      )}
 
 
 
@@ -733,7 +736,7 @@ export default function Calculator() {
       <main className={styles.main}>
 
 
-        <ParametresPanel
+        <ParametresPanel data-tour="params"
 
 
           typeService={typeService} onTypeServiceChange={setTypeService}
@@ -839,7 +842,7 @@ export default function Calculator() {
             {(dashExpanded || window.innerWidth >= 769) && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
 
 
-              <div className={styles.timelineWrap}>
+              <div data-tour="timeline" className={styles.timelineWrap}>
 
 
                 <Card><Timeline24h equipage={equipage} activites={jours[jourActifIndex].activites} theme={theme} onActiviteClick={function(idx) { setBottomTab('saisie'); setTimeout(function() { var el = document.getElementById('activite-' + idx); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow 0.3s'; el.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.5)'; setTimeout(function() { el.style.boxShadow = 'none'; }, 2000); } }, 100); }} /></Card>
@@ -1015,11 +1018,11 @@ export default function Calculator() {
         )}
 
         {bottomTab === "resultats" && resultat && !chargement ? (
-          <div className={styles.resultInlineWrap}>
+          <div data-tour="results" className={styles.resultInlineWrap}>
             <ResultPanel resultat={resultat} compact />
           </div>
         ) : (
-          <div className={styles.inputSection}>
+          <div data-tour="input" className={styles.inputSection}>
             {mode === "formulaire" ? (
               <div className={styles.formulaire}>
                 <JourFormulaire

@@ -230,3 +230,39 @@
   .themeThumb { width: 14px; height: 14px; }
   .themeThumbDark { transform: translateX(14px); }
 }
+/* === Bouton aide "?" === */
+.helpBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border, #2a2a3e);
+  background: var(--bg-input, #1a1a2e);
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+.helpBtn:hover {
+  border-color: var(--accent, #00d4ff);
+  color: var(--accent, #00d4ff);
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
+}
+.helpBtn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 480px) {
+  .helpBtn {
+    width: 28px;
+    height: 28px;
+  }
+  .helpBtn svg {
+    width: 15px;
+    height: 15px;
+  }
+}
