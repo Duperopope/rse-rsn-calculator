@@ -471,3 +471,25 @@
   .actionBtnLabel, .removeBtnLabel {
   gap: 6px; min-height: 44px; padding: 8px 16px; }
 }
+/* Chevauchement d'horaires */
+.chevauchement {
+  border-left: 3px solid #f44336 !important;
+  background: rgba(244, 67, 54, 0.08) !important;
+  animation: pulseChev 1.5s ease-in-out infinite;
+}
+.chevauchement::after {
+  content: "Chevauchement";
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+@keyframes pulseChev {
+  0%, 100% { border-left-color: #f44336; }
+  50% { border-left-color: #ff8a80; }
+}

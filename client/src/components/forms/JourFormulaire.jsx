@@ -153,10 +153,56 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
   }
 
   function updateActivite(actIndex, field, value) {
-    const newActivites = jour.activites.map((a, i) =>
-      i === actIndex ? { ...a, [field]: value } : a
-    );
-    onUpdate(index, { ...jour, activites: newActivites });
+    const acts = [...jour.activites];
+    const old = acts[actIndex];
+    const updated = { ...old, [field]: value };
+
+    // Si on change le debut: ajuster la fin pour garder la meme duree
+    if (field === "debut" && old.debut && old.fin && value) {
+      var oldDuree = toMin(old.fin) - toMin(old.debut);
+      if (oldDuree < 0) oldDuree += 1440;
+      if (oldDuree > 0) {
+        var newFin = toMin(value) + oldDuree;
+        if (newFin >= 1440) newFin -= 1440;
+        var hh = String(Math.floor(newFin / 60)).padStart(2, "0");
+        var mm = String(newFin % 60).padStart(2, "0");
+        updated.fin = hh + ":" + mm;
+      }
+    }
+
+    acts[actIndex] = updated;
+
+    // Chainage: si on change la fin, ajuster le debut de la suivante
+    if (field === "fin" && actIndex < acts.length - 1) {
+      var next = acts[actIndex + 1];
+      // Ne chainer que si le debut de la suivante = ancien fin (etait chaine)
+      if (next.debut === old.fin || !next.debut) {
+        var nextDuree = 0;
+        if (next.debut && next.fin) {
+          nextDuree = toMin(next.fin) - toMin(next.debut);
+          if (nextDuree < 0) nextDuree += 1440;
+        }
+        acts[actIndex + 1] = { ...next, debut: value };
+        // Ajuster aussi la fin de la suivante pour garder sa duree
+        if (nextDuree > 0 && value) {
+          var nf = toMin(value) + nextDuree;
+          if (nf >= 1440) nf -= 1440;
+          var hh2 = String(Math.floor(nf / 60)).padStart(2, "0");
+          var mm2 = String(nf % 60).padStart(2, "0");
+          acts[actIndex + 1] = { ...acts[actIndex + 1], fin: hh2 + ":" + mm2 };
+        }
+      }
+    }
+
+    // Chainage: si on change le debut, ajuster la fin du precedent
+    if (field === "debut" && actIndex > 0) {
+      var prev = acts[actIndex - 1];
+      if (prev.fin === old.debut || !prev.fin) {
+        acts[actIndex - 1] = { ...prev, fin: value };
+      }
+    }
+
+    onUpdate(index, { ...jour, activites: acts });
   }
 
   function changeType(actIndex, newType) {
@@ -166,10 +212,17 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
 
   function ajouterActivite() {
     const last = jour.activites[jour.activites.length - 1];
+    var debutMin = last && last.fin ? toMin(last.fin) : 360;
+    var finMin = debutMin + 15;
+    if (finMin >= 1440) finMin -= 1440;
+    var dH = String(Math.floor(debutMin / 60)).padStart(2, "0");
+    var dM = String(debutMin % 60).padStart(2, "0");
+    var fH = String(Math.floor(finMin / 60)).padStart(2, "0");
+    var fM = String(finMin % 60).padStart(2, "0");
     const newAct = {
-      debut: last ? last.fin : '06:00',
-      fin: last ? '' : '06:15',
-      type: 'C'
+      debut: dH + ":" + dM,
+      fin: fH + ":" + fM,
+      type: "C"
     };
     onUpdate(index, { ...jour, activites: [...jour.activites, newAct] });
   }
@@ -248,6 +301,20 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
         </div>
         {jour.activites.map((act, actIdx) => {
           const typeInfo = TYPES_ACTIVITE.find(t => t.code === act.type) || TYPES_ACTIVITE[0];
+          // Detection chevauchement
+          var chevauchement = false;
+          if (actIdx > 0 && act.debut) {
+            var prevAct = jour.activites[actIdx - 1];
+            if (prevAct.fin && toMin(act.debut) < toMin(prevAct.fin)) {
+              chevauchement = true;
+            }
+          }
+          if (actIdx < jour.activites.length - 1 && act.fin) {
+            var nextAct = jour.activites[actIdx + 1];
+            if (nextAct.debut && toMin(nextAct.debut) < toMin(act.fin)) {
+              chevauchement = true;
+            }
+          }
           let duree = 0;
           if (act.debut && act.fin) {
             duree = toMin(act.fin) - toMin(act.debut);
@@ -256,7 +323,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
 
           return (
             <React.Fragment key={actIdx}>
-              <div id={'activite-' + actIdx} data-activite-index={actIdx} className={styles.activiteLine} style={{ '--type-color': typeInfo.couleur + '80' }}>
+              <div id={'activite-' + actIdx} data-activite-index={actIdx} className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')} style={{ '--type-color': typeInfo.couleur + '80' }}>
                 <button
                   type="button"
                   className={styles.activiteTypeBtn}
