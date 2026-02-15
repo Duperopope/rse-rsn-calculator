@@ -833,7 +833,7 @@ export default function Calculator() {
 
 
 
-            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} nbDerogConduite={window.__nbDerogConduite || 0} />}
+            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} nbDerogConduite={window.__nbDerogConduite || 0} jours={jours} jourActifIndex={jourActifIndex} />}
 
 
             {(dashExpanded || window.innerWidth >= 769) && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (

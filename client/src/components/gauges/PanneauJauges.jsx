@@ -4,6 +4,7 @@ import { JaugeLineaire } from './JaugeLineaire.jsx';
 import { LIMITES } from '../../config/constants.js';
 import { fmtMin } from '../../utils/time.js';
 import styles from './PanneauJauges.module.css';
+import { JaugeHebdo } from "./JaugeHebdo.jsx";
 
 /**
  * Panneau complet de jauges temps reel
@@ -11,7 +12,7 @@ import styles from './PanneauJauges.module.css';
  * @param {Object} stats - Resultat de calculerStatsJour
  * @param {string} typeService - Code type de service
  */
-export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite = 0 }) {
+export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite = 0, jours = [], jourActifIndex = 0 }) {
   if (!stats || stats.nbActivites === 0) return null;
 
 
@@ -98,6 +99,9 @@ export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite
           );
         })()}
       </div>
+
+      {/* Jauge hebdomadaire multi-vues */}
+      <JaugeHebdo jours={jours} typeService={typeService} jourActifIndex={jourActifIndex} />
     </div>
   );
 }
