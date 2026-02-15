@@ -119,7 +119,7 @@ function analyserInfractions(activites) {
   return { zones, marqueurs };
 }
 
-export function Timeline24h({ activites = [], theme = 'dark' }) {
+export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick }) {
   const containerRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
   const [selectedMarqueur, setSelectedMarqueur] = useState(null);
@@ -241,6 +241,12 @@ export function Timeline24h({ activites = [], theme = 'dark' }) {
                 });
               }}
               onMouseLeave={() => setTooltip(null)}
+              onClick={() => {
+                if (onActiviteClick) {
+                  const actIndex = activites.findIndex(a => a.debut === bloc.debut && a.fin === bloc.fin && a.type === bloc.type);
+                  if (actIndex >= 0) onActiviteClick(actIndex);
+                }
+              }}
             />
           );
         })}

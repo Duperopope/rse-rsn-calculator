@@ -819,7 +819,7 @@ export default function Calculator() {
               <div className={styles.timelineWrap}>
 
 
-                <Card><Timeline24h activites={jours[jourActifIndex].activites} theme={theme} /></Card>
+                <Card><Timeline24h activites={jours[jourActifIndex].activites} theme={theme} onActiviteClick={function(idx) { var el = document.getElementById('activite-' + idx); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow 0.3s'; el.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.5)'; setTimeout(function() { el.style.boxShadow = 'none'; }, 2000); } }} /></Card>
 
 
               </div>

@@ -39,7 +39,7 @@
   pointer-events: none;
 }
 
-.bloc {
+.bloc { cursor: pointer;
   position: absolute;
   top: 2px;
   bottom: 2px;
@@ -122,7 +122,7 @@
     height: 40px;
     min-height: 44px;
   }
-  .bloc {
+  .bloc { cursor: pointer;
     top: 0;
     bottom: 0;
     min-width: 8px;
