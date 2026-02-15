@@ -799,32 +799,59 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
   // dont au moins 1 normal (>= 45h)
   // Repos reduit : compensation dans les 3 semaines suivantes
   // Exception transport international marchandises : 2 reduits consecutifs possibles
-  // --- v7.20.2 FIX-06 : Repos hebdo sans double-comptage ---
-  // On utilise un Set pour marquer les jours deja consommes dans un bloc de repos
+  // --- v7.20.3 FIX-08 : Repos hebdo = residuel veille + jours R + residuel lendemain ---
+  // Le repos hebdomadaire commence a la fin du dernier service avant le repos
+  // et finit au debut du premier service apres le repos.
+  // Exemple : fin 31/12 a 14:45 + R 01/01 24h + debut 02/01 a 06:00 = 39.25h
   const reposHebdoDetectes = [];
   let joursConsecutifsSansRepos = 0;
   const joursReposConsommes = new Set();
 
+  // Helper : trouver la fin de derniere activite d'un jour (en heures depuis 00:00)
+  function finDerniereActivite(dateStr) {
+    const dj = detailsJours.find(d => d.date === dateStr);
+    if (!dj) return 24;
+    const acts = (joursMap[dateStr] || []).filter(a => a.type_normalise !== 'repos' && a.type_normalise !== 'pause');
+    if (acts.length === 0) return 0; // jour sans activite de travail/conduite
+    let maxFin = 0;
+    acts.forEach(a => {
+      const parts = a.heure_fin.split(':');
+      const finH = parseInt(parts[0]) + parseInt(parts[1]) / 60;
+      if (finH > maxFin) maxFin = finH;
+    });
+    return maxFin;
+  }
+
+  // Helper : trouver le debut de premiere activite d'un jour (en heures depuis 00:00)
+  function debutPremiereActivite(dateStr) {
+    const acts = (joursMap[dateStr] || []).filter(a => a.type_normalise !== 'repos' && a.type_normalise !== 'pause');
+    if (acts.length === 0) return 24; // jour sans activite
+    let minDeb = 24;
+    acts.forEach(a => {
+      const parts = a.heure_debut.split(':');
+      const debH = parseInt(parts[0]) + parseInt(parts[1]) / 60;
+      if (debH < minDeb) minDeb = debH;
+    });
+    return minDeb;
+  }
+
   joursTries.forEach((dateJour, idx) => {
-    // Si ce jour a deja ete inclus dans un bloc de repos precedent, on le saute
     if (joursReposConsommes.has(dateJour)) return;
 
     const dj = detailsJours.find(d => d.date === dateJour);
     if (!dj) return;
     const conduiteJour = dj.conduite_min || 0;
     const travailJour = dj.travail_min || 0;
-    const reposH = parseFloat(dj.repos_estime_h) || 0;
     const estJourTravail = (conduiteJour > 0 || travailJour > 0);
 
     if (estJourTravail) {
       joursConsecutifsSansRepos++;
     } else {
-      // Jour sans activite = debut d'un bloc de repos potentiel
       joursReposConsommes.add(dateJour);
-      let dureeReposTotal = reposH;
       let joursInclusDansBloc = 1;
 
-      // Cumuler avec les jours suivants sans travail
+      // Cumuler les jours suivants sans travail
+      let dernierJourRepos = dateJour;
       for (let j = idx + 1; j < joursTries.length; j++) {
         const dateNext = joursTries[j];
         const djNext = detailsJours.find(d => d.date === dateNext);
@@ -832,13 +859,40 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
         const cNext = djNext.conduite_min || 0;
         const tNext = djNext.travail_min || 0;
         if (cNext === 0 && tNext === 0) {
-          dureeReposTotal += parseFloat(djNext.repos_estime_h) || 0;
           joursReposConsommes.add(dateNext);
           joursInclusDansBloc++;
+          dernierJourRepos = dateNext;
         } else {
           break;
         }
       }
+
+      // Calculer le repos REEL :
+      // = repos residuel du jour precedent (24h - fin derniere activite)
+      // + 24h * nombre de jours R complets
+      // + repos residuel du jour suivant (debut premiere activite)
+      let reposResiduelAvant = 0;
+      if (idx > 0) {
+        const jourAvant = joursTries[idx - 1];
+        const djAvant = detailsJours.find(d => d.date === jourAvant);
+        if (djAvant && (djAvant.conduite_min > 0 || djAvant.travail_min > 0)) {
+          const finH = finDerniereActivite(jourAvant);
+          reposResiduelAvant = 24 - finH; // heures de repos entre fin service et minuit
+        }
+      }
+
+      let reposResiduelApres = 0;
+      // Trouver le premier jour travaille APRES le bloc de repos
+      const idxDernierRepos = joursTries.indexOf(dernierJourRepos);
+      if (idxDernierRepos >= 0 && idxDernierRepos + 1 < joursTries.length) {
+        const jourApres = joursTries[idxDernierRepos + 1];
+        const djApres = detailsJours.find(d => d.date === jourApres);
+        if (djApres && (djApres.conduite_min > 0 || djApres.travail_min > 0)) {
+          reposResiduelApres = debutPremiereActivite(jourApres); // heures entre minuit et debut service
+        }
+      }
+
+      const dureeReposTotal = reposResiduelAvant + (joursInclusDansBloc * 24) + reposResiduelApres;
 
       const typeRepos = dureeReposTotal >= R_MULTI.REPOS_HEBDO_NORMAL_H ? 'normal' :
                         dureeReposTotal >= R_MULTI.REPOS_HEBDO_REDUIT_H ? 'reduit' : 'insuffisant';
@@ -848,7 +902,9 @@ function analyseMultiSemaines(detailsJours, joursMap, joursTries, typeService, e
         duree_h: parseFloat(dureeReposTotal.toFixed(1)),
         type: typeRepos,
         jours_travail_avant: joursConsecutifsSansRepos,
-        jours_repos_bloc: joursInclusDansBloc
+        jours_repos_bloc: joursInclusDansBloc,
+        repos_avant_h: parseFloat(reposResiduelAvant.toFixed(1)),
+        repos_apres_h: parseFloat(reposResiduelApres.toFixed(1))
       };
 
       if (typeRepos === 'reduit') {
