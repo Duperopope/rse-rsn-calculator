@@ -241,3 +241,82 @@
   margin-left: 6px;
   white-space: nowrap;
 }
+
+/* === Explications Amende === */
+.amendeExplain { margin-top: 8px; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); font-size: 0.78rem; line-height: 1.5; }
+.amendeWho { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: rgba(255,255,255,0.8); }
+.amendeWhoIcon { font-size: 1rem; }
+.amendeConditions { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.amendeCondItem { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.7); }
+.condBadge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; font-weight: 700; }
+.condMinore { background: rgba(0,200,100,0.15); color: #00c864; }
+.condForfait { background: rgba(0,150,255,0.15); color: #0096ff; }
+.condMajore { background: rgba(255,170,0,0.15); color: #ffaa00; }
+.condMax { background: rgba(255,68,68,0.15); color: #ff4444; }
+.amendeNote { color: rgba(255,255,255,0.45); font-size: 0.72rem; font-style: italic; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; }
+/* Explications amende */
+.amendeExplain {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.amendeWho {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.amendeWhoIcon {
+  font-size: 1.2rem;
+}
+.amendeConditions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.amendeCondItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.condBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.condMinore {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+}
+.condForfait {
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196F3;
+}
+.condMajore {
+  background: rgba(255, 152, 0, 0.2);
+  color: #FF9800;
+}
+.condMax {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+.amendeNote {
+  margin: 8px 0 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+  font-style: italic;
+}

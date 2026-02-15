@@ -259,6 +259,7 @@ export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick })
             <div
               key={'zone' + i}
               className={styles.zoneDepassement}
+              data-zone-type={zone.type}
               style={{
                 left: left + '%',
                 width: Math.max(w, 0.5) + '%'

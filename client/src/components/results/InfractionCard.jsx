@@ -99,14 +99,27 @@ function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }
 
   function handleTap() {
     if (navigator.vibrate) navigator.vibrate(10);
-    const timeline = document.querySelector('[class*="Timeline"]') || document.querySelector('[class*="timeline"]');
+    var msg = (inf.regle || inf.message || "").toLowerCase();
+    var zoneType = "";
+    if (msg.indexOf("continue") !== -1 || msg.indexOf("4h30") !== -1) zoneType = "conduite_continue";
+    else if (msg.indexOf("journali") !== -1 || msg.indexOf("9h") !== -1 || msg.indexOf("10h") !== -1) zoneType = "conduite_journaliere";
+    else if (msg.indexOf("amplitude") !== -1 || msg.indexOf("13h") !== -1) zoneType = "amplitude";
+    var timeline = document.querySelector("[class*='Timeline']") || document.querySelector("[class*='timeline']");
     if (timeline) {
-      timeline.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      timeline.style.transition = 'box-shadow 0.3s';
-      timeline.style.boxShadow = '0 0 20px rgba(255, 59, 48, 0.5)';
-      setTimeout(() => { timeline.style.boxShadow = 'none'; }, 1500);
+      timeline.scrollIntoView({ behavior: "smooth", block: "center" });
+      var targetZone = zoneType ? timeline.querySelector("[data-zone-type='" + zoneType + "']") : null;
+      if (targetZone) {
+        targetZone.style.transition = "box-shadow 0.3s, transform 0.3s";
+        targetZone.style.boxShadow = "0 0 16px 4px rgba(255, 59, 48, 0.8)";
+        targetZone.style.transform = "scaleY(1.5)";
+        targetZone.style.zIndex = "50";
+        setTimeout(function() { targetZone.style.boxShadow = "none"; targetZone.style.transform = "scaleY(1)"; targetZone.style.zIndex = ""; }, 2000);
+      } else {
+        timeline.style.transition = "box-shadow 0.3s";
+        timeline.style.boxShadow = "0 0 20px rgba(255, 59, 48, 0.5)";
+        setTimeout(function() { timeline.style.boxShadow = "none"; }, 1500);
+      }
     }
-    if (onNavigate) onNavigate(inf);
   }
 
   function handleSourceClick(e) {
@@ -151,6 +164,38 @@ function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }
           <span className={styles.amendeLabel}>Maximum</span>
           <span className={styles.amendeValue}>{bareme.max} €</span>
         </div>
+      </div>
+
+      {/* Explications amende - responsabilite et conditions */}
+      <div className={styles.amendeExplain}>
+        <div className={styles.amendeWho}>
+          <span className={styles.amendeWhoIcon}>{classe === "5e classe" ? "\uD83C\uDFE2" : "\uD83D\uDC64"}</span>
+          <span><strong>Responsable :</strong> {classe === "5e classe" ? "Entreprise (personne morale)" : "Conducteur (personne physique)"}</span>
+        </div>
+        <div className={styles.amendeConditions}>
+          <div className={styles.amendeCondItem}>
+            <span className={styles.condBadge + " " + styles.condMinore}>{"\u2193"}</span>
+            <span><strong>Minoree</strong> ({bareme.minore} {"\u20AC"}) : paiement sous 15 jours</span>
+          </div>
+          <div className={styles.amendeCondItem}>
+            <span className={styles.condBadge + " " + styles.condForfait}>{"\u2022"}</span>
+            <span><strong>Forfait</strong> ({bareme.forfait} {"\u20AC"}) : paiement sous 45 jours</span>
+          </div>
+          <div className={styles.amendeCondItem}>
+            <span className={styles.condBadge + " " + styles.condMajore}>{"\u2191"}</span>
+            <span><strong>Majoree</strong> ({bareme.majore} {"\u20AC"}) : non-paiement apres 45 jours</span>
+          </div>
+          {classe === "5e classe" && (
+            <div className={styles.amendeCondItem}>
+              <span className={styles.condBadge + " " + styles.condMax}>{"\u26A0"}</span>
+              <span><strong>Recidive</strong> : {bareme.max * 2} {"\u20AC"} (doublement)</span>
+            </div>
+          )}
+        </div>
+        <p className={styles.amendeNote}>
+          Art. R49-7 C. proc. pen. (minoration/majoration).
+          {classe === "5e classe" ? " Art. L3315-4 C. transports (employeur)." : " Art. L3315-2 C. transports (conducteur)."}
+        </p>
       </div>
 
       {source && (
