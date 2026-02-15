@@ -63,13 +63,13 @@ export function FixEnginePanel({ fixEngine, score, amendeFinale, infractions }) 
         <div className={styles.headerLeft}>
           <span className={styles.icon}>&#x1F9F9;</span>
           <div>
-            <h3 className={styles.title}>Analyse corrig\u00e9e</h3>
-            <span className={styles.subtitle}>{retirees} alerte(s) non pertinente(s) retir\u00e9e(s)</span>
+            <h3 className={styles.title}>Analyse corrigée</h3>
+            <span className={styles.subtitle}>{retirees} alerte(s) non pertinente(s) retirée(s)</span>
           </div>
         </div>
         <div className={styles.badge}>
           <span className={styles.badgeValue}>{retirees}</span>
-          <span className={styles.badgeLabel}>corrig\u00e9(s)</span>
+          <span className={styles.badgeLabel}>corrigé(s)</span>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export function FixEnginePanel({ fixEngine, score, amendeFinale, infractions }) 
       <div className={styles.savings}>
         <div className={styles.savingItem}>
           <span className={styles.savingIcon}>&#x2716;</span>
-          <span><strong>{retirees}</strong> alerte(s) non pertinente(s) retir\u00e9e(s)</span>
+          <span><strong>{retirees}</strong> alerte(s) non pertinente(s) retirée(s)</span>
         </div>
         {reposCorreiges > 0 ? (
           <div className={styles.savingItem}>

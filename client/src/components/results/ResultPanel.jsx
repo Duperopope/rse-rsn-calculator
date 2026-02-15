@@ -3,7 +3,7 @@ import { EURO, API_URL } from '../../config/constants.js';
 import { InfractionCard } from './InfractionCard.jsx';
 import { RecommandationList } from './RecommandationList.jsx';
 import { SanctionTable } from './SanctionTable.jsx';
-import { FixEnginePanel } from './FixEnginePanel.jsx';
+// import { FixEnginePanel } from './FixEnginePanel.jsx';
 import { TrackingDashboard } from './TrackingDashboard.jsx';
 import styles from './ResultPanel.module.css';
 
@@ -120,14 +120,7 @@ export function ResultPanel({ resultat }) {
       ) : null}
 
       {/* Fix-Engine : Comparaison avant/apres */}
-      {fixEngine ? (
-        <FixEnginePanel
-          fixEngine={fixEngine}
-          score={score}
-          amendeFinale={amende}
-          infractions={infractions}
-        />
-      ) : null}
+      {/* FixEngine masque — correction silencieuse */}
 
       {/* Infractions */}
       {infractions.length > 0 ? (
@@ -138,7 +131,7 @@ export function ResultPanel({ resultat }) {
               const grouped = [];
               const seen = new Map();
               infractions.forEach((inf, i) => {
-                const groupKey = (inf.regle || '') + '|' + (inf.description || inf.message || '');
+                const groupKey = (inf.regle || inf.article || '') + '|' + (inf.description || inf.message || inf.detail || '');
                 if (seen.has(groupKey)) {
                   seen.get(groupKey).jours.push(inf.jour || ('J' + (i + 1)));
                   seen.get(groupKey).count++;
