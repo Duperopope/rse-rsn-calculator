@@ -161,7 +161,7 @@ export default function Calculator() {
 
 
   const [dashExpanded, setDashExpanded] = useState(false);
-  const [showResultDetail, setShowResultDetail] = useState(false);
+  const [showResultDetail, setShowResultDetail] = useState(() => { try { return !!sessionStorage.getItem('fimo_resultat'); } catch(e) { return false; } });
 
 
 

@@ -6,14 +6,27 @@ import { API_URL } from '../config/constants.js';
  * @returns {{ analyser: Function, resultat: Object|null, erreur: string|null, chargement: boolean }}
  */
 export function useAnalysis() {
-  const [resultat, setResultat] = useState(null);
+  const [resultat, setResultat] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('fimo_resultat');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) { return null; }
+  });
   const [erreur, setErreur] = useState(null);
+
+  function setResultatPersist(data) {
+    setResultat(data);
+    try {
+      if (data) sessionStorage.setItem('fimo_resultat', JSON.stringify(data));
+      else sessionStorage.removeItem('fimo_resultat');
+    } catch (e) { /* quota depasse */ }
+  }
   const [chargement, setChargement] = useState(false);
 
   async function analyser(csvTexte, csv2, typeService, pays, equipage) {
     setChargement(true);
     setErreur(null);
-    setResultat(null);
+    setResultatPersist(null);
 
     try {
       const res = await fetch(API_URL + '/analyze', {
@@ -30,7 +43,7 @@ export function useAnalysis() {
         return null;
       }
 
-      setResultat(data);
+      setResultatPersist(data);
       // QOL 3: Auto-scroll vers resultats apres analyse
       setTimeout(() => { const el = document.getElementById("resultats"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 300);
       return data;
@@ -49,10 +62,10 @@ export function useAnalysis() {
   }
 
   function reset() {
-    setResultat(null);
+    setResultatPersist(null);
     setErreur(null);
     setChargement(false);
   }
 
-  return { analyser, resultat, setResultat, erreur, chargement, reset };
+  return { analyser, resultat, setResultat: setResultatPersist, erreur, chargement, reset };
 }
