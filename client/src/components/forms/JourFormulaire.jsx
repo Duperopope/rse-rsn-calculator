@@ -18,30 +18,71 @@ import styles from './JourFormulaire.module.css';
 
 function useSwipeDelete(onDelete, threshold = 80) {
   const startX = React.useRef(0);
+  const startY = React.useRef(0);
   const currentX = React.useRef(0);
   const swiping = React.useRef(false);
   const elRef = React.useRef(null);
+  const longPressTimer = React.useRef(null);
+  const longPressFired = React.useRef(false);
 
   const handlers = {
     onTouchStart(e) {
       startX.current = e.touches[0].clientX;
+      startY.current = e.touches[0].clientY;
+      currentX.current = startX.current;
       swiping.current = true;
+      longPressFired.current = false;
+
+      /* Demarrer le timer long-press (600ms) */
+      longPressTimer.current = setTimeout(function () {
+        if (!swiping.current) return;
+        longPressFired.current = true;
+        if (elRef.current) {
+          elRef.current.style.transition = 'background 0.2s ease';
+          elRef.current.style.background = 'rgba(255, 68, 68, 0.25)';
+        }
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+        /* Confirm dialog pour eviter suppression accidentelle */
+        setTimeout(function () {
+          if (elRef.current) {
+            elRef.current.style.transform = 'translateX(-100%)';
+            elRef.current.style.opacity = '0';
+            elRef.current.style.transition = 'transform 0.3s ease, opacity 0.3s ease, background 0.3s ease';
+          }
+          setTimeout(onDelete, 300);
+        }, 200);
+      }, 600);
+
       if (elRef.current) elRef.current.style.transition = 'none';
     },
     onTouchMove(e) {
-      if (!swiping.current) return;
+      if (!swiping.current || longPressFired.current) return;
       currentX.current = e.touches[0].clientX;
-      const diff = currentX.current - startX.current;
+      var diffX = Math.abs(currentX.current - startX.current);
+      var diffY = Math.abs(e.touches[0].clientY - startY.current);
+
+      /* Si mouvement > 10px, annuler le long-press (c'est un swipe) */
+      if (diffX > 10 || diffY > 10) {
+        if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+      }
+
+      var diff = currentX.current - startX.current;
       if (diff < 0 && elRef.current) {
         elRef.current.style.transform = 'translateX(' + Math.max(diff, -120) + 'px)';
         elRef.current.style.opacity = String(1 - Math.min(Math.abs(diff) / 200, 0.5));
       }
     },
     onTouchEnd() {
+      /* Annuler le timer long-press si encore actif */
+      if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+
+      if (longPressFired.current) { swiping.current = false; return; }
+
       swiping.current = false;
-      const diff = currentX.current - startX.current;
+      var diff = currentX.current - startX.current;
       if (elRef.current) {
-        elRef.current.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        elRef.current.style.transition = 'transform 0.3s ease, opacity 0.3s ease, background 0.3s ease';
+        elRef.current.style.background = '';
         if (diff < -threshold) {
           elRef.current.style.transform = 'translateX(-100%)';
           elRef.current.style.opacity = '0';
