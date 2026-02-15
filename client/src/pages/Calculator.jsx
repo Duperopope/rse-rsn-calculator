@@ -67,7 +67,7 @@ import { Badge } from '../components/common/Badge.jsx';
 import styles from './Calculator.module.css';
 
 
-import { HistoriquePanel, getUnseenCount } from '../components/history/HistoriquePanel.jsx';
+import { HistoriquePanel } from '../components/history/HistoriquePanel.jsx';
 
 
 
@@ -134,6 +134,20 @@ export default function Calculator() {
 
 
   const [voirHistorique, setVoirHistorique] = useState(false);
+  const [lastSeenCount, setLastSeenCount] = useState(() => {
+    try { return parseInt(localStorage.getItem('fimo_historique_seen_count') || '0', 10); } catch { return 0; }
+  });
+
+  /* Quand on ferme le panel, marquer tout comme vu */
+  useEffect(() => {
+    if (!voirHistorique && historique && historique.length > 0) {
+      const len = historique.length;
+      if (len !== lastSeenCount) {
+        setLastSeenCount(len);
+        try { localStorage.setItem('fimo_historique_seen_count', String(len)); } catch {}
+      }
+    }
+  }, [voirHistorique]);
 
 
   const [statsJour, setStatsJour] = useState(null);
@@ -675,7 +689,7 @@ export default function Calculator() {
         analyseDisabled={!online || chargement}
 
 
-        historiqueCount={getUnseenCount((historique || []).length)}
+        historiqueCount={Math.max(0, (historique || []).length - lastSeenCount)}
 
 
         onToggleHistorique={() => setVoirHistorique(v => !v)}
@@ -1071,7 +1085,7 @@ export default function Calculator() {
         analyseDisabled={!online || chargement}
 
 
-        historiqueCount={getUnseenCount((historique || []).length)}
+        historiqueCount={Math.max(0, (historique || []).length - lastSeenCount)}
 
 
         onToggleHistorique={() => setVoirHistorique(v => !v)}
