@@ -277,7 +277,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
       {/* TEMPLATES EN CARTES */}
       <div className={styles.templates}>
         <span className={styles.templatesLabel}>Remplissage rapide :</span>
-        <div className={styles.templateCards}>
+        <div data-tour="templates" className={styles.templateCards}>
           {Object.entries(TEMPLATES).map(([key, tpl]) => (
             <TemplateCard
               key={key}
@@ -323,7 +323,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
 
           return (
             <React.Fragment key={actIdx}>
-              <div id={'activite-' + actIdx} data-activite-index={actIdx} className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')} style={{ '--type-color': typeInfo.couleur + '80' }}>
+              <div id={'activite-' + actIdx} data-activite-index={actIdx} data-tour="activite" className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')} style={{ '--type-color': typeInfo.couleur + '80' }}>
                 <button
                   type="button"
                   className={styles.activiteTypeBtn}
@@ -376,7 +376,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
         })}
       </div>
 
-      <button className={styles.addActBtn} onClick={ajouterActivite} type="button">
+      <button data-tour="ajouter" className={styles.addActBtn} onClick={ajouterActivite} type="button">
         + Ajouter une activite
       </button>
 

@@ -31,7 +31,7 @@ import { BottomBar } from '../components/layout/BottomBar.jsx';
 import { Footer } from '../components/layout/Footer.jsx';
 
 
-import { GuidedTour } from '../components/layout/GuidedTour.jsx';
+import GuidedTour from '../components/layout/GuidedTour.jsx';
 
 
 import { ParametresPanel } from '../components/forms/ParametresPanel.jsx';
@@ -686,9 +686,9 @@ export default function Calculator() {
     <div className={styles.app}>
 
 
-      {(!onboardingDone || showTour) && (
-        <GuidedTour onClose={() => { setOnboardingDone(true); setShowTour(false); }} />
-      )}
+
+        <GuidedTour visible={!onboardingDone || showTour} onClose={() => { setOnboardingDone(true); setShowTour(false); }} />
+
 
 
 
@@ -865,7 +865,7 @@ export default function Calculator() {
                   aria-label="Jours precedents"
                   tabIndex={-1}
                 >&lsaquo;</button>
-                <div className={styles.jourNavTabs} ref={jourTabsRef}>
+                <div data-tour="jour-tabs" className={styles.jourNavTabs} ref={jourTabsRef}>
                   {jours.map((j, i) => (
                     <div key={i} className={styles.jourNavItem}>
                       <button
@@ -1008,7 +1008,7 @@ export default function Calculator() {
         {erreur && <Card variant="danger" animate><p className={styles.erreur}>{erreur}</p></Card>}
 
         {resultat && (
-          <div className={styles.bottomTabs}>
+          <div data-tour="bottom-tabs" className={styles.bottomTabs}>
             <button
               className={styles.bottomTab + (bottomTab === "saisie" ? " " + styles.bottomTabActive : "")}
               onClick={() => setBottomTab('saisie')}

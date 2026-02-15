@@ -57,7 +57,7 @@ export function BottomBar({
         className={styles.item + ' ' + styles.itemPrimary + (analyseEnCours ? ' ' + styles.itemLoading : '')}
         onClick={handleAnalyse}
         disabled={analyseDisabled || analyseEnCours}
-        aria-label="Analyser la conformite"
+        data-tour="analyser" aria-label="Analyser la conformite"
       >
         <span className={styles.iconWrap}>
           <IconAnalyse />

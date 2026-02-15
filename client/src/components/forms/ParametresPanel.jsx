@@ -35,7 +35,7 @@ export function ParametresPanel({
         aria-expanded={ouvert}
         aria-label="Modifier les parametres"
       >
-        <div className={styles.chipsRow}>
+        <div data-tour="service-type" className={styles.chipsRow}>
           <span className={styles.chipService}>
             <span className={styles.chipIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="18" height="14" rx="3"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="7" cy="20" r="2"/><circle cx="17" cy="20" r="2"/></svg></span>
             {serviceShort}
@@ -46,7 +46,7 @@ export function ParametresPanel({
           <span className={styles.chip}>
             {equipage === 'double' ? <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="7" r="3.5"/><circle cx="17" cy="8" r="3"/><path d="M2 21a7 7 0 0114 0"/><path d="M16 21a5.5 5.5 0 015-5"/></svg> Duo</span> : <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0113 0"/></svg> Solo</span>}
           </span>
-          <span className={styles.chipMode}>
+          <span data-tour="equipage" className={styles.chipMode}>
             {mode === 'formulaire' ? <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 3l4 4L7 21H3v-4L17 3z"/></svg> Manuel</span> : <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> CSV</span>}
           </span>
         </div>

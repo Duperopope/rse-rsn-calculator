@@ -1,239 +1,330 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './GuidedTour.module.css';
 
 /**
- * GuidedTour v2.0 — Tour interactif 8 etapes
- * Cible les data-tour poses sur les composants reels
- * Saute automatiquement les etapes dont l'element n'est pas visible
+ * GuidedTour - Visite guidee interactive complete (16 etapes)
+ * Couvre le parcours complet : decouverte -> saisie -> analyse -> resultats
+ * Chaque etape cible un element via [data-tour="xxx"]
  */
 
 const STEPS = [
   {
     target: '[data-tour="header"]',
-    title: 'Votre tableau de bord',
-    text: 'En haut, vous voyez si le serveur est connecte (point vert), et vous pouvez changer le theme clair/sombre. Le bouton "?" rouvre ce guide a tout moment.',
-    position: 'bottom'
+    title: 'Bienvenue sur FIMO Check !',
+    text: 'FIMO Check analyse vos temps de conduite et de repos selon la reglementation europeenne CE 561/2006. Ce guide va vous montrer comment utiliser chaque fonctionnalite.',
+    position: 'bottom',
+    icon: '\u{1F3AF}'
   },
   {
-    target: '[data-tour="params"]',
-    title: 'Votre situation',
-    text: 'Choisissez votre type de trajet (regulier, longue distance, occasionnel), le pays et si vous roulez seul ou en equipage double. Tapez sur la barre pour ouvrir les options.',
-    position: 'bottom'
+    target: '[data-tour="status"]',
+    title: 'Status du serveur',
+    text: 'Ce point indique si le serveur est connecte. Vert = en ligne, pret a analyser. Rouge = hors ligne, les analyses ne sont pas disponibles pour le moment.',
+    position: 'bottom',
+    icon: '\u{1F7E2}'
   },
   {
-    target: '[data-tour="input"]',
-    title: 'Remplissez votre journee',
-    text: 'Ajoutez vos activites : conduite, pause, repos, autres taches. Chaque ligne a une heure de debut, une heure de fin et un type. Vous pouvez aussi coller un fichier CSV.',
-    position: 'top'
+    target: '[data-tour="theme"]',
+    title: 'Theme clair / sombre',
+    text: 'Basculez entre le mode sombre et le mode clair selon votre preference. Votre choix est sauvegarde automatiquement.',
+    position: 'bottom',
+    icon: '\u{1F319}'
+  },
+  {
+    target: '[data-tour="help"]',
+    title: 'Besoin d\'aide ?',
+    text: 'Ce bouton "?" relance ce guide a tout moment. Si vous etes perdu, un clic et c\'est reparti !',
+    position: 'bottom',
+    icon: '\u{2753}'
+  },
+  {
+    target: '[data-tour="service-type"]',
+    title: 'Votre type de service',
+    text: 'Selectionnez votre activite : Urbain, Tourisme, Poids lourd, Long trajet ou Libre. Chaque type applique les seuils reglementaires correspondants (amplitude, derogations...).',
+    position: 'bottom',
+    icon: '\u{1F698}'
+  },
+  {
+    target: '[data-tour="equipage"]',
+    title: 'Solo ou double equipage',
+    text: 'Indiquez si vous conduisez seul ou en double equipage. En duo, les regles de repos changent : 9h dans les 30h au lieu de 11h dans les 24h (Art.8 par.5).',
+    position: 'bottom',
+    icon: '\u{1F465}'
+  },
+  {
+    target: '[data-tour="templates"]',
+    title: 'Modeles de journee',
+    text: 'Utilisez ces modeles pour pre-remplir une journee type : conduite longue, journee mixte, repos... Un clic et les activites se remplissent automatiquement.',
+    position: 'bottom',
+    icon: '\u{1F4CB}'
+  },
+  {
+    target: '[data-tour="activite"]',
+    title: 'Ligne d\'activite',
+    text: 'Chaque ligne represente une activite : le bouton colore a gauche indique le type (Conduite, Repos, Travail, Disponibilite). Les champs horaires definissent le debut et la fin. La poubelle a droite supprime la ligne.',
+    position: 'bottom',
+    icon: '\u{1F4DD}'
+  },
+  {
+    target: '[data-tour="ajouter"]',
+    title: 'Ajouter une activite',
+    text: 'Cliquez sur "+ Ajouter une activite" pour inserer une nouvelle ligne. L\'heure de debut se cale automatiquement sur la fin de la precedente.',
+    position: 'top',
+    icon: '\u{2795}'
+  },
+  {
+    target: '[data-tour="jour-tabs"]',
+    title: 'Navigation multi-jours',
+    text: 'Chaque onglet represente un jour. Les couleurs indiquent le statut : vert = conforme, orange = attention, rouge = infractions detectees. Cliquez sur "+" pour ajouter un jour.',
+    position: 'bottom',
+    icon: '\u{1F4C5}'
   },
   {
     target: '[data-tour="gauges"]',
     title: 'Jauges en temps reel',
-    text: 'Ces barres de couleur montrent ou vous en etes : conduite continue, conduite du jour, amplitude, temps de travail. Vert = OK, orange = attention, rouge = depasse.',
-    position: 'bottom'
+    text: 'Ces jauges se mettent a jour en direct pendant la saisie. Cliquez sur un cercle pour alterner les vues : Conduite continue / Conduite jour, Amplitude / Repos, Travail hebdo. Les barres en dessous detaillent chaque compteur.',
+    position: 'bottom',
+    icon: '\u{1F4CA}'
   },
   {
     target: '[data-tour="timeline"]',
-    title: 'Frise de la journee',
-    text: 'La timeline affiche vos 24 heures en couleurs. Bleu = conduite, gris = pause, vert = repos, jaune = autres taches. Tapez sur une zone pour y acceder dans le formulaire.',
-    position: 'top'
+    title: 'Frise chronologique 24h',
+    text: 'Votre journee en un coup d\'oeil. Bleu = conduite, gris = pause, vert = repos, jaune = autres taches. Les zones rouges signalent des depassements. Cliquez sur une zone pour y acceder dans le formulaire.',
+    position: 'top',
+    icon: '\u{1F552}'
+  },
+  {
+    target: '[data-tour="analyser"]',
+    title: 'Lancer l\'analyse',
+    text: 'Une fois vos activites saisies, appuyez sur "Analyser" pour verifier votre conformite. L\'analyse prend quelques secondes et detecte toutes les infractions potentielles.',
+    position: 'top',
+    icon: '\u{1F50D}'
   },
   {
     target: '[data-tour="results"]',
-    title: 'Resultats de l\'analyse',
-    text: 'Apres avoir clique "Analyser", vous verrez votre score (0 a 100), le nombre d\'infractions detectees et l\'amende estimee. Vert = conforme, rouge = problemes.',
-    position: 'top'
+    title: 'Score et resultats',
+    text: 'Apres l\'analyse : votre score de conformite (0 a 100), le nombre d\'infractions, et l\'amende estimee. Vert (90+) = conforme, orange (70-89) = attention, rouge (<70) = problemes serieux. Chaque infraction est detaillee avec l\'article de loi concerne.',
+    position: 'top',
+    icon: '\u{1F3C6}'
   },
   {
     target: '[data-tour="tracking"]',
     title: 'Suivi reglementaire',
-    text: 'Le detail des repos hebdomadaires, compensations dues et rappels reglementaires. Cliquez sur chaque carte pour voir le tableau detaille.',
-    position: 'top'
+    text: 'Le detail complet : repos hebdomadaires, compensations dues, conduite bi-hebdomadaire (90h max), heures de nuit. Chaque carte est cliquable pour voir le tableau detaille.',
+    position: 'top',
+    icon: '\u{1F4CB}'
   },
   {
     target: '[data-tour="history"]',
-    title: 'Vos analyses passees',
-    text: 'Chaque analyse est sauvegardee automatiquement. Retrouvez vos anciens resultats, comparez vos scores et suivez votre progression.',
-    position: 'top'
+    title: 'Historique des analyses',
+    text: 'Toutes vos analyses sont sauvegardees automatiquement. Retrouvez vos resultats passes, comparez vos scores et suivez votre progression. Cliquez sur une entree pour la recharger.',
+    position: 'top',
+    icon: '\u{1F4DA}'
   }
 ];
 
-export function GuidedTour({ onClose }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [spotlightRect, setSpotlightRect] = useState(null);
-  const [visibleSteps, setVisibleSteps] = useState([]);
+export default function GuidedTour({ visible, onClose }) {
+  const [step, setStep] = useState(0);
+  const [pos, setPos] = useState(null);
+  const [transitioning, setTransitioning] = useState(false);
+  const bubbleRef = useRef(null);
 
-  // Filtrer les etapes dont l'element existe dans le DOM
-  useEffect(function() {
-    var available = [];
-    for (var i = 0; i < STEPS.length; i++) {
-      var el = document.querySelector(STEPS[i].target);
-      if (el) {
-        available.push(i);
-      }
-    }
-    // Toujours inclure au moins les 3 premieres meme si pas encore rendues
-    if (available.length === 0) {
-      available = [0, 1, 2];
-    }
-    setVisibleSteps(available);
-  }, []);
+  const current = STEPS[step] || STEPS[0];
+  const total = STEPS.length;
+  const progress = ((step + 1) / total) * 100;
 
-  // Calculer la position du spotlight
-  var updateSpotlight = useCallback(function() {
-    if (visibleSteps.length === 0) return;
-    var stepIndex = visibleSteps[currentStep];
-    if (stepIndex === undefined) return;
-    var step = STEPS[stepIndex];
-    var el = document.querySelector(step.target);
-    if (el) {
-      var rect = el.getBoundingClientRect();
-      setSpotlightRect({
-        top: rect.top - 8,
-        left: rect.left - 8,
-        width: rect.width + 16,
-        height: rect.height + 16
-      });
-      // Scroll l'element en vue si necessaire
-      var inView = rect.top >= 0 && rect.bottom <= window.innerHeight;
-      if (!inView) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Re-calculer apres le scroll
-        setTimeout(function() {
-          var r2 = el.getBoundingClientRect();
-          setSpotlightRect({
-            top: r2.top - 8,
-            left: r2.left - 8,
-            width: r2.width + 16,
-            height: r2.height + 16
-          });
-        }, 400);
-      }
-    } else {
-      setSpotlightRect(null);
+  // Positionner le spotlight et la bulle sur l element cible
+  const updatePosition = useCallback(() => {
+    if (!visible) return;
+    const el = document.querySelector(current.target);
+    if (!el) {
+      // Element pas visible (ex: resultats pas encore affiches) -> centrer la bulle
+      setPos(null);
+      return;
     }
-  }, [currentStep, visibleSteps]);
+    const rect = el.getBoundingClientRect();
+    const pad = 10;
+    setPos({
+      top: rect.top - pad + window.scrollY,
+      left: rect.left - pad,
+      width: rect.width + pad * 2,
+      height: rect.height + pad * 2,
+      elRect: rect
+    });
+    // Scroll l element en vue
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [visible, current.target]);
 
-  useEffect(function() {
-    updateSpotlight();
-    window.addEventListener('resize', updateSpotlight);
-    window.addEventListener('scroll', updateSpotlight, true);
-    return function() {
-      window.removeEventListener('resize', updateSpotlight);
-      window.removeEventListener('scroll', updateSpotlight, true);
+  useEffect(() => {
+    if (!visible) return;
+    // Petit delai pour laisser le DOM se stabiliser
+    const timer = setTimeout(updatePosition, 150);
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
     };
-  }, [updateSpotlight]);
+  }, [visible, step, updatePosition]);
 
-  // Navigation
-  function goNext() {
-    if (currentStep < visibleSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
+  // Reset au step 0 quand on ouvre
+  useEffect(() => {
+    if (visible) setStep(0);
+  }, [visible]);
+
+  if (!visible) return null;
+
+  function next() {
+    if (step < total - 1) {
+      setTransitioning(true);
+      setTimeout(() => {
+        setStep(step + 1);
+        setTransitioning(false);
+      }, 200);
     } else {
       onClose();
     }
   }
 
-  function goPrev() {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+  function prev() {
+    if (step > 0) {
+      setTransitioning(true);
+      setTimeout(() => {
+        setStep(step - 1);
+        setTransitioning(false);
+      }, 200);
     }
   }
 
-  // Fermer avec Escape
-  useEffect(function() {
-    function handleKey(e) {
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowRight') goNext();
-      if (e.key === 'ArrowLeft') goPrev();
+  function skip() {
+    onClose();
+  }
+
+  // Calculer la position de la bulle
+  function getBubbleStyle() {
+    if (!pos) {
+      // Element non visible -> centrer
+      return {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
+      };
     }
-    window.addEventListener('keydown', handleKey);
-    return function() { window.removeEventListener('keydown', handleKey); };
-  });
+    const bubbleHeight = 280;
+    const bubbleWidth = 340;
+    const margin = 16;
+    const viewH = window.innerHeight;
+    const viewW = window.innerWidth;
 
-  if (visibleSteps.length === 0) return null;
-
-  var stepIndex = visibleSteps[currentStep];
-  if (stepIndex === undefined) { onClose(); return null; }
-  var step = STEPS[stepIndex];
-  var isLast = currentStep >= visibleSteps.length - 1;
-  var progress = ((currentStep + 1) / visibleSteps.length) * 100;
-
-  // Position de la bulle
-  var bubbleStyle = {};
-  if (spotlightRect) {
-    var pos = step.position || 'bottom';
-    if (pos === 'bottom') {
-      bubbleStyle.top = (spotlightRect.top + spotlightRect.height + 16) + 'px';
-      bubbleStyle.left = Math.max(16, Math.min(spotlightRect.left, window.innerWidth - 340)) + 'px';
+    let top, left;
+    
+    if (current.position === 'bottom') {
+      top = pos.top + pos.height + margin - window.scrollY;
+      if (top + bubbleHeight > viewH - margin) {
+        top = pos.top - bubbleHeight - margin - window.scrollY;
+      }
     } else {
-      bubbleStyle.top = Math.max(16, spotlightRect.top - 200) + 'px';
-      bubbleStyle.left = Math.max(16, Math.min(spotlightRect.left, window.innerWidth - 340)) + 'px';
+      top = pos.top - bubbleHeight - margin - window.scrollY;
+      if (top < margin) {
+        top = pos.top + pos.height + margin - window.scrollY;
+      }
     }
-  } else {
-    bubbleStyle.top = '50%';
-    bubbleStyle.left = '50%';
-    bubbleStyle.transform = 'translate(-50%, -50%)';
+
+    left = pos.left + (pos.width - bubbleWidth) / 2;
+    if (left < margin) left = margin;
+    if (left + bubbleWidth > viewW - margin) left = viewW - bubbleWidth - margin;
+    
+    // Clamp vertical
+    if (top < margin) top = margin;
+    if (top + bubbleHeight > viewH - margin) top = viewH - bubbleHeight - margin;
+
+    return {
+      position: 'fixed',
+      top: top + 'px',
+      left: left + 'px'
+    };
   }
 
   return (
-    <div className={styles.overlay}>
-      {/* Fond sombre avec trou */}
-      <svg className={styles.maskSvg} width="100%" height="100%">
-        <defs>
-          <mask id="tourMask">
-            <rect width="100%" height="100%" fill="white" />
-            {spotlightRect && (
+    <div className={styles.overlay} onClick={(e) => { if (e.target === e.currentTarget) skip(); }}>
+      {/* Masque SVG pour le spotlight */}
+      {pos ? (
+        <svg className={styles.maskSvg} width="100%" height="100%">
+          <defs>
+            <mask id="tour-mask">
+              <rect width="100%" height="100%" fill="white" />
               <rect
-                x={spotlightRect.left}
-                y={spotlightRect.top}
-                width={spotlightRect.width}
-                height={spotlightRect.height}
+                x={pos.left}
+                y={pos.top - window.scrollY}
+                width={pos.width}
+                height={pos.height}
                 rx="12"
                 fill="black"
               />
-            )}
-          </mask>
-        </defs>
-        <rect width="100%" height="100%" fill="rgba(0,0,0,0.72)" mask="url(#tourMask)" />
-      </svg>
+            </mask>
+          </defs>
+          <rect width="100%" height="100%" fill="rgba(0,0,0,0.75)" mask="url(#tour-mask)" />
+        </svg>
+      ) : (
+        <div className={styles.fullOverlay} />
+      )}
 
-      {/* Bordure lumineuse autour de l'element */}
-      {spotlightRect && (
+      {/* Spotlight border */}
+      {pos ? (
         <div
           className={styles.spotlight}
           style={{
-            top: spotlightRect.top + 'px',
-            left: spotlightRect.left + 'px',
-            width: spotlightRect.width + 'px',
-            height: spotlightRect.height + 'px'
+            position: 'fixed',
+            top: (pos.top - window.scrollY) + 'px',
+            left: pos.left + 'px',
+            width: pos.width + 'px',
+            height: pos.height + 'px',
           }}
         />
-      )}
+      ) : null}
 
-      {/* Bulle explicative */}
-      <div className={styles.bubble} style={bubbleStyle}>
+      {/* Bulle */}
+      <div
+        ref={bubbleRef}
+        className={styles.bubble + (transitioning ? ' ' + styles.bubbleHidden : '')}
+        style={getBubbleStyle()}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Barre de progression */}
         <div className={styles.progressBar}>
           <div className={styles.progressFill} style={{ width: progress + '%' }} />
         </div>
 
+        {/* Header bulle */}
         <div className={styles.bubbleHeader}>
-          <span className={styles.stepCount}>{currentStep + 1}/{visibleSteps.length}</span>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Fermer le guide">&times;</button>
+          <span className={styles.bubbleIcon}>{current.icon}</span>
+          <span className={styles.stepCount}>{step + 1} / {total}</span>
+          <button className={styles.closeBtn} onClick={skip} title="Fermer le guide" aria-label="Fermer">&times;</button>
         </div>
 
-        <h3 className={styles.bubbleTitle}>{step.title}</h3>
-        <p className={styles.bubbleText}>{step.text}</p>
+        {/* Contenu */}
+        <h3 className={styles.bubbleTitle}>{current.title}</h3>
+        <p className={styles.bubbleText}>{current.text}</p>
 
+        {/* Navigation */}
         <div className={styles.bubbleNav}>
-          {currentStep > 0 ? (
-            <button className={styles.prevBtn} onClick={goPrev}>Precedent</button>
-          ) : (
-            <button className={styles.skipBtn} onClick={onClose}>Passer</button>
-          )}
-          <button className={styles.nextBtn} onClick={goNext}>
-            {isLast ? 'Terminer' : 'Suivant'}
+          <button
+            className={styles.skipBtn}
+            onClick={skip}
+          >
+            Passer
           </button>
+          <div className={styles.navRight}>
+            {step > 0 ? (
+              <button className={styles.prevBtn} onClick={prev}>
+                &larr; Precedent
+              </button>
+            ) : null}
+            <button className={styles.nextBtn} onClick={next}>
+              {step < total - 1 ? 'Suivant \u2192' : 'Terminer \u2713'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
