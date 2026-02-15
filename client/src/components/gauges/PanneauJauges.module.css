@@ -63,3 +63,13 @@
 .hebdoFill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.3s; }
 .hebdoMarker { position: absolute; top: -2px; width: 2px; height: 10px; background: rgba(255,255,255,0.3); border-radius: 1px; z-index: 2; }
 .hebdoZones { position: relative; height: 12px; margin-top: 1px; }
+
+/* Barre hebdo visible uniquement en mobile */
+.hebdoMobileOnly {
+  display: none;
+}
+@media (max-width: 768px) {
+  .hebdoMobileOnly {
+    display: block;
+  }
+}

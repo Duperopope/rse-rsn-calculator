@@ -3,7 +3,9 @@ import styles from './JaugeCirculaire.module.css';
 
 /**
  * Jauge circulaire SVG pour afficher une valeur en pourcentage
- * Utilisee pour le score global et les metriques principales
+ * Supporte un onClick externe pour switcher les vues (PanneauJauges)
+ * Si onClick est fourni : le clic appelle onClick (pas de toggle %)
+ * Si onClick est absent : le clic toggle l'affichage pourcentage (comportement legacy)
  * @param {number} valeur - Valeur actuelle
  * @param {number} max - Valeur maximale
  * @param {string} label - Texte sous la jauge
@@ -14,6 +16,8 @@ import styles from './JaugeCirculaire.module.css';
  * @param {string} couleurWarning - Couleur quand proche du max
  * @param {string} couleurDanger - Couleur quand depasse le max
  * @param {number} seuilWarning - Pourcentage declenchant le warning (defaut 0.8)
+ * @param {Function} onClick - Handler externe optionnel (desactive le toggle %)
+ * @param {boolean} switchable - Affiche un indicateur visuel "cliquable" (defaut false)
  */
 export function JaugeCirculaire({
   valeur = 0,
@@ -25,7 +29,9 @@ export function JaugeCirculaire({
   couleurOk = 'var(--accent-green, #00ff88)',
   couleurWarning = 'var(--accent-orange, #ffaa00)',
   couleurDanger = 'var(--accent-red, #ff4444)',
-  seuilWarning = 0.8
+  seuilWarning = 0.8,
+  onClick = null,
+  switchable = false
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -47,8 +53,28 @@ export function JaugeCirculaire({
   const [showDetail, setShowDetail] = useState(false);
   const pourcent = Math.round(displayRatio * 100);
 
+  // Handler : si onClick externe fourni, l'utiliser. Sinon toggle %
+  const handleClick = () => {
+    if (navigator.vibrate) navigator.vibrate(5);
+    if (onClick) {
+      onClick();
+    } else {
+      setShowDetail(p => !p);
+    }
+  };
+
+  // Label affiche : si pas de onClick externe ET showDetail, afficher %
+  // Si onClick externe, toujours afficher le label tel quel
+  const displayLabel = (!onClick && showDetail) ? pourcent + '%' : label;
+
   return (
-    <div className={styles.container} style={{ width: size, minHeight: size }} onClick={() => { if (navigator.vibrate) navigator.vibrate(5); setShowDetail(p => !p); }} role="button" tabIndex={0}>
+    <div
+      className={`${styles.container}${switchable ? ' ' + styles.switchable : ''}`}
+      style={{ width: size, minHeight: size, cursor: 'pointer' }}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+    >
       <svg width={size} height={size} className={styles.svg}>
         <circle
           cx={center}
@@ -79,7 +105,10 @@ export function JaugeCirculaire({
         {unite ? <span className={styles.unite}>{unite}</span> : null}
       </div>
       {label ? (
-        <span className={styles.label} data-status={status}>{showDetail ? pourcent + "%" : label}</span>
+        <span className={styles.label} data-status={status}>{displayLabel}</span>
+      ) : null}
+      {switchable ? (
+        <span className={styles.switchHint}>&#x21C4;</span>
       ) : null}
     </div>
   );

@@ -104,10 +104,10 @@ export function calculerStatsJour(activites) {
     });
   }
 
-  if (amplitude > LIMITES.AMPLITUDE_REGULIER_MAX) {
+  if (amplitude > LIMITES.AMPLITUDE_REGULIER_DEROG) {
     alertes.push({
       type: 'danger',
-      message: 'Amplitude: ' + fmtMin(amplitude) + ' > ' + fmtMin(LIMITES.AMPLITUDE_REGULIER_MAX)
+      message: 'Amplitude: ' + fmtMin(amplitude) + ' > ' + fmtMin(LIMITES.AMPLITUDE_REGULIER_DEROG)
     });
   }
 
@@ -118,6 +118,7 @@ export function calculerStatsJour(activites) {
     travailTotal,
     pauseTotale,
     amplitude,
+    reposJournalier: Math.max(0, 1440 - amplitude),
     nbActivites: activites.length,
     alertes
   };
@@ -135,7 +136,7 @@ export function genererRecommandations(stats, typeService) {
 
   const limiteAmplitude = (typeService === 'OCCASIONNEL')
     ? LIMITES.AMPLITUDE_OCCASIONNEL_MAX
-    : LIMITES.AMPLITUDE_REGULIER_MAX;
+    : LIMITES.AMPLITUDE_REGULIER_DEROG;
 
   // Conduite continue
   const resteContinue = LIMITES.CONDUITE_CONTINUE_MAX - stats.conduiteMax;
@@ -172,3 +173,4 @@ export function genererRecommandations(stats, typeService) {
 
   return recs;
 }
+

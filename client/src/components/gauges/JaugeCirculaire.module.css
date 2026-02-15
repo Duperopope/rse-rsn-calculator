@@ -76,3 +76,24 @@
   outline-offset: 4px;
   border-radius: 50%;
 }
+
+/* Indicateur visuel pour jauges switchables */
+.switchable {
+  position: relative;
+}
+.switchable:hover {
+  transform: scale(1.03);
+  transition: transform 0.15s ease;
+}
+.switchHint {
+  position: absolute;
+  bottom: -2px;
+  right: 8px;
+  font-size: 10px;
+  opacity: 0.4;
+  color: var(--text-secondary, #888);
+  pointer-events: none;
+}
+.switchable:hover .switchHint {
+  opacity: 0.8;
+}
