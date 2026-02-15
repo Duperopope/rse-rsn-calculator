@@ -154,7 +154,7 @@ function phase3(detailsJours) {
 }
 
 // PHASE 4: Filtrage
-function phase4(infractions, derogConduite, derogTravail, detailsJours) {
+function phase4(infractions, derogConduite, derogTravail, detailsJours, typeService) {
   log('P4', 'Originales=' + infractions.length);
 
   var dateToWeek = {};
@@ -191,7 +191,7 @@ function phase4(infractions, derogConduite, derogTravail, detailsJours) {
     var retire = false;
     var raison = '';
 
-    if (PATTERNS.CONDUITE_CONTINUE.test(regle)) {
+    if (PATTERNS.CONDUITE_CONTINUE.test(regle) && !/Decret 2006-925/i.test(regle) && typeService === 'STANDARD') {
       retire = true; raison = 'bug_L1411';
     }
     if (!retire && PATTERNS.TRAVAIL_JOURNALIER_DOUBLON.test(regle)) {
@@ -428,7 +428,7 @@ function corrigerResultat(resultat) {
     var p1 = phase1(resultat.details_jours);
     var reposHebdos = phase2(resultat.details_jours);
     var p3 = phase3(resultat.details_jours);
-    var p4 = phase4(resultat.infractions, p3.derogConduite, p3.derogTravail, resultat.details_jours);
+    var p4 = phase4(resultat.infractions, p3.derogConduite, p3.derogTravail, resultat.details_jours, resultat.type_service || 'STANDARD');
     var hebdo = phase5(p3.semaines);
     // Phase 4b: Filtrer les repos journalier adjacents aux repos hebdo
     var joursRepos = {};
