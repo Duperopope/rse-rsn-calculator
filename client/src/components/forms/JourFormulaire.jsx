@@ -24,6 +24,7 @@ function useSwipeDelete(onDelete, threshold = 80) {
   const elRef = React.useRef(null);
   const longPressTimer = React.useRef(null);
   const longPressFired = React.useRef(false);
+  const isHorizontalSwipe = React.useRef(false);
 
   const handlers = {
     onTouchStart(e) {
@@ -32,8 +33,8 @@ function useSwipeDelete(onDelete, threshold = 80) {
       currentX.current = startX.current;
       swiping.current = true;
       longPressFired.current = false;
+      isHorizontalSwipe.current = false;
 
-      /* Demarrer le timer long-press (600ms) */
       longPressTimer.current = setTimeout(function () {
         if (!swiping.current) return;
         longPressFired.current = true;
@@ -42,7 +43,6 @@ function useSwipeDelete(onDelete, threshold = 80) {
           elRef.current.style.background = 'rgba(255, 68, 68, 0.25)';
         }
         if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-        /* Confirm dialog pour eviter suppression accidentelle */
         setTimeout(function () {
           if (elRef.current) {
             elRef.current.style.transform = 'translateX(-100%)';
@@ -61,20 +61,27 @@ function useSwipeDelete(onDelete, threshold = 80) {
       var diffX = Math.abs(currentX.current - startX.current);
       var diffY = Math.abs(e.touches[0].clientY - startY.current);
 
-      /* Si mouvement > 10px, annuler le long-press (c'est un swipe) */
       if (diffX > 10 || diffY > 10) {
         if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
       }
 
       var diff = currentX.current - startX.current;
+      if (diff < -15 && diffX > diffY) {
+        isHorizontalSwipe.current = true;
+        e.stopPropagation();
+      }
+
       if (diff < 0 && elRef.current) {
         elRef.current.style.transform = 'translateX(' + Math.max(diff, -120) + 'px)';
         elRef.current.style.opacity = String(1 - Math.min(Math.abs(diff) / 200, 0.5));
       }
     },
-    onTouchEnd() {
-      /* Annuler le timer long-press si encore actif */
+    onTouchEnd(e) {
       if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+
+      if (isHorizontalSwipe.current) {
+        e.stopPropagation();
+      }
 
       if (longPressFired.current) { swiping.current = false; return; }
 
@@ -96,6 +103,7 @@ function useSwipeDelete(onDelete, threshold = 80) {
       currentX.current = 0;
     }
   };
+
   return { ref: elRef, handlers };
 }
 
@@ -182,6 +190,72 @@ function TypeActiviteSelector({ value, onChange }) {
         </button>
       ))}
     </div>
+  );
+}
+
+
+// Sous-composant par ligne d activite (hook legal par instance)
+function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTypeSelector, setShowTypeSelector, updateActivite, supprimerActivite, changeType, fmtDuree, toMin }) {
+  var swipe = useSwipeDelete(function() { supprimerActivite(actIdx); });
+
+  return (
+    <React.Fragment>
+      <div
+        ref={swipe.ref}
+        {...swipe.handlers}
+        id={'activite-' + actIdx}
+        data-activite-index={actIdx}
+        className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')}
+        style={{ '--type-color': typeInfo.couleur + '80' }}
+      >
+        <button
+          type="button"
+          className={styles.activiteTypeBtn}
+          onClick={() => setShowTypeSelector(showTypeSelector === actIdx ? null : actIdx)}
+          style={{ borderColor: typeInfo.couleur + '60', background: typeInfo.couleur + '12' }}
+          title={'Changer le type (actuellement: ' + typeInfo.label + ')'}
+        >
+          <IconeActivite type={act.type} size={20} color={typeInfo.couleur} />
+          <span className={styles.activiteTypeName} style={{ color: typeInfo.couleur }}>
+            {typeInfo.label}
+          </span>
+        </button>
+
+        <input
+          type="time"
+          className={styles.timeInput}
+          value={act.debut}
+          onChange={(e) => updateActivite(actIdx, 'debut', e.target.value)}
+        />
+        <span className={styles.fleche}>&rarr;</span>
+        <input
+          type="time"
+          className={styles.timeInput}
+          value={act.fin}
+          onChange={(e) => updateActivite(actIdx, 'fin', e.target.value)}
+        />
+
+        <span className={styles.dureeLabel}>
+          {duree > 0 ? fmtDuree(duree) : ''}
+        </span>
+
+        <button
+          className={styles.deleteActBtn}
+          onClick={() => supprimerActivite(actIdx)}
+          disabled={jour.activites.length <= 1}
+          title="Supprimer cette activite"
+          type="button"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M19 6v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
+      </div>
+
+      {showTypeSelector === actIdx ? (
+        <div className={styles.typeSelectorWrapper}>
+          <TypeActiviteSelector value={act.type} onChange={(code) => changeType(actIdx, code)} />
+        </div>
+      ) : null}
+    </React.Fragment>
   );
 }
 
@@ -342,7 +416,6 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
         </div>
         {jour.activites.map((act, actIdx) => {
           const typeInfo = TYPES_ACTIVITE.find(t => t.code === act.type) || TYPES_ACTIVITE[0];
-          // Detection chevauchement
           var chevauchement = false;
           if (actIdx > 0 && act.debut) {
             var prevAct = jour.activites[actIdx - 1];
@@ -361,58 +434,23 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
             duree = toMin(act.fin) - toMin(act.debut);
             if (duree < 0) duree += 1440;
           }
-
           return (
-            <React.Fragment key={actIdx}>
-              <div id={'activite-' + actIdx} data-activite-index={actIdx} className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')} style={{ '--type-color': typeInfo.couleur + '80' }}>
-                <button
-                  type="button"
-                  className={styles.activiteTypeBtn}
-                  onClick={() => setShowTypeSelector(showTypeSelector === actIdx ? null : actIdx)}
-                  style={{ borderColor: typeInfo.couleur + '60', background: typeInfo.couleur + '12' }}
-                  title={'Changer le type (actuellement: ' + typeInfo.label + ')'}
-                >
-                  <IconeActivite type={act.type} size={20} color={typeInfo.couleur} />
-                  <span className={styles.activiteTypeName} style={{ color: typeInfo.couleur }}>
-                    {typeInfo.label}
-                  </span>
-                </button>
-
-                <input
-                  type="time"
-                  className={styles.timeInput}
-                  value={act.debut}
-                  onChange={(e) => updateActivite(actIdx, 'debut', e.target.value)}
-                />
-                <span className={styles.fleche}>&rarr;</span>
-                <input
-                  type="time"
-                  className={styles.timeInput}
-                  value={act.fin}
-                  onChange={(e) => updateActivite(actIdx, 'fin', e.target.value)}
-                />
-
-                <span className={styles.dureeLabel}>
-                  {duree > 0 ? fmtDuree(duree) : ''}
-                </span>
-
-                <button
-                  className={styles.deleteActBtn}
-                  onClick={() => supprimerActivite(actIdx)}
-                  disabled={jour.activites.length <= 1}
-                  title="Supprimer cette activite"
-                  type="button"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M19 6v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-                </button>
-              </div>
-
-              {showTypeSelector === actIdx ? (
-                <div className={styles.typeSelectorWrapper}>
-                  <TypeActiviteSelector value={act.type} onChange={(code) => changeType(actIdx, code)} />
-                </div>
-              ) : null}
-            </React.Fragment>
+            <ActivityRow
+              key={actIdx}
+              act={act}
+              actIdx={actIdx}
+              jour={jour}
+              typeInfo={typeInfo}
+              chevauchement={chevauchement}
+              duree={duree}
+              showTypeSelector={showTypeSelector}
+              setShowTypeSelector={setShowTypeSelector}
+              updateActivite={updateActivite}
+              supprimerActivite={supprimerActivite}
+              changeType={changeType}
+              fmtDuree={fmtDuree}
+              toMin={toMin}
+            />
           );
         })}
       </div>
