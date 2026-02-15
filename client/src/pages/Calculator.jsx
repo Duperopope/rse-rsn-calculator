@@ -806,10 +806,10 @@ export default function Calculator() {
             )}
 
 
-            {dashExpanded && <PanneauJauges stats={statsJour} typeService={typeService} />}
+            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} />}
 
 
-            {dashExpanded && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
+            {(dashExpanded || window.innerWidth >= 769) && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
 
 
               <div className={styles.timelineWrap}>

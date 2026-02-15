@@ -463,3 +463,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ── Desktop: masquer expand toggle et mini-jauges ── */
+@media (min-width: 769px) {
+  .expandToggle {
+    display: none;
+  }
+  .miniJauges {
+    display: none;
+  }
+}
