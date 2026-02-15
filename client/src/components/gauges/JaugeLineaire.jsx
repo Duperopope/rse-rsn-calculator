@@ -155,7 +155,7 @@ export function JaugeLineaire({
                 label.includes('Conduite continue') && status === 'danger'
                   ? 'Pause obligatoire de 45 min (ou 15+30 min) requise maintenant'
                   : label.includes('Conduite continue') && status === 'warning'
-                  ? 'Prevoir une pause dans les ' + restantTxt + ' prochaines'
+                  ? (restant <= 0 ? 'Pause obligatoire de 45 min requise maintenant' : 'Prevoir une pause dans les ' + restantTxt + ' prochaines')
                   : label.includes('journaliere') && status === 'danger'
                   ? 'Arret de conduite obligatoire. Max 10h avec derogation (2x/sem.)'
                   : label.includes('journaliere') && status === 'warning'
