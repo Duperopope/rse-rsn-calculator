@@ -279,3 +279,16 @@
     border-radius: 10px;
   }
 }
+/* === Detail Jours Polish === */
+.detailJour { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--accent-green, #00ff88); transition: all 0.2s; }
+.detailJourWarn { border-left-color: var(--accent-red, #ff4444); background: rgba(255,68,68,0.04); }
+.detailHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.detailDate { font-weight: 700; font-size: 0.85rem; color: #fff; }
+.detailBadgeOk { background: rgba(0,255,136,0.15); color: #00ff88; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+.detailBadgeDanger { background: rgba(255,68,68,0.15); color: #ff4444; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+.detailGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; }
+.detailStat { display: flex; flex-direction: column; align-items: center; }
+.detailStatLabel { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.03em; }
+.detailStatVal { font-size: 0.85rem; font-weight: 600; color: #fff; }
+.detailInf { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.detailInfItem { background: rgba(255,68,68,0.12); color: #ff6666; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; }

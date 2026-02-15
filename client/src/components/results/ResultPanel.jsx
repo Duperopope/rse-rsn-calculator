@@ -191,38 +191,43 @@ export function ResultPanel({ resultat, compact = false }) {
         </div>
       ) : null}
 
-      {/* Details par jour */}
+      {/* Journees analysees */}
       {details.length > 0 ? (
         <div className={styles.section}>
           <button className={styles.toggleBtn} onClick={() => setShowDetails(!showDetails)}>
-            {showDetails ? 'Masquer' : 'Afficher'} les details ({details.length} jour(s))
+            {showDetails ? "\u25B2" : "\u25BC"} {details.length} journee{details.length > 1 ? "s" : ""} analysee{details.length > 1 ? "s" : ""}
           </button>
           {showDetails ? (
             <div className={styles.details}>
-              {details.map((jour, i) => (
-                <div key={i} className={styles.detailJour}>
-                  <div className={styles.detailHeader}>
-                    <strong>{jour.date}</strong>
-                    <span>{jour.fuseau}</span>
-                  </div>
-                  <div className={styles.detailStats}>
-                    <span>Conduite : {jour.conduite_h}h</span>
-                    <span>Travail : {jour.travail_h}h</span>
-                    <span>Pause : {jour.pause_h}h</span>
-                    <span>Amplitude : {jour.amplitude_estimee_h}h</span>
-                    <span>Conduite continue max : {jour.conduite_continue_max_min} min</span>
-                    <span>Repos estime : {jour.repos_estime_h}h</span>
-                    {parseFloat(jour.ferry_h) > 0 ? <span>Ferry : {jour.ferry_h}h</span> : null}
-                  </div>
-                  {jour.infractions && jour.infractions.length > 0 ? (
-                    <div className={styles.detailInf}>
-                      {jour.infractions.map((inf, j) => (
-                        <span key={j} className={styles.detailInfItem}>{inf.regle}</span>
-                      ))}
+              {details.map((jour, i) => {
+                const hasInf = jour.infractions && jour.infractions.length > 0;
+                const jourDate = jour.date || "";
+                const dateObj = jourDate ? new Date(jourDate + "T00:00:00") : null;
+                const jourLabel = dateObj ? ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][dateObj.getDay()] + " " + String(dateObj.getDate()).padStart(2,"0") + "/" + String(dateObj.getMonth()+1).padStart(2,"0") : jourDate;
+                return (
+                  <div key={i} className={styles.detailJour + (hasInf ? " " + styles.detailJourWarn : "")}>
+                    <div className={styles.detailHeader}>
+                      <span className={styles.detailDate}>{jourLabel}</span>
+                      {hasInf ? <span className={styles.detailBadgeDanger}>{jour.infractions.length} inf.</span> : <span className={styles.detailBadgeOk}>{"\u2713"}</span>}
                     </div>
-                  ) : <span className={styles.detailOk}>Conforme</span>}
-                </div>
-              ))}
+                    <div className={styles.detailGrid}>
+                      <div className={styles.detailStat}><span className={styles.detailStatLabel}>Conduite</span><span className={styles.detailStatVal}>{jour.conduite_h}h</span></div>
+                      <div className={styles.detailStat}><span className={styles.detailStatLabel}>Travail</span><span className={styles.detailStatVal}>{jour.travail_h}h</span></div>
+                      <div className={styles.detailStat}><span className={styles.detailStatLabel}>Pause</span><span className={styles.detailStatVal}>{jour.pause_h}h</span></div>
+                      <div className={styles.detailStat}><span className={styles.detailStatLabel}>Amplitude</span><span className={styles.detailStatVal}>{jour.amplitude_estimee_h !== "N/A" ? jour.amplitude_estimee_h + "h" : "-"}</span></div>
+                      <div className={styles.detailStat}><span className={styles.detailStatLabel}>Cond. max</span><span className={styles.detailStatVal}>{jour.conduite_continue_max_min} min</span></div>
+                      <div className={styles.detailStat}><span className={styles.detailStatLabel}>Repos</span><span className={styles.detailStatVal}>{jour.repos_estime_h}h</span></div>
+                    </div>
+                    {hasInf ? (
+                      <div className={styles.detailInf}>
+                        {jour.infractions.map((inf, j) => (
+                          <span key={j} className={styles.detailInfItem}>{inf.regle}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           ) : null}
         </div>
