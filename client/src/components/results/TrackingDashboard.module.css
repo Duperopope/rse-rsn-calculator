@@ -1,48 +1,45 @@
-/* TrackingDashboard v8 — Compact */
-.dashboard {
-  margin: 12px 0;
-}
-
+/* TrackingDashboard v9 — Ultra-compact */
+.dashboard { margin: 8px 0; }
 .metricsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
 }
-
 .metricCard {
   background: rgba(255,255,255,0.04);
-  border-radius: 12px;
-  padding: 12px;
-  border-left: 3px solid transparent;
+  border-radius: 8px;
+  padding: 8px 6px;
+  border-left: 2px solid transparent;
+  text-align: center;
 }
-
 .metricOk { border-left-color: var(--accent-green, #00ff88); }
 .metricWarning { border-left-color: var(--accent-orange, #ffaa00); }
 .metricDanger { border-left-color: var(--accent-red, #ff4444); }
 .metricInfo { border-left-color: var(--accent-blue, #0084ff); }
-
 .metricLabel {
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   color: rgba(255,255,255,0.5);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
 .metricValue {
-  font-size: 1.4rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #fff;
   line-height: 1.2;
 }
-
 .metricSub {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.35);
-  margin-top: 2px;
+  font-size: 0.5rem;
+  color: rgba(255,255,255,0.3);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
 @media (max-width: 360px) {
-  .metricsGrid { grid-template-columns: 1fr; }
-  .metricValue { font-size: 1.2rem; }
+  .metricsGrid { grid-template-columns: 1fr 1fr; }
 }
