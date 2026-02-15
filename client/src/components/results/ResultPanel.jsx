@@ -232,10 +232,7 @@ export function ResultPanel({ resultat, compact = false }) {
 
       <SanctionTable />
       <div className={styles.exportBtns}>
-        <button className={styles.pdfBtn} onClick={telechargerPDF} disabled={pdfLoading}>
-          {pdfLoading ? 'Generation...' : 'Telecharger PDF'}
-        </button>
-        <button className={styles.printBtn} onClick={function() { window.print(); }}>
+        <button className={styles.pdfBtn} onClick={function() { window.print(); }}>
           Imprimer
         </button>
       </div>
