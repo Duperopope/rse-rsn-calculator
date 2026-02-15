@@ -411,13 +411,15 @@
 
   .fleche { width: auto; font-size: 0.8rem; color: rgba(255,255,255,0.5); }
 
-  .dureeLabel { width: auto; min-width: auto; text-align: center; font-size: 0.7rem; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 20px; color: rgba(255,255,255,0.7); }
+  .dureeLabel { width: auto; min-width: auto; text-align: center; font-size: 0.72rem; background: none; padding: 0; border-radius: 0; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; }
 
   .resume { flex-direction: row; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: flex-start; }
   .resumeSep { display: none; }
 
   .typeSelector { gap: 4px; }
   .typeBtn, .typeBtnActive { padding: 10px 12px; flex: 1; min-width: 45%; justify-content: center; }
+  /* Masquer poubelle sur mobile (swipe-to-delete disponible) */
+  .deleteActBtn { display: none; }
 }
 
 /* --- TOUCH TARGETS WCAG 2.2 --- */
