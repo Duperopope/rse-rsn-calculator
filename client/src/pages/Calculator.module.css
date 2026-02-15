@@ -293,17 +293,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
+  min-width: 34px;
   height: 34px;
-  border-radius: 50%;
-  border: 1.5px dashed var(--accent, #00d4ff);
+  border-radius: 10px;
+  border: 1px solid var(--border, #2a2a3e);
   background: transparent;
-  color: var(--accent, #00d4ff);
-  font-size: 1.2rem;
-  font-weight: 600;
+  color: var(--text-secondary, #888);
+  font-size: 1.1rem;
+  font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.2s, transform 0.15s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  margin-left: 4px;
 }
 /* === Bouton + dans la barre === */
 @media (hover: hover) and (pointer: fine) {

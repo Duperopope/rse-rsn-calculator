@@ -882,8 +882,7 @@ export default function Calculator() {
                       )}
                     </div>
                   ))}
-                </div>
-                <button
+                  <button
                     className={styles.jourNavAddInline}
                     onClick={() => {
                       ajouterJourActif();
@@ -894,6 +893,8 @@ export default function Calculator() {
                     }}
                     aria-label="Ajouter un jour"
                   >+</button>
+                </div>
+                
                 <button
                   className={styles.jourNavArrow + ' ' + styles.jourNavArrowRight}
                   onClick={() => scrollJourTabs('right')}
