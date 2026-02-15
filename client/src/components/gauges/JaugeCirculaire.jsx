@@ -2,22 +2,13 @@ import React, { useState } from 'react';
 import styles from './JaugeCirculaire.module.css';
 
 /**
- * Jauge circulaire SVG pour afficher une valeur en pourcentage
- * Supporte un onClick externe pour switcher les vues (PanneauJauges)
- * Si onClick est fourni : le clic appelle onClick (pas de toggle %)
- * Si onClick est absent : le clic toggle l'affichage pourcentage (comportement legacy)
- * @param {number} valeur - Valeur actuelle
- * @param {number} max - Valeur maximale
- * @param {string} label - Texte sous la jauge
- * @param {string} unite - Unite affichee (min, h, %)
- * @param {number} size - Taille en pixels (defaut 120)
- * @param {number} strokeWidth - Epaisseur du trait (defaut 8)
- * @param {string} couleurOk - Couleur quand < seuil warning
- * @param {string} couleurWarning - Couleur quand proche du max
- * @param {string} couleurDanger - Couleur quand depasse le max
- * @param {number} seuilWarning - Pourcentage declenchant le warning (defaut 0.8)
- * @param {Function} onClick - Handler externe optionnel (desactive le toggle %)
- * @param {boolean} switchable - Affiche un indicateur visuel "cliquable" (defaut false)
+ * Jauge circulaire SVG
+ * unite="hm" : affiche la valeur (en minutes) au format Xh MM
+ * unite="h"  : affiche la valeur (en heures decimales) avec "h"
+ * unite="min": affiche la valeur brute avec "min"
+ * inverseColor=true : vert quand valeur >= max (pour repos)
+ * onClick : handler externe (desactive toggle %)
+ * switchable : indicateur visuel cliquable
  */
 export function JaugeCirculaire({
   valeur = 0,
@@ -31,7 +22,8 @@ export function JaugeCirculaire({
   couleurDanger = 'var(--accent-red, #ff4444)',
   seuilWarning = 0.8,
   onClick = null,
-  switchable = false
+  switchable = false,
+  inverseColor = false
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -39,21 +31,36 @@ export function JaugeCirculaire({
   const displayRatio = Math.min(ratio, 1);
   const offset = circumference - displayRatio * circumference;
 
+  // Calcul couleur
   let couleur = couleurOk;
   let status = 'ok';
-  if (ratio >= 1) {
-    couleur = couleurDanger;
-    status = 'danger';
-  } else if (ratio >= seuilWarning) {
-    couleur = couleurWarning;
-    status = 'warning';
+  if (inverseColor) {
+    // Logique inversee : vert si valeur >= max, orange si entre warning et max, rouge sinon
+    if (valeur >= max) {
+      couleur = couleurOk;
+      status = 'ok';
+    } else if (ratio >= seuilWarning) {
+      couleur = couleurWarning;
+      status = 'warning';
+    } else {
+      couleur = couleurDanger;
+      status = 'danger';
+    }
+  } else {
+    // Logique normale
+    if (ratio >= 1) {
+      couleur = couleurDanger;
+      status = 'danger';
+    } else if (ratio >= seuilWarning) {
+      couleur = couleurWarning;
+      status = 'warning';
+    }
   }
 
   const center = size / 2;
   const [showDetail, setShowDetail] = useState(false);
   const pourcent = Math.round(displayRatio * 100);
 
-  // Handler : si onClick externe fourni, l'utiliser. Sinon toggle %
   const handleClick = () => {
     if (navigator.vibrate) navigator.vibrate(5);
     if (onClick) {
@@ -63,8 +70,20 @@ export function JaugeCirculaire({
     }
   };
 
-  // Label affiche : si pas de onClick externe ET showDetail, afficher %
-  // Si onClick externe, toujours afficher le label tel quel
+  // Formatage de la valeur selon l'unite
+  let displayValue;
+  let displayUnite = unite;
+  if (unite === 'hm') {
+    // Valeur en minutes -> afficher Xh MM
+    const totalMin = Math.round(valeur);
+    const heures = Math.floor(totalMin / 60);
+    const minutes = String(totalMin % 60).padStart(2, '0');
+    displayValue = heures + 'h' + minutes;
+    displayUnite = '';
+  } else {
+    displayValue = String(Math.round(valeur));
+  }
+
   const displayLabel = (!onClick && showDetail) ? pourcent + '%' : label;
 
   return (
@@ -99,10 +118,10 @@ export function JaugeCirculaire({
         />
       </svg>
       <div className={styles.content}>
-        <span className={styles.valeur} style={{ color: couleur }}>
-          {Math.round(valeur)}
+        <span className={styles.valeur} style={{ color: couleur, fontSize: unite === 'hm' ? '1.1em' : undefined }}>
+          {displayValue}
         </span>
-        {unite ? <span className={styles.unite}>{unite}</span> : null}
+        {displayUnite ? <span className={styles.unite}>{displayUnite}</span> : null}
       </div>
       {label ? (
         <span className={styles.label} data-status={status}>{displayLabel}</span>

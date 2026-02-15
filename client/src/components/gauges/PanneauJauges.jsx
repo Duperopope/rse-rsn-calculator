@@ -105,13 +105,13 @@ export function PanneauJauges({ stats, typeService = "REGULIER", nbDerogConduite
     c1valeur = stats.conduiteBloc;
     c1max = LIMITES.CONDUITE_CONTINUE_MAX;
     c1label = "Continue";
-    c1unite = "min";
+    c1unite = "hm";
     c1warning = 0.93;
   } else {
     c1valeur = stats.conduiteTotale;
     c1max = limiteConduite;
     c1label = labelConduite;
-    c1unite = "min";
+    c1unite = "hm";
     c1warning = enModeDerogConduite ? 0.9 : 0.95;
   }
 
@@ -121,7 +121,7 @@ export function PanneauJauges({ stats, typeService = "REGULIER", nbDerogConduite
     c2valeur = stats.amplitude;
     c2max = limiteAmplitude;
     c2label = labelAmplitude;
-    c2unite = "min";
+    c2unite = "hm";
     c2warning = enModeDerogAmpl ? 0.86 : 0.92;
   } else {
     // Repos : la jauge est "inversee" - plus c est haut mieux c est
@@ -129,23 +129,23 @@ export function PanneauJauges({ stats, typeService = "REGULIER", nbDerogConduite
     c2valeur = reposJournalier;
     c2max = limiteReposNormal;
     c2label = labelRepos;
-    c2unite = "min";
-    c2warning = 2.0; // Jamais en warning (vert = ok quand repos suffisant)
+    c2unite = "hm";
+    c2warning = 0.82; // 540/660 = seuil repos reduit
   }
 
   // Cercle 3 : Travail hebdo / Moyenne
   var c3valeur, c3max, c3label, c3unite, c3warning;
   if (vue3 === 0) {
-    c3valeur = Math.round(hebdoStats.travailSemaine / 60 * 10) / 10;
-    c3max = Math.round(travailHebdoMax / 60);
+    c3valeur = hebdoStats.travailSemaine;
+    c3max = travailHebdoMax;
     c3label = "Travail hebdo";
-    c3unite = "h";
+    c3unite = "hm";
     c3warning = travailHebdoLegal / travailHebdoMax; // ~0.76 pour 35/46
   } else {
-    c3valeur = Math.round(hebdoStats.moyenneGlissante / 60 * 10) / 10;
-    c3max = Math.round(moyenneMax / 60);
+    c3valeur = Math.round(hebdoStats.moyenneGlissante);
+    c3max = moyenneMax;
     c3label = "Moy. " + hebdoStats.nbSemaines + " sem.";
-    c3unite = "h";
+    c3unite = "hm";
     c3warning = travailHebdoLegal / moyenneMax; // ~0.83 pour 35/42
   }
 
@@ -205,7 +205,7 @@ export function PanneauJauges({ stats, typeService = "REGULIER", nbDerogConduite
             seuilWarning={c2warning}
             onClick={cycleVue2}
             switchable={true}
-            couleurOk={vue2 === 1 ? reposCouleurOk : undefined}
+            inverseColor={vue2 === 1}
           />
           <Dots count={2} active={vue2} />
         </div>
