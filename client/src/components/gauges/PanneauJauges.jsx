@@ -59,19 +59,21 @@ export function PanneauJauges({ stats, typeService = 'REGULIER', nbDerogConduite
           max={LIMITES.CONDUITE_CONTINUE_MAX}
           label="Conduite continue"
           texteValeur={fmtMin(stats.conduiteBloc) + ' / ' + fmtMin(LIMITES.CONDUITE_CONTINUE_MAX)}
+          seuilWarning={0.93}
         />
         <JaugeLineaire
           valeur={stats.conduiteTotale}
           max={limiteConduite}
           label={labelConduite}
           texteValeur={fmtMin(stats.conduiteTotale) + ' / ' + fmtMin(limiteConduite)}
-          seuilWarning={enModeDerog ? 0.9 : 0.8}
+          seuilWarning={enModeDerog ? 0.9 : 0.95}
         />
         <JaugeLineaire
           valeur={stats.amplitude}
           max={limiteAmplitude}
           label="Amplitude"
           texteValeur={fmtMin(stats.amplitude) + ' / ' + fmtMin(limiteAmplitude)}
+          seuilWarning={0.92}
         />
         {/* Pause cumulee : seuil dynamique selon conduite (CE 561 Art.7) */}
         {stats.travailTotal > 0 && (() => {
