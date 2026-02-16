@@ -173,7 +173,7 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
   }
 
   return (
-    <div className={styles.card} onClick={handleTap} role="button" tabIndex={0}>
+    <div className={styles.card} onClick={handleTap} role="button" tabIndex={0} data-infraction-index={index}>
       <div className={styles.header}>
         <span className={styles.badge}>{index + 1}</span>
               {grouped && count > 1 ? (

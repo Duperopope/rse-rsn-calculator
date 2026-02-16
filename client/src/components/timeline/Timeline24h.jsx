@@ -4,7 +4,7 @@ import { dureeMin } from "../../utils/time.js";
 import styles from "./Timeline24h.module.css";
 
 // Mapper une infraction backend vers un type de severite + position temporelle
-function mapInfractionToFlag(inf, activites) {
+function mapInfractionToFlag(inf, activites, idx) {
   var regle = (inf.regle || inf.message || "").toLowerCase();
   var severity = "serious";
   if (inf.classe && inf.classe.indexOf("5") !== -1) severity = "critical";
@@ -64,8 +64,22 @@ function mapInfractionToFlag(inf, activites) {
     }
   }
 
+  // Si aucune position trouvee, placer au milieu de la journee comme indicateur
+  if (minute < 0 || minute > 1440) {
+    // Essayer de deduire une position a partir du constate
+    var constMatch = (inf.constate || "").match(/(\d+\.?\d*)h/);
+    if (constMatch) {
+      // Position proportionnelle basee sur le ratio constate/limite
+      var limMatch = (inf.limite || "").match(/(\d+\.?\d*)h?/);
+      if (limMatch && activites.length > 0) {
+        var first = dureeMin(activites[0].debut || "06:00");
+        var limVal = parseFloat(limMatch[1]) * 60;
+        minute = Math.min(first + limVal, 1439);
+      }
+    }
+  }
   if (minute < 0 || minute > 1440) minute = -1;
-  return { minute: minute, severity: severity, label: label, infraction: inf };
+  return { minute: minute, severity: severity, label: label, infraction: inf, index: idx };
 }
 
 export function Timeline24h({ activites = [], theme = "dark", onActiviteClick, equipage = "solo", infractions = [], onInfractionClick }) {
@@ -85,8 +99,8 @@ export function Timeline24h({ activites = [], theme = "dark", onActiviteClick, e
   // Mapper les infractions backend vers des drapeaux positionnes
   var flags = useMemo(function() {
     if (!infractions || infractions.length === 0) return [];
-    return infractions.map(function(inf) {
-      return mapInfractionToFlag(inf, activites);
+    return infractions.map(function(inf, i) {
+      return mapInfractionToFlag(inf, activites, i);
     }).filter(function(f) { return f.minute >= 0; });
   }, [infractions, activites]);
 
@@ -157,7 +171,7 @@ export function Timeline24h({ activites = [], theme = "dark", onActiviteClick, e
                 style={{ left: leftPct + "%" }}
                 onClick={function() {
                   if (onInfractionClick) {
-                    onInfractionClick(idx);
+                    onInfractionClick(flag.index !== undefined ? flag.index : idx);
                   }
                 }}
                 onTouchStart={function(e) {
