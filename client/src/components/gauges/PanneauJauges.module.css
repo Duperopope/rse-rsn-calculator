@@ -1,11 +1,11 @@
 .panneau {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 16px;
-  background: var(--bg-card, var(--md-surface, #0F172A));
-  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
-  border-radius: var(--md-radius-lg, 16px);
+  gap: 24px;
+  padding: 20px;
+  background-color: #151A21;
+  border: 2px solid #2D3748;
+  border-radius: 14px;
 }
 
 .circular {

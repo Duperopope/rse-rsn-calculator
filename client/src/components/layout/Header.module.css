@@ -4,13 +4,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  background: var(--bg-card, var(--md-surface, #0F172A));
-  border-bottom: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  padding: 12px 20px;
+  background: var(--bg, #0B0D10);
+  border-bottom: 2px solid var(--border, #2D3748);
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(12px);
   gap: 12px;
 }
 

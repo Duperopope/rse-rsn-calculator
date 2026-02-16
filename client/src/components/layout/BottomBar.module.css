@@ -2,7 +2,10 @@
    Barre fixe en bas — mobile uniquement
    WCAG 2.5.5: zones tactiles min 48px */
 
-.bottomBar { display: none; }
+.bottomBar { display: none;   
+  border-top: 2px solid #1F2937;
+  
+}
 
 @media (max-width: 768px) {
   .bottomBar {

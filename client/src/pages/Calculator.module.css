@@ -1,18 +1,18 @@
-.app { min-height: 100vh; display: flex; flex-direction: column; }
+.app { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg, #0B0D10); }
 
 .main {
   flex: 1;
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px 20px 100px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.inputSection { display: flex; flex-direction: column; gap: 16px; }
-.formulaire { display: flex; flex-direction: column; gap: 16px; }
+.inputSection { display: flex; flex-direction: column; gap: 20px; }
+.formulaire { display: flex; flex-direction: column; gap: 20px; }
 
 /* analyseSection retire — bouton dans le header */
 
@@ -56,23 +56,23 @@
 
 /* === Onglets jour (dashboard) === */
 .realtimeSticky {
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; flex-direction: column; gap: 14px;
   position: sticky; top: var(--header-height, 70px); z-index: 50;
-  background: var(--bg, #0a0a0f);
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  background: var(--bg, #0B0D10);
+  padding: 14px 20px 10px;
+  border-bottom: 2px solid var(--border, #2D3748);
   margin: 0 -20px;
-  border-radius: 0 0 16px 16px;
+  border-radius: 0 0 20px 20px;
 }
 
 /* Bouton expand/collapse — cache sur desktop */
 .expandToggle {
   display: none;
-  width: 100%; padding: 6px; border: none; border-radius: var(--md-radius-sm, 8px);
-  background: rgba(255,255,255,0.04); color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
-  font-size: 12px; font-weight: 400; cursor: pointer;
-  transition: color 0.2s;
+  width: 100%; padding: 10px; border: none; border-radius: 10px;
+  background: var(--bg-elevated, #1E2433); color: var(--text, #E2E8F0);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: background 0.2s;
+  border: 1px solid var(--border, #2D3748);
 }
 .expandToggle:active { color: #00d4ff; }
 
@@ -143,27 +143,20 @@
 
 /* === Onglet de base (inactif) === */
 .jourNavBtn {
-  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
   background: transparent;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s, background 0.15s;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
+  transition: all 0.2s;
+  min-width: 54px;
+  position: relative;
 }
 
 /* Underline indicator — invisible par defaut */
@@ -195,26 +188,10 @@
 
 /* === Onglet actif === */
 .jourNavActive {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 48px;
-  min-height: 44px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 0;
-  background: #1a5fb4;
-  color: #ffffff;
-  font-size: 13px;
+  background: var(--bg-elevated, #1E2433);
+  color: var(--text, #E2E8F0);
+  border: 1px solid var(--accent, #3B82F6);
   font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 /* Underline indicator — actif = visible */
@@ -401,28 +378,31 @@
 
 /* ── Mini-jauges compactes (dashboard replie) ─────────── */
 .miniJauges {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 8px;
-  padding: 6px 0 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 4px;
+  border-top: 1px solid var(--border, #2D3748);
+  margin-top: 4px;
 }
 .miniJauge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  min-height: 22px;
+  gap: 8px;
+  min-height: 28px;
 }
 .miniJaugeLabel {
-  font-size: 12px;
-  color: var(--text-secondary, #888);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #94A3B8);
   white-space: nowrap;
-  min-width: 52px;
+  min-width: 56px;
 }
 .miniJaugeTrack {
   flex: 1;
-  height: 5px;
-  background: var(--border, var(--md-outline-variant, #2a2a4e));
-  border-radius: 3px;
+  height: 8px;
+  background: var(--border, #2D3748);
+  border-radius: 4px;
   overflow: hidden;
 }
 .miniJaugeFill {
@@ -431,11 +411,11 @@
   transition: width 0.5s ease-out, background 0.3s ease;
 }
 .miniJaugeVal {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  min-width: 32px;
+  min-width: 42px;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 @media (min-width: 769px) {
   .miniJauges {
@@ -447,24 +427,26 @@
 .scoreStickyRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 2px 0 6px;
+  gap: 12px;
+  padding: 4px 0 8px;
 }
 .scoreCircleMini {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--md-radius-full, 9999px);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  border: 2px solid var(--border, #2D3748);
 }
 .scoreStickyLabel {
-  font-size: 12.5px;
-  color: var(--text-secondary, #aaa);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #E2E8F0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -499,11 +481,32 @@
 }
 .scoreStickyRow:hover .scoreChevron { opacity: 0.9; }
 /* === Bottom Tabs === */
-.bottomTabs { display: flex; gap: 0; border-radius: var(--md-radius-md, 12px); overflow: hidden; margin: 0 0 12px 0; border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e)); }
-.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, var(--md-surface-container, #1a1a2e)); color: var(--text-secondary, #888); border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.bottomTabs {
+  display: flex;
+  background: var(--bg-card, #151A21);
+  border: 1px solid var(--border, #2D3748);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.bottomTab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #64748B);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  border-bottom: 2px solid transparent;
+}
 .bottomTab:first-child { border-radius: var(--md-radius-md, 12px) 0 0 12px; }
 .bottomTab:last-child { border-radius: 0 12px 12px 0; }
-.bottomTabActive { background: var(--accent, #00d4ff); color: #000; }
+.bottomTabActive {
+  color: var(--accent, #3B82F6);
+  border-bottom: 2px solid var(--accent, #3B82F6);
+}
 .bottomTab:not(.bottomTabActive):hover { background: var(--accent-glow, rgba(96, 165, 250, 0.15)); color: #fff; }
 /* === Hide scrollbar mobile === */
 * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
