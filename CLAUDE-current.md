@@ -1,39 +1,53 @@
 # CLAUDE-current.md — Etat du projet
 
 ## Date: 2026-02-16
-## Dernier commit: 7b057a0 (refonte v1 stable)
+## Dernier commit: b3ae73a (memoire session 8)
+## Commit stable: 7b057a0 (refonte v1)
 ## Version: v7.25.2
 
 ## Etat actuel
-- App fonctionnelle, fond AMOLED #0B0D10, jauges epaisses 8px
-- Couleurs inline JSX migrees (var(--danger/warning/success))
-- Score badge 44px, onglets jour avec bordure accent
-- Audit WCAG 100% (7/7 OK)
-- Vue Semaine fonctionnelle (2 bugs fixes: useEffect + onInfractionClick)
-- ErrorBoundary sur Timeline24h
-- Build: CSS 93kB, JS 376kB, 150+ modules
+- App fonctionnelle sur 7b057a0 (fond AMOLED, jauges epaisses, couleurs migrees)
+- Build: CSS ~93kB, JS ~376kB, 150+ modules
+- Audit WCAG 100% (7/7)
+- Vue Semaine OK, ErrorBoundary OK
 
-## LECONS CRITIQUES (NE JAMAIS OUBLIER)
-1. JAMAIS reecrire un fichier CSS module entier — les noms de classes sont un CONTRAT avec le JSX
-2. JAMAIS modifier plus de 3 fichiers CSS sans rebuild + screenshot entre chaque
-3. JAMAIS supprimer des variables CSS anciennes (--md-*) tant que des fichiers y font reference
-4. Pour refonte visuelle: modifier les VALEURS dans les classes existantes, jamais renommer/supprimer
-5. Toujours grep les noms de classes JSX AVANT de toucher un CSS: grep -o "styles\.[a-zA-Z]*" fichier.jsx | sort -u
-6. Regex massives sur CSS = danger — verifier parentheses apres chaque remplacement
-7. Un CSS module qui passe de 596 a 50 lignes = ALERTE ROUGE (classes manquantes)
-8. Verifier taille build apres chaque modif: CSS ~93kB, JS ~376kB, 150+ modules
+## ARCHITECTURE — AUDIT (session 8)
+- Calculator.jsx = 1128 lignes MONOLITHIQUE (25+ useState, logique metier inline)
+- Mini-jauges (L941-960) = DOUBLON de PanneauJauges (80 lignes HTML brut)
+- Fonctions doublees solo/duo: updateJour/updateJourActif, ajouterJour/ajouterJourActif (x4)
+- Variables globales bricolees: window.__nbDerogConduite, window.__amplMax
+- JaugeHebdo.jsx = ORPHELIN (184 lignes, jamais importe)
+- 3 tableaux paralleles: jours, jours2, joursActifs
+- Animations DOM inline dans le JSX (querySelector + scrollIntoView + boxShadow)
+- 29 composants, 25 fichiers CSS, 40+ couleurs uniques
 
-## Fichiers CSS — JAMAIS reecrire sans grep JSX avant
-- Header.module.css (294 lignes, 24 classes JSX)
-- BottomBar.module.css (124 lignes, 8 classes JSX)
-- HistoriquePanel.module.css (592 lignes, 30+ classes JSX)
-- JourFormulaire.module.css (596 lignes, 40+ classes JSX)
-- Calculator.module.css (531 lignes, 50+ classes JSX)
-- Timeline24h.module.css (363 lignes)
-- ResultPanel.module.css (309 lignes)
-- InfractionCard.module.css (349 lignes)
+## PLAN SESSION 9 — Architecture v8
+Phase 1: Document architecture cible (composants, flux, conventions)
+Phase 2: References visuelles + maquette textuelle
+Phase 3: Implementation composant par composant avec screenshot apres chaque
 
-## TODO
-- Refonte visuelle: fichier par fichier, validation apres chaque
-- P3: pinch-to-zoom, copy previous day, design-system doc
+## LECONS CRITIQUES
+1. JAMAIS reecrire un CSS module entier — noms de classes = CONTRAT avec JSX
+2. JAMAIS modifier plus de 3 fichiers sans rebuild + screenshot
+3. JAMAIS supprimer variables CSS tant que des fichiers y font reference
+4. Grep classes JSX AVANT de toucher un CSS
+5. Verifier taille build: CSS ~93kB, JS ~376kB, 150+ modules
+6. Un CSS qui perd 500 lignes = ALERTE ROUGE
+7. Pour refonte: modifier VALEURS, jamais renommer classes
+8. Architecture AVANT design — impossible de styler un monolithe
+
+## Fichiers CSS — tailles de reference
+- JourFormulaire: 596 lignes
+- HistoriquePanel: 592 lignes  
+- Calculator: 531 lignes
+- Timeline24h: 363 lignes
+- InfractionCard: 349 lignes
+- ResultPanel: 309 lignes
+- Header: 294 lignes
+- ParametresPanel: 254 lignes
+- FixEnginePanel: 226 lignes
+
+## TODO prioritaire
+- Architecture v8 (restructuration Calculator.jsx)
+- Refonte visuelle (apres architecture)
 - Features: vue 2 semaines, mode exercice FIMO
