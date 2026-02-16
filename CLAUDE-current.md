@@ -1,11 +1,11 @@
 # Tache en cours
 
-## Statut: TIMELINE UX V2
+## Statut: TIMELINE V3 - AFFICHAGE PUR
 
 ## Details
-- CSS reecrit : track 56px desktop / 64px mobile, blocs arrondis, zones subtiles
-- Zones depassement : bordure rouge top/bottom au lieu de hachures pleines
-- Marqueurs : pin style Google Maps, pulse desactive
-- Fusion zones chevauchantes (fusionnerZones)
-- Bandes nuit plus subtiles (opacite reduite)
-- Min-width blocs augmente pour tactile
+- Timeline reecrite : suppression mini-moteur analyserInfractions
+- Plus de zones de depassement, marqueurs, ou details infraction dans la timeline
+- Ajout barre de stats (conduite, travail, pause, amplitude)
+- Tooltip avec duree
+- Les infractions restent 100% gerees par le backend + InfractionCards
+- Build en cours

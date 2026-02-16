@@ -21,7 +21,7 @@
 ## Fonctionnalites
 
 ### Analyse et conformite
-- **Analyse en temps reel** — jauges circulaires, timeline 24h interactive, zones de depassement animees, bandes nuit (21h-6h), alertes orange/rouge
+- **Analyse en temps reel** — jauges circulaires, timeline 24h epuree (stats conduite/travail/pause/amplitude), bandes nuit, tooltips avec duree
 - **Explications pedagogiques** — chaque infraction affiche un texte clair avec la regle, la limite, le constat et la consequence (12 types couverts, zero IA generative)
 - **Double reglementation** — CE 561/2006 europeen + Code des transports francais, 29 pays supportes
 - **Fix engine** — correction automatique des infractions avec comparaison avant/apres
@@ -150,7 +150,7 @@ Types : `C` = Conduite, `P` = Pause, `T` = Travail, `D` = Disponibilite, `R` = R
 - **Documentation projet** : CLAUDE.md, CLAUDE-updates.md, CLAUDE-current.md
 - **Pipeline QA** : 5 outils automatises (analyse-qa, verify-bugs, audit-complet, test-tour, check-targets)
 - **Format API corrige** : /api/analyze accepte JSON {csv, typeService, pays, equipage}
-- **Timeline v2** : track 64px mobile, fusion zones depassement, bandes nuit subtiles, pins Google Maps, navigation InfractionCard corrigee, blocs min 10px tactile
+- **Timeline v3** : affichage pur (suppression double moteur infractions), barre stats, tooltips duree, track 64px mobile, bandes nuit subtiles
 
 ### v7.11.0 (2025-02-14) — FIMO Check: UX Conducteur
 - Rebrand complet: RSE/RSN Calculator -> FIMO Check

@@ -1,12 +1,53 @@
-/* Timeline24h - v2 UX mobile */
+/* Timeline24h - v3 affichage pur */
 .container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   padding: 12px 0;
   user-select: none;
 }
 
+/* === STATS BAR === */
+.statsBar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0 12px;
+}
+
+.statChip {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.statConduite {
+  background: rgba(76, 175, 80, 0.12);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.25);
+}
+
+.statTravail {
+  background: rgba(33, 150, 243, 0.12);
+  color: #2196f3;
+  border: 1px solid rgba(33, 150, 243, 0.25);
+}
+
+.statPause {
+  background: rgba(156, 39, 176, 0.12);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.25);
+}
+
+.statAmplitude {
+  background: rgba(255, 152, 0, 0.12);
+  color: #ff9800;
+  border: 1px solid rgba(255, 152, 0, 0.25);
+}
+
+/* === LABELS HEURES === */
 .labels {
   position: relative;
   height: 20px;
@@ -22,13 +63,14 @@
   font-weight: 500;
 }
 
+/* === TRACK === */
 .track {
   position: relative;
-  height: 56px;
+  height: 52px;
   background: var(--bg-input, #1a1a2e);
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 0 12px;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .gridLine {
@@ -37,32 +79,34 @@
   bottom: 0;
   width: 1px;
   background: var(--border, #2a2a3e);
-  opacity: 0.3;
+  opacity: 0.25;
   pointer-events: none;
 }
 
+/* === BLOCS === */
 .bloc {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
-  border-radius: 6px;
+  top: 6px;
+  bottom: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.15s;
   min-width: 6px;
   z-index: 2;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
 }
 
 @media (hover: hover) {
   .bloc:hover {
     opacity: 0.85;
-    transform: scaleY(1.1);
+    transform: scaleY(1.08);
     z-index: 3;
   }
 }
 
 .bloc:active {
-  opacity: 0.7;
-  transform: scaleY(1.15);
+  opacity: 0.75;
+  transform: scaleY(1.12);
   z-index: 4;
 }
 
@@ -71,7 +115,7 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin: 6px 12px 0;
+  margin: 4px 12px 0;
 }
 
 .legendeItem {
@@ -109,137 +153,6 @@
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* === BARRE INFRACTION HAUT === */
-.infractionBar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: rgba(255, 59, 48, 0.1);
-  border-radius: 8px;
-  margin: 0 12px 6px;
-  border-left: 3px solid #ff3b30;
-}
-
-.infractionCount {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #ff6b6b;
-}
-
-/* === ZONES DE DEPASSEMENT === */
-.zoneDepassement {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 5;
-  cursor: pointer;
-  border-radius: 6px;
-  overflow: hidden;
-  min-width: 8px;
-  border-top: 2px solid #ff3b30;
-  border-bottom: 2px solid #ff3b30;
-}
-
-.zoneHachures {
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 59, 48, 0.15);
-}
-
-.zoneDepassement:active {
-  transform: scaleY(1.1);
-}
-
-.legendeDepassement {
-  background: #ff3b30 !important;
-  opacity: 0.6;
-  border-radius: 3px !important;
-}
-
-/* === MARQUEURS INFRACTION === */
-.marqueurInfraction {
-  position: absolute;
-  top: -10px;
-  width: 20px;
-  height: 20px;
-  transform: translateX(-50%);
-  z-index: 10;
-  cursor: pointer;
-}
-
-.marqueurDanger .marqueurPin {
-  background: #ff3b30;
-}
-
-.marqueurWarning .marqueurPin {
-  background: #ff9500;
-}
-
-.marqueurPin {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
-  border-radius: 50% 50% 50% 0;
-  transform: translateX(-50%) rotate(-45deg);
-  border: 2px solid #fff;
-  z-index: 11;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-.marqueurPulse {
-  display: none;
-}
-
-/* === DETAIL INFRACTION === */
-.infractionDetail {
-  margin: 8px 12px 0;
-  padding: 12px 16px;
-  background: rgba(255, 59, 48, 0.06);
-  border: 1px solid rgba(255, 59, 48, 0.2);
-  border-radius: 12px;
-  animation: slideInfraction 0.2s ease;
-}
-
-@keyframes slideInfraction {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.infractionHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.infractionIcon {
-  font-size: 1rem;
-}
-
-.infractionLabel {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #ff6b6b;
-}
-
-.infractionTime {
-  margin-left: auto;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #ff4757;
-  font-variant-numeric: tabular-nums;
-}
-
-.infractionBody {
-  font-size: 0.75rem;
-  color: var(--text-secondary, #888);
-  line-height: 1.5;
-}
-
 /* === BADGE EQUIPAGE === */
 .equipageBadge {
   display: inline-flex;
@@ -249,7 +162,7 @@
   border-radius: 12px;
   font-size: 0.7rem;
   font-weight: 600;
-  margin: 0 12px 4px;
+  margin: 0 12px;
   width: fit-content;
 }
 
@@ -265,22 +178,15 @@
   color: #aa44ff;
 }
 
-.equipageIcon {
-  font-size: 0.85rem;
-}
+.equipageIcon { font-size: 0.85rem; }
+.equipageLabel { letter-spacing: 0.03em; }
 
-.equipageLabel {
-  letter-spacing: 0.03em;
-}
-
-/* === BANDES NUIT 21h-6h === */
+/* === BANDES NUIT === */
 .nightZone {
   position: absolute;
   top: 0;
   bottom: 0;
-  background: rgba(99, 102, 241, 0.06);
-  border-left: 1px dashed rgba(99, 102, 241, 0.2);
-  border-right: 1px dashed rgba(99, 102, 241, 0.2);
+  background: rgba(99, 102, 241, 0.05);
   pointer-events: none;
   z-index: 0;
 }
@@ -290,36 +196,15 @@
   .track {
     height: 64px;
     min-height: 64px;
-    border-radius: 12px;
   }
   .bloc {
-    top: 6px;
-    bottom: 6px;
-    min-width: 10px;
-    border-radius: 8px;
-  }
-  .zoneDepassement {
-    min-width: 14px;
-  }
-  .marqueurInfraction {
-    width: 28px;
-    height: 28px;
-    top: -14px;
-  }
-  .marqueurPin {
-    width: 16px;
-    height: 16px;
+    top: 8px;
+    bottom: 8px;
+    min-width: 12px;
   }
 }
 
 @media (max-width: 480px) {
-  .legende {
-    gap: 8px;
-  }
-  .labels {
-    margin: 0 8px;
-  }
-  .track {
-    margin: 0 8px;
-  }
+  .statsBar { gap: 4px; }
+  .statChip { font-size: 0.65rem; padding: 2px 8px; }
 }
