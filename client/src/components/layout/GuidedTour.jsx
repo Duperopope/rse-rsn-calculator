@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
 
 /* ============================================================
-   GuidedTour v3.1 — 10 etapes adaptees a la visibilite DOM
+   GuidedTour v4.0 — 4 etapes adaptees a la visibilite DOM
    Etapes 1-6: elements toujours presents
    Etapes 7-10: elements toujours presents (header, params, input)
    Les cibles conditionnelles (timeline, gauges, results)
@@ -10,79 +10,35 @@ import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
    ============================================================ */
 
 var STEPS = [
-  {
-    target: '[data-tour="header"]',
-    title: '\uD83C\uDFAF Bienvenue sur FIMO Check !',
-    content: 'Verifiez en quelques clics si vos temps de conduite respectent la reglementation. Ce guide vous montre tout en 10 etapes simples.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="params"]',
-    title: '\u2699\uFE0F Vos parametres',
-    content: 'Choisissez votre type de service (Urbain, SLO, Occasionnel), votre pays et si vous roulez seul ou en equipage. Tout le calcul s\'adapte automatiquement.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="jour-tabs"]',
-    title: '\uD83D\uDCC5 Vos journees',
-    content: 'Chaque onglet represente un jour. Cliquez sur "+" pour ajouter des jours et analyser une semaine complete. Le point de couleur sous chaque onglet indique le statut.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="templates"]',
-    title: '\u26A1 Remplissage rapide',
-    content: 'Pas envie de tout saisir ? Cliquez sur un modele pour pre-remplir une journee type. Ideal pour tester rapidement.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="activite"]',
-    title: '\uD83D\uDCCB Vos activites',
-    content: 'Chaque ligne est une activite : conduite, pause, repos, travail. Modifiez le type en cliquant dessus, ajustez les horaires de debut et fin.',
-    placement: 'top',
-    disableBeacon: true,
-    data: { hideDashboard: true },
-  },
-  {
-    target: '[data-tour="ajouter"]',
-    title: '\u2795 Ajouter une activite',
-    content: 'Ajoutez autant d\'activites que necessaire. L\'heure de debut se cale automatiquement sur la fin de la precedente.',
-    placement: 'top',
-    disableBeacon: true,
-    data: { hideDashboard: true },
-  },
-  {
-    target: '[data-tour="input"]',
-    title: '\uD83D\uDD52 Frise et jauges',
-    content: 'Une fois vos activites saisies, une frise chronologique 24h et des jauges en temps reel apparaissent au-dessus. Vert = conforme, orange = attention, rouge = depassement.',
-    placement: 'top',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="header"]',
-    title: '\uD83D\uDE80 Lancez l\'analyse',
-    content: 'Cliquez sur "Analyser la conformite" pour obtenir votre score sur 100, la liste des infractions eventuelles et les amendes estimees. Sur mobile, le bouton est dans la barre en bas.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="header"]',
-    title: '\uD83D\uDCCA Resultats et suivi',
-    content: 'Apres l\'analyse, vous verrez le score, les infractions detaillees avec references legales, les sanctions et un tableau de suivi par jour. Vous pouvez aussi exporter en PDF.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="params"]',
-    title: '\u2753 Besoin d\'aide ?',
-    content: 'Relancez ce guide a tout moment via le bouton "?" en haut a droite. L\'historique conserve vos analyses precedentes. Bonne route avec FIMO Check !',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-];
+    {
+      target: '[data-tour="header"]',
+      title: '\uD83C\uDFAF Bienvenue sur FIMO Check !',
+      content: 'Verifiez en quelques clics si vos temps de conduite et repos respectent la reglementation europeenne (CE 561/2006). Suivez ce guide rapide en 4 etapes.',
+      placement: 'bottom',
+      disableBeacon: true
+    },
+    {
+      target: '[data-tour="templates"]',
+      title: '\u26A1 Saisissez vos activites',
+      content: 'Utilisez un modele pre-rempli (journee type, longue, nuit) ou ajoutez vos activites manuellement. Chaque activite a un type (conduite, pause, repos), une heure de debut et de fin. Ajoutez des jours avec le bouton "+".',
+      placement: 'bottom',
+      disableBeacon: true
+    },
+    {
+      target: '[data-tour="header"]',
+      title: '\uD83D\uDE80 Analysez et consultez',
+      content: 'Cliquez sur "Analyser" (en bas sur mobile) pour obtenir votre score sur 100, les infractions avec references legales, les amendes estimees et un export PDF. Les jauges en temps reel vous alertent avant meme l\'analyse.',
+      placement: 'bottom',
+      disableBeacon: true
+    },
+    {
+      target: '[data-tour="params"]',
+      title: '\u2753 Besoin d\'aide ?',
+      content: 'Relancez ce guide via le bouton "Aide" en bas de l\'ecran ou le "?" en haut. Parametrez votre type de service, pays et equipage dans la barre du haut. Bonne route !',
+      placement: 'bottom',
+      disableBeacon: true
+    }
+  ];
 
 var HIDE_DASHBOARD_STEPS = [4, 5];
 
