@@ -12,7 +12,7 @@ import styles from './ResultPanel.module.css';
  * Panneau de resultats complet apres analyse
  * Score anime, infractions, avertissements, details par jour, sanctions
  */
-export function ResultPanel({ resultat, compact = false, onBack = null }) {
+export function ResultPanel({ resultat, compact = false, onBack = null, onNavigateTimeline = null }) {
   const [animScore, setAnimScore] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -145,7 +145,7 @@ export function ResultPanel({ resultat, compact = false, onBack = null }) {
                 }
               });
               return grouped.map((inf, i) => (
-                <InfractionCard key={i} infraction={inf} index={i} grouped={inf.count > 1} count={inf.count} jours={inf.jours} />
+                <InfractionCard key={i} infraction={inf} index={i} grouped={inf.count > 1} count={inf.count} jours={inf.jours} onNavigate={onNavigateTimeline} />
               ));
             })()}
           </div>

@@ -1022,7 +1022,7 @@ export default function Calculator() {
 
         {bottomTab === "resultats" && resultat && !chargement ? (
           <div data-tour="results" className={styles.resultInlineWrap}>
-            <ResultPanel resultat={resultat} compact onBack={function() { setBottomTab("saisie"); window.scrollTo(0, 0); }} />
+            <ResultPanel resultat={resultat} compact onBack={function() { setBottomTab("saisie"); window.scrollTo(0, 0); }} onNavigateTimeline={function(zoneType) { setBottomTab("saisie"); setTimeout(function() { var timeline = document.querySelector("[class*='Timeline']") || document.querySelector("[class*='timeline']"); if (timeline) { timeline.scrollIntoView({ behavior: "smooth", block: "center" }); if (zoneType) { var target = timeline.querySelector("[data-zone-type='" + zoneType + "']"); if (target) { target.style.transition = "box-shadow 0.3s, transform 0.3s"; target.style.boxShadow = "0 0 16px 4px rgba(255, 59, 48, 0.8)"; target.style.transform = "scaleY(1.5)"; target.style.zIndex = "50"; setTimeout(function() { target.style.boxShadow = "none"; target.style.transform = "scaleY(1)"; target.style.zIndex = ""; }, 2500); } } timeline.style.transition = "box-shadow 0.3s"; timeline.style.boxShadow = "0 0 20px rgba(255, 59, 48, 0.5)"; setTimeout(function() { timeline.style.boxShadow = "none"; }, 2000); } }, 400); }} />
           </div>
         ) : (
           <div data-tour="input" className={styles.inputSection}>

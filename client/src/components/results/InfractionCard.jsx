@@ -162,21 +162,8 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
     if (msg.indexOf("continue") !== -1 || msg.indexOf("4h30") !== -1) zoneType = "conduite_continue";
     else if (msg.indexOf("journali") !== -1 || msg.indexOf("9h") !== -1 || msg.indexOf("10h") !== -1) zoneType = "conduite_journaliere";
     else if (msg.indexOf("amplitude") !== -1 || msg.indexOf("13h") !== -1) zoneType = "amplitude";
-    var timeline = document.querySelector("[class*='Timeline']") || document.querySelector("[class*='timeline']");
-    if (timeline) {
-      timeline.scrollIntoView({ behavior: "smooth", block: "center" });
-      var targetZone = zoneType ? timeline.querySelector("[data-zone-type='" + zoneType + "']") : null;
-      if (targetZone) {
-        targetZone.style.transition = "box-shadow 0.3s, transform 0.3s";
-        targetZone.style.boxShadow = "0 0 16px 4px rgba(255, 59, 48, 0.8)";
-        targetZone.style.transform = "scaleY(1.5)";
-        targetZone.style.zIndex = "50";
-        setTimeout(function() { targetZone.style.boxShadow = "none"; targetZone.style.transform = "scaleY(1)"; targetZone.style.zIndex = ""; }, 2000);
-      } else {
-        timeline.style.transition = "box-shadow 0.3s";
-        timeline.style.boxShadow = "0 0 20px rgba(255, 59, 48, 0.5)";
-        setTimeout(function() { timeline.style.boxShadow = "none"; }, 1500);
-      }
+    if (onNavigate) {
+      onNavigate(zoneType);
     }
   }
 
