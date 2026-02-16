@@ -355,3 +355,15 @@
 .equipageLabel {
   letter-spacing: 0.03em;
 }
+
+/* === BANDES VISUELLES NUIT 21h-6h === */
+.nightZone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(99, 102, 241, 0.08);
+  border-left: 1px dashed rgba(99, 102, 241, 0.25);
+  border-right: 1px dashed rgba(99, 102, 241, 0.25);
+  pointer-events: none;
+  z-index: 0;
+}

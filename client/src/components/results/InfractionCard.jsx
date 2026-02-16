@@ -162,6 +162,7 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
     if (msg.indexOf("continue") !== -1 || msg.indexOf("4h30") !== -1) zoneType = "conduite_continue";
     else if (msg.indexOf("journali") !== -1 || msg.indexOf("9h") !== -1 || msg.indexOf("10h") !== -1) zoneType = "conduite_journaliere";
     else if (msg.indexOf("amplitude") !== -1 || msg.indexOf("13h") !== -1) zoneType = "amplitude";
+    else if (msg.indexOf("nuit") !== -1 || msg.indexOf("21h") !== -1 || msg.indexOf("nocturne") !== -1) zoneType = "nuit";
     if (onNavigate) {
       onNavigate(zoneType);
     }

@@ -116,6 +116,51 @@ function analyserInfractions(activites) {
     }
   }
 
+
+  // --- Travail de nuit (21h-6h) : limite 10h total ---
+  var travailNuit = 0;
+  for (var ni = 0; ni < sorted.length; ni++) {
+    var nAct = sorted[ni];
+    if (nAct.type === "C" || nAct.type === "T") {
+      var nStart = dureeMin(nAct.debut);
+      var nEnd = dureeMin(nAct.fin) <= nStart ? dureeMin(nAct.fin) + 1440 : dureeMin(nAct.fin);
+      // Plage nuit : 0-360 (0h-6h) et 1260-1440 (21h-24h)
+      if (nStart < 360) {
+        travailNuit += Math.min(nEnd, 360) - nStart;
+        if (nEnd > 360) { /* depasse 6h, partie hors nuit */ }
+      }
+      if (nEnd > 1260) {
+        travailNuit += nEnd - Math.max(nStart, 1260);
+      }
+      if (nStart >= 1260 && nEnd <= 1440) {
+        travailNuit += nEnd - nStart;
+      }
+    }
+  }
+  if (travailNuit > 600) {
+    // Zone nuit soir (21h-24h)
+    zones.push({
+      startMin: 1260,
+      endMin: 1440,
+      type: "nuit",
+      label: "Travail de nuit > 10h"
+    });
+    // Zone nuit matin (0h-6h)
+    zones.push({
+      startMin: 0,
+      endMin: 360,
+      type: "nuit",
+      label: "Travail de nuit > 10h"
+    });
+    marqueurs.push({
+      minute: 1260,
+      type: "nuit",
+      label: "Travail de nuit > 10h",
+      detail: "Limite 10h de travail total entre 21h et 6h (L3312-1). Constate : " + Math.round(travailNuit / 60 * 10) / 10 + "h",
+      severity: "danger"
+    });
+  }
+
   return { zones, marqueurs };
 }
 
@@ -211,6 +256,10 @@ export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick, e
         {heures.map(h => (
           <div key={'g' + h} className={styles.gridLine} style={{ left: (h / 24 * 100) + '%' }} />
         ))}
+
+                {/* Bandes nuit 21h-6h */}
+        <div className={styles.nightZone} style={{ left: "0%", width: (360/1440*100) + "%" }} />
+        <div className={styles.nightZone} style={{ left: (1260/1440*100) + "%", width: (180/1440*100) + "%" }} />
 
         {/* Blocs normaux */}
         {blocs.map((bloc, i) => {
