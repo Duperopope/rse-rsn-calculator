@@ -17,6 +17,7 @@ html {
 }
 
 body {
+  font-variant-numeric: tabular-nums;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   background: var(--bg, #0a0a0f);
@@ -253,4 +254,49 @@ small, .small {
   line-height: 1.4;
   min-height: 44px;
   padding: 8px 12px;
+}
+
+/* === Design Tokens MD3 (GPT-5.2 audit) === */
+html {
+  /* Surface */
+  --md-surface: #0F172A;
+  --md-surface-container: #1a1a2e;
+  --md-surface-container-high: #242442;
+  --md-outline: #3a3a5c;
+  --md-outline-variant: #2a2a4e;
+  /* Text */
+  --md-on-surface: #e2e2f0;
+  --md-on-surface-variant: #b0b0c0;
+  /* Primary (desature) */
+  --md-primary: #60a5fa;
+  --md-primary-container: #1e3a5f;
+  --md-on-primary: #ffffff;
+  /* Error */
+  --md-error: #f87171;
+  --md-error-container: #4a1c1c;
+  --md-on-error: #ffffff;
+  /* Warning */
+  --md-warning: #fbbf24;
+  --md-warning-container: #4a3a0a;
+  /* Success */
+  --md-success: #4ade80;
+  --md-success-container: #1a3a2a;
+  /* Typography scale */
+  --md-title-large: 22px;
+  --md-title-medium: 18px;
+  --md-body-large: 16px;
+  --md-body-medium: 14px;
+  --md-label-large: 14px;
+  --md-label-medium: 12px;
+  /* Spacing */
+  --md-spacing-xs: 4px;
+  --md-spacing-sm: 8px;
+  --md-spacing-md: 12px;
+  --md-spacing-lg: 16px;
+  --md-spacing-xl: 24px;
+  /* Radius */
+  --md-radius-sm: 8px;
+  --md-radius-md: 12px;
+  --md-radius-lg: 16px;
+  --md-radius-full: 9999px;
 }
