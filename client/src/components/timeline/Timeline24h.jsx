@@ -222,6 +222,7 @@ export function Timeline24h(props) {
   var jourActifIndex = props.jourActifIndex;
   var onJourClick = props.onJourClick;
   var statistiques = props.statistiques;
+  var onInfractionClick = props.onInfractionClick;
 
   var hasMultiJours = jours && jours.length > 1;
 
@@ -239,11 +240,10 @@ export function Timeline24h(props) {
   var tooltip = _t[0];
   var setTooltip = _t[1];
 
-  // Si pas de multi-jours et vue semaine selectionnee, revenir a jour
-  if (!hasMultiJours && vue !== 'Jour') {
-    setVue('Jour');
-  }
-
+  // Auto-reset vue si plus de multi-jours (useEffect pour eviter setState pendant render)
+  React.useEffect(function() {
+    if (!hasMultiJours && vue !== "Jour") { setVue("Jour"); }
+  }, [hasMultiJours]);
   return React.createElement('div', {
     className: styles.container + ' ' + (theme === 'dark' ? styles.dark : ''),
     'data-tour': 'timeline'
