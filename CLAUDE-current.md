@@ -1,40 +1,34 @@
-# Etat actuel du projet
+# Etat actuel FIMO Check
 
-## Version: v7.25.1 (commit 70056e4)
+## Version: v7.25.1 (commit 920554b)
 
-## Composants existants
-- Timeline24h v6 : vue Jour (blocs 24h, tooltip, labels, bandes nuit) + vue Semaine (barres empilees, stats backend, badges cliquables, compteur 56h)
-- ResultPanel : affichage resultats + bouton PDF + bouton Retour
-- InfractionCard : 12 types explications pedagogiques, data-infraction-index, navigation vers timeline
-- PanneauJauges : jauges circulaires conduite/amplitude/repos
-- GuidedTour v3.1 : 10 etapes react-joyride (styles inline)
-- FixEngine : moteur correction automatique
-- PDF : generation via pdfkit 0.17.2
+## Composants
+- Timeline24h v6 (Jour + Semaine, badges infractions cliquables)
+- ResultPanel, InfractionCard (12 types, navigation bidirectionnelle)
+- PanneauJauges, GuidedTour v3.1, FixEngine, PDF pdfkit 0.17.2
+- Header (themeToggle 50x36, helpBtn 44x44)
 
-## Structure donnees backend (POST /api/analyze)
-- resultat.score, resultat.infractions[], resultat.avertissements[]
-- resultat.details_jours[] : {date, conduite_min, conduite_h, travail_min, pause_min, amplitude_estimee_h, conduite_continue_max_min, repos_estime_h, travail_nuit_min, infractions[], avertissements[]}
-- resultat.statistiques : {conduite_totale_h, moyenne_conduite_jour_h}
-- resultat.tracking : {repos_reduits_journaliers, conduite_nuit_21h_6h, derogations}
+## Design
+- Audit WCAG 2.2 + MD3 : score 80%
+- 4 OK : font-size, contraste, scroll, interligne
+- 1 warning touch (themeToggle acceptable)
+- Boutons nav colles = design intentionnel
 
-## Tests valides
-- Backend : 56/56, QA : 203/203, URLs legales : 44/44
-- Pre-deploy : 5/5 (build, syntaxe, health, analyze, git)
+## Tests
+- Backend 56/56, QA 203/203, Legal URLs 44/44
+- Pre-deploy 6/6, Parcours 6/6
+- Audit design 80% (4 OK, 0 fail)
 
-## Pipeline outils (tools/)
-- analyse-qa.js, verify-bugs.js, audit-complet.js, test-tour.js, check-targets.js, pre-deploy.js
+## Tools
+- analyse-qa.js, verify-bugs.js, audit-complet.js
+- test-tour.js, check-targets.js, pre-deploy.js
+- test-parcours.js, audit-design.js
 
-## Deploiement
+## Deploy
 - Render.com : https://rse-rsn-calculator.onrender.com/
-- Push main = deploy auto, free tier cold start 15min
+- Auto-deploy on main, free tier cold start ~15min
 
-## En cours
-- Audit design WCAG 2.2 + MD3 : corrections en cours
-
-## En cours
-- Audit design WCAG 2.2 + MD3 : corrections en cours
-
-## Chantiers prochaine session
-1. Tester timeline v6 sur scenario multi-jours avec infractions (vrai test mobile)
-2. Vue 2 Semaines dans timeline (14 barres, compteur 90h bi-hebdo)
-3. Mode exercice FIMO (scenarios predefinins, correction auto)
+## Priorites prochaine session
+1. Vue 2 semaines (14 barres, compteur 90h)
+2. Mode exercice FIMO
+3. Ameliorer score design 80% -> 90%+
