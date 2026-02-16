@@ -22,3 +22,11 @@
 - URLs legales : 44 testees, 27 EUR-Lex OK, 16 Legifrance 403 (anti-bot, OK en navigateur)
 - Toutes taches en attente completees
 - Prochaines taches : a definir
+
+## 2026-02-16 - Session 3
+- Boutons Telecharger PDF + Retour a la saisie ajoutes dans ResultPanel
+- Explications pedagogiques dans InfractionCard (12 types, zero LLM)
+- Format API /api/analyze corrige dans CLAUDE.md (JSON avec cle csv)
+- Convention CLAUDE-current.md auto-update dans workflow
+- Alias cls = clear, clx = contexte presse-papiers
+- Commits: 9813316, 6e47723, 196d632, eddef05
