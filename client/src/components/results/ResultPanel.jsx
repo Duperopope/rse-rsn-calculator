@@ -5,6 +5,7 @@ import { RecommandationList } from './RecommandationList.jsx';
 import { SanctionTable } from './SanctionTable.jsx';
 // import { FixEnginePanel } from './FixEnginePanel.jsx';
 import { TrackingDashboard } from './TrackingDashboard.jsx';
+import { CalendrierSynthese } from './CalendrierSynthese.jsx';
 import styles from './ResultPanel.module.css';
 
 /**
@@ -234,6 +235,9 @@ export function ResultPanel({ resultat, compact = false }) {
       ) : null}
 
       {tracking ? <TrackingDashboard tracking={tracking} /> : null}
+
+      {/* Calendrier synthese multi-jours */}
+      <CalendrierSynthese details={details} />
 
       <SanctionTable />
       <div className={styles.exportBtns}>
