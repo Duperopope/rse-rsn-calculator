@@ -44,6 +44,13 @@
 - Mettre a jour CLAUDE-current.md a chaque etape importante (debut tache, fichier modifie, build, commit)
 - Format: node -e "require(fs).writeFileSync(CLAUDE-current.md, contenu)" integre dans la commande
 
+## Lecons apprises (conventions derivees)
+- Ne jamais creer de moteur de calcul doublon cote client : le backend est la source unique
+- Ne pas empiler des patches sur du code bugge : repartir clean
+- Toujours verifier si les donnees sont multi-jours ou jour unique avant de les passer en props
+- Planifier l UX (maquette, references) AVANT de coder une feature visuelle complexe
+- Reference UX tachygraphe : tachogram.com (standard industrie)
+
 ## Outils QA (dans tools/)
 - tools/analyse-qa.js : QA visuel rapide DOM + Claude Sonnet (~0.02$)
 - tools/verify-bugs.js : Verification DOM des bugs IA (0$)

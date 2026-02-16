@@ -30,3 +30,19 @@
 - Convention CLAUDE-current.md auto-update dans workflow
 - Alias cls = clear, clx = contexte presse-papiers
 - Commits: 9813316, 6e47723, 196d632, eddef05
+
+## 2026-02-16 - Session 4
+- README.md reecrit et pousse (v7.25.1, 56 tests, 44 URLs, explications pedagogiques)
+- Convention README auto-update ajoutee dans CLAUDE.md section Git
+- Timeline : 5 iterations (v1 -> v5), conclusion = timeline clean sans moteur infraction
+  - v2: track 64px, fusion zones, bandes nuit
+  - v3: suppression double moteur, ajout stats chips
+  - v4: drapeaux backend style Tachogram (bugge: crash ecran noir, mauvais positionnement)
+  - v5: retour a l essentiel, zero drapeau, zero crash
+- Fix navigation InfractionCard -> Timeline (callback onNavigateTimeline via Calculator)
+- Lecon apprise: ne pas empiler des patches, repartir clean quand ca diverge
+- Lecon apprise: ne pas creer de moteur doublon cote client quand le backend fait deja le calcul
+- Lecon apprise: verifier les props multi-jours vs jour actif avant de passer des donnees
+- Prochaine session: timeline multi-jours intelligente (planifier UX avant de coder)
+- Source UX reference: tachogram.com (drapeaux au-dessus du track, couleurs par severite)
+- Commits: 2962c9b, 7a9135d, d449ae4, 2749746, 7b92795, 09bfda5, 32c8d1a, 8c33af6, 4567b97
