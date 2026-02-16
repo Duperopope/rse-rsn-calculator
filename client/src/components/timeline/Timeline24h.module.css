@@ -322,3 +322,42 @@
     height: 20px;
   }
 }
+
+/* === BARRE INFRACTIONS VUE JOUR === */
+.jourInfBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 4px 0;
+  padding: 6px 10px;
+  background: rgba(255, 68, 68, 0.08);
+  border: 1px solid rgba(255, 68, 68, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.jourInfIcon {
+  font-size: 14px;
+}
+.jourInfText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ff4444;
+}
+.jourAvertBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 4px 0;
+  padding: 6px 10px;
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid rgba(255, 170, 0, 0.2);
+  border-radius: 8px;
+}
+.jourAvertIcon {
+  font-size: 14px;
+}
+.jourAvertText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e69500;
+}

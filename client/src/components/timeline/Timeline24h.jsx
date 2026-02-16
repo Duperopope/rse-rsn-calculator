@@ -36,6 +36,7 @@ function VueJour(props) {
   var equipage = props.equipage;
   var theme = props.theme;
   var onActiviteClick = props.onActiviteClick;
+  var detailJour = props.detailJour;
   var tooltip = props.tooltip;
   var setTooltip = props.setTooltip;
 
@@ -99,6 +100,15 @@ function VueJour(props) {
         );
       })
     ),
+    // Barre infractions jour
+    detailJour && detailJour.infractions && detailJour.infractions.length > 0 ? React.createElement('div', { className: styles.jourInfBar },
+      React.createElement('span', { className: styles.jourInfIcon }, '\u26A0'),
+      React.createElement('span', { className: styles.jourInfText }, detailJour.infractions.length + ' infraction' + (detailJour.infractions.length > 1 ? 's' : '') + ' sur ce jour')
+    ) : null,
+    detailJour && detailJour.avertissements && detailJour.avertissements.length > 0 && (!detailJour.infractions || detailJour.infractions.length === 0) ? React.createElement('div', { className: styles.jourAvertBar },
+      React.createElement('span', { className: styles.jourAvertIcon }, '\u24D8'),
+      React.createElement('span', { className: styles.jourAvertText }, detailJour.avertissements.length + ' alerte' + (detailJour.avertissements.length > 1 ? 's' : '') + ' sur ce jour')
+    ) : null,
     // Badge equipage
     React.createElement('div', { className: styles.badgeRow },
       React.createElement('span', { className: styles.badge },
@@ -121,6 +131,7 @@ function VueSemaine(props) {
   var jourActifIndex = props.jourActifIndex;
   var onJourClick = props.onJourClick;
   var statistiques = props.statistiques;
+  var onInfractionClick = props.onInfractionClick;
 
   // Associer details_jours par date
   var detailsMap = {};
@@ -186,8 +197,8 @@ function VueSemaine(props) {
         // Stats rapides
         React.createElement('div', { className: styles.semaineStats },
           detail.conduite_h ? React.createElement('span', { className: styles.semaineStat }, detail.conduite_h + 'h C') : null,
-          nbInf > 0 ? React.createElement('span', { className: styles.semaineInfBadge }, nbInf) : null,
-          nbAvert > 0 ? React.createElement('span', { className: styles.semaineAvertBadge }, nbAvert) : null
+          nbInf > 0 ? React.createElement('span', { className: styles.semaineInfBadge, onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'infraction'); } }, nbInf) : null,
+          nbAvert > 0 ? React.createElement('span', { className: styles.semaineAvertBadge, onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'avertissement'); } }, nbAvert) : null
         )
       );
     }),
@@ -263,6 +274,7 @@ export function Timeline24h(props) {
 
     // Vue active
     vue === 'Jour' ? React.createElement(VueJour, {
+      detailJour: detailsJours && detailsJours[jourActifIndex] ? detailsJours[jourActifIndex] : null,
       activites: activites,
       equipage: equipage,
       theme: theme,
@@ -272,6 +284,7 @@ export function Timeline24h(props) {
     }) : null,
 
     vue === 'Semaine' ? React.createElement(VueSemaine, {
+      onInfractionClick: onInfractionClick,
       jours: jours,
       detailsJours: detailsJours,
       jourActifIndex: jourActifIndex,
