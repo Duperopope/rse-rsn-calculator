@@ -75,9 +75,67 @@ function trouverSource(regle) {
   return null;
 }
 
-export 
 
-function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }) {
+function generateExplication(inf) {
+  var regle = (inf.regle || '').toLowerCase();
+  var limite = inf.limite || '';
+  var constate = inf.constate || inf.detail || '';
+
+  // Amplitude SLO (doit etre avant amplitude generale)
+  if (regle.indexOf('amplitude') !== -1 && regle.indexOf('slo') !== -1) {
+    var ampMatch = constate.match(/(\d+\.?\d*)h/);
+    var ampVal = ampMatch ? ampMatch[1] + 'h' : '?';
+    return "L'amplitude de votre journee atteint " + ampVal + ". En service occasionnel ou SLO, si l'amplitude depasse 13h, une coupure de 3h consecutives ou de 2 fois 2h est obligatoire (R3312-11 al.2b). Cette coupure n'a pas ete respectee.";
+  }
+  // Amplitude generale
+  if (regle.indexOf('amplitude') !== -1) {
+    return "L'amplitude de votre journee (du debut de service a la fin) atteint " + constate + ", depassant la limite de " + limite + ". L'amplitude correspond a la duree entre la premiere et la derniere activite de la journee.";
+  }
+  // Conduite continue
+  if (regle.indexOf('conduite continue') !== -1 || regle.indexOf('art.7') !== -1) {
+    return "Vous avez conduit " + constate + " sans interruption suffisante. Le reglement CE 561/2006 (Art.7) impose une pause d'au moins 45 minutes apres " + limite + " de conduite continue. Cette pause peut etre fractionnee en 15 min puis 30 min minimum.";
+  }
+  // Conduite journaliere
+  if (regle.indexOf('conduite journali') !== -1) {
+    return "Le temps de conduite total sur cette journee atteint " + constate + ", au-dela de la limite de " + limite + ". Le reglement CE 561/2006 (Art.6) autorise 9h par jour, extensible a 10h deux fois par semaine maximum.";
+  }
+  // Conduite hebdomadaire
+  if (regle.indexOf('conduite hebdo') !== -1 && regle.indexOf('bi') === -1) {
+    return "Sur cette semaine, le cumul de conduite atteint " + constate + " pour une limite de " + limite + ". Le reglement CE 561/2006 (Art.6) fixe un maximum de 56h de conduite par semaine.";
+  }
+  // Bi-hebdomadaire
+  if (regle.indexOf('bi-hebdo') !== -1 || regle.indexOf('bihebdo') !== -1) {
+    return "Sur deux semaines consecutives, le cumul de conduite atteint " + constate + " pour un maximum autorise de " + limite + ". Le reglement CE 561/2006 (Art.6) limite a 90h sur toute periode de deux semaines.";
+  }
+  // Repos journalier
+  if (regle.indexOf('repos journalier') !== -1 || regle.indexOf('repos quotidien') !== -1) {
+    var limVal = limite.replace(/minimum|minim\.|min\./gi, '').replace(/\(|\)/g, '').trim();
+    return "Le temps de repos entre deux journees de travail est de " + constate + ", inferieur au minimum requis de " + limVal + ". Le reglement CE 561/2006 (Art.8) impose 11h de repos journalier normal, reductible a 9h maximum 3 fois entre deux repos hebdomadaires.";
+  }
+  // Repos hebdomadaire
+  if (regle.indexOf('repos hebdo') !== -1) {
+    return "Le repos hebdomadaire est insuffisant ou absent. Le reglement CE 561/2006 (Art.8) impose au minimum 45h de repos normal ou 24h en repos reduit, a compenser dans les 3 semaines suivantes.";
+  }
+  // Repos reduits trop nombreux
+  if (regle.indexOf('repos reduit') !== -1 && regle.indexOf('trop') !== -1) {
+    return constate + " au lieu du maximum de " + limite + ". Entre deux repos hebdomadaires, vous ne pouvez prendre que 3 repos journaliers reduits (9h au lieu de 11h).";
+  }
+  // Travail de nuit
+  if (regle.indexOf('nuit') !== -1 || regle.indexOf('21h') !== -1) {
+    return "En periode de nuit (21h-6h), le temps de travail total ne doit pas depasser 10h par tranche de 24h. Ici, le travail total atteint " + constate + " pour une limite de " + limite + ".";
+  }
+  // Travail journalier
+  if (regle.indexOf('travail') !== -1 && regle.indexOf('journalier') !== -1) {
+    return "Le temps de travail total (conduite + autres taches) atteint " + constate + " sur cette journee, depassant la limite de " + limite + ". Le Code des transports distingue le temps de travail effectif du temps de conduite seul.";
+  }
+  // Pause
+  if (regle.indexOf('pause') !== -1) {
+    return "La pause cumulee est insuffisante. Apres " + limite + " de travail continu, une interruption est obligatoire. Ici : " + constate + ".";
+  }
+  return '';
+}
+
+export function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }) {
   const inf = infraction || {};
   const message = inf.regle || inf.message || inf.description || 'Infraction';
   const article = inf.article || inf.reference || '';
@@ -146,6 +204,18 @@ function InfractionCard({ infraction, index, onNavigate, grouped, count, jours }
           {depassement && depassement !== 'N/A' && <div className={styles.detailRow}><span className={styles.detailLabel}>Dépassement :</span> <strong className={styles.depassement}>{depassement}</strong></div>}
         </div>
       )}
+
+
+      {(() => {
+        var expl = generateExplication(inf);
+        if (!expl) return null;
+        return (
+          <div className={styles.explicationBlock}>
+            <span className={styles.explicationIcon}>💡</span>
+            <p className={styles.explicationText}>{expl}</p>
+          </div>
+        );
+      })()}
 
       <div className={styles.amendeGrid}>
         <div className={styles.amendeItem + ' ' + styles.amendeMinore}>
