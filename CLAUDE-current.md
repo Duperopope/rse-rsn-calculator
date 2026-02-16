@@ -1,19 +1,17 @@
 # Tache en cours
 
-## Statut: AUCUNE TACHE EN COURS
+## Statut: TIMELINE V6 MULTI-NIVEAUX
 
-## Derniere tache terminee
-- Timeline v5 clean : blocs activites + tooltip + labels, zero moteur infraction
-- README a jour (v7.25.1)
-- Convention README auto-update en place
+## Fichiers modifies
+- client/src/components/timeline/Timeline24h.jsx (reecrit - 3 vues)
+- client/src/components/timeline/Timeline24h.module.css (reecrit)
+- client/src/pages/Calculator.jsx (props multi-jours ajoutees)
 
-## Prochaines priorites
-1. Timeline multi-jours intelligente (vue semaine/macro avec zoom jour)
-2. Mode exercice FIMO (scenarios predefininis, correction auto)
-3. Nettoyage code mort / vestiges des iterations timeline
+## Donnees consommees
+- Vue Jour: jours[jourActifIndex].activites (state client)
+- Vue Semaine: jours[] + resultat.details_jours[] + resultat.statistiques
+- Zero calcul client, tout vient du backend
 
-## Lecons session 4
-- Ne pas empiler des patches : repartir clean si ca diverge
-- Ne pas dupliquer le moteur backend cote client
-- Verifier structure donnees (multi-jours vs jour actif) avant de passer des props
-- Planifier UX AVANT de coder (reference: tachogram.com)
+## Prochaine etape
+- Build, test, commit
+- Vue 2 Semaines (phase 2, apres validation vue Semaine)

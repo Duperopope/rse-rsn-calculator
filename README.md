@@ -150,7 +150,7 @@ Types : `C` = Conduite, `P` = Pause, `T` = Travail, `D` = Disponibilite, `R` = R
 - **Documentation projet** : CLAUDE.md, CLAUDE-updates.md, CLAUDE-current.md
 - **Pipeline QA** : 5 outils automatises (analyse-qa, verify-bugs, audit-complet, test-tour, check-targets)
 - **Format API corrige** : /api/analyze accepte JSON {csv, typeService, pays, equipage}
-- **Timeline v3** : affichage pur (suppression double moteur infractions), barre stats, tooltips duree, track 64px mobile, bandes nuit subtiles
+- **Timeline v6 multi-niveaux** : vue Jour (blocs 24h, tooltip, labels) + vue Semaine (barres empilees, stats backend, badges infractions, compteur 56h). Zero calcul client. References UX : Tachogram, Geotab, Hicron Software
 
 ### v7.11.0 (2025-02-14) — FIMO Check: UX Conducteur
 - Rebrand complet: RSE/RSN Calculator -> FIMO Check

@@ -1,4 +1,11 @@
-import React, { useState, useMemo } from 'react';
+var fs = require('fs');
+
+// ============================================================
+// ETAPE 1 : Nouveau composant Timeline24h.jsx — 3 vues
+// ============================================================
+console.log('[1/4] Ecriture Timeline24h.jsx...');
+
+var timelineJsx = `import React, { useState, useMemo } from 'react';
 import styles from './Timeline24h.module.css';
 
 // Couleurs par type d activite (standard tachygraphe)
@@ -102,14 +109,14 @@ function VueJour(props) {
     // Badge equipage
     React.createElement('div', { className: styles.badgeRow },
       React.createElement('span', { className: styles.badge },
-        (equipage === 'double' ? '\uD83D\uDC65 Duo' : '\uD83D\uDC64 Solo')
+        (equipage === 'double' ? '\\uD83D\\uDC65 Duo' : '\\uD83D\\uDC64 Solo')
       )
     ),
     // Tooltip
     tooltip ? React.createElement('div', { className: styles.tooltip },
       React.createElement('strong', null, (COULEURS[tooltip.type] || {}).label || tooltip.type),
-      ' \u2022 ', tooltip.debut, ' \u2192 ', tooltip.fin,
-      ' \u2022 ', formatDuree(tooltip.duree)
+      ' \\u2022 ', tooltip.debut, ' \\u2192 ', tooltip.fin,
+      ' \\u2022 ', formatDuree(tooltip.duree)
     ) : null
   );
 }
@@ -280,3 +287,395 @@ export function Timeline24h(props) {
     }) : null
   );
 }
+`;
+
+fs.writeFileSync('client/src/components/timeline/Timeline24h.jsx', timelineJsx, 'utf8');
+console.log('  OK - Timeline24h.jsx ecrit (' + timelineJsx.split('\n').length + ' lignes)');
+
+// ============================================================
+// ETAPE 2 : CSS
+// ============================================================
+console.log('[2/4] Ecriture Timeline24h.module.css...');
+
+var css = `/* Timeline24h v6 — Multi-niveaux */
+
+/* === CONTAINER === */
+.container {
+  width: 100%;
+  padding: 8px 0;
+}
+.dark {
+  color: #e0e0e0;
+}
+
+/* === SELECTEUR VUE === */
+.vueSelector {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+.vueSelectorBtn {
+  flex: 1;
+  padding: 6px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dark .vueSelectorBtn {
+  border-color: #444;
+  color: #999;
+}
+.vueSelectorActive {
+  background: #1a73e8;
+  color: #fff !important;
+  border-color: #1a73e8 !important;
+  font-weight: 600;
+}
+
+/* === LEGENDE === */
+.legende {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 4px 6px;
+  font-size: 11px;
+  color: #888;
+}
+.legendeItem {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.legendeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ============================== */
+/* === VUE JOUR === */
+/* ============================== */
+.vueJour {
+  position: relative;
+}
+
+/* Echelle horaire */
+.echelleHoraire {
+  position: relative;
+  height: 16px;
+  margin: 0 4px;
+  font-size: 10px;
+  color: #aaa;
+}
+.echelleMarque {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+/* Track */
+.track {
+  position: relative;
+  height: 52px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  margin: 0 4px;
+  overflow: hidden;
+}
+.dark .track {
+  background: #2a2a2a;
+}
+
+/* Bandes nuit */
+.nightBand {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(63, 81, 181, 0.05);
+  pointer-events: none;
+}
+
+/* Blocs activite */
+.bloc {
+  position: absolute;
+  top: 4px;
+  height: calc(100% - 8px);
+  border-radius: 6px;
+  min-width: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bloc:hover {
+  opacity: 0.85;
+}
+.blocLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+
+/* Badge equipage */
+.badgeRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 8px 0;
+}
+.badge {
+  font-size: 11px;
+  color: #888;
+}
+
+/* Tooltip */
+.tooltip {
+  background: #333;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin: 6px 4px 0;
+  text-align: center;
+}
+.dark .tooltip {
+  background: #555;
+}
+
+/* ============================== */
+/* === VUE SEMAINE === */
+/* ============================== */
+.vueSemaine {
+  padding: 0 4px;
+}
+
+.semaineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.semaineTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+.dark .semaineTitle {
+  color: #ccc;
+}
+.semaineCounter {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Ligne jour */
+.semaineLigne {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+}
+.semaineLigne:hover {
+  background: rgba(0,0,0,0.03);
+}
+.dark .semaineLigne:hover {
+  background: rgba(255,255,255,0.05);
+}
+.semaineLigneActive {
+  background: rgba(26, 115, 232, 0.08) !important;
+  border-left: 3px solid #1a73e8;
+}
+
+/* Date */
+.semaineDate {
+  width: 48px;
+  flex-shrink: 0;
+  text-align: center;
+}
+.semaineJourNom {
+  display: block;
+  font-size: 10px;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.semaineDateNum {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+.dark .semaineDateNum {
+  color: #ccc;
+}
+
+/* Mini barre */
+.semaineBarre {
+  flex: 1;
+  height: 24px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.dark .semaineBarre {
+  background: #2a2a2a;
+}
+.nightBandMini {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(63, 81, 181, 0.04);
+  pointer-events: none;
+}
+.semaineBlocAct {
+  position: absolute;
+  top: 3px;
+  height: calc(100% - 6px);
+  border-radius: 4px;
+  min-width: 3px;
+}
+
+/* Stats */
+.semaineStats {
+  width: 72px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.semaineStat {
+  font-size: 11px;
+  color: #777;
+}
+.dark .semaineStat {
+  color: #aaa;
+}
+.semaineInfBadge {
+  background: #ff4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.semaineAvertBadge {
+  background: #ffaa00;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Footer */
+.semaineFooter {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 4px 0;
+  font-size: 12px;
+  color: #888;
+  border-top: 1px solid #eee;
+  margin-top: 6px;
+}
+.dark .semaineFooter {
+  border-top-color: #333;
+}
+
+/* === RESPONSIVE MOBILE === */
+@media (max-width: 480px) {
+  .track {
+    height: 56px;
+  }
+  .bloc {
+    min-width: 8px;
+  }
+  .semaineDate {
+    width: 42px;
+  }
+  .semaineStats {
+    width: 64px;
+  }
+  .semaineBarre {
+    height: 20px;
+  }
+}
+`;
+
+fs.writeFileSync('client/src/components/timeline/Timeline24h.module.css', css, 'utf8');
+console.log('  OK - CSS ecrit');
+
+// ============================================================
+// ETAPE 3 : Patch Calculator.jsx — passer les props multi-jours
+// ============================================================
+console.log('[3/4] Patch Calculator.jsx pour props multi-jours...');
+
+var calc = fs.readFileSync('client/src/pages/Calculator.jsx', 'utf8');
+
+// Trouver la ligne Timeline24h actuelle et la remplacer
+var oldTimeline = calc.match(/<Card><Timeline24h[^/]*\/><\/Card>/);
+if (!oldTimeline) {
+  // Essayer sur plusieurs lignes
+  oldTimeline = calc.match(/<Card><Timeline24h[\s\S]*?\/><\/Card>/);
+}
+
+if (oldTimeline) {
+  var newTimeline = '<Card><Timeline24h equipage={equipage} activites={jours[jourActifIndex] ? jours[jourActifIndex].activites : []} theme={theme} jours={jours} detailsJours={resultat && resultat.details_jours ? resultat.details_jours : []} jourActifIndex={jourActifIndex} onJourClick={function(i) { setJourActifIndex(i); }} statistiques={resultat && resultat.statistiques ? resultat.statistiques : null} onActiviteClick={function(idx) { setBottomTab(\'saisie\'); setTimeout(function() { var el = document.getElementById(\'activite-\' + idx); if (el) { el.scrollIntoView({ behavior: \'smooth\', block: \'center\' }); el.style.transition = \'box-shadow 0.3s\'; el.style.boxShadow = \'0 0 20px rgba(0, 212, 255, 0.5)\'; setTimeout(function() { el.style.boxShadow = \'none\'; }, 2000); } }, 100); }} /></Card>';
+  
+  calc = calc.replace(oldTimeline[0], newTimeline);
+  fs.writeFileSync('client/src/pages/Calculator.jsx', calc, 'utf8');
+  console.log('  OK - Calculator.jsx patche (props multi-jours ajoutees)');
+} else {
+  console.log('  ATTENTION - Pattern Timeline24h non trouve dans Calculator.jsx');
+  console.log('  Recherche manuelle...');
+  var lines = calc.split('\n');
+  for (var li = 0; li < lines.length; li++) {
+    if (lines[li].indexOf('Timeline24h') !== -1 && lines[li].indexOf('<') !== -1) {
+      console.log('  Ligne ' + (li + 1) + ': ' + lines[li].substring(0, 120));
+    }
+  }
+}
+
+// ============================================================
+// ETAPE 4 : CLAUDE-current.md
+// ============================================================
+console.log('[4/4] Mise a jour CLAUDE-current.md...');
+
+var current = '# Tache en cours\\n\\n## Statut: TIMELINE V6 MULTI-NIVEAUX\\n\\n';
+current += '## Fichiers modifies\\n';
+current += '- client/src/components/timeline/Timeline24h.jsx (reecrit - 3 vues)\\n';
+current += '- client/src/components/timeline/Timeline24h.module.css (reecrit)\\n';
+current += '- client/src/pages/Calculator.jsx (props multi-jours ajoutees)\\n\\n';
+current += '## Donnees consommees\\n';
+current += '- Vue Jour: jours[jourActifIndex].activites (state client)\\n';
+current += '- Vue Semaine: jours[] + resultat.details_jours[] + resultat.statistiques\\n';
+current += '- Zero calcul client, tout vient du backend\\n\\n';
+current += '## Prochaine etape\\n';
+current += '- Build, test, commit\\n';
+current += '- Vue 2 Semaines (phase 2, apres validation vue Semaine)\\n';
+
+fs.writeFileSync('CLAUDE-current.md', current.replace(/\\n/g, '\n'), 'utf8');
+console.log('  OK - CLAUDE-current.md mis a jour');
+
+console.log('\n=== TERMINE ===');
