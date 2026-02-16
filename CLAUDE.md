@@ -34,6 +34,8 @@
 - Messages commit en francais, format conventionnel (feat/fix/chore)
 - Toujours git add -A && git commit -m ... && git push origin main
 - Ne jamais committer .env
+- Mettre a jour README.md a chaque push significatif (feat/fix) : version, stats, changelog, nouvelles sections si besoin
+- Le README est la vitrine publique du projet : toujours synchronise avec la realite du code
 
 ### Code
 - Pas de code inline complexe dans bash (utiliser cat > fichier.js)

@@ -1,8 +1,7 @@
 # Tache en cours
 
-## Statut: README MIS A JOUR
+## Statut: CONVENTION AJOUTEE
 
 ## Details
-- README.md reecrit : v7.25.1, 56 tests, 44 URLs, explications pedagogiques
-- Ajout : pipeline QA, format API, sources Legifrance completes, signature auteur
-- Commit en attente de push
+- Convention README auto-update ajoutee dans CLAUDE.md section Git
+- Chaque push feat/fix doit mettre a jour le README (version, changelog, stats)
