@@ -66,12 +66,14 @@ function phase1(detailsJours) {
       j._fix_repos = 'jour_repos_complet';
       repos++;
     } else {
-      var pH = parseNum(j.pause_h);
       var dH = parseNum(j.disponibilite_h);
-      var amp = cH + tH + pH + dH;
-      var rc = round1(24 - amp);
+      // CE 561/2006 Art.7+8 : les pauses ne sont PAS de l'activite
+      // repos = 24h - (conduite + travail + dispo) SANS les pauses
+      var activiteHorsPause = cH + tH + dH;
+      var rc = round1(24 - activiteHorsPause);
       var ro = parseNum(j.repos_estime_h);
-      if (ro < 1 || Math.abs(rc - ro) > 2) {
+      // Ne corriger que si la valeur serveur est manifestement erronee (< 1h ou incoherente)
+      if (ro < 1 && activiteHorsPause > 0.5) {
         j.repos_estime_h = String(Math.max(0, rc));
         j._fix_repos = 'corrige_' + ro + '_vers_' + rc;
       }
