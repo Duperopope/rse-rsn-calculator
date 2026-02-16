@@ -55,6 +55,14 @@
 - Planifier l UX (maquette, references) AVANT de coder une feature visuelle complexe
 - Reference UX tachygraphe : tachogram.com (standard industrie)
 
+
+## Systeme de memoire (3 niveaux)
+- CLAUDE.md : conventions permanentes, stack, regles (ne grossit pas) — charge a chaque session
+- CLAUDE-current.md : etat PRESENT du projet, reecrit a chaque fin de session (max 40 lignes) — charge a chaque session
+- CLAUDE-updates.md : journal condense (1 ligne/session), vieilles sessions dans archives/ — charge uniquement si besoin
+- Debut de session : utilisateur colle CLAUDE.md + CLAUDE-current.md (alias clx)
+- Fin de session : reecrire CLAUDE-current.md + ajouter 1 ligne dans CLAUDE-updates.md
+
 ## Outils QA (dans tools/)
 - tools/analyse-qa.js : QA visuel rapide DOM + Claude Sonnet (~0.02$)
 - tools/verify-bugs.js : Verification DOM des bugs IA (0$)
