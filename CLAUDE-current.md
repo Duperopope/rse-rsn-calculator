@@ -1,9 +1,10 @@
 # Tache en cours
 
-## Statut: FIX TIMELINE V4
+## Statut: TIMELINE V5 CLEAN
 
-## Corrections
-- Crash ecran noir : selecteur [class*=card] remplace par [data-infraction-index]
-- InfractionCard : data-infraction-index ajoute au div racine
-- Mapping drapeaux : fallback position pour infractions sans heure precise
-- Index original passe au click handler pour cibler la bonne InfractionCard
+## Details
+- Timeline nettoyee : zero drapeau, zero moteur infraction, zero crash
+- Affiche uniquement les blocs du jour actif + tooltip + labels
+- Props supprimees : infractions, onInfractionClick
+- Preparation pour future timeline multi-jours intelligente (session dediee)
+- Les infractions restent 100% dans InfractionCards (onglet Resultats)
