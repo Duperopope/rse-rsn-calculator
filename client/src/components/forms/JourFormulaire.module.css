@@ -507,3 +507,70 @@
   0%, 100% { border-left-color: #f44336; }
   50% { border-left-color: #ff8a80; }
 }
+
+
+/* === SWIPE-REVEAL DELETE (style iOS) === */
+.swipeWrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 2px;
+}
+
+.swipeDeleteBtn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 0;
+  border-radius: 0 12px 12px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.swipeDeleteBtn.swipeDeleteBtnVisible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.swipeDeleteBtn:active:not(:disabled) {
+  background: #c82333;
+  transform: scale(0.97);
+}
+
+.swipeDeleteBtn:disabled {
+  background: #555;
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.activiteLine {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-card, #1a1a2e);
+}
+
+/* Desktop : pas de wrapper overflow (pas de swipe) */
+@media (hover: hover) and (pointer: fine) {
+  .swipeWrapper {
+    overflow: visible;
+  }
+  .swipeDeleteBtn {
+    display: none;
+  }
+}

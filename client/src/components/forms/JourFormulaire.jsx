@@ -22,9 +22,24 @@ function useSwipeDelete(onDelete, threshold = 80) {
   const currentX = React.useRef(0);
   const swiping = React.useRef(false);
   const elRef = React.useRef(null);
-  const longPressTimer = React.useRef(null);
-  const longPressFired = React.useRef(false);
   const isHorizontalSwipe = React.useRef(false);
+  const [revealed, setRevealed] = React.useState(false);
+
+  // Fermer le bouton si on clique ailleurs
+  React.useEffect(function() {
+    if (!revealed) return;
+    function closeOnOutsideTouch(e) {
+      if (elRef.current && !elRef.current.parentElement.contains(e.target)) {
+        setRevealed(false);
+        if (elRef.current) {
+          elRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          elRef.current.style.transform = 'translateX(0)';
+        }
+      }
+    }
+    document.addEventListener('touchstart', closeOnOutsideTouch, true);
+    return function() { document.removeEventListener('touchstart', closeOnOutsideTouch, true); };
+  }, [revealed]);
 
   const handlers = {
     onTouchStart(e) {
@@ -32,79 +47,87 @@ function useSwipeDelete(onDelete, threshold = 80) {
       startY.current = e.touches[0].clientY;
       currentX.current = startX.current;
       swiping.current = true;
-      longPressFired.current = false;
       isHorizontalSwipe.current = false;
 
-      longPressTimer.current = setTimeout(function () {
-        if (!swiping.current) return;
-        longPressFired.current = true;
+      // Si deja ouvert et on re-touche la ligne, fermer
+      if (revealed) {
+        setRevealed(false);
         if (elRef.current) {
-          elRef.current.style.transition = 'background 0.2s ease';
-          elRef.current.style.background = 'rgba(255, 68, 68, 0.25)';
+          elRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          elRef.current.style.transform = 'translateX(0)';
         }
-        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-        setTimeout(function () {
-          if (elRef.current) {
-            elRef.current.style.transform = 'translateX(-100%)';
-            elRef.current.style.opacity = '0';
-            elRef.current.style.transition = 'transform 0.3s ease, opacity 0.3s ease, background 0.3s ease';
-          }
-          setTimeout(onDelete, 300);
-        }, 200);
-      }, 600);
+        swiping.current = false;
+        return;
+      }
 
       if (elRef.current) elRef.current.style.transition = 'none';
     },
     onTouchMove(e) {
-      if (!swiping.current || longPressFired.current) return;
+      if (!swiping.current) return;
       currentX.current = e.touches[0].clientX;
       var diffX = Math.abs(currentX.current - startX.current);
       var diffY = Math.abs(e.touches[0].clientY - startY.current);
 
-      if (diffX > 10 || diffY > 10) {
-        if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+      // Ignorer si c est un scroll vertical
+      if (!isHorizontalSwipe.current && diffY > diffX && diffY > 10) {
+        swiping.current = false;
+        if (elRef.current) {
+          elRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          elRef.current.style.transform = 'translateX(0)';
+        }
+        return;
       }
 
       var diff = currentX.current - startX.current;
-      if (diff < -15 && diffX > diffY) {
+      if (diff < -10 && diffX > diffY) {
         isHorizontalSwipe.current = true;
         e.stopPropagation();
       }
 
+      // Seulement swipe vers la gauche, max -90px (largeur du bouton)
       if (diff < 0 && elRef.current) {
-        elRef.current.style.transform = 'translateX(' + Math.max(diff, -120) + 'px)';
-        elRef.current.style.opacity = String(1 - Math.min(Math.abs(diff) / 200, 0.5));
+        var clamped = Math.max(diff, -90);
+        elRef.current.style.transform = 'translateX(' + clamped + 'px)';
       }
     },
     onTouchEnd(e) {
-      if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+      if (!swiping.current) return;
 
       if (isHorizontalSwipe.current) {
         e.stopPropagation();
       }
 
-      if (longPressFired.current) { swiping.current = false; return; }
-
       swiping.current = false;
       var diff = currentX.current - startX.current;
+
       if (elRef.current) {
-        elRef.current.style.transition = 'transform 0.3s ease, opacity 0.3s ease, background 0.3s ease';
-        elRef.current.style.background = '';
+        elRef.current.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         if (diff < -threshold) {
-          elRef.current.style.transform = 'translateX(-100%)';
-          elRef.current.style.opacity = '0';
-          if (navigator.vibrate) navigator.vibrate(15);
-          setTimeout(onDelete, 300);
+          // Reveler le bouton : snap a -88px
+          elRef.current.style.transform = 'translateX(-88px)';
+          setRevealed(true);
+          if (navigator.vibrate) navigator.vibrate(10);
         } else {
+          // Retour
           elRef.current.style.transform = 'translateX(0)';
-          elRef.current.style.opacity = '1';
+          setRevealed(false);
         }
       }
       currentX.current = 0;
     }
   };
 
-  return { ref: elRef, handlers };
+  function doDelete() {
+    if (elRef.current) {
+      elRef.current.style.transition = 'transform 0.3s ease, opacity 0.25s ease';
+      elRef.current.style.transform = 'translateX(-100%)';
+      elRef.current.style.opacity = '0';
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+    setTimeout(onDelete, 300);
+  }
+
+  return { ref: elRef, handlers: handlers, revealed: revealed, doDelete: doDelete };
 }
 
 /* Mini helper : minutes depuis minuit */
@@ -197,57 +220,72 @@ function TypeActiviteSelector({ value, onChange }) {
 // Sous-composant par ligne d activite (hook legal par instance)
 function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTypeSelector, setShowTypeSelector, updateActivite, supprimerActivite, changeType, fmtDuree, toMin }) {
   var swipe = useSwipeDelete(function() { supprimerActivite(actIdx); });
+  var disabled = jour.activites.length <= 1;
 
   return (
     <React.Fragment>
-      <div
-        ref={swipe.ref}
-        {...swipe.handlers}
-        id={'activite-' + actIdx}
-        data-activite-index={actIdx}
-        className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')}
-        style={{ '--type-color': typeInfo.couleur + '80' }}
-      >
+      <div className={styles.swipeWrapper}>
+        {/* Bouton Supprimer revele derriere */}
         <button
+          className={styles.swipeDeleteBtn + (swipe.revealed ? ' ' + styles.swipeDeleteBtnVisible : '')}
+          onClick={disabled ? undefined : swipe.doDelete}
+          disabled={disabled}
           type="button"
-          className={styles.activiteTypeBtn}
-          onClick={() => setShowTypeSelector(showTypeSelector === actIdx ? null : actIdx)}
-          style={{ borderColor: typeInfo.couleur + '60', background: typeInfo.couleur + '12' }}
-          title={'Changer le type (actuellement: ' + typeInfo.label + ')'}
+          aria-label="Supprimer cette activite"
         >
-          <IconeActivite type={act.type} size={20} color={typeInfo.couleur} />
-          <span className={styles.activiteTypeName} style={{ color: typeInfo.couleur }}>
-            {typeInfo.label}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><path d="M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M19 6v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <span>Supprimer</span>
+        </button>
+
+        <div
+          ref={swipe.ref}
+          {...swipe.handlers}
+          id={'activite-' + actIdx}
+          data-activite-index={actIdx}
+          className={styles.activiteLine + (chevauchement ? ' ' + styles.chevauchement : '')}
+          style={{ '--type-color': typeInfo.couleur + '80' }}
+        >
+          <button
+            type="button"
+            className={styles.activiteTypeBtn}
+            onClick={() => setShowTypeSelector(showTypeSelector === actIdx ? null : actIdx)}
+            style={{ borderColor: typeInfo.couleur + '60', background: typeInfo.couleur + '12' }}
+            title={'Changer le type (actuellement: ' + typeInfo.label + ')'}
+          >
+            <IconeActivite type={act.type} size={20} color={typeInfo.couleur} />
+            <span className={styles.activiteTypeName} style={{ color: typeInfo.couleur }}>
+              {typeInfo.label}
+            </span>
+          </button>
+
+          <input
+            type="time"
+            className={styles.timeInput}
+            value={act.debut}
+            onChange={(e) => updateActivite(actIdx, 'debut', e.target.value)}
+          />
+          <span className={styles.fleche}>&rarr;</span>
+          <input
+            type="time"
+            className={styles.timeInput}
+            value={act.fin}
+            onChange={(e) => updateActivite(actIdx, 'fin', e.target.value)}
+          />
+
+          <span className={styles.dureeLabel}>
+            {duree > 0 ? fmtDuree(duree) : ''}
           </span>
-        </button>
 
-        <input
-          type="time"
-          className={styles.timeInput}
-          value={act.debut}
-          onChange={(e) => updateActivite(actIdx, 'debut', e.target.value)}
-        />
-        <span className={styles.fleche}>&rarr;</span>
-        <input
-          type="time"
-          className={styles.timeInput}
-          value={act.fin}
-          onChange={(e) => updateActivite(actIdx, 'fin', e.target.value)}
-        />
-
-        <span className={styles.dureeLabel}>
-          {duree > 0 ? fmtDuree(duree) : ''}
-        </span>
-
-        <button
-          className={styles.deleteActBtn}
-          onClick={() => supprimerActivite(actIdx)}
-          disabled={jour.activites.length <= 1}
-          title="Supprimer cette activite"
-          type="button"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M19 6v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-        </button>
+          <button
+            className={styles.deleteActBtn}
+            onClick={() => supprimerActivite(actIdx)}
+            disabled={disabled}
+            title="Supprimer cette activite"
+            type="button"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M19 6v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
+        </div>
       </div>
 
       {showTypeSelector === actIdx ? (
