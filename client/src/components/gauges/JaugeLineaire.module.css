@@ -16,12 +16,12 @@
 }
 
 .label {
-  font-size: 0.8rem;
+  font-size: 13px;
   color: var(--text-secondary, #888);
 }
 
 .texteValeur {
-  font-size: 0.8rem;
+  font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--text, #e0e0e0);
@@ -85,7 +85,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.72rem;
+  font-size: 12px;
   margin-top: 4px;
   padding: 4px 0;
   color: var(--text-secondary, #888);
@@ -101,7 +101,7 @@
   color: var(--accent-green, #00ff88);
 }
 .detailIcon {
-  font-size: 0.85rem;
+  font-size: 14px;
 }
 .detailSep {
   opacity: 0.3;
@@ -138,7 +138,7 @@
   background: rgba(255, 68, 68, 0.08);
   border-radius: 6px;
   border-left: 3px solid var(--accent-red, #ff4444);
-  font-size: 0.7rem;
+  font-size: 12px;
   color: var(--accent-red, #ff4444);
   animation: detailSlide 0.2s ease;
 }
@@ -154,7 +154,7 @@
 }
 .refLine {
   margin-top: 2px;
-  font-size: 0.65rem;
+  font-size: 12px;
   opacity: 0.5;
 }
 .refText {
@@ -172,12 +172,12 @@
   background: rgba(0, 212, 255, 0.06);
   border-radius: 6px;
   border-left: 3px solid var(--accent, #00d4ff);
-  font-size: 0.7rem;
+  font-size: 12px;
   color: var(--accent, #00d4ff);
   animation: detailSlide 0.2s ease;
   line-height: 1.4;
 }
 .conseilIcon {
-  font-size: 0.85rem;
+  font-size: 14px;
   flex-shrink: 0;
 }

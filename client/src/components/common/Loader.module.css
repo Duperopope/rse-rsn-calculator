@@ -20,7 +20,7 @@
 
 .text {
   color: var(--text-secondary, #888);
-  font-size: 0.9rem;
+  font-size: 14px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 

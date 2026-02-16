@@ -28,6 +28,12 @@
 - Render.com : https://rse-rsn-calculator.onrender.com/
 - Push main = deploy auto, free tier cold start 15min
 
+## En cours
+- Audit design WCAG 2.2 + MD3 : corrections en cours
+
+## En cours
+- Audit design WCAG 2.2 + MD3 : corrections en cours
+
 ## Chantiers prochaine session
 1. Tester timeline v6 sur scenario multi-jours avec infractions (vrai test mobile)
 2. Vue 2 Semaines dans timeline (14 barres, compteur 90h bi-hebdo)

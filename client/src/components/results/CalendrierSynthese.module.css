@@ -16,15 +16,15 @@
   border: 1px solid var(--border, #2a2a3e);
   border-radius: 10px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 600;
   transition: border-color 0.2s;
 }
 .toggleBtn:active { border-color: var(--accent, #00d4ff); opacity: 0.85; }
 @media (hover: hover) { .toggleBtn:hover { border-color: var(--accent, #00d4ff); } }
-.toggleIcon { font-size: 0.75rem; }
+.toggleIcon { font-size: 12px; }
 .toggleLabel { flex: 1; text-align: left; }
-.toggleStats { display: flex; gap: 0.5rem; font-size: 0.75rem; font-weight: 700; }
+.toggleStats { display: flex; gap: 0.5rem; font-size: 12px; font-weight: 700; }
 .statCyan { color: var(--accent, #00d4ff); }
 .statOrange { color: var(--accent-orange, #ffaa00); }
 .statRed { color: var(--accent-red, #ff4444); }
@@ -45,7 +45,7 @@
   display: flex;
   gap: 0.75rem;
   padding: 0.4rem 0.5rem;
-  font-size: 0.65rem;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.5);
 }
 .legendItem { display: flex; align-items: center; gap: 4px; }
@@ -78,7 +78,7 @@
   cursor: pointer;
   transition: background 0.15s;
   color: #fff;
-  font-size: 0.8rem;
+  font-size: 13px;
   text-align: left;
 }
 .dayRow:active { background: rgba(0, 212, 255, 0.06); }
@@ -88,7 +88,7 @@
 
 .dayLabel {
   width: 60px;
-  font-size: 0.7rem;
+  font-size: 12px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   flex-shrink: 0;
@@ -112,7 +112,7 @@
 .infBadge {
   background: rgba(255, 68, 68, 0.2);
   color: var(--accent-red, #ff4444);
-  font-size: 0.65rem;
+  font-size: 12px;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 6px;
@@ -123,7 +123,7 @@
 .okBadge {
   background: rgba(0, 255, 136, 0.15);
   color: var(--accent-green, #00ff88);
-  font-size: 0.7rem;
+  font-size: 12px;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 6px;
@@ -154,7 +154,7 @@
   letter-spacing: 0.03em;
 }
 .dayDetailVal {
-  font-size: 0.8rem;
+  font-size: 13px;
   font-weight: 600;
   color: #fff;
 }
@@ -173,13 +173,13 @@
   color: #ff6666;
   padding: 2px 8px;
   border-radius: 6px;
-  font-size: 0.65rem;
+  font-size: 12px;
 }
 
 /* Mobile adjustments */
 @media (max-width: 480px) {
-  .dayLabel { width: 50px; font-size: 0.65rem; }
+  .dayLabel { width: 50px; font-size: 12px; }
   .barContainer { height: 12px; }
-  .toggleBtn { padding: 0.6rem 0.75rem; font-size: 0.85rem; }
+  .toggleBtn { padding: 0.6rem 0.75rem; font-size: 14px; }
   .dayDetailGrid { grid-template-columns: repeat(2, 1fr); }
 }

@@ -1,7 +1,7 @@
 /* TrackingDashboard v10 — Enrichi FIX-08 */
 .dashboard { margin: 12px 0; }
 .sectionTitle {
-  font-size: 0.65rem;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: rgba(255,255,255,0.4);

@@ -16,16 +16,16 @@
 
 /* analyseSection retire — bouton dans le header */
 
-.offlineMsg { font-size: 0.82rem; color: var(--accent-red, #ff4444); text-align: center; margin: 0; }
-.erreur { color: var(--accent-red, #ff4444); font-size: 0.9rem; margin: 0; }
-.equipageInfo { text-align: center; color: #00d4ff; font-size: 0.85rem; margin-top: 0.5rem; }
+.offlineMsg { font-size: 13px; color: var(--accent-red, #ff4444); text-align: center; margin: 0; }
+.erreur { color: var(--accent-red, #ff4444); font-size: 14px; margin: 0; }
+.equipageInfo { text-align: center; color: #00d4ff; font-size: 14px; margin-top: 0.5rem; }
 
 /* === Historique === */
 .historique { display: flex; flex-direction: column; gap: 10px; }
 .histToggle {
   padding: 8px 16px; border-radius: 8px;
   background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888);
-  border: 1px solid var(--border, #2a2a3e); font-size: 0.82rem; font-weight: 600;
+  border: 1px solid var(--border, #2a2a3e); font-size: 13px; font-weight: 600;
   transition: border-color 0.2s, color 0.2s; align-self: flex-start;
 }
 @media (hover: hover) { .histToggle:hover { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); } }
@@ -35,12 +35,12 @@
   background: var(--bg-card, #12121a); border: 1px solid var(--border, #2a2a3e); border-radius: 12px;
 }
 .histItem { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(42, 42, 62, 0.3); }
-.histDate { font-size: 0.78rem; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; min-width: 90px; }
-.histMeta { font-size: 0.78rem; color: var(--text-secondary, #888); }
+.histDate { font-size: 12.5px; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; min-width: 90px; }
+.histMeta { font-size: 12.5px; color: var(--text-secondary, #888); }
 .histClear {
   margin-top: var(--header-height, 70px); padding: 6px 12px; border-radius: 6px;
   background: transparent; color: var(--accent-red, #ff4444);
-  border: 1px solid rgba(255, 68, 68, 0.2); font-size: 0.78rem;
+  border: 1px solid rgba(255, 68, 68, 0.2); font-size: 12.5px;
   transition: background 0.2s; align-self: flex-end;
 }
 @media (hover: hover) { .histClear:hover { background: rgba(255, 68, 68, 0.08); } }
@@ -70,8 +70,8 @@
 .expandToggle {
   display: none;
   width: 100%; padding: 6px; border: none; border-radius: 6px;
-  background: rgba(255,255,255,0.04); color: var(--text-secondary, #888);
-  font-size: 0.72rem; font-weight: 500; cursor: pointer;
+  background: rgba(255,255,255,0.04); color: #e0e0e0;
+  font-size: 12px; font-weight: 500; cursor: pointer;
   transition: color 0.2s;
 }
 .expandToggle:active { color: #00d4ff; }
@@ -95,7 +95,8 @@
   }
 
   /* Montrer le bouton toggle */
-  .expandToggle { display: block; }
+  .expandToggle { display: block;   color: #e0e0e0;
+}
 
   /* Quand expanded, montrer tout */
   .dashExpanded .timelineWrap {
@@ -147,14 +148,14 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-width: 48px;
+  min-width: 44px;
   min-height: 44px;
   padding: 8px 16px;
   border: none;
   border-radius: 0;
   background: transparent;
   color: var(--text-secondary, #888);
-  font-size: 0.82rem;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: color 0.2s, background 0.15s;
@@ -204,9 +205,9 @@
   padding: 8px 16px;
   border: none;
   border-radius: 0;
-  background: rgba(0, 132, 255, 0.08);
-  color: #fff;
-  font-size: 0.82rem;
+  background: #1a5fb4;
+  color: #ffffff;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -232,7 +233,7 @@
 /* Sous-texte date */
 .jourNavDate {
   /* fix-qa-mobile */
-  font-size: 0.72rem;
+  font-size: 12px;
   font-weight: 400;
   opacity: 0.6;
 }
@@ -257,7 +258,7 @@
 /* === Fleches scroll PC (masquees sur tactile) === */
 .jourNavArrow {
   flex-shrink: 0;
-  width: 24px;
+  width: 44px;
   height: 44px;
   border: none;
   background: none;
@@ -268,8 +269,10 @@
   align-items: center;
   justify-content: center;
   transition: color 0.15s;
-  padding: 0;
+  padding: 0 8px;
   line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .jourNavArrow:hover {
@@ -285,7 +288,9 @@
 
 /* Masquer les fleches sur ecran tactile (scroll naturel) */
 @media (hover: none) and (pointer: coarse) {
-  .jourNavArrow { display: none; }
+  .jourNavArrow { display: none;   min-width: 44px;
+  min-height: 44px;
+}
 }
 
 
@@ -348,7 +353,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   border: none;
-  font-size: 0.78rem;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -381,7 +386,7 @@
   .jourNavBtn, .jourNavActive {
     min-height: 48px;
     padding: 10px 14px;
-    font-size: 0.8rem;
+    font-size: 13px;
   }
   .jourMenu {
     padding: 8px;
@@ -390,7 +395,7 @@
   .jourMenuBtn {
     min-height: 44px;
     padding: 10px 18px;
-    font-size: 0.82rem;
+    font-size: 13px;
   }
 }
 
@@ -408,7 +413,7 @@
   min-height: 22px;
 }
 .miniJaugeLabel {
-  font-size: 0.65rem;
+  font-size: 12px;
   color: var(--text-secondary, #888);
   white-space: nowrap;
   min-width: 52px;
@@ -426,7 +431,7 @@
   transition: width 0.5s ease-out, background 0.3s ease;
 }
 .miniJaugeVal {
-  font-size: 0.65rem;
+  font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   min-width: 32px;
@@ -452,13 +457,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 800;
   flex-shrink: 0;
   box-shadow: 0 0 8px rgba(0,0,0,0.3);
 }
 .scoreStickyLabel {
-  font-size: 0.78rem;
+  font-size: 12.5px;
   color: var(--text-secondary, #aaa);
   white-space: nowrap;
   overflow: hidden;
@@ -469,7 +474,8 @@
 @media (min-width: 769px) {
   .expandToggle {
     display: none;
-  }
+    color: #e0e0e0;
+}
   .miniJauges {
     display: none;
   }
@@ -487,14 +493,14 @@
 }
 .scoreChevron {
   margin-left: auto;
-  font-size: 0.7rem;
+  font-size: 12px;
   opacity: 0.5;
   transition: transform 0.2s;
 }
 .scoreStickyRow:hover .scoreChevron { opacity: 0.9; }
 /* === Bottom Tabs === */
 .bottomTabs { display: flex; gap: 0; border-radius: 12px; overflow: hidden; margin: 0 0 12px 0; border: 1px solid var(--border, #2a2a3e); }
-.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888); border: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888); border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .bottomTab:first-child { border-radius: 12px 0 0 12px; }
 .bottomTab:last-child { border-radius: 0 12px 12px 0; }
 .bottomTabActive { background: var(--accent, #00d4ff); color: #000; }

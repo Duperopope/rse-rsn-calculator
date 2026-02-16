@@ -2,8 +2,8 @@
 .wrap { padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); cursor: pointer; user-select: none; transition: border-color 0.2s; margin-top: 8px; }
 .wrap:hover { border-color: rgba(0,212,255,0.3); }
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.label { font-size: 0.82rem; font-weight: 600; color: var(--text-primary, #e0e0e0); }
-.valText { font-size: 0.82rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.label { font-size: 13px; font-weight: 600; color: var(--text-primary, #e0e0e0); }
+.valText { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .barWrap { position: relative; margin-bottom: 4px; }
 .bar { height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; position: relative; }
 .fill { height: 100%; border-radius: 4px; transition: width 0.4s ease, background 0.3s ease; }
@@ -11,10 +11,10 @@
 @keyframes pulseOver { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
 .marker { position: absolute; top: -2px; width: 2px; height: 12px; background: rgba(255,255,255,0.25); border-radius: 1px; z-index: 2; transform: translateX(-1px); }
 .zoneLabels { position: relative; height: 14px; margin-top: 2px; }
-.zoneLabel { position: absolute; font-size: 0.62rem; color: rgba(255,255,255,0.4); transform: translateX(-50%); white-space: nowrap; }
+.zoneLabel { position: absolute; font-size: 12px; color: rgba(255,255,255,0.4); transform: translateX(-50%); white-space: nowrap; }
 .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
-.detail { font-size: 0.72rem; color: var(--text-secondary, #888); }
-.info { font-size: 0.68rem; color: rgba(255,255,255,0.3); font-style: italic; }
+.detail { font-size: 12px; color: var(--text-secondary, #888); }
+.info { font-size: 12px; color: rgba(255,255,255,0.3); font-style: italic; }
 .dots { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.15); transition: background 0.2s; }
 .dotActive { width: 6px; height: 6px; border-radius: 50%; background: #00d4ff; transition: background 0.2s; }

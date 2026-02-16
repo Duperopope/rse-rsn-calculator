@@ -11,7 +11,7 @@
 }
 
 .label {
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text, #e0e0e0);
 }
@@ -24,7 +24,7 @@
 .btn {
   padding: 4px 12px;
   border-radius: 6px;
-  font-size: 0.78rem;
+  font-size: 13px;
   font-weight: 600;
   background: var(--bg-input, #1a1a2e);
   color: var(--text-secondary, #888);
@@ -46,7 +46,7 @@
   border-radius: 10px;
   padding: 12px;
   font-family: 'Cascadia Code', 'Fira Code', monospace;
-  font-size: 0.85rem;
+  font-size: 14px;
   line-height: 1.5;
   resize: vertical;
   min-height: 120px;
@@ -63,7 +63,7 @@
   background: rgba(0, 255, 136, 0.08);
   border: 1px solid rgba(0, 255, 136, 0.2);
   color: var(--accent-green, #00ff88);
-  font-size: 0.82rem;
+  font-size: 13px;
 }
 
 .validErr {
@@ -72,17 +72,17 @@
   background: rgba(255, 68, 68, 0.08);
   border: 1px solid rgba(255, 68, 68, 0.2);
   color: var(--accent-red, #ff4444);
-  font-size: 0.82rem;
+  font-size: 13px;
 }
 
 .errLine {
   margin: 2px 0 0 0;
-  font-size: 0.78rem;
+  font-size: 13px;
   opacity: 0.9;
 }
 
 .hint {
-  font-size: 0.75rem;
+  font-size: 12px;
   color: var(--text-secondary, #888);
   margin: 0;
 }

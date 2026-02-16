@@ -63,6 +63,14 @@
 - Debut de session : utilisateur colle CLAUDE.md + CLAUDE-current.md (alias clx)
 - Fin de session : reecrire CLAUDE-current.md + ajouter 1 ligne dans CLAUDE-updates.md
 
+
+## Pipeline QA (4 couches)
+- Couche 1 (auto/chaque push) : node tools/pre-deploy.js — build, syntaxe, API health, analyze
+- Couche 2 (auto/chaque feature) : node tools/test-parcours.js — 5 parcours Puppeteer (chargement, saisie, analyse, resultats, PDF)
+- Couche 3 (LLM/avant deploy important) : screenshots + audit visuel via API Mammouth (~0.05$)
+- Couche 4 (humain/5min) : CHECKLIST.md — 15 points a verifier sur telephone
+- Regle : JAMAIS deployer une feature sans au moins couches 1+2. Couches 3+4 avant release importante.
+
 ## Outils QA (dans tools/)
 - tools/analyse-qa.js : QA visuel rapide DOM + Claude Sonnet (~0.02$)
 - tools/verify-bugs.js : Verification DOM des bugs IA (0$)

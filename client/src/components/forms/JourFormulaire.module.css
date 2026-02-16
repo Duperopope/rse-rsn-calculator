@@ -32,7 +32,7 @@
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
   color: #fff;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 13px;
   padding: 4px 12px;
   border-radius: 20px;
   white-space: nowrap;
@@ -44,7 +44,7 @@
   border: 1px solid var(--border, #2a2a3e);
   border-radius: 10px;
   padding: 8px 12px;
-  font-size: 0.88rem;
+  font-size: 14px;
   transition: border-color 0.2s;
 }
 .dateInput:focus { border-color: var(--accent, #00d4ff); outline: none; }
@@ -81,7 +81,7 @@
 }
 
 .templatesLabel {
-  font-size: 0.78rem;
+  font-size: 13px;
   color: var(--text-secondary, #888);
   font-weight: 600;
   text-transform: none;
@@ -100,7 +100,7 @@
   gap: 8px;
   padding: 10px 16px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -154,7 +154,7 @@
 }
 
 .colHead {
-  font-size: 0.68rem;
+  font-size: 12px;
   color: var(--text-secondary, #888);
   font-weight: 600;
   text-transform: uppercase;
@@ -188,7 +188,7 @@
   cursor: pointer;
   transition: all 0.2s;
   flex: 0 0 140px;
-  min-height: 36px;
+  min-height: 44px;
   background: transparent;
 }
 @media (hover: hover) {
@@ -196,7 +196,7 @@
 }
 
 .activiteTypeName {
-  font-size: 0.82rem;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -207,7 +207,7 @@
   border: 1px solid var(--border, #2a2a3e);
   border-radius: 12px;
   padding: 10px 12px;
-  font-size: 0.88rem;
+  font-size: 14px;
   width: 95px;
   font-variant-numeric: tabular-nums;
   text-align: center;
@@ -217,14 +217,14 @@
 
 .fleche {
   color: var(--text-secondary, #888);
-  font-size: 0.9rem;
+  font-size: 14px;
   flex-shrink: 0;
   width: 20px;
   text-align: center;
 }
 
 .dureeLabel {
-  font-size: 0.78rem;
+  font-size: 13px;
   color: var(--text-secondary, #888);
   min-width: 50px;
   text-align: right;
@@ -280,7 +280,7 @@
   gap: 6px;
   padding: 8px 14px;
   border-radius: 10px;
-  font-size: 0.82rem;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -290,6 +290,7 @@
   background: var(--bg-input, #1a1a2e);
   border: 1px solid var(--border, #2a2a3e);
   color: var(--text-secondary, #888);
+  min-height: 44px;
 }
 @media (hover: hover) {
   .typeBtn:hover { color: var(--text, #e0e0e0); border-color: var(--text-secondary, #888); }
@@ -314,7 +315,7 @@
   background: transparent;
   border: 2px dashed var(--border, #2a2a3e);
   color: var(--text-secondary, #888);
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 600;
   transition: all 0.2s;
   cursor: pointer;
@@ -346,20 +347,20 @@
 }
 
 .resumeLabel {
-  font-size: 0.78rem;
+  font-size: 13px;
   color: var(--text-secondary, #888);
   font-weight: 600;
 }
 
 .resumeValueOk {
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 700;
   color: var(--accent-green, #00ff88);
   font-variant-numeric: tabular-nums;
 }
 
 .resumeValueDanger {
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 700;
   color: var(--accent-red, #ff4444);
   font-variant-numeric: tabular-nums;
@@ -404,14 +405,14 @@
     align-items: center;
   }
 
-  .activiteTypeBtn { flex: 0 0 auto; min-height: 40px; padding: 6px 10px; }
+  .activiteTypeBtn { flex: 0 0 auto; min-height: 44px; padding: 6px 10px; }
   .activiteTypeName { display: none; }
 
   .timeInput { width: 72px; flex: 0 0 72px; min-height: 36px; font-size: 13px; padding: 6px 5px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
 
-  .fleche { width: auto; font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+  .fleche { width: auto; font-size: 13px; color: rgba(255,255,255,0.5); }
 
-  .dureeLabel { width: auto; min-width: auto; text-align: center; font-size: 0.72rem; background: none; padding: 0; border-radius: 0; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; }
+  .dureeLabel { width: auto; min-width: auto; text-align: center; font-size: 12px; background: none; padding: 0; border-radius: 0; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; }
 
   .resume { flex-direction: row; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: flex-start; }
   .resumeSep { display: none; }
@@ -436,7 +437,7 @@
     min-height: 48px;
   }
   .activiteTypeBtn {
-    min-height: 48px;
+    min-height: 44px;
   }
   .timeInput {
     min-height: 44px;
@@ -460,7 +461,7 @@
   gap: 6px;
   padding: 6px 14px;
   border-radius: 10px;
-  font-size: 0.78rem;
+  font-size: 13px;
   font-weight: 600;
   transition: all 0.2s;
   border: 1px solid var(--border, #2a2a3e);
@@ -479,7 +480,7 @@
   .removeBtnLabel:hover { border-color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
 }
 .actionBtnLabel span, .removeBtnLabel span {
-  font-size: 0.78rem;
+  font-size: 13px;
 }
 @media (pointer: coarse) {
   .actionBtnLabel, .removeBtnLabel {
@@ -496,7 +497,7 @@
   position: absolute;
   top: -8px;
   right: 8px;
-  font-size: 0.65rem;
+  font-size: 12px;
   font-weight: 700;
   color: #f44336;
   background: rgba(244, 67, 54, 0.15);
@@ -531,7 +532,7 @@
   background: #dc3545;
   color: #fff;
   border: none;
-  font-size: 0.7rem;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
@@ -541,6 +542,8 @@
   z-index: 0;
   border-radius: 0 12px 12px 0;
   -webkit-tap-highlight-color: transparent;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .swipeDeleteBtn.swipeDeleteBtnVisible {
@@ -572,16 +575,18 @@
   }
   .swipeDeleteBtn {
     display: none;
-  }
+    margin-top: 4px;
+  margin-bottom: 4px;
+}
 }
 
 
 /* min-font-mobile-fix-v2 */
 @media (max-width: 480px) {
-  .activiteTypeName { font-size: 0.78rem; }
+  .activiteTypeName { font-size: 13px; }
 }
 
 /* date-span-mobile-fix */
 @media (max-width: 480px) {
-  .jourTab span, .jourBtn span, .dayButton span, .navJour span, .navJour button span { font-size: 0.7rem; }
+  .jourTab span, .jourBtn span, .dayButton span, .navJour span, .navJour button span { font-size: 12px; }
 }

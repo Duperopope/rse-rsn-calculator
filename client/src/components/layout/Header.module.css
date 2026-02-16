@@ -32,7 +32,7 @@
 }
 .subtitle {
 
-  font-size: 0.69rem;
+  font-size: 12px;
   color: var(--text-secondary, #888);
   white-space: nowrap;
   letter-spacing: 0.04em;
@@ -42,7 +42,7 @@
 
 /* Status */
 .statusOn {
-  font-size: 0.72rem;
+  font-size: 12px;
   color: var(--accent-green, #00ff88);
   display: flex;
   align-items: center;
@@ -58,7 +58,7 @@
   flex-shrink: 0;
 }
 .statusOff {
-  font-size: 0.72rem;
+  font-size: 12px;
   color: var(--accent-red, #ff4444);
   display: flex;
   align-items: center;
@@ -79,12 +79,14 @@
 .themeToggle {
   background: none;
   border: none;
-  padding: 0;
+  padding: 8px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   display: flex;
   align-items: center;
+  min-width: 44px;
+  min-height: 44px;
 }
 .themeToggle:active .themeThumb {
   width: 18px;
@@ -143,7 +145,7 @@
   color: #fff;
   border: none;
   border-radius: 10px;
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.12s, box-shadow 0.12s, opacity 0.12s;
@@ -170,7 +172,7 @@
   color: var(--text, #e0e0e0);
   border: 1px solid var(--border, #2a2a3e);
   border-radius: 10px;
-  font-size: 0.85rem;
+  font-size: 14px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
   position: relative;
@@ -191,7 +193,7 @@
   right: -6px;
   background: var(--accent-red, #ff4444);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 12px;
   font-weight: 700;
   min-width: 18px;
   height: 18px;
@@ -228,7 +230,7 @@
   .subtitle {
  display: none; }
   .logo svg { width: 28px; height: 28px; }
-  .title { font-size: 0.95rem; }
+  .title { font-size: 15px; }
   .themeTrack { width: 34px; height: 20px; }
   .themeThumb { width: 14px; height: 14px; }
   .themeThumbDark { transform: translateX(14px); }
@@ -239,14 +241,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 44px;
+  height: 44px;
   border-radius: 11px;
   border: none;
   background: var(--bg-input, #1a1a2e);
   border: 1px solid var(--border, #2a2a3e);
   color: var(--text-secondary, #888);
-  font-size: 0.72rem;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s, background 0.2s;
@@ -254,6 +256,8 @@
   flex-shrink: 0;
   padding: 0;
   line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
 }
 .helpBtn:hover {
   color: var(--accent, #00d4ff);
@@ -266,19 +270,21 @@
 
 @media (max-width: 480px) {
   .helpBtn {
-    width: 20px;
-    height: 20px;
-    font-size: 0.65rem;
-  }
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    min-width: 44px;
+  min-height: 44px;
+}
 }
 
 /* min-font-mobile-fix-v2 */
 @media (max-width: 480px) {
-  .header button { min-width: 28px; min-height: 28px; font-size: 0.75rem; }
-  .version { font-size: 0.65rem; }
+  .header button { min-width: 28px; min-height: 28px; font-size: 12px; }
+  .version { font-size: 12px; }
 }
 
 /* date-nav-mobile-fix */
 @media (max-width: 480px) {
-  .dayNav span, .jourNav span { font-size: 0.7rem; }
+  .dayNav span, .jourNav span { font-size: 12px; }
 }

@@ -31,7 +31,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -44,7 +44,7 @@
 }
 
 .message {
-  font-size: 0.85rem;
+  font-size: 14px;
   color: var(--text, #e0e0e0);
   font-weight: 600;
   line-height: 1.3;
@@ -54,7 +54,7 @@
   display: inline-block;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.68rem;
+  font-size: 12px;
   font-weight: 700;
   background: rgba(255, 159, 10, 0.15);
   color: #ffaa00;
@@ -75,7 +75,7 @@
 }
 
 .detailRow {
-  font-size: 0.78rem;
+  font-size: 13px;
   color: var(--text-secondary, #888);
   line-height: 1.5;
 }
@@ -107,7 +107,7 @@
 }
 
 .amendeLabel {
-  font-size: 0.62rem;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -116,7 +116,7 @@
 }
 
 .amendeValue {
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -155,7 +155,7 @@
 .dateBadge {
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.68rem;
+  font-size: 12px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-secondary, #888);
@@ -165,7 +165,7 @@
 .navHint {
   margin-top: 8px;
   text-align: center;
-  font-size: 0.68rem;
+  font-size: 12px;
   color: var(--accent, #00d4ff);
   opacity: 0.6;
   font-weight: 500;
@@ -202,7 +202,7 @@
   border-radius: 10px;
   text-decoration: none;
   color: #4da3ff;
-  font-size: 0.82rem;
+  font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -236,24 +236,24 @@
   border-radius: 10px;
   background: rgba(0, 132, 255, 0.15);
   color: #0084ff;
-  font-size: 0.7rem;
+  font-size: 12px;
   font-weight: 600;
   margin-left: 6px;
   white-space: nowrap;
 }
 
 /* === Explications Amende === */
-.amendeExplain { margin-top: 8px; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); font-size: 0.78rem; line-height: 1.5; }
+.amendeExplain { margin-top: 8px; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); font-size: 13px; line-height: 1.5; }
 .amendeWho { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: rgba(255,255,255,0.8); }
 .amendeWhoIcon { font-size: 1rem; }
 .amendeConditions { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
 .amendeCondItem { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.7); }
-.condBadge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; font-weight: 700; }
+.condBadge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: 700; }
 .condMinore { background: rgba(0,200,100,0.15); color: #00c864; }
 .condForfait { background: rgba(0,150,255,0.15); color: #0096ff; }
 .condMajore { background: rgba(255,170,0,0.15); color: #ffaa00; }
 .condMax { background: rgba(255,68,68,0.15); color: #ff4444; }
-.amendeNote { color: rgba(255,255,255,0.45); font-size: 0.72rem; font-style: italic; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; }
+.amendeNote { color: rgba(255,255,255,0.45); font-size: 12px; font-style: italic; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; }
 /* Explications amende */
 .amendeExplain {
   margin-top: 10px;
@@ -261,7 +261,7 @@
   background: rgba(255,255,255,0.03);
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.06);
-  font-size: 0.82rem;
+  font-size: 13px;
   line-height: 1.5;
 }
 .amendeWho {
@@ -292,7 +292,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -316,7 +316,7 @@
   margin: 8px 0 0 0;
   padding-top: 8px;
   border-top: 1px solid rgba(255,255,255,0.06);
-  font-size: 0.75rem;
+  font-size: 12px;
   color: var(--text-secondary, #888);
   font-style: italic;
 }
@@ -338,12 +338,12 @@
   margin-top: 1px;
 }
 .explicationText {
-  font-size: 0.75rem;
+  font-size: 12px;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.75);
   margin: 0;
 }
 @media (max-width: 480px) {
-  .explicationText { font-size: 0.7rem; }
+  .explicationText { font-size: 12px; }
   .explicationBlock { padding: 8px 10px; }
 }

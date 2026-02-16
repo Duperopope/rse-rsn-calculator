@@ -58,7 +58,7 @@
 }
 
 .scoreSummary {
-  font-size: 0.85rem;
+  font-size: 14px;
   color: var(--text-secondary, #888);
 }
 
@@ -104,7 +104,7 @@
   background: rgba(255, 170, 0, 0.06);
   border: 1px solid rgba(255, 170, 0, 0.15);
   border-radius: 10px;
-  font-size: 0.85rem;
+  font-size: 14px;
   color: var(--text, #e0e0e0);
 }
 
@@ -118,16 +118,16 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.75rem;
+  font-size: 12px;
   flex-shrink: 0;
 }
 
-.toggleBtn { padding: 8px 12px; font-size: 0.8rem;
+.toggleBtn { padding: 8px 12px; font-size: 13px;
   border-radius: 8px;
   background: var(--bg-input, #1a1a2e);
   color: var(--accent, #00d4ff);
   border: 1px solid var(--border, #2a2a3e);
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 600;
   transition: border-color 0.2s;
   align-self: flex-start;
@@ -158,7 +158,7 @@
 .detailStats {
   display: flex;
   gap: 16px;
-  font-size: 0.82rem;
+  font-size: 13px;
   color: var(--text-secondary, #888);
   flex-wrap: wrap;
 }
@@ -169,7 +169,7 @@
   background: var(--bg-input, #1a1a2e);
   color: var(--text-secondary, #888);
   border: 1px solid var(--border, #2a2a3e);
-  font-size: 0.85rem;
+  font-size: 14px;
   transition: border-color 0.2s, color 0.2s;
   align-self: center;
 }
@@ -205,14 +205,14 @@
 
 .statsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 1rem; }
 .statItem { text-align: center; }
-.statLabel { display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.25rem; }
+.statLabel { display: block; font-size: 12px; color: #888; margin-bottom: 0.25rem; }
 .statValue { display: block; font-size: 1.1rem; font-weight: 600; color: #e0e0e0; }
-.equipageBadge { display: inline-block; background: rgba(0,212,255,0.15); color: #00d4ff; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; margin-top: 0.3rem; }
-.periode { display: block; font-size: 0.8rem; color: #888; margin-top: 0.2rem; }
-.detailStats { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.85rem; color: #aaa; padding: 0.5rem 0; }
+.equipageBadge { display: inline-block; background: rgba(0,212,255,0.15); color: #00d4ff; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 13px; margin-top: 0.3rem; }
+.periode { display: block; font-size: 13px; color: #888; margin-top: 0.2rem; }
+.detailStats { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 14px; color: #aaa; padding: 0.5rem 0; }
 .detailInf { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
-.detailInfItem { background: rgba(255,68,68,0.15); color: #ff4444; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
-.detailOk { color: #00ff88; font-size: 0.85rem; }
+.detailInfItem { background: rgba(255,68,68,0.15); color: #ff4444; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 13px; }
+.detailOk { color: #00ff88; font-size: 14px; }
 
 
 /* === QOL 8: Score reveal animation === */
@@ -264,8 +264,8 @@
 
 @media (max-width: 640px) {
   .exportBtns { flex-direction: row; gap: 8px; }
-  .pdfBtn { padding: 10px 16px; font-size: 0.8rem; }
-  .printBtn { padding: 10px 16px; font-size: 0.8rem; flex: 1; }
+  .pdfBtn { padding: 10px 16px; font-size: 13px; }
+  .printBtn { padding: 10px 16px; font-size: 13px; flex: 1; }
 }
 
 /* printBtnMobileHide — Imprimer masque sur mobile */
@@ -275,7 +275,7 @@
   .pdfBtn {
     width: 100%;
     padding: 10px 16px;
-    font-size: 0.85rem;
+    font-size: 14px;
     border-radius: 10px;
   }
 }
@@ -283,15 +283,15 @@
 .detailJour { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--accent-green, #00ff88); transition: all 0.2s; }
 .detailJourWarn { border-left-color: var(--accent-red, #ff4444); background: rgba(255,68,68,0.04); }
 .detailHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.detailDate { font-weight: 700; font-size: 0.85rem; color: #fff; }
-.detailBadgeOk { background: rgba(0,255,136,0.15); color: #00ff88; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-.detailBadgeDanger { background: rgba(255,68,68,0.15); color: #ff4444; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+.detailDate { font-weight: 700; font-size: 14px; color: #fff; }
+.detailBadgeOk { background: rgba(0,255,136,0.15); color: #00ff88; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.detailBadgeDanger { background: rgba(255,68,68,0.15); color: #ff4444; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
 .detailGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; }
 .detailStat { display: flex; flex-direction: column; align-items: center; }
 .detailStatLabel { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.03em; }
-.detailStatVal { font-size: 0.85rem; font-weight: 600; color: #fff; }
+.detailStatVal { font-size: 14px; font-weight: 600; color: #fff; }
 .detailInf { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-.detailInfItem { background: rgba(255,68,68,0.12); color: #ff6666; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; }
+.detailInfItem { background: rgba(255,68,68,0.12); color: #ff6666; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
 /* Bouton retour saisie */
 .backBtn {
   padding: 10px 16px;
@@ -299,7 +299,7 @@
   background: rgba(255,255,255,0.05);
   color: rgba(255,255,255,0.7);
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }

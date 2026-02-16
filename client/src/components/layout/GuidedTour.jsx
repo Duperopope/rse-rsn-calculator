@@ -113,7 +113,7 @@ var JOYRIDE_STYLES = {
     color: '#f1f5f9',
   },
   tooltipContent: {
-    fontSize: '0.92rem',
+    fontSize: '15px',
     lineHeight: 1.6,
     color: '#cbd5e1',
   },
@@ -122,13 +122,13 @@ var JOYRIDE_STYLES = {
     borderRadius: '10px',
     color: '#fff',
     fontWeight: 600,
-    fontSize: '0.9rem',
+    fontSize: '14px',
     padding: '8px 20px',
   },
   buttonBack: {
     color: '#94a3b8',
     fontWeight: 500,
-    fontSize: '0.9rem',
+    fontSize: '14px',
     marginRight: '8px',
   },
   buttonSkip: {

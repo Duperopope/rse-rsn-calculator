@@ -223,5 +223,32 @@ body {
   html { font-size: 16px; }
 }
 @media (max-width: 375px) {
-  html { font-size: 15px; }
+  html { font-size: 16px; }
+}
+
+/* === DESIGN STANDARDS WCAG 2.2 + Material Design 3 === */
+/* Touch targets minimum 44x44px */
+button, a, [role="button"], input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Font minimum 12px, line-height 1.4 */
+* {
+  font-size: inherit;
+}
+body {
+  font-size: 14px;
+  line-height: 1.5;
+}
+small, .small {
+  font-size: 12px;
+}
+
+/* Chips parametres — lisibilite */
+[class*="paramChip"], [class*="chip"] {
+  font-size: 13px;
+  line-height: 1.4;
+  min-height: 44px;
+  padding: 8px 12px;
 }
