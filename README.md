@@ -150,7 +150,7 @@ Types : `C` = Conduite, `P` = Pause, `T` = Travail, `D` = Disponibilite, `R` = R
 - **Documentation projet** : CLAUDE.md, CLAUDE-updates.md, CLAUDE-current.md
 - **Pipeline QA** : 5 outils automatises (analyse-qa, verify-bugs, audit-complet, test-tour, check-targets)
 - **Format API corrige** : /api/analyze accepte JSON {csv, typeService, pays, equipage}
-- **Timeline enrichie** : detection travail de nuit (21h-6h), bandes visuelles nocturnes, navigation InfractionCard vers timeline corrigee sur mobile
+- **Timeline v2** : track 64px mobile, fusion zones depassement, bandes nuit subtiles, pins Google Maps, navigation InfractionCard corrigee, blocs min 10px tactile
 
 ### v7.11.0 (2025-02-14) — FIMO Check: UX Conducteur
 - Rebrand complet: RSE/RSN Calculator -> FIMO Check

@@ -7,6 +7,28 @@ import styles from './Timeline24h.module.css';
  * Calcule les zones de depassement pour colorer les blocs en rouge
  * Retourne {zones: [{startMin, endMin, type, label, detail}], marqueurs: [...]}
  */
+
+/**
+ * Fusionne les zones de depassement qui se chevauchent
+ * pour eviter les empilements visuels
+ */
+function fusionnerZones(zones) {
+  if (zones.length <= 1) return zones;
+  var sorted = zones.slice().sort(function(a, b) { return a.startMin - b.startMin; });
+  var merged = [sorted[0]];
+  for (var i = 1; i < sorted.length; i++) {
+    var last = merged[merged.length - 1];
+    if (sorted[i].startMin <= last.endMin) {
+      last.endMin = Math.max(last.endMin, sorted[i].endMin);
+      last.label = last.label + " + " + sorted[i].label;
+      last.type = "multiple";
+    } else {
+      merged.push(sorted[i]);
+    }
+  }
+  return merged;
+}
+
 function analyserInfractions(activites) {
   const zones = [];
   const marqueurs = [];
@@ -181,7 +203,8 @@ export function Timeline24h({ activites = [], theme = 'dark', onActiviteClick, e
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  const { zones, marqueurs: infractions } = useMemo(() => analyserInfractions(activites), [activites]);
+  const { zones: rawZones, marqueurs: infractions } = useMemo(() => analyserInfractions(activites), [activites]);
+  const zones = useMemo(() => fusionnerZones(rawZones), [rawZones]);
   const totalMin = 1440;
 
   function getCouleur(type) {

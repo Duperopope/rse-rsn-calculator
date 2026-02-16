@@ -1,32 +1,34 @@
+/* Timeline24h - v2 UX mobile */
 .container {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   padding: 12px 0;
   user-select: none;
 }
 
 .labels {
   position: relative;
-  height: 18px;
-  margin: 0 10px;
+  height: 20px;
+  margin: 0 12px;
 }
 
 .heure {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   color: var(--text-secondary, #888);
   font-variant-numeric: tabular-nums;
+  font-weight: 500;
 }
 
 .track {
   position: relative;
-  height: 28px;
+  height: 56px;
   background: var(--bg-input, #1a1a2e);
-  border-radius: 6px;
-  margin: 0 10px;
-  overflow: hidden;
+  border-radius: 10px;
+  margin: 0 12px;
+  overflow: visible;
 }
 
 .gridLine {
@@ -35,70 +37,68 @@
   bottom: 0;
   width: 1px;
   background: var(--border, #2a2a3e);
-  opacity: 0.5;
+  opacity: 0.3;
   pointer-events: none;
 }
 
-.bloc { cursor: pointer;
+.bloc {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
-  border-radius: 3px;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.15s;
-  min-width: 2px;
+  min-width: 6px;
+  z-index: 2;
 }
 
 @media (hover: hover) {
   .bloc:hover {
-  opacity: 0.85;
-  transform: scaleY(1.15);
-  z-index: 2;
-}
+    opacity: 0.85;
+    transform: scaleY(1.1);
+    z-index: 3;
+  }
 }
 
+.bloc:active {
+  opacity: 0.7;
+  transform: scaleY(1.15);
+  z-index: 4;
+}
+
+/* === LEGENDE === */
 .legende {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin: 4px 10px 0;
+  margin: 6px 12px 0;
 }
 
 .legendeItem {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.7rem;
+  gap: 5px;
+  font-size: 0.72rem;
   color: var(--text-secondary, #888);
 }
 
 .legendeDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
   flex-shrink: 0;
 }
 
-@media (max-width: 480px) {
-  .track {
-    height: 22px;
-  }
-  .legende {
-    gap: 8px;
-  }
-}
-
-
-/* === Tooltip bulle tactile === */
+/* === TOOLTIP === */
 .tooltipBubble {
   background: var(--bg-card, #16213e);
   color: var(--text, #e0e0e0);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.78rem;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   border: 1px solid var(--accent, #00d4ff);
   pointer-events: auto;
   animation: tooltipFadeIn 0.15s ease;
@@ -109,114 +109,103 @@
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* Feedback tactile sur blocs */
-.bloc:active {
-  opacity: 0.7;
-  transform: scaleY(1.3);
-  z-index: 3;
-}
-
-/* Augmenter zone tactile blocs */
-@media (pointer: coarse) {
-  .track {
-    height: 40px;
-    min-height: 44px;
-  }
-  .bloc { cursor: pointer;
-    top: 0;
-    bottom: 0;
-    min-width: 8px;
-  }
-}
-
-
-/* === MARQUEURS D'INFRACTION === */
+/* === BARRE INFRACTION HAUT === */
 .infractionBar {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
-  background: rgba(255, 59, 48, 0.12);
-  border-radius: 6px;
-  margin: 0 10px 4px;
+  padding: 6px 14px;
+  background: rgba(255, 59, 48, 0.1);
+  border-radius: 8px;
+  margin: 0 12px 6px;
   border-left: 3px solid #ff3b30;
 }
 
 .infractionCount {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #ff6b6b;
-  letter-spacing: 0.02em;
 }
 
+/* === ZONES DE DEPASSEMENT === */
+.zoneDepassement {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 8px;
+  border-top: 2px solid #ff3b30;
+  border-bottom: 2px solid #ff3b30;
+}
+
+.zoneHachures {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 59, 48, 0.15);
+}
+
+.zoneDepassement:active {
+  transform: scaleY(1.1);
+}
+
+.legendeDepassement {
+  background: #ff3b30 !important;
+  opacity: 0.6;
+  border-radius: 3px !important;
+}
+
+/* === MARQUEURS INFRACTION === */
 .marqueurInfraction {
   position: absolute;
-  top: -6px;
-  bottom: -6px;
-  width: 3px;
+  top: -10px;
+  width: 20px;
+  height: 20px;
   transform: translateX(-50%);
   z-index: 10;
   cursor: pointer;
-  transition: transform 0.15s;
 }
 
-.marqueurInfraction:active {
-  transform: translateX(-50%) scaleX(2);
-}
-
-.marqueurDanger {
+.marqueurDanger .marqueurPin {
   background: #ff3b30;
-  box-shadow: 0 0 8px rgba(255, 59, 48, 0.6);
 }
 
-.marqueurWarning {
-  background: #ff4757;
-  box-shadow: 0 0 8px rgba(255, 159, 10, 0.6);
+.marqueurWarning .marqueurPin {
+  background: #ff9500;
 }
 
 .marqueurPin {
   position: absolute;
-  top: -4px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: inherit;
+  width: 12px;
+  height: 12px;
+  border-radius: 50% 50% 50% 0;
+  transform: translateX(-50%) rotate(-45deg);
   border: 2px solid #fff;
   z-index: 11;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 .marqueurPulse {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: inherit;
-  opacity: 0.3;
-  animation: pulseInfraction 2s infinite;
+  display: none;
 }
 
-@keyframes pulseInfraction {
-  0% { transform: translateX(-50%) scale(0.5); opacity: 0.4; }
-  50% { transform: translateX(-50%) scale(1.2); opacity: 0; }
-  100% { transform: translateX(-50%) scale(0.5); opacity: 0.4; }
-}
-
+/* === DETAIL INFRACTION === */
 .infractionDetail {
-  margin: 6px 10px 0;
-  padding: 10px 14px;
-  background: rgba(255, 59, 48, 0.08);
-  border: 1px solid rgba(255, 59, 48, 0.25);
-  border-radius: 10px;
+  margin: 8px 12px 0;
+  padding: 12px 16px;
+  background: rgba(255, 59, 48, 0.06);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  border-radius: 12px;
   animation: slideInfraction 0.2s ease;
 }
 
 @keyframes slideInfraction {
-  from { opacity: 0; transform: translateY(-6px); }
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -239,131 +228,98 @@
 
 .infractionTime {
   margin-left: auto;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #ff4757;
   font-variant-numeric: tabular-nums;
 }
 
 .infractionBody {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-secondary, #888);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
-.legendeInfraction {
-  background: #ff3b30 !important;
-  box-shadow: 0 0 4px rgba(255, 59, 48, 0.5);
-  animation: pulseInfraction 2s infinite;
-}
-
-@media (pointer: coarse) {
-  .marqueurInfraction {
-    width: 20px;
-    background: transparent;
-  }
-  .marqueurDanger {
-    border-left: 3px solid #ff3b30;
-  }
-  .marqueurDanger .marqueurPin {
-    background: #ff3b30;
-  }
-  .marqueurWarning {
-    border-left: 3px solid #ff4757;
-  }
-  .marqueurWarning .marqueurPin {
-    background: #ff4757;
-  }
-}
-
-
-/* === ZONES DE DEPASSEMENT === */
-.zoneDepassement {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 5;
-  cursor: pointer;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.zoneHachures {
-  width: 100%;
-  height: 100%;
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(255, 59, 48, 0.5),
-    rgba(255, 59, 48, 0.5) 3px,
-    rgba(255, 59, 48, 0.2) 3px,
-    rgba(255, 59, 48, 0.2) 6px
-  );
-  animation: zonePulse 2s ease-in-out infinite;
-}
-
-@keyframes zonePulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-.zoneDepassement:active {
-  transform: scaleY(1.15);
-}
-
-.legendeDepassement {
-  background: repeating-linear-gradient(
-    -45deg,
-    #ff3b30,
-    #ff3b30 2px,
-    rgba(255, 59, 48, 0.3) 2px,
-    rgba(255, 59, 48, 0.3) 4px
-  ) !important;
-  border-radius: 2px !important;
-}
-
-@media (pointer: coarse) {
-  .zoneDepassement {
-    min-width: 12px;
-  }
-}
-
-/* === BADGE EQUIPAGE SOLO/DUO === */
+/* === BADGE EQUIPAGE === */
 .equipageBadge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.68rem;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
   font-weight: 600;
-  margin: 0 10px 4px;
+  margin: 0 12px 4px;
   width: fit-content;
 }
+
 .equipageSolo {
-  background: rgba(0, 212, 255, 0.1);
-  border: 1px solid rgba(0, 212, 255, 0.3);
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.25);
   color: #00d4ff;
 }
+
 .equipageDuo {
-  background: rgba(170, 68, 255, 0.1);
-  border: 1px solid rgba(170, 68, 255, 0.3);
+  background: rgba(170, 68, 255, 0.08);
+  border: 1px solid rgba(170, 68, 255, 0.25);
   color: #aa44ff;
 }
+
 .equipageIcon {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
+
 .equipageLabel {
   letter-spacing: 0.03em;
 }
 
-/* === BANDES VISUELLES NUIT 21h-6h === */
+/* === BANDES NUIT 21h-6h === */
 .nightZone {
   position: absolute;
   top: 0;
   bottom: 0;
-  background: rgba(99, 102, 241, 0.08);
-  border-left: 1px dashed rgba(99, 102, 241, 0.25);
-  border-right: 1px dashed rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.06);
+  border-left: 1px dashed rgba(99, 102, 241, 0.2);
+  border-right: 1px dashed rgba(99, 102, 241, 0.2);
   pointer-events: none;
   z-index: 0;
+}
+
+/* === MOBILE === */
+@media (pointer: coarse) {
+  .track {
+    height: 64px;
+    min-height: 64px;
+    border-radius: 12px;
+  }
+  .bloc {
+    top: 6px;
+    bottom: 6px;
+    min-width: 10px;
+    border-radius: 8px;
+  }
+  .zoneDepassement {
+    min-width: 14px;
+  }
+  .marqueurInfraction {
+    width: 28px;
+    height: 28px;
+    top: -14px;
+  }
+  .marqueurPin {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .legende {
+    gap: 8px;
+  }
+  .labels {
+    margin: 0 8px;
+  }
+  .track {
+    margin: 0 8px;
+  }
 }
