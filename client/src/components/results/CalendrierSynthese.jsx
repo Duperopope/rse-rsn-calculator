@@ -45,7 +45,7 @@ export function CalendrierSynthese({ details }) {
     <div className={styles.container}>
       <button className={styles.toggleBtn} onClick={function () { setOpen(!open); }}>
         <span className={styles.toggleIcon}>{open ? '\u25B2' : '\u25BC'}</span>
-        <span className={styles.toggleLabel}>Synth\u00e8se {details.length} jour{details.length > 1 ? 's' : ''}</span>
+        <span className={styles.toggleLabel}>Synthèse {details.length} jour{details.length > 1 ? 's' : ''}</span>
         <span className={styles.toggleStats}>
           <span className={styles.statCyan}>{totalConduite.toFixed(1)}h</span>
           <span className={styles.statOrange}>{totalTravail.toFixed(1)}h</span>
