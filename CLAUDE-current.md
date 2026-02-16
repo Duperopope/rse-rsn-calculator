@@ -1,13 +1,8 @@
 # Tache en cours
 
-## Statut: AUCUNE TACHE EN COURS
+## Statut: README MIS A JOUR
 
-## Derniere tache terminee
-- Explications pedagogiques InfractionCard (eddef05)
-- 12 types infractions avec texte clair, zero hallucination
-- Teste: 4/4 explications correctes sur scenario infractional
-
-## Prochaines idees
-- Mode exercice FIMO (scenarii predefinies, correction auto)
-- Ameliorer les textes explications apres tests utilisateurs
-- Verifier rendu visuel des explications (screenshot)
+## Details
+- README.md reecrit : v7.25.1, 56 tests, 44 URLs, explications pedagogiques
+- Ajout : pipeline QA, format API, sources Legifrance completes, signature auteur
+- Commit en attente de push
