@@ -12,7 +12,7 @@ import styles from './ResultPanel.module.css';
  * Panneau de resultats complet apres analyse
  * Score anime, infractions, avertissements, details par jour, sanctions
  */
-export function ResultPanel({ resultat, compact = false }) {
+export function ResultPanel({ resultat, compact = false, onBack = null }) {
   const [animScore, setAnimScore] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -241,7 +241,15 @@ export function ResultPanel({ resultat, compact = false }) {
 
       <SanctionTable />
       <div className={styles.exportBtns}>
-        <button className={styles.pdfBtn} onClick={function() { window.print(); }}>
+        {onBack ? (
+          <button className={styles.backBtn} onClick={onBack}>
+            Retour a la saisie
+          </button>
+        ) : null}
+        <button className={styles.pdfBtn} onClick={telechargerPDF} disabled={pdfLoading}>
+          {pdfLoading ? "Generation..." : "Telecharger PDF"}
+        </button>
+        <button className={styles.printBtn} onClick={function() { window.print(); }}>
           Imprimer
         </button>
       </div>

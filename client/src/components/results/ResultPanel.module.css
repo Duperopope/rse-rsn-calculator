@@ -292,3 +292,18 @@
 .detailStatVal { font-size: 0.85rem; font-weight: 600; color: #fff; }
 .detailInf { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .detailInfItem { background: rgba(255,68,68,0.12); color: #ff6666; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; }
+/* Bouton retour saisie */
+.backBtn {
+  padding: 10px 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.backBtn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}

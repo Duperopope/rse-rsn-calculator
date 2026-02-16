@@ -1022,7 +1022,7 @@ export default function Calculator() {
 
         {bottomTab === "resultats" && resultat && !chargement ? (
           <div data-tour="results" className={styles.resultInlineWrap}>
-            <ResultPanel resultat={resultat} compact />
+            <ResultPanel resultat={resultat} compact onBack={function() { setBottomTab("saisie"); window.scrollTo(0, 0); }} />
           </div>
         ) : (
           <div data-tour="input" className={styles.inputSection}>
