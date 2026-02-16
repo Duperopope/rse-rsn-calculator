@@ -81,7 +81,7 @@
 
 ## API endpoints
 - GET /api/health : etat du serveur
-- POST /api/analyze : analyse CSV (body: CSV texte + params query string)
+- POST /api/analyze : body JSON {csv: "lignes CSV", typeService: "SLO", pays: "FR", equipage: "solo"}
 - POST /api/rapport/pdf : generation PDF (body: {resultat, options})
 
 ## Format CSV pour /api/analyze
