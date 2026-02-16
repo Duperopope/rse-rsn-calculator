@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 
 import { useAnalysis } from '../hooks/useAnalysis.js';
+import { useJours } from '../hooks/useJours.js';
 
 
 import { useLocalStorage } from '../hooks/useLocalStorage.js';
@@ -126,6 +127,17 @@ export default function Calculator() {
 
   const [mode, setMode] = useState('formulaire');
 
+  // === Hook unifie jours ===
+  const joursData = useJours(equipage, typeService);
+
+  // Derogations depuis le hook (remplace window.__)
+  const nbDerogConduite = joursData.derogations.nbDerogConduite;
+  const amplNormal = joursData.derogations.amplNormal;
+  const amplMax = joursData.derogations.amplMax;
+  // Passerelles window.__ (PanneauJauges les lit encore)
+  if (typeof window !== 'undefined') { window.__nbDerogConduite = nbDerogConduite; window.__amplNormal = amplNormal; window.__amplMax = amplMax; }
+
+
 
   const [csvTexte, setCsvTexte] = useState('');
 
@@ -153,7 +165,7 @@ export default function Calculator() {
   }, [voirHistorique]);
 
 
-  const [statsJour, setStatsJour] = useState(null);
+  const statsJour = joursData.statsJour;
 
 
   const [jourActifIndex, setJourActifIndex] = useState(0);
@@ -345,7 +357,7 @@ export default function Calculator() {
         window.__amplNormal = amplNormal;
         window.__amplMax = amplActuelle > amplNormal ? amplDerog : amplNormal;
 
-        setStatsJour(calculerStatsJour(jours[idx].activites));
+        // statsJour fourni par useJours
 
 
       }
@@ -840,7 +852,7 @@ export default function Calculator() {
 
 
 
-            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} nbDerogConduite={window.__nbDerogConduite || 0} jours={jours} jourActifIndex={jourActifIndex} />}
+            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} nbDerogConduite={nbDerogConduite} jours={jours} jourActifIndex={jourActifIndex} />}
 
 
             {(dashExpanded || window.innerWidth >= 769) && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
@@ -945,14 +957,14 @@ export default function Calculator() {
                   <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteBloc >= 270 ? 'var(--danger, #EF4444)' : statsJour.conduiteBloc >= 216 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.conduiteBloc || 0) / 60)}h{String(Math.round((statsJour.conduiteBloc || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteTotale >= (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)'} /> Jour</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteTotale || 0) / (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) * 100, 100) + '%', background: statsJour.conduiteTotale >= (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteTotale >= (window.__nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.conduiteTotale || 0) / 60)}h{String(Math.round((statsJour.conduiteTotale || 0) % 60)).padStart(2, '0')}</span>
+                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteTotale >= (nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)'} /> Jour</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteTotale || 0) / (nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) * 100, 100) + '%', background: statsJour.conduiteTotale >= (nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteTotale >= (nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.conduiteTotale || 0) / 60)}h{String(Math.round((statsJour.conduiteTotale || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke={statsJour.amplitude >= (window.__amplMax || 780) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (window.__amplNormal || 660) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Ampl.</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.amplitude || 0) / (window.__amplMax || 780) * 100, 100) + '%', background: statsJour.amplitude >= (window.__amplMax || 780) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (window.__amplNormal || 660) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.amplitude >= (window.__amplMax || 780) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (window.__amplNormal || 660) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.amplitude || 0) / 60)}h{String(Math.round((statsJour.amplitude || 0) % 60)).padStart(2, '0')}</span>
+                  <span className={styles.miniJaugeLabel}><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke={statsJour.amplitude >= (amplMax) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (amplNormal) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Ampl.</span>
+                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.amplitude || 0) / (amplMax) * 100, 100) + '%', background: statsJour.amplitude >= (amplMax) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (amplNormal) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }} /></div>
+                  <span className={styles.miniJaugeVal} style={{ color: statsJour.amplitude >= (amplMax) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (amplNormal) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.amplitude || 0) / 60)}h{String(Math.round((statsJour.amplitude || 0) % 60)).padStart(2, '0')}</span>
                 </div>
                 <div className={styles.miniJauge}>
                   <span className={styles.miniJaugeLabel}><IconePause size={14} color={(statsJour.pauseTotale || 0) >= 45 ? 'var(--success, #10B981)' : (statsJour.pauseTotale || 0) >= 22 ? 'var(--warning, #F59E0B)' : 'var(--danger, #EF4444)'} /> Pause</span>
