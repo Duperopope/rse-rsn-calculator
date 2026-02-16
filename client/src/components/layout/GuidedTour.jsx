@@ -2,52 +2,46 @@ import React, { useState, useEffect } from 'react';
 import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
 
 /* ============================================================
-   GuidedTour v2 — React Joyride + auto-hide dashboard
-   8 etapes, theme sombre FIMO Check, glow cyan.
-   Les etapes 6-7 (activite/ajouter) masquent le sticky dashboard
-   pour liberer le viewport.
+   GuidedTour v3.1 — 10 etapes adaptees a la visibilite DOM
+   Etapes 1-6: elements toujours presents
+   Etapes 7-10: elements toujours presents (header, params, input)
+   Les cibles conditionnelles (timeline, gauges, results)
+   sont couvertes par le texte explicatif.
    ============================================================ */
 
-const STEPS = [
+var STEPS = [
   {
     target: '[data-tour="header"]',
     title: '\uD83C\uDFAF Bienvenue sur FIMO Check !',
-    content: 'Votre assistant de conformite RSE/RSN. Ce guide vous presente les zones principales en 8 etapes rapides.',
+    content: 'Verifiez en quelques clics si vos temps de conduite respectent la reglementation. Ce guide vous montre tout en 10 etapes simples.',
     placement: 'bottom',
     disableBeacon: true,
   },
   {
     target: '[data-tour="params"]',
-    title: '\u2699\uFE0F Parametres de conduite',
-    content: 'Definissez ici le type de transport (marchandises/voyageurs), le pays et les seuils reglementaires. Ces parametres conditionnent toute l\'analyse.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="gauges"]',
-    title: '\uD83D\uDCCA Jauges en temps reel',
-    content: 'Les jauges se mettent a jour automatiquement. Vert = conforme, orange = attention, rouge = depassement. Survolez pour voir les details.',
-    placement: 'bottom',
-    disableBeacon: true,
-  },
-  {
-    target: '[data-tour="timeline"]',
-    title: '\uD83D\uDD52 Frise chronologique 24h',
-    content: 'Visualisez votre journee complete : Conduite (bleu), Repos (vert), Travail (orange), Disponibilite (jaune), Pause (violet). Les zones rouges signalent les depassements.',
+    title: '\u2699\uFE0F Vos parametres',
+    content: 'Choisissez votre type de service (Urbain, SLO, Occasionnel), votre pays et si vous roulez seul ou en equipage. Tout le calcul s\'adapte automatiquement.',
     placement: 'bottom',
     disableBeacon: true,
   },
   {
     target: '[data-tour="jour-tabs"]',
-    title: '\uD83D\uDCC5 Navigation multi-jours',
-    content: 'Basculez entre les jours pour verifier la conformite sur plusieurs journees consecutives. Chaque jour a sa propre frise et ses propres activites.',
+    title: '\uD83D\uDCC5 Vos journees',
+    content: 'Chaque onglet represente un jour. Cliquez sur "+" pour ajouter des jours et analyser une semaine complete. Le point de couleur sous chaque onglet indique le statut.',
+    placement: 'bottom',
+    disableBeacon: true,
+  },
+  {
+    target: '[data-tour="templates"]',
+    title: '\u26A1 Remplissage rapide',
+    content: 'Pas envie de tout saisir ? Cliquez sur un modele pour pre-remplir une journee type. Ideal pour tester rapidement.',
     placement: 'bottom',
     disableBeacon: true,
   },
   {
     target: '[data-tour="activite"]',
     title: '\uD83D\uDCCB Vos activites',
-    content: 'Chaque ligne represente une activite. Cliquez le type pour modifier, renseignez debut/fin. La poubelle rouge supprime. Utilisez les modeles rapides au-dessus pour pre-remplir.',
+    content: 'Chaque ligne est une activite : conduite, pause, repos, travail. Modifiez le type en cliquant dessus, ajustez les horaires de debut et fin.',
     placement: 'top',
     disableBeacon: true,
     data: { hideDashboard: true },
@@ -55,24 +49,43 @@ const STEPS = [
   {
     target: '[data-tour="ajouter"]',
     title: '\u2795 Ajouter une activite',
-    content: 'Inserez une nouvelle ligne. L\'heure de debut se cale sur la fin de la precedente. Ajoutez autant d\'activites que necessaire.',
+    content: 'Ajoutez autant d\'activites que necessaire. L\'heure de debut se cale automatiquement sur la fin de la precedente.',
     placement: 'top',
     disableBeacon: true,
     data: { hideDashboard: true },
   },
   {
+    target: '[data-tour="input"]',
+    title: '\uD83D\uDD52 Frise et jauges',
+    content: 'Une fois vos activites saisies, une frise chronologique 24h et des jauges en temps reel apparaissent au-dessus. Vert = conforme, orange = attention, rouge = depassement.',
+    placement: 'top',
+    disableBeacon: true,
+  },
+  {
     target: '[data-tour="header"]',
-    title: '\uD83D\uDE80 Analysez et c\'est parti !',
-    content: 'Cliquez "Analyser" dans le header pour obtenir le score (0-100) et les infractions. Vous pouvez relancer ce guide a tout moment via le bouton "?" en haut a droite.',
+    title: '\uD83D\uDE80 Lancez l\'analyse',
+    content: 'Cliquez sur "Analyser la conformite" pour obtenir votre score sur 100, la liste des infractions eventuelles et les amendes estimees. Sur mobile, le bouton est dans la barre en bas.',
+    placement: 'bottom',
+    disableBeacon: true,
+  },
+  {
+    target: '[data-tour="header"]',
+    title: '\uD83D\uDCCA Resultats et suivi',
+    content: 'Apres l\'analyse, vous verrez le score, les infractions detaillees avec references legales, les sanctions et un tableau de suivi par jour. Vous pouvez aussi exporter en PDF.',
+    placement: 'bottom',
+    disableBeacon: true,
+  },
+  {
+    target: '[data-tour="params"]',
+    title: '\u2753 Besoin d\'aide ?',
+    content: 'Relancez ce guide a tout moment via le bouton "?" en haut a droite. L\'historique conserve vos analyses precedentes. Bonne route avec FIMO Check !',
     placement: 'bottom',
     disableBeacon: true,
   },
 ];
 
-/* Indices des etapes qui doivent cacher le dashboard */
-var HIDE_DASHBOARD_STEPS = [5, 6];
+var HIDE_DASHBOARD_STEPS = [4, 5];
 
-/* Style custom theme sombre FIMO Check */
 var JOYRIDE_STYLES = {
   options: {
     arrowColor: '#1e293b',
@@ -135,15 +148,14 @@ var JOYRIDE_STYLES = {
 };
 
 var LOCALE = {
-  back: '\u2190 Prec.',
+  back: '\u2190 Retour',
   close: 'Fermer',
-  last: 'Terminer',
+  last: 'C\'est parti !',
   next: 'Suivant \u2192',
   open: 'Ouvrir',
-  skip: 'Passer',
+  skip: 'Passer le guide',
 };
 
-/* ---- Helpers pour masquer/restaurer le dashboard ---- */
 function setDashboardHidden(hidden) {
   var el = document.querySelector('[data-tour-sticky="dashboard"]');
   if (!el) return;
@@ -166,12 +178,10 @@ export default function GuidedTour({ visible, onClose }) {
   var stepIndex = stepState[0];
   var setStepIndex = stepState[1];
 
-  /* Sync avec la prop visible */
   useEffect(function () {
     if (visible) {
       setStepIndex(0);
       setDashboardHidden(false);
-      /* Small delay to let DOM settle before starting */
       var t = setTimeout(function () { setRun(true); }, 100);
       return function () { clearTimeout(t); };
     } else {
@@ -180,20 +190,16 @@ export default function GuidedTour({ visible, onClose }) {
     }
   }, [visible]);
 
-  /* Quand stepIndex change, gerer le dashboard */
   useEffect(function () {
-    var hide = shouldHideDashboard(stepIndex);
-    setDashboardHidden(hide);
+    setDashboardHidden(shouldHideDashboard(stepIndex));
   }, [stepIndex]);
 
-  /* Callback Joyride */
   function handleJoyrideCallback(data) {
     var status = data.status;
     var action = data.action;
     var index = data.index;
     var type = data.type;
 
-    /* Tour termine ou skip */
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRun(false);
       setStepIndex(0);
@@ -202,20 +208,16 @@ export default function GuidedTour({ visible, onClose }) {
       return;
     }
 
-    /* Navigation step par step */
     if (type === EVENTS.STEP_AFTER) {
       var nextIndex = action === ACTIONS.PREV ? index - 1 : index + 1;
-      /* Pre-toggle dashboard BEFORE Joyride measures next step */
       var willHide = shouldHideDashboard(nextIndex);
       setDashboardHidden(willHide);
-      /* Delay step change to let CSS transition finish */
       setTimeout(function () {
         setStepIndex(nextIndex);
       }, willHide || shouldHideDashboard(index) ? 450 : 50);
       return;
     }
 
-    /* Si target introuvable, passer au suivant */
     if (type === EVENTS.TARGET_NOT_FOUND) {
       setStepIndex(index + 1);
     }
