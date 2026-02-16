@@ -71,7 +71,7 @@
   display: none;
   width: 100%; padding: 6px; border: none; border-radius: 6px;
   background: rgba(255,255,255,0.04); color: #e0e0e0;
-  font-size: 12px; font-weight: 500; cursor: pointer;
+  font-size: 12px; font-weight: 400; cursor: pointer;
   transition: color 0.2s;
 }
 .expandToggle:active { color: #00d4ff; }
@@ -283,8 +283,8 @@
   color: #0084ff;
 }
 
-.jourNavArrowLeft { margin-right: 2px; }
-.jourNavArrowRight { margin-left: 2px; }
+.jourNavArrowLeft { margin-right: 8px; }
+.jourNavArrowRight { margin-left: 8px; }
 
 /* Masquer les fleches sur ecran tactile (scroll naturel) */
 @media (hover: none) and (pointer: coarse) {
@@ -310,7 +310,7 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
-  margin-left: 4px;
+  margin-left: 10px;
 }
 /* === Bouton + dans la barre === */
 @media (hover: hover) and (pointer: fine) {
@@ -500,7 +500,7 @@
 .scoreStickyRow:hover .scoreChevron { opacity: 0.9; }
 /* === Bottom Tabs === */
 .bottomTabs { display: flex; gap: 0; border-radius: 12px; overflow: hidden; margin: 0 0 12px 0; border: 1px solid var(--border, #2a2a3e); }
-.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888); border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888); border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
 .bottomTab:first-child { border-radius: 12px 0 0 12px; }
 .bottomTab:last-child { border-radius: 0 12px 12px 0; }
 .bottomTabActive { background: var(--accent, #00d4ff); color: #000; }

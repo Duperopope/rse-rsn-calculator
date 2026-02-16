@@ -104,7 +104,7 @@ function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
         var r1=btns[i].getBoundingClientRect(), r2=btns[j].getBoundingClientRect();
         var hG=Math.max(0,Math.max(r2.left-r1.right,r1.left-r2.right));
         var vG=Math.max(0,Math.max(r2.top-r1.bottom,r1.top-r2.bottom));
-        if (hG<8&&vG<8&&(hG+vG)>0) { close.push({ b1:(btns[i].textContent||'').substring(0,15).trim(), b2:(btns[j].textContent||'').substring(0,15).trim(), gap:Math.round(Math.min(hG,vG)) }); }
+        var b1cls=(btns[i].className||""); var b2cls=(btns[j].className||""); function hasFixedAncestor(el){while(el){if(getComputedStyle(el).position==="fixed")return true;el=el.parentElement;}return false;} var isFixed=(hasFixedAncestor(btns[i])||hasFixedAncestor(btns[j])); /* bottomBar filter */ if (hG<8&&vG<8&&(hG+vG)>0&&!isFixed) { close.push({ b1:(btns[i].textContent||'').substring(0,15).trim(), b2:(btns[j].textContent||'').substring(0,15).trim(), gap:Math.round(Math.min(hG,vG)) }); }
       }}
       return { total: btns.length, close: close.slice(0,5) };
     });

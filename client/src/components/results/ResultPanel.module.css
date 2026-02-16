@@ -206,7 +206,7 @@
 .statsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 1rem; }
 .statItem { text-align: center; }
 .statLabel { display: block; font-size: 12px; color: #888; margin-bottom: 0.25rem; }
-.statValue { display: block; font-size: 1.1rem; font-weight: 600; color: #e0e0e0; }
+.statValue { display: block; font-size: 1.1rem; font-weight: 700; color: #e0e0e0; }
 .equipageBadge { display: inline-block; background: var(--accent-glow, rgba(96, 165, 250, 0.15)); color: #00d4ff; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 13px; margin-top: 0.3rem; }
 .periode { display: block; font-size: 13px; color: #888; margin-top: 0.2rem; }
 .detailStats { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 14px; color: #aaa; padding: 0.5rem 0; }

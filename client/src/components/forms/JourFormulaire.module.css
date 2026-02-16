@@ -92,6 +92,8 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .templateCard, .templateCardActive {
@@ -389,7 +391,9 @@
 
   .jourHeader { flex-wrap: wrap; gap: 8px; }
 
-  .templateCards { flex-direction: column; }
+  .templateCards { flex-direction: column;   padding-left: 12px;
+  padding-right: 12px;
+}
   .templateCard, .templateCardActive { min-width: 100%; }
 
   .activitesHeader { display: none; }

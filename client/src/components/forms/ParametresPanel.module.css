@@ -6,6 +6,8 @@
   border-radius: 14px;
   overflow: hidden;
   transition: border-color 0.2s;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 .panelOpen {
   border-color: var(--accent, #00d4ff);
@@ -255,7 +257,9 @@
 }
 
 @media print {
-  .panel { border: 1px solid #ccc; }
+  .panel { border: 1px solid #ccc;   padding-left: 12px;
+  padding-right: 12px;
+}
   .summaryBtn { pointer-events: none; }
   .chevron { display: none; }
 }
