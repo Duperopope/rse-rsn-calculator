@@ -28,6 +28,11 @@
 - Render.com : https://rse-rsn-calculator.onrender.com/
 - Auto-deploy on main, free tier cold start ~15min
 
+## Audit expert (2026-02-16)
+- UX 6.5 | UI 7.4 | A11y 5.5 | Cout 0.18$
+- 15 problemes identifies, 5 points forts
+- Rapport complet: AUDIT-EXPERT.md
+
 ## Priorites prochaine session
 1. Vue 2 semaines (14 barres, compteur 90h)
 2. Mode exercice FIMO
