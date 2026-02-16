@@ -504,7 +504,7 @@
 .bottomTab:first-child { border-radius: 12px 0 0 12px; }
 .bottomTab:last-child { border-radius: 0 12px 12px 0; }
 .bottomTabActive { background: var(--accent, #00d4ff); color: #000; }
-.bottomTab:not(.bottomTabActive):hover { background: rgba(0, 212, 255, 0.1); color: #fff; }
+.bottomTab:not(.bottomTabActive):hover { background: var(--accent-glow, rgba(96, 165, 250, 0.15)); color: #fff; }
 /* === Hide scrollbar mobile === */
 * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
 *::-webkit-scrollbar { width: 4px; }

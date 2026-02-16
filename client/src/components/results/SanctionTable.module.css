@@ -100,7 +100,7 @@
 
 .amountMinore {
   background: rgba(0, 212, 255, 0.06);
-  border: 1px solid rgba(0, 212, 255, 0.15);
+  border: 1px solid var(--accent-glow, rgba(96, 165, 250, 0.15));
   color: #00d4ff;
 }
 

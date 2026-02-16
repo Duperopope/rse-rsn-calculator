@@ -24,7 +24,7 @@
 }
 
 .badge-info {
-  background: rgba(0, 212, 255, 0.15);
+  background: var(--accent-glow, rgba(96, 165, 250, 0.15));
   color: var(--accent, #00d4ff);
 }
 

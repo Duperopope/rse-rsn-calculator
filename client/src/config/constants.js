@@ -110,7 +110,7 @@ export const THEME_COLORS = {
     text: '#e0e0e0',
     textSecondary: '#888',
     border: '#2a2a3e',
-    accent: '#00d4ff',
+    accent: '#60a5fa',
     accentGreen: '#00ff88',
     accentRed: '#ff4444',
     accentOrange: '#ffaa00',

@@ -262,7 +262,7 @@
 .helpBtn:hover {
   color: var(--accent, #00d4ff);
   border-color: var(--accent, #00d4ff);
-  background: rgba(0, 212, 255, 0.08);
+  background: var(--accent-subtle, rgba(96, 165, 250, 0.08));
 }
 .helpBtn:active {
   transform: scale(0.9);

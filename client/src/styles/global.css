@@ -14,6 +14,9 @@ html {
   -moz-osx-font-smoothing: grayscale;
   --text-secondary: #b0b0b0;
   --text-tertiary: #8a8a9a;
+  --accent: #60a5fa;
+  --accent-glow: rgba(96, 165, 250, 0.15);
+  --accent-subtle: rgba(96, 165, 250, 0.08);
 }
 
 body {
@@ -176,7 +179,7 @@ input:focus, textarea:focus, select:focus {
 /* Source: https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action */
 button, .btn, [role="button"] {
   touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(0, 212, 255, 0.15);
+  -webkit-tap-highlight-color: var(--accent-glow, rgba(96, 165, 250, 0.15));
   cursor: pointer;
 }
 

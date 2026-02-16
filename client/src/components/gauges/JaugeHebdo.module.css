@@ -1,6 +1,6 @@
 /* JaugeHebdo - Jauge hebdomadaire multi-vues */
 .wrap { padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); cursor: pointer; user-select: none; transition: border-color 0.2s; margin-top: 8px; }
-.wrap:hover { border-color: rgba(0,212,255,0.3); }
+.wrap:hover { border-color: rgba(96, 165, 250, 0.3); }
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .label { font-size: 13px; font-weight: 600; color: var(--text-primary, #e0e0e0); }
 .valText { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }

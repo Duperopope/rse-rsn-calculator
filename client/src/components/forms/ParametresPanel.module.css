@@ -9,7 +9,7 @@
 }
 .panelOpen {
   border-color: var(--accent, #00d4ff);
-  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.1);
+  box-shadow: 0 0 0 1px var(--accent-glow, rgba(96, 165, 250, 0.15));
 }
 
 /* === Barre de chips === */
@@ -83,7 +83,7 @@
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
-  background: rgba(0, 212, 255, 0.15);
+  background: var(--accent-glow, rgba(96, 165, 250, 0.15));
   color: #e0e0e0;
   border: 1px solid rgba(0, 212, 255, 0.4);
   white-space: nowrap;
@@ -152,7 +152,7 @@
 .select:focus {
   border-color: var(--accent, #00d4ff);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
+  box-shadow: 0 0 0 2px var(--accent-glow, rgba(96, 165, 250, 0.15));
 }
 
 /* Toggles Equipage / Saisie */
@@ -235,7 +235,7 @@
 @media (max-width: 600px) {
   .summaryBtn { padding: 8px 10px; }
   .chip, .chipMode { font-size: 12px; padding: 4px 8px;   color: #e0e0e0;
-  background: rgba(0, 212, 255, 0.15);
+  background: var(--accent-glow, rgba(96, 165, 250, 0.15));
   border: 1px solid rgba(0, 212, 255, 0.4);
 }
   .chipService { font-size: 12px; padding: 4px 10px;   color: #e0e0e0;
@@ -264,7 +264,7 @@
 /* min-font-mobile-fix-v2 */
 @media (max-width: 480px) {
   .chip, .chipService, .chipMode { font-size: 14px; min-height: 34px;   color: #e0e0e0;
-  background: rgba(0, 212, 255, 0.15);
+  background: var(--accent-glow, rgba(96, 165, 250, 0.15));
   border: 1px solid rgba(0, 212, 255, 0.4);
 }
   .chipIcon { font-size: 14px; }

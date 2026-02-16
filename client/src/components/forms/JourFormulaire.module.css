@@ -69,7 +69,7 @@
 .actionBtn { color: var(--accent, #00d4ff); }
 .removeBtn { color: var(--accent-red, #ff4444); }
 @media (hover: hover) {
-  .actionBtn:hover { border-color: var(--accent, #00d4ff); background: rgba(0, 212, 255, 0.08); }
+  .actionBtn:hover { border-color: var(--accent, #00d4ff); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
   .removeBtn:hover { border-color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
 }
 
@@ -476,7 +476,7 @@
   color: var(--accent-red, #ff4444);
 }
 @media (hover: hover) {
-  .actionBtnLabel:hover { border-color: var(--accent, #00d4ff); background: rgba(0, 212, 255, 0.08); }
+  .actionBtnLabel:hover { border-color: var(--accent, #00d4ff); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
   .removeBtnLabel:hover { border-color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
 }
 .actionBtnLabel span, .removeBtnLabel span {

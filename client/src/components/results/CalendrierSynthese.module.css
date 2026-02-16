@@ -84,7 +84,7 @@
 .dayRow:active { background: rgba(0, 212, 255, 0.06); }
 @media (hover: hover) { .dayRow:hover { background: rgba(0, 212, 255, 0.04); } }
 .dayRowWarn { border-left-color: var(--accent-red, #ff4444); }
-.dayRowActive { background: rgba(0, 212, 255, 0.08); border-left-color: var(--accent, #00d4ff); }
+.dayRowActive { background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); border-left-color: var(--accent, #00d4ff); }
 
 .dayLabel {
   width: 60px;
