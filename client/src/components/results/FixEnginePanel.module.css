@@ -1,7 +1,7 @@
 .panel {
-  background: var(--bg-secondary, #1a1a2e);
+  background: var(--bg-secondary, var(--md-surface-container, #1a1a2e));
   border: 1px solid var(--border, #2a2a4a);
-  border-radius: 16px;
+  border-radius: var(--md-radius-lg, 16px);
   padding: 24px;
   margin: 20px 0;
 }
@@ -40,19 +40,19 @@
   align-items: center;
   background: rgba(0, 255, 136, 0.1);
   border: 1px solid rgba(0, 255, 136, 0.3);
-  border-radius: 12px;
+  border-radius: var(--md-radius-md, 12px);
   padding: 8px 16px;
 }
 
 .badgeValue {
   font-size: 22px;
   font-weight: 700;
-  color: #00ff88;
+  color: var(--md-success, #34d399);
 }
 
 .badgeLabel {
   font-size: 12px;
-  color: #00ff88;
+  color: var(--md-success, #34d399);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -66,7 +66,7 @@
 
 .compCard {
   flex: 1;
-  border-radius: 12px;
+  border-radius: var(--md-radius-md, 12px);
   padding: 16px;
 }
 
@@ -113,7 +113,7 @@
 
 .arrow {
   font-size: 24px;
-  color: var(--accent, #00ff88);
+  color: var(--accent, var(--md-success, #34d399));
   flex-shrink: 0;
 }
 
@@ -129,7 +129,7 @@
   align-items: center;
   gap: 8px;
   background: var(--bg-tertiary, #16162a);
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   padding: 8px 14px;
   font-size: 14px;
   color: var(--text-primary, #ffffff);
@@ -149,15 +149,15 @@
   border: 1px solid var(--border, #2a2a4a);
   color: var(--text-secondary, #8888aa);
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   cursor: pointer;
   font-size: 13px;
   transition: all 0.2s;
 }
 
 .toggleBtn:hover {
-  border-color: var(--accent, #00ff88);
-  color: var(--accent, #00ff88);
+  border-color: var(--accent, var(--md-success, #34d399));
+  color: var(--accent, var(--md-success, #34d399));
 }
 
 .detailList {
@@ -174,7 +174,7 @@
   align-items: center;
   padding: 6px 10px;
   background: var(--bg-tertiary, #16162a);
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   margin-bottom: 6px;
 }
 
@@ -185,12 +185,12 @@
 }
 
 .raisonCount {
-  background: var(--accent, #00ff88);
+  background: var(--accent, var(--md-success, #34d399));
   color: #000;
   font-size: 12px;
   font-weight: 700;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
 }
 
 .detailItem {

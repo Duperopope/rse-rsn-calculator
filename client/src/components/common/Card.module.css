@@ -1,7 +1,7 @@
 .card {
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 16px;
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-lg, 16px);
   padding: 20px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -18,12 +18,12 @@
 }
 
 .card-danger {
-  border-color: var(--accent-red, #ff4444);
+  border-color: var(--accent-red, var(--md-error, #ef4444));
   box-shadow: 0 0 15px rgba(255, 68, 68, 0.1);
 }
 
 .card-success {
-  border-color: var(--accent-green, #00ff88);
+  border-color: var(--accent-green, var(--md-success, #34d399));
   box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
 }
 
@@ -31,7 +31,7 @@
   font-size: 1.05rem;
   font-weight: 700;
   margin-bottom: 12px;
-  color: var(--text, #e0e0e0);
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
 }
 
 .animate {

@@ -16,30 +16,30 @@
 
 /* analyseSection retire — bouton dans le header */
 
-.offlineMsg { font-size: 13px; color: var(--accent-red, #ff4444); text-align: center; margin: 0; }
-.erreur { color: var(--accent-red, #ff4444); font-size: 14px; margin: 0; }
+.offlineMsg { font-size: 13px; color: var(--accent-red, var(--md-error, #ef4444)); text-align: center; margin: 0; }
+.erreur { color: var(--accent-red, var(--md-error, #ef4444)); font-size: 14px; margin: 0; }
 .equipageInfo { text-align: center; color: #00d4ff; font-size: 14px; margin-top: 0.5rem; }
 
 /* === Historique === */
 .historique { display: flex; flex-direction: column; gap: 10px; }
 .histToggle {
-  padding: 8px 16px; border-radius: 8px;
-  background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888);
-  border: 1px solid var(--border, #2a2a3e); font-size: 13px; font-weight: 600;
+  padding: 8px 16px; border-radius: var(--md-radius-sm, 8px);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e)); color: var(--text-secondary, #888);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e)); font-size: 13px; font-weight: 600;
   transition: border-color 0.2s, color 0.2s; align-self: flex-start;
 }
 @media (hover: hover) { .histToggle:hover { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); } }
 .histToggle:active { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); opacity: 0.85; }
 .histList {
   display: flex; flex-direction: column; gap: 6px; padding: 12px;
-  background: var(--bg-card, #12121a); border: 1px solid var(--border, #2a2a3e); border-radius: 12px;
+  background: var(--bg-card, var(--md-surface, #0F172A)); border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e)); border-radius: var(--md-radius-md, 12px);
 }
 .histItem { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(42, 42, 62, 0.3); }
 .histDate { font-size: 12.5px; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; min-width: 90px; }
 .histMeta { font-size: 12.5px; color: var(--text-secondary, #888); }
 .histClear {
-  margin-top: var(--header-height, 70px); padding: 6px 12px; border-radius: 6px;
-  background: transparent; color: var(--accent-red, #ff4444);
+  margin-top: var(--header-height, 70px); padding: 6px 12px; border-radius: var(--md-radius-sm, 8px);
+  background: transparent; color: var(--accent-red, var(--md-error, #ef4444));
   border: 1px solid rgba(255, 68, 68, 0.2); font-size: 12.5px;
   transition: background 0.2s; align-self: flex-end;
 }
@@ -47,7 +47,7 @@
 .histClear:active { background: rgba(255, 68, 68, 0.08); opacity: 0.85; }
 
 /* === Conducteur tabs === */
-.conducteurTabs{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)}
+.conducteurTabs{display:flex;gap:0;margin:1rem 0;border-radius: var(--md-radius-sm, 8px);overflow:hidden;border:1px solid rgba(255,255,255,0.1)}
 .tab,.tabActive{flex:1;padding:.75rem 1.5rem;border:none;cursor:pointer;font-weight:600;font-size:.95rem;transition:all .2s}
 .tab{background:rgba(255,255,255,.05);color:rgba(255,255,255,.5)}
 @media(hover:hover){.tab:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}}
@@ -60,7 +60,7 @@
   position: sticky; top: var(--header-height, 70px); z-index: 50;
   background: var(--bg, #0a0a0f);
   padding: 12px 20px;
-  border-bottom: 1px solid var(--border, #2a2a3e);
+  border-bottom: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   margin: 0 -20px;
   border-radius: 0 0 16px 16px;
@@ -69,8 +69,8 @@
 /* Bouton expand/collapse — cache sur desktop */
 .expandToggle {
   display: none;
-  width: 100%; padding: 6px; border: none; border-radius: 6px;
-  background: rgba(255,255,255,0.04); color: #e0e0e0;
+  width: 100%; padding: 6px; border: none; border-radius: var(--md-radius-sm, 8px);
+  background: rgba(255,255,255,0.04); color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
   font-size: 12px; font-weight: 400; cursor: pointer;
   transition: color 0.2s;
 }
@@ -95,7 +95,7 @@
   }
 
   /* Montrer le bouton toggle */
-  .expandToggle { display: block;   color: #e0e0e0;
+  .expandToggle { display: block;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
 }
 
   /* Quand expanded, montrer tout */
@@ -182,7 +182,7 @@
 /* Hover (PC uniquement) */
 @media (hover: hover) and (pointer: fine) {
   .jourNavBtn:hover {
-    color: var(--text-primary, #e0e0e0);
+    color: var(--text-primary, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
     background: rgba(255, 255, 255, 0.04);
   }
 }
@@ -301,8 +301,8 @@
   justify-content: center;
   min-width: 34px;
   height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border, #2a2a3e);
+  border-radius: var(--md-radius-md, 12px);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   background: transparent;
   color: var(--text-secondary, #888);
   font-size: 1.1rem;
@@ -334,9 +334,9 @@
   transform: translateX(-50%);
   display: flex;
   gap: 6px;
-  background: var(--bg-card, #1a1a2e);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 12px;
+  background: var(--bg-card, var(--md-surface-container, #1a1a2e));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
   padding: 6px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 100;
@@ -351,7 +351,7 @@
 
 .jourMenuBtn {
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   border: none;
   font-size: 12.5px;
   font-weight: 600;
@@ -371,7 +371,7 @@
 
 .jourMenuDel {
   background: rgba(255, 68, 68, 0.12);
-  color: #ff4444;
+  color: var(--md-error, #ef4444);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -421,7 +421,7 @@
 .miniJaugeTrack {
   flex: 1;
   height: 5px;
-  background: var(--border, #2a2a3e);
+  background: var(--border, var(--md-outline-variant, #2a2a4e));
   border-radius: 3px;
   overflow: hidden;
 }
@@ -453,7 +453,7 @@
 .scoreCircleMini {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -474,7 +474,7 @@
 @media (min-width: 769px) {
   .expandToggle {
     display: none;
-    color: #e0e0e0;
+    color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
 }
   .miniJauges {
     display: none;
@@ -499,9 +499,9 @@
 }
 .scoreStickyRow:hover .scoreChevron { opacity: 0.9; }
 /* === Bottom Tabs === */
-.bottomTabs { display: flex; gap: 0; border-radius: 12px; overflow: hidden; margin: 0 0 12px 0; border: 1px solid var(--border, #2a2a3e); }
-.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, #1a1a2e); color: var(--text-secondary, #888); border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-.bottomTab:first-child { border-radius: 12px 0 0 12px; }
+.bottomTabs { display: flex; gap: 0; border-radius: var(--md-radius-md, 12px); overflow: hidden; margin: 0 0 12px 0; border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e)); }
+.bottomTab { flex: 1; padding: 12px 16px; background: var(--bg-input, var(--md-surface-container, #1a1a2e)); color: var(--text-secondary, #888); border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.bottomTab:first-child { border-radius: var(--md-radius-md, 12px) 0 0 12px; }
 .bottomTab:last-child { border-radius: 0 12px 12px 0; }
 .bottomTabActive { background: var(--accent, #00d4ff); color: #000; }
 .bottomTab:not(.bottomTabActive):hover { background: var(--accent-glow, rgba(96, 165, 250, 0.15)); color: #fff; }
@@ -509,7 +509,7 @@
 * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
 *::-webkit-scrollbar { width: 4px; }
 *::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+*::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: var(--md-radius-sm, 8px); }
 @media (max-width: 768px) {
   * { scrollbar-width: none; }
   *::-webkit-scrollbar { display: none; }

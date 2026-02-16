@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: var(--md-radius-lg, 16px);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -10,17 +10,17 @@
 
 .badge-ok {
   background: rgba(0, 255, 136, 0.15);
-  color: var(--accent-green, #00ff88);
+  color: var(--accent-green, var(--md-success, #34d399));
 }
 
 .badge-warning {
   background: rgba(255, 170, 0, 0.15);
-  color: var(--accent-orange, #ffaa00);
+  color: var(--accent-orange, var(--md-warning, #f59e0b));
 }
 
 .badge-danger {
   background: rgba(255, 68, 68, 0.15);
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
 }
 
 .badge-info {

@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   font-weight: 600;
   transition: all 0.2s ease;
   position: relative;
@@ -40,9 +40,9 @@
 }
 
 .btn-secondary {
-  background: var(--bg-input, #1a1a2e);
-  color: var(--text, #e0e0e0);
-  border: 1px solid var(--border, #2a2a3e);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
 }
 @media (hover: hover) {
   .btn-secondary:hover:not(:disabled) {
@@ -57,7 +57,7 @@
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ff4444, #cc0000);
+  background: linear-gradient(135deg, var(--md-error, #ef4444), #cc0000);
   color: white;
 }
 @media (hover: hover) {
@@ -99,7 +99,7 @@
   height: 18px;
   border: 2px solid rgba(255,255,255,0.3);
   border-top-color: white;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   animation: spin 0.6s linear infinite;
   position: absolute;
 }

@@ -1,6 +1,6 @@
 .footer {
   padding: 20px 24px;
-  border-top: 1px solid var(--border, #2a2a3e);
+  border-top: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,7 +33,7 @@
 }
 
 .sep {
-  color: var(--border, #2a2a3e);
+  color: var(--border, var(--md-outline-variant, #2a2a4e));
   font-size: 13px;
 }
 

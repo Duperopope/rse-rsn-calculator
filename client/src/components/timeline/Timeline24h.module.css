@@ -6,7 +6,7 @@
   padding: 8px 0;
 }
 .dark {
-  color: #e0e0e0;
+  color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
 }
 
 /* === SELECTEUR VUE === */
@@ -20,7 +20,7 @@
   flex: 1;
   padding: 6px 0;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   background: transparent;
   font-size: 13px;
   font-weight: 500;
@@ -56,7 +56,7 @@
 .legendeDot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   display: inline-block;
 }
 
@@ -85,7 +85,7 @@
   position: relative;
   height: 52px;
   background: #f5f5f5;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   margin: 0 4px;
   overflow: hidden;
 }
@@ -107,7 +107,7 @@
   position: absolute;
   top: 4px;
   height: calc(100% - 8px);
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   min-width: 6px;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -143,7 +143,7 @@
   color: #fff;
   font-size: 12px;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   margin: 6px 4px 0;
   text-align: center;
 }
@@ -183,7 +183,7 @@
   align-items: center;
   gap: 6px;
   padding: 5px 4px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   cursor: pointer;
   transition: background 0.15s;
   margin-bottom: 2px;
@@ -227,7 +227,7 @@
   flex: 1;
   height: 24px;
   background: #f0f0f0;
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   position: relative;
   overflow: hidden;
 }
@@ -245,7 +245,7 @@
   position: absolute;
   top: 3px;
   height: calc(100% - 6px);
-  border-radius: 4px;
+  border-radius: var(--md-radius-sm, 8px);
   min-width: 3px;
 }
 
@@ -266,25 +266,25 @@
   color: #aaa;
 }
 .semaineInfBadge {
-  background: #ff4444;
+  background: var(--md-error, #ef4444);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .semaineAvertBadge {
-  background: #ffaa00;
+  background: var(--md-warning, #f59e0b);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -332,7 +332,7 @@
   padding: 6px 10px;
   background: rgba(255, 68, 68, 0.08);
   border: 1px solid rgba(255, 68, 68, 0.2);
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   cursor: pointer;
 }
 .jourInfIcon {
@@ -341,7 +341,7 @@
 .jourInfText {
   font-size: 12px;
   font-weight: 600;
-  color: #ff4444;
+  color: var(--md-error, #ef4444);
 }
 .jourAvertBar {
   display: flex;
@@ -351,7 +351,7 @@
   padding: 6px 10px;
   background: rgba(255, 170, 0, 0.08);
   border: 1px solid rgba(255, 170, 0, 0.2);
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
 }
 .jourAvertIcon {
   font-size: 14px;

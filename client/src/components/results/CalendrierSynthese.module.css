@@ -11,10 +11,10 @@
   gap: 0.5rem;
   width: 100%;
   padding: 0.7rem 1rem;
-  background: var(--bg-input, #1a1a2e);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   color: var(--accent, #00d4ff);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 10px;
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
@@ -26,16 +26,16 @@
 .toggleLabel { flex: 1; text-align: left; }
 .toggleStats { display: flex; gap: 0.5rem; font-size: 12px; font-weight: 700; }
 .statCyan { color: var(--accent, #00d4ff); }
-.statOrange { color: var(--accent-orange, #ffaa00); }
-.statRed { color: var(--accent-red, #ff4444); }
+.statOrange { color: var(--accent-orange, var(--md-warning, #f59e0b)); }
+.statRed { color: var(--accent-red, var(--md-error, #ef4444)); }
 
 /* Calendar zone */
 .calendar {
   margin-top: 0.5rem;
   padding: 0.5rem;
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 10px;
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
   animation: fadeIn 0.25s ease;
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
@@ -53,8 +53,8 @@
   width: 8px; height: 8px; border-radius: 2px; display: inline-block;
 }
 .dotCyan { background: var(--accent, #00d4ff); }
-.dotOrange { background: var(--accent-orange, #ffaa00); }
-.dotGreen { background: var(--accent-green, #00ff88); }
+.dotOrange { background: var(--accent-orange, var(--md-warning, #f59e0b)); }
+.dotGreen { background: var(--accent-green, var(--md-success, #34d399)); }
 .dotGray { background: rgba(255, 255, 255, 0.15); }
 
 /* Grid of days */
@@ -74,7 +74,7 @@
   background: transparent;
   border: none;
   border-left: 3px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   cursor: pointer;
   transition: background 0.15s;
   color: #fff;
@@ -83,7 +83,7 @@
 }
 .dayRow:active { background: rgba(0, 212, 255, 0.06); }
 @media (hover: hover) { .dayRow:hover { background: rgba(0, 212, 255, 0.04); } }
-.dayRowWarn { border-left-color: var(--accent-red, #ff4444); }
+.dayRowWarn { border-left-color: var(--accent-red, var(--md-error, #ef4444)); }
 .dayRowActive { background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); border-left-color: var(--accent, #00d4ff); }
 
 .dayLabel {
@@ -99,34 +99,34 @@
   flex: 1;
   height: 14px;
   display: flex;
-  border-radius: 4px;
+  border-radius: var(--md-radius-sm, 8px);
   overflow: hidden;
   background: rgba(255, 255, 255, 0.04);
 }
 .barSegCyan { background: var(--accent, #00d4ff); height: 100%; transition: width 0.3s ease; }
-.barSegOrange { background: var(--accent-orange, #ffaa00); height: 100%; transition: width 0.3s ease; }
-.barSegGreen { background: var(--accent-green, #00ff88); height: 100%; transition: width 0.3s ease; }
+.barSegOrange { background: var(--accent-orange, var(--md-warning, #f59e0b)); height: 100%; transition: width 0.3s ease; }
+.barSegGreen { background: var(--accent-green, var(--md-success, #34d399)); height: 100%; transition: width 0.3s ease; }
 .barSegGray { background: rgba(255, 255, 255, 0.12); height: 100%; transition: width 0.3s ease; }
 
 /* Badges */
 .infBadge {
   background: rgba(255, 68, 68, 0.2);
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
   font-size: 12px;
   font-weight: 700;
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   min-width: 20px;
   text-align: center;
   flex-shrink: 0;
 }
 .okBadge {
   background: rgba(0, 255, 136, 0.15);
-  color: var(--accent-green, #00ff88);
+  color: var(--accent-green, var(--md-success, #34d399));
   font-size: 12px;
   font-weight: 700;
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   min-width: 20px;
   text-align: center;
   flex-shrink: 0;
@@ -159,8 +159,8 @@
   color: #fff;
 }
 .valCyan { color: var(--accent, #00d4ff); }
-.valOrange { color: var(--accent-orange, #ffaa00); }
-.valGreen { color: var(--accent-green, #00ff88); }
+.valOrange { color: var(--accent-orange, var(--md-warning, #f59e0b)); }
+.valGreen { color: var(--accent-green, var(--md-success, #34d399)); }
 
 .dayDetailInf {
   display: flex;
@@ -172,7 +172,7 @@
   background: rgba(255, 68, 68, 0.12);
   color: #ff6666;
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   font-size: 12px;
 }
 

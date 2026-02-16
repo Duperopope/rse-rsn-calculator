@@ -24,21 +24,21 @@
   font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--text, #e0e0e0);
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
 }
 
 .texteValeur[data-status="danger"] {
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
 }
 
 .texteValeur[data-status="warning"] {
-  color: var(--accent-orange, #ffaa00);
+  color: var(--accent-orange, var(--md-warning, #f59e0b));
 }
 
 .track {
   width: 100%;
   height: 6px;
-  background: var(--border, #2a2a3e);
+  background: var(--border, var(--md-outline-variant, #2a2a4e));
   border-radius: 3px;
   overflow: hidden;
 }
@@ -55,15 +55,15 @@
 }
 
 .fill[data-status="ok"] {
-  background: linear-gradient(90deg, var(--accent-green, #00ff88), #00cc66);
+  background: linear-gradient(90deg, var(--accent-green, var(--md-success, #34d399)), #00cc66);
 }
 
 .fill[data-status="warning"] {
-  background: linear-gradient(90deg, var(--accent-orange, #ffaa00), #ff8800);
+  background: linear-gradient(90deg, var(--accent-orange, var(--md-warning, #f59e0b)), #ff8800);
 }
 
 .fill[data-status="danger"] {
-  background: linear-gradient(90deg, var(--accent-red, #ff4444), #cc0000);
+  background: linear-gradient(90deg, var(--accent-red, var(--md-error, #ef4444)), #cc0000);
 }
 
 
@@ -71,7 +71,7 @@
 .container {
   cursor: pointer;
   transition: background 0.2s ease;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   padding: 6px 8px;
   margin: -6px -8px;
 }
@@ -92,13 +92,13 @@
   animation: detailSlide 0.2s ease;
 }
 .details[data-status="danger"] {
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
 }
 .details[data-status="warning"] {
-  color: var(--accent-orange, #ffaa00);
+  color: var(--accent-orange, var(--md-warning, #f59e0b));
 }
 .details[data-status="ok"] {
-  color: var(--accent-green, #00ff88);
+  color: var(--accent-green, var(--md-success, #34d399));
 }
 .detailIcon {
   font-size: 14px;
@@ -118,7 +118,7 @@
 .container:focus-visible {
   outline: 2px solid var(--accent, #00d4ff);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
 }
 
 
@@ -136,10 +136,10 @@
   margin-top: 4px;
   padding: 4px 8px;
   background: rgba(255, 68, 68, 0.08);
-  border-radius: 6px;
-  border-left: 3px solid var(--accent-red, #ff4444);
+  border-radius: var(--md-radius-sm, 8px);
+  border-left: 3px solid var(--accent-red, var(--md-error, #ef4444));
   font-size: 12px;
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
   animation: detailSlide 0.2s ease;
 }
 .sanctionRef {
@@ -170,7 +170,7 @@
   margin-top: 4px;
   padding: 5px 8px;
   background: rgba(0, 212, 255, 0.06);
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   border-left: 3px solid var(--accent, #00d4ff);
   font-size: 12px;
   color: var(--accent, #00d4ff);

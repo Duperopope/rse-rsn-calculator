@@ -14,9 +14,9 @@
 }
 
 .modal {
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 20px;
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-lg, 16px);
   padding: 32px;
   max-width: 480px;
   width: 100%;
@@ -50,7 +50,7 @@
 .num {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
   color: white;
   display: flex;
@@ -62,7 +62,7 @@
 }
 
 .step strong {
-  color: var(--text, #e0e0e0);
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
   display: block;
   margin-bottom: 2px;
 }
@@ -76,8 +76,8 @@
 .reglements {
   text-align: center;
   padding: 12px;
-  background: var(--bg-input, #1a1a2e);
-  border-radius: 10px;
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  border-radius: var(--md-radius-md, 12px);
   margin-bottom: 20px;
 }
 
@@ -90,7 +90,7 @@
 .btn {
   width: 100%;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--md-radius-md, 12px);
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
   color: white;
   font-weight: 700;

@@ -15,16 +15,16 @@
 }
 .metricCard {
   background: rgba(255,255,255,0.04);
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   padding: 8px 6px;
   border-left: 2px solid transparent;
   text-align: center;
   transition: background 0.15s;
 }
 .metricCard:hover { background: rgba(255,255,255,0.07); }
-.metricOk { border-left-color: var(--accent-green, #00ff88); }
-.metricWarning { border-left-color: var(--accent-orange, #ffaa00); }
-.metricDanger { border-left-color: var(--accent-red, #ff4444); }
+.metricOk { border-left-color: var(--accent-green, var(--md-success, #34d399)); }
+.metricWarning { border-left-color: var(--accent-orange, var(--md-warning, #f59e0b)); }
+.metricDanger { border-left-color: var(--accent-red, var(--md-error, #ef4444)); }
 .metricInfo { border-left-color: var(--accent-blue, #0084ff); }
 .metricLabel {
   font-size: 0.55rem;
@@ -55,7 +55,7 @@
 .detailSection {
   margin-top: 8px;
   background: rgba(255,255,255,0.03);
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   padding: 8px;
   animation: fadeIn 0.2s ease;
 }
@@ -98,7 +98,7 @@
 /* Type tags */
 .tagNormal {
   background: rgba(0,255,136,0.15);
-  color: var(--accent-green, #00ff88);
+  color: var(--accent-green, var(--md-success, #34d399));
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.5rem;
@@ -106,7 +106,7 @@
 }
 .tagReduit {
   background: rgba(255,170,0,0.15);
-  color: var(--accent-orange, #ffaa00);
+  color: var(--accent-orange, var(--md-warning, #f59e0b));
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.5rem;
@@ -114,7 +114,7 @@
 }
 .tagInsuffisant {
   background: rgba(255,68,68,0.15);
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 0.5rem;
@@ -138,11 +138,11 @@
   border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 .detteDate { font-weight: 600; color: #fff; }
-.detteH { font-weight: 600; color: var(--accent-orange, #ffaa00); }
+.detteH { font-weight: 600; color: var(--accent-orange, var(--md-warning, #f59e0b)); }
 .detteEcheance { color: rgba(255,255,255,0.4); font-size: 0.55rem; }
 .detteStatut { font-size: 0.5rem; font-weight: 600; }
-.detteEnCours { color: var(--accent-orange, #ffaa00); }
-.detteCompense { color: var(--accent-green, #00ff88); }
+.detteEnCours { color: var(--accent-orange, var(--md-warning, #f59e0b)); }
+.detteCompense { color: var(--accent-green, var(--md-success, #34d399)); }
 
 /* Rappels */
 .rappelsSection {

@@ -10,15 +10,15 @@
   align-items: center;
   gap: 24px;
   padding: 24px;
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 20px;
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-lg, 16px);
 }
 
 .scoreCircle {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   border: 4px solid;
   display: flex;
   flex-direction: column;
@@ -53,7 +53,7 @@
 
 .amende {
   font-size: 1rem;
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
   font-weight: 600;
 }
 
@@ -71,7 +71,7 @@
 .sectionTitle {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 68, 68, 0.2);
 }
@@ -79,7 +79,7 @@
 .sectionTitleWarn {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--accent-orange, #ffaa00);
+  color: var(--accent-orange, var(--md-warning, #f59e0b));
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 170, 0, 0.2);
 }
@@ -103,16 +103,16 @@
   padding: 10px 14px;
   background: rgba(255, 170, 0, 0.06);
   border: 1px solid rgba(255, 170, 0, 0.15);
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   font-size: 14px;
-  color: var(--text, #e0e0e0);
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
 }
 
 .warnIcon {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background: var(--accent-orange, #ffaa00);
+  border-radius: var(--md-radius-full, 9999px);
+  background: var(--accent-orange, var(--md-warning, #f59e0b));
   color: black;
   display: flex;
   align-items: center;
@@ -123,10 +123,10 @@
 }
 
 .toggleBtn { padding: 8px 12px; font-size: 13px;
-  border-radius: 8px;
-  background: var(--bg-input, #1a1a2e);
+  border-radius: var(--md-radius-sm, 8px);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   color: var(--accent, #00d4ff);
-  border: 1px solid var(--border, #2a2a3e);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   font-size: 14px;
   font-weight: 600;
   transition: border-color 0.2s;
@@ -143,9 +143,9 @@
 
 .detailJour {
   padding: 12px;
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 10px;
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
 }
 
 .detailHeader {
@@ -165,10 +165,10 @@
 
 .printBtn {
   padding: 10px 20px;
-  border-radius: 10px;
-  background: var(--bg-input, #1a1a2e);
+  border-radius: var(--md-radius-md, 12px);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   color: var(--text-secondary, #888);
-  border: 1px solid var(--border, #2a2a3e);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   font-size: 14px;
   transition: border-color 0.2s, color 0.2s;
   align-self: center;
@@ -203,16 +203,16 @@
   .panel { gap: 12px; }
 }
 
-.statsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 1rem; }
+.statsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: var(--md-radius-sm, 8px); margin-bottom: 1rem; }
 .statItem { text-align: center; }
 .statLabel { display: block; font-size: 12px; color: #888; margin-bottom: 0.25rem; }
-.statValue { display: block; font-size: 1.1rem; font-weight: 700; color: #e0e0e0; }
-.equipageBadge { display: inline-block; background: var(--accent-glow, rgba(96, 165, 250, 0.15)); color: #00d4ff; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 13px; margin-top: 0.3rem; }
+.statValue { display: block; font-size: 1.1rem; font-weight: 700; color: var(--md-on-surface, var(--md-on-surface, #e2e2f0)); }
+.equipageBadge { display: inline-block; background: var(--accent-glow, rgba(96, 165, 250, 0.15)); color: #00d4ff; padding: 0.2rem 0.6rem; border-radius: var(--md-radius-sm, 8px); font-size: 13px; margin-top: 0.3rem; }
 .periode { display: block; font-size: 13px; color: #888; margin-top: 0.2rem; }
 .detailStats { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 14px; color: #aaa; padding: 0.5rem 0; }
 .detailInf { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
-.detailInfItem { background: rgba(255,68,68,0.15); color: #ff4444; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 13px; }
-.detailOk { color: #00ff88; font-size: 14px; }
+.detailInfItem { background: rgba(255,68,68,0.15); color: var(--md-error, #ef4444); padding: 0.15rem 0.5rem; border-radius: var(--md-radius-sm, 8px); font-size: 13px; }
+.detailOk { color: var(--md-success, #34d399); font-size: 14px; }
 
 
 /* === QOL 8: Score reveal animation === */
@@ -244,7 +244,7 @@
   background: linear-gradient(135deg, #00cc6a, #00aa55);
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -276,29 +276,29 @@
     width: 100%;
     padding: 10px 16px;
     font-size: 14px;
-    border-radius: 10px;
+    border-radius: var(--md-radius-md, 12px);
   }
 }
 /* === Detail Jours Polish === */
-.detailJour { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--accent-green, #00ff88); transition: all 0.2s; }
-.detailJourWarn { border-left-color: var(--accent-red, #ff4444); background: rgba(255,68,68,0.04); }
+.detailJour { background: rgba(255,255,255,0.03); border-radius: var(--md-radius-md, 12px); padding: 10px 12px; border-left: 3px solid var(--accent-green, var(--md-success, #34d399)); transition: all 0.2s; }
+.detailJourWarn { border-left-color: var(--accent-red, var(--md-error, #ef4444)); background: rgba(255,68,68,0.04); }
 .detailHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .detailDate { font-weight: 700; font-size: 14px; color: #fff; }
-.detailBadgeOk { background: rgba(0,255,136,0.15); color: #00ff88; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-.detailBadgeDanger { background: rgba(255,68,68,0.15); color: #ff4444; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.detailBadgeOk { background: rgba(0,255,136,0.15); color: var(--md-success, #34d399); padding: 2px 8px; border-radius: var(--md-radius-sm, 8px); font-size: 12px; font-weight: 600; }
+.detailBadgeDanger { background: rgba(255,68,68,0.15); color: var(--md-error, #ef4444); padding: 2px 8px; border-radius: var(--md-radius-sm, 8px); font-size: 12px; font-weight: 600; }
 .detailGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; }
 .detailStat { display: flex; flex-direction: column; align-items: center; }
 .detailStatLabel { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.03em; }
 .detailStatVal { font-size: 14px; font-weight: 600; color: #fff; }
 .detailInf { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-.detailInfItem { background: rgba(255,68,68,0.12); color: #ff6666; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+.detailInfItem { background: rgba(255,68,68,0.12); color: #ff6666; padding: 2px 8px; border-radius: var(--md-radius-sm, 8px); font-size: 12px; }
 /* Bouton retour saisie */
 .backBtn {
   padding: 10px 16px;
   border: 1px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.05);
   color: rgba(255,255,255,0.7);
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;

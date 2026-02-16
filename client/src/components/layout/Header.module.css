@@ -5,8 +5,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
-  background: var(--bg-card, #12121a);
-  border-bottom: 1px solid var(--border, #2a2a3e);
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border-bottom: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   position: sticky;
   top: 0;
   z-index: 100;
@@ -43,7 +43,7 @@
 /* Status */
 .statusOn {
   font-size: 12px;
-  color: var(--accent-green, #00ff88);
+  color: var(--accent-green, var(--md-success, #34d399));
   display: flex;
   align-items: center;
   gap: 4px;
@@ -52,14 +52,14 @@
   content: '';
   width: 7px;
   height: 7px;
-  border-radius: 50%;
-  background: var(--accent-green, #00ff88);
-  box-shadow: 0 0 6px var(--accent-green, #00ff88);
+  border-radius: var(--md-radius-full, 9999px);
+  background: var(--accent-green, var(--md-success, #34d399));
+  box-shadow: 0 0 6px var(--accent-green, var(--md-success, #34d399));
   flex-shrink: 0;
 }
 .statusOff {
   font-size: 12px;
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
   display: flex;
   align-items: center;
   gap: 4px;
@@ -68,8 +68,8 @@
   content: '';
   width: 7px;
   height: 7px;
-  border-radius: 50%;
-  background: var(--accent-red, #ff4444);
+  border-radius: var(--md-radius-full, 9999px);
+  background: var(--accent-red, var(--md-error, #ef4444));
   flex-shrink: 0;
 }
 
@@ -112,7 +112,7 @@
   border: 1px solid #3a3a5e;
 }
 .themeTrackLight {
-  background: #e0e0e0;
+  background: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
   border: 1px solid #ccc;
 }
 
@@ -122,7 +122,7 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   transition: transform 0.25s ease, width 0.15s ease, background 0.25s;
 }
 .themeThumbDark {
@@ -149,7 +149,7 @@
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -173,10 +173,10 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: var(--bg-input, #1a1a2e);
-  color: var(--text, #e0e0e0);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 10px;
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
   font-size: 14px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
@@ -196,7 +196,7 @@
   position: absolute;
   top: -6px;
   right: -6px;
-  background: var(--accent-red, #ff4444);
+  background: var(--accent-red, var(--md-error, #ef4444));
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -250,8 +250,8 @@
   height: 44px;
   border-radius: 11px;
   border: none;
-  background: var(--bg-input, #1a1a2e);
-  border: 1px solid var(--border, #2a2a3e);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   color: var(--text-secondary, #888);
   font-size: 18px;
   font-weight: 700;

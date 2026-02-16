@@ -23,9 +23,9 @@
   align-items: flex-start;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   font-size: 14px;
-  color: var(--text, #e0e0e0);
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
 }
 
 .item[data-niveau="danger"] { background: rgba(255, 68, 68, 0.06); }
@@ -36,7 +36,7 @@
 .icon {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
+  border-radius: var(--md-radius-full, 9999px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,10 +45,10 @@
   flex-shrink: 0;
 }
 
-.icon[data-niveau="danger"] { background: var(--accent-red, #ff4444); color: white; }
-.icon[data-niveau="warning"] { background: var(--accent-orange, #ffaa00); color: black; }
+.icon[data-niveau="danger"] { background: var(--accent-red, var(--md-error, #ef4444)); color: white; }
+.icon[data-niveau="warning"] { background: var(--accent-orange, var(--md-warning, #f59e0b)); color: black; }
 .icon[data-niveau="info"] { background: var(--accent, #00d4ff); color: black; }
-.icon[data-niveau="ok"] { background: var(--accent-green, #00ff88); color: black; }
+.icon[data-niveau="ok"] { background: var(--accent-green, var(--md-success, #34d399)); color: black; }
 
 .texte {
   line-height: 1.4;

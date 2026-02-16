@@ -8,8 +8,8 @@
 }
 
 .spinner {
-  border-radius: 50%;
-  border: 3px solid var(--border, #2a2a3e);
+  border-radius: var(--md-radius-full, 9999px);
+  border: 3px solid var(--border, var(--md-outline-variant, #2a2a4e));
   border-top-color: var(--accent, #00d4ff);
   animation: spin 0.8s linear infinite;
 }

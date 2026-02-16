@@ -1,9 +1,9 @@
 /* FIMO Check — ParametresPanel v7.11.0 — UX Conducteur */
 
 .panel {
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 14px;
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-lg, 16px);
   overflow: hidden;
   transition: border-color 0.2s;
   padding-left: 12px;
@@ -46,12 +46,12 @@
   align-items: center;
   gap: 3px;
   padding: 5px 10px;
-  border-radius: 20px;
+  border-radius: var(--md-radius-lg, 16px);
   font-size: 13px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.08);
-  color: #e0e0e0;
-  border: 1px solid var(--border, #2a2a3e);
+  color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   white-space: nowrap;
   line-height: 1.2;
 }
@@ -62,11 +62,11 @@
   align-items: center;
   gap: 4px;
   padding: 5px 12px;
-  border-radius: 20px;
+  border-radius: var(--md-radius-lg, 16px);
   font-size: 13px;
   font-weight: 700;
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
-  color: #e0e0e0;
+  color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
   white-space: nowrap;
   line-height: 1.2;
   box-shadow: 0 1px 4px rgba(102, 126, 234, 0.25);
@@ -82,11 +82,11 @@
   align-items: center;
   gap: 3px;
   padding: 5px 10px;
-  border-radius: 20px;
+  border-radius: var(--md-radius-lg, 16px);
   font-size: 13px;
   font-weight: 600;
   background: var(--accent-glow, rgba(96, 165, 250, 0.15));
-  color: #e0e0e0;
+  color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
   border: 1px solid rgba(0, 212, 255, 0.4);
   white-space: nowrap;
   line-height: 1.2;
@@ -136,10 +136,10 @@
 }
 
 .select {
-  background: var(--bg-input, #1a1a2e);
-  color: var(--text, #e0e0e0);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 10px;
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
   padding: 8px 10px;
   font-size: 13px;
   cursor: pointer;
@@ -160,10 +160,10 @@
 /* Toggles Equipage / Saisie */
 .toggle {
   display: flex;
-  background: var(--bg-input, #1a1a2e);
-  border-radius: 10px;
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  border-radius: var(--md-radius-md, 12px);
   padding: 3px;
-  border: 1px solid var(--border, #2a2a3e);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   gap: 2px;
 }
 
@@ -174,7 +174,7 @@
   justify-content: center;
   gap: 4px;
   padding: 7px 6px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   font-size: 13px;
   font-weight: 600;
   background: transparent;
@@ -187,7 +187,7 @@
 .toggleBtn:active { opacity: 0.7; }
 @media (hover: hover) and (pointer: fine) {
   .toggleBtn:hover {
-    color: var(--text, #e0e0e0);
+    color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
     background: rgba(255, 255, 255, 0.04);
   }
 }
@@ -199,7 +199,7 @@
   justify-content: center;
   gap: 4px;
   padding: 7px 6px;
-  border-radius: 8px;
+  border-radius: var(--md-radius-sm, 8px);
   font-size: 13px;
   font-weight: 700;
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
@@ -223,7 +223,7 @@
   padding: 8px 12px;
   background: rgba(0, 212, 255, 0.06);
   border: 1px solid rgba(0, 212, 255, 0.12);
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   font-size: 12px;
   color: var(--text-secondary, #aaa);
   line-height: 1.35;
@@ -236,11 +236,11 @@
 /* === Responsive === */
 @media (max-width: 600px) {
   .summaryBtn { padding: 8px 10px; }
-  .chip, .chipMode { font-size: 12px; padding: 4px 8px;   color: #e0e0e0;
+  .chip, .chipMode { font-size: 12px; padding: 4px 8px;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
   background: var(--accent-glow, rgba(96, 165, 250, 0.15));
   border: 1px solid rgba(0, 212, 255, 0.4);
 }
-  .chipService { font-size: 12px; padding: 4px 10px;   color: #e0e0e0;
+  .chipService { font-size: 12px; padding: 4px 10px;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
 }
   .grid { grid-template-columns: 1fr; gap: 10px; }
   .content { padding: 0 10px 12px 10px; }
@@ -248,7 +248,7 @@
 
 @media (max-width: 380px) {
   .chipsRow { gap: 4px; }
-  .chip, .chipMode, .chipService { font-size: 12px; padding: 3px 7px;   color: #e0e0e0;
+  .chip, .chipMode, .chipService { font-size: 12px; padding: 3px 7px;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
 }
 }
 
@@ -267,7 +267,7 @@
 
 /* min-font-mobile-fix-v2 */
 @media (max-width: 480px) {
-  .chip, .chipService, .chipMode { font-size: 14px; min-height: 34px;   color: #e0e0e0;
+  .chip, .chipService, .chipMode { font-size: 14px; min-height: 34px;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
   background: var(--accent-glow, rgba(96, 165, 250, 0.15));
   border: 1px solid rgba(0, 212, 255, 0.4);
 }

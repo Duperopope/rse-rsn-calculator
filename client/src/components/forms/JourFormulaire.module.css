@@ -1,9 +1,9 @@
 /* === JourFormulaire v7.9.0 - Refonte UX === */
 
 .jour {
-  background: var(--bg-card, #12121a);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 16px;
+  background: var(--bg-card, var(--md-surface, #0F172A));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-lg, 16px);
   padding: 20px;
   animation: fadeIn 0.3s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -34,15 +34,15 @@
   font-weight: 700;
   font-size: 13px;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: var(--md-radius-lg, 16px);
   white-space: nowrap;
 }
 
 .dateInput {
-  background: var(--bg-input, #1a1a2e);
-  color: var(--text, #e0e0e0);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 10px;
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
   padding: 8px 12px;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -58,19 +58,19 @@
 .actionBtn, .removeBtn {
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  border: 1px solid var(--border, #2a2a3e);
-  background: var(--bg-input, #1a1a2e);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
 }
 .actionBtn { color: var(--accent, #00d4ff); }
-.removeBtn { color: var(--accent-red, #ff4444); }
+.removeBtn { color: var(--accent-red, var(--md-error, #ef4444)); }
 @media (hover: hover) {
   .actionBtn:hover { border-color: var(--accent, #00d4ff); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
-  .removeBtn:hover { border-color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
+  .removeBtn:hover { border-color: var(--accent-red, var(--md-error, #ef4444)); background: rgba(255, 68, 68, 0.08); }
 }
 
 /* --- TEMPLATES CARTES --- */
@@ -101,7 +101,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border-radius: 12px;
+  border-radius: var(--md-radius-md, 12px);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -109,17 +109,17 @@
   flex: 1;
   min-width: 140px;
   justify-content: center;
-  border: 1px solid var(--border, #2a2a3e);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
 }
 
 .templateCard {
-  background: var(--bg-input, #1a1a2e);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   color: var(--text-secondary, #888);
 }
 @media (hover: hover) {
   .templateCard:hover {
     border-color: var(--accent, #00d4ff);
-    color: var(--text, #e0e0e0);
+    color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
     background: rgba(0, 212, 255, 0.06);
   }
 }
@@ -172,7 +172,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 4px;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   transition: background 0.15s;
 }
 @media (hover: hover) {
@@ -185,7 +185,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   border: 1px solid;
   cursor: pointer;
   transition: all 0.2s;
@@ -204,10 +204,10 @@
 }
 
 .timeInput {
-  background: var(--bg-input, #1a1a2e);
-  color: var(--text, #e0e0e0);
-  border: 1px solid var(--border, #2a2a3e);
-  border-radius: 12px;
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  border-radius: var(--md-radius-md, 12px);
   padding: 10px 12px;
   font-size: 14px;
   width: 95px;
@@ -236,7 +236,7 @@
 .deleteActBtn {
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: var(--md-radius-sm, 8px);
   background: rgba(255, 68, 68, 0.08);
   border: 1px solid rgba(255, 68, 68, 0.15);
   color: #ff6b6b;
@@ -250,7 +250,7 @@
 }
 @media (hover: hover) {
   .deleteActBtn:hover:not(:disabled) {
-    color: #ff4444;
+    color: var(--md-error, #ef4444);
     background: rgba(255, 68, 68, 0.18);
     border-color: rgba(255, 68, 68, 0.35);
     transform: scale(1.08);
@@ -281,7 +281,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -289,19 +289,19 @@
 }
 
 .typeBtn {
-  background: var(--bg-input, #1a1a2e);
-  border: 1px solid var(--border, #2a2a3e);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   color: var(--text-secondary, #888);
   min-height: 44px;
 }
 @media (hover: hover) {
-  .typeBtn:hover { color: var(--text, #e0e0e0); border-color: var(--text-secondary, #888); }
+  .typeBtn:hover { color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0))); border-color: var(--text-secondary, #888); }
 }
 
 .typeBtnActive {
   font-weight: 700;
   border: 2px solid;
-  color: var(--text, #e0e0e0);
+  color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
 }
 
 .typeBtnLabel {
@@ -313,9 +313,9 @@
   margin-top: 4px;
   width: 100%;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--md-radius-md, 12px);
   background: transparent;
-  border: 2px dashed var(--border, #2a2a3e);
+  border: 2px dashed var(--border, var(--md-outline-variant, #2a2a4e));
   color: var(--text-secondary, #888);
   font-size: 14px;
   font-weight: 600;
@@ -338,7 +338,7 @@
   gap: 16px;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
+  border-radius: var(--md-radius-md, 12px);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -357,21 +357,21 @@
 .resumeValueOk {
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent-green, #00ff88);
+  color: var(--accent-green, var(--md-success, #34d399));
   font-variant-numeric: tabular-nums;
 }
 
 .resumeValueDanger {
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
   font-variant-numeric: tabular-nums;
 }
 
 .resumeSep {
   width: 1px;
   height: 20px;
-  background: var(--border, #2a2a3e);
+  background: var(--border, var(--md-outline-variant, #2a2a4e));
 }
 
 /* --- ANIMATIONS --- */
@@ -403,7 +403,7 @@
     gap: 6px;
     padding: 8px 10px;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
+    border-radius: var(--md-radius-md, 12px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     margin-bottom: 4px;
     align-items: center;
@@ -412,7 +412,7 @@
   .activiteTypeBtn { flex: 0 0 auto; min-height: 44px; padding: 6px 10px; }
   .activiteTypeName { display: none; }
 
-  .timeInput { width: 72px; flex: 0 0 72px; min-height: 36px; font-size: 13px; padding: 6px 5px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+  .timeInput { width: 72px; flex: 0 0 72px; min-height: 36px; font-size: 13px; padding: 6px 5px; border-radius: var(--md-radius-sm, 8px); border: 1px solid rgba(255,255,255,0.1); }
 
   .fleche { width: auto; font-size: 13px; color: rgba(255,255,255,0.5); }
 
@@ -464,12 +464,12 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: 10px;
+  border-radius: var(--md-radius-md, 12px);
   font-size: 13px;
   font-weight: 600;
   transition: all 0.2s;
-  border: 1px solid var(--border, #2a2a3e);
-  background: var(--bg-input, #1a1a2e);
+  border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   cursor: pointer;
   white-space: nowrap;
 }
@@ -477,11 +477,11 @@
   color: var(--accent, #00d4ff);
 }
 .removeBtnLabel {
-  color: var(--accent-red, #ff4444);
+  color: var(--accent-red, var(--md-error, #ef4444));
 }
 @media (hover: hover) {
   .actionBtnLabel:hover { border-color: var(--accent, #00d4ff); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
-  .removeBtnLabel:hover { border-color: var(--accent-red, #ff4444); background: rgba(255, 68, 68, 0.08); }
+  .removeBtnLabel:hover { border-color: var(--accent-red, var(--md-error, #ef4444)); background: rgba(255, 68, 68, 0.08); }
 }
 .actionBtnLabel span, .removeBtnLabel span {
   font-size: 13px;
@@ -506,7 +506,7 @@
   color: #f44336;
   background: rgba(244, 67, 54, 0.15);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--md-radius-sm, 8px);
 }
 @keyframes pulseChev {
   0%, 100% { border-left-color: #f44336; }
@@ -518,7 +518,7 @@
 .swipeWrapper {
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: var(--md-radius-md, 12px);
   margin-bottom: 2px;
 }
 
@@ -569,7 +569,7 @@
 .activiteLine {
   position: relative;
   z-index: 1;
-  background: var(--bg-card, #1a1a2e);
+  background: var(--bg-card, var(--md-surface-container, #1a1a2e));
 }
 
 /* Desktop : pas de wrapper overflow (pas de swipe) */
