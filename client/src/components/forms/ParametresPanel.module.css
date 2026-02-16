@@ -45,7 +45,7 @@
   gap: 3px;
   padding: 5px 10px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   background: var(--bg-input, #1a1a2e);
   color: var(--text-secondary, #aaa);
@@ -61,7 +61,7 @@
   gap: 4px;
   padding: 5px 12px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
   color: #fff;
@@ -81,7 +81,7 @@
   gap: 3px;
   padding: 5px 10px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   background: rgba(0, 212, 255, 0.1);
   color: var(--accent, #00d4ff);
@@ -126,7 +126,7 @@
 }
 
 .label {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   color: var(--text-secondary, #888);
   font-weight: 600;
   text-transform: uppercase;
@@ -253,4 +253,12 @@
   .panel { border: 1px solid #ccc; }
   .summaryBtn { pointer-events: none; }
   .chevron { display: none; }
+}
+
+
+/* min-font-mobile-fix-v2 */
+@media (max-width: 480px) {
+  .chip, .chipService, .chipMode { font-size: 0.85rem; min-height: 34px; }
+  .chipIcon { font-size: 0.9rem; }
+  .label { font-size: 0.8rem; }
 }

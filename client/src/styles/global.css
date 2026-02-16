@@ -217,3 +217,11 @@ body {
   outline: 2px solid var(--accent, #00d4ff);
   outline-offset: 2px;
 }
+
+/* mobile-root-font-fix */
+@media (max-width: 480px) {
+  html { font-size: 16px; }
+}
+@media (max-width: 375px) {
+  html { font-size: 15px; }
+}

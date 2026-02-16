@@ -574,3 +574,14 @@
     display: none;
   }
 }
+
+
+/* min-font-mobile-fix-v2 */
+@media (max-width: 480px) {
+  .activiteTypeName { font-size: 0.78rem; }
+}
+
+/* date-span-mobile-fix */
+@media (max-width: 480px) {
+  .jourTab span, .jourBtn span, .dayButton span, .navJour span, .navJour button span { font-size: 0.7rem; }
+}

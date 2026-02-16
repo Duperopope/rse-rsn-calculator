@@ -48,3 +48,9 @@
 @media print {
   .footer { display: none; }
 }
+
+
+/* min-font-mobile-fix-v2 */
+@media (max-width: 480px) {
+  .footer, .footer span, .footer div, .footer a { font-size: 0.7rem; }
+}

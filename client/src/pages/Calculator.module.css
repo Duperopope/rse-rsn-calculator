@@ -231,7 +231,8 @@
 
 /* Sous-texte date */
 .jourNavDate {
-  font-size: 0.65rem;
+  /* fix-qa-mobile */
+  font-size: 0.72rem;
   font-weight: 400;
   opacity: 0.6;
 }
