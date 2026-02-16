@@ -1099,32 +1099,13 @@ export default function Calculator() {
 
 
       <BottomBar
-
-
         onAnalyse={() => { if (navigator.vibrate) navigator.vibrate(10); lancerAnalyse(); }}
-
-
         analyseEnCours={chargement}
-
-
         analyseDisabled={!online || chargement}
-
-
         historiqueCount={Math.max(0, (historique || []).length - lastSeenCount)}
-
-
         onToggleHistorique={() => setVoirHistorique(v => !v)}
-
-
         voirHistorique={voirHistorique}
-
-
         onStartTour={() => setShowTour(true)}
-
-
-        onScrollTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-
-
       />
 
 

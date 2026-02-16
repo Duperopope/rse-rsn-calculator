@@ -3,7 +3,7 @@ import styles from './BottomBar.module.css';
 
 /**
  * FIMO Check — BottomBar v7.10.3
- * 3 boutons : Analyser | Historique | Haut
+ * 3 boutons : Analyser | Historique | Aide
  * Theme deplace dans ParametresPanel
  */
 
@@ -34,7 +34,7 @@ function IconHistorique() {
 export function BottomBar({
   onAnalyse, analyseEnCours, analyseDisabled,
   historiqueCount, onToggleHistorique, voirHistorique,
-  onScrollTop
+  onStartTour
 }) {
   const handleAnalyse = () => {
     if (navigator.vibrate) navigator.vibrate(15);
@@ -46,9 +46,9 @@ export function BottomBar({
     if (onToggleHistorique) onToggleHistorique();
   };
 
-  const handleTop = () => {
-    if (navigator.vibrate) navigator.vibrate(5);
-    if (onScrollTop) onScrollTop();
+  const handleAide = () => {
+    if (navigator.vibrate) navigator.vibrate(10);
+    if (onStartTour) onStartTour();
   };
 
   return (
@@ -81,16 +81,17 @@ export function BottomBar({
 
       <button
         className={styles.item}
-        onClick={handleTop}
-        aria-label="Remonter en haut"
+        onClick={handleAide}
+        aria-label="Guide interactif"
       >
         <span className={styles.iconWrap}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 19 L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M5 12 L12 5 L19 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M9 9.5a3 3 0 0 1 5.5 1.5c0 2-3 2-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="12" cy="18" r="0.5" fill="currentColor" />
           </svg>
         </span>
-        <span className={styles.label}>Haut</span>
+        <span className={styles.label}>Aide</span>
       </button>
     </nav>
   );
