@@ -38,6 +38,10 @@
 - Le README est la vitrine publique du projet : toujours synchronise avec la realite du code
 
 ### Code
+- JAMAIS coder une feature visuelle complexe sans planifier l UX AVANT (maquette, flux, donnees necessaires, references)
+- JAMAIS creer un moteur de calcul cote client si le backend fait deja le calcul (source unique = backend)
+- JAMAIS empiler des patches sur du code bugge : supprimer et repartir clean
+- Toujours verifier si les donnees sont multi-jours ou jour unique avant de les passer en props
 - Pas de code inline complexe dans bash (utiliser cat > fichier.js)
 - Expliquer ce quon fait avant de le faire
 - Logger chaque etape (console.log avec prefixe)
