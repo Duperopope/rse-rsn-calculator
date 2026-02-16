@@ -53,7 +53,7 @@ export function PanneauJauges({ stats, typeService = "REGULIER", nbDerogConduite
   var limiteReposMin = LIMITES.REPOS_JOURNALIER_MIN; // 540 = 9h
   var reposOk = reposJournalier >= limiteReposNormal;
   var reposReduit = reposJournalier >= limiteReposMin && reposJournalier < limiteReposNormal;
-  var labelRepos = reposOk ? "Repos (11h+)" : reposReduit ? "Repos (reduit)" : "Repos insuf.";
+  var labelRepos = reposOk ? "✓ Repos (11h+)" : reposReduit ? "⚠ Repos (reduit)" : "✗ Repos insuf.";
 
   // === Stats hebdomadaires ===
   var hebdoStats = useMemo(function() {
