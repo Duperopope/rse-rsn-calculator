@@ -94,9 +94,7 @@
 - Double reglementation : CE 561/2006 (europeen) + Decret 2006-925 (francais)
 
 ## Taches en attente
-1. Bouton Previous du dashboard
-2. Erreurs Rollup (react-joyride)
-3. Verification URLs legales (Legifrance, EUR-Lex)
+Aucune tache en attente - toutes completees le 2026-02-16
 
 ## Environnement
 - Device : Samsung (Termux, Android)
