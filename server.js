@@ -1168,7 +1168,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
   let amendeEstimee = 0;
 
   // Analyser chaque jour
-  joursTries.forEach(dateJour => {
+  joursTries.forEach((dateJour, idxJour) => {
     // Tri intelligent : detecte si le service traverse minuit
     // Si activites avant ET apres 12h sur le meme jour = service de nuit
     // Dans ce cas, les heures >= 12h passent en premier (debut de service)
@@ -1613,20 +1613,104 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       }
     }
 
-// Repos journalier (approximation sur les donnees disponibles)
-    // v7.20 FIX: Detecter jour de repos complet pour ne pas generer de faux positif
+// Repos journalier — v7.21 FIX: calcul inter-journalier reel
+    // CE 561/2006 Art.8: repos = periode consecutive sans conduite/travail/dispo
+    // Sur tachygraphe, pause et repos = meme symbole. Distinction par duree et contexte:
+    //   < 3h entre activites = pause (Art.7)
+    //   >= 3h (part1) + >= 9h (part2) = repos fractionne (Art.4 par.g)
+    //   >= 9h consecutives = repos reduit (Art.8 par.2)
+    //   >= 11h consecutives = repos normal (Art.8 par.2)
     const estJourReposCompletCSV = activitesJour.length === 1 && (activitesJour[0].type === 'repos' || activitesJour[0].type === 'pause') && activitesJour[0].heure_debut === '00:00' && (activitesJour[0].heure_fin === '24:00' || activitesJour[0].heure_fin === '23:59');
+
+    // Calcul du repos inter-journalier REEL:
+    // = (24h - heure fin derniere activite conduite/travail du jour)
+    //   + (heure debut premiere activite conduite/travail du jour suivant)
+    // Les pauses/repos < 3h entre activites NE COMPTENT PAS comme repos journalier
+    const totalActiviteHorsPause = estJourReposCompletCSV ? 0 : (conduiteJour + travailJour + dispoJour);
     const totalActiviteJour = estJourReposCompletCSV ? 0 : (conduiteJour + travailJour + dispoJour + pauseJour);
-    const reposEstime = (24 * 60) - totalActiviteJour;
-    const seuilReposIntraJourH = equipage === "double" ? R.MULTI_REPOS_JOURNALIER_MIN_H : R.REPOS_JOURNALIER_REDUIT_H;
-    if (reposEstime < seuilReposIntraJourH * 60 && totalActiviteJour > 0) {
-      const manqueMin = (seuilReposIntraJourH * 60) - reposEstime;
-      if (manqueMin > 150) { // > 2h30 sous le minimum = classe 5
+
+    let reposInterJourH = 24; // Par defaut (premier jour ou jour de repos complet)
+    if (!estJourReposCompletCSV && totalActiviteHorsPause > 0) {
+      // Heure de fin de la derniere activite de travail/conduite de CE jour
+      const finJourH = (function() {
+        var maxFin = 0;
+        activitesJour.forEach(function(a) {
+          if (a.type !== 'pause' && a.type !== 'repos' && a.type !== 'ferry') {
+            var parts = a.heure_fin.split(':');
+            var fH = parseInt(parts[0]) + parseInt(parts[1]) / 60;
+            if (fH > maxFin) maxFin = fH;
+          }
+        });
+        return maxFin;
+      })();
+
+      // Heure de debut de la premiere activite de travail/conduite du jour SUIVANT
+      var debutSuivantH = -1; // -1 = pas de jour suivant connu
+      if (idxJour + 1 < joursTries.length) {
+        var dateSuivant = joursTries[idxJour + 1];
+        var actsSuivant = joursMap[dateSuivant] || [];
+        var minDeb = 24;
+        actsSuivant.forEach(function(a) {
+          if (a.type !== 'pause' && a.type !== 'repos' && a.type !== 'ferry') {
+            var parts = a.heure_debut.split(':');
+            var dH = parseInt(parts[0]) + parseInt(parts[1]) / 60;
+            if (dH < minDeb) minDeb = dH;
+          }
+        });
+        debutSuivantH = minDeb;
+      }
+
+      // Repos inter-journalier reel (fin jour N -> debut jour N+1)
+      var reposInterJourBrut;
+      if (debutSuivantH >= 0) {
+        reposInterJourBrut = (24 - finJourH) + debutSuivantH;
+      } else {
+        reposInterJourBrut = 24 - finJourH;
+      }
+      // Repos intra-periode 24h (CE 561/2006 Art.8 + Art.4 par.g)
+      // = 24h - (conduite + travail + dispo). Pause exclue (meme symbole tachy)
+      var reposIntraPeriodeH = (24 * 60 - totalActiviteHorsPause) / 60;
+      // Prendre le MAX des deux estimations
+      reposInterJourH = Math.max(reposInterJourBrut, reposIntraPeriodeH);
+
+      // Verifier aussi le plus long bloc consecutif INTRA-jour
+      // (pour detecter les repos fractionnes 3h+9h)
+      var blocsReposIntra = [];
+      var triees = activitesJour.slice().sort(function(a, b) { return a.heure_debut.localeCompare(b.heure_debut); });
+      for (var bi = 0; bi < triees.length - 1; bi++) {
+        var finAct = parseInt(triees[bi].heure_fin.split(':')[0]) * 60 + parseInt(triees[bi].heure_fin.split(':')[1]);
+        var debNext = parseInt(triees[bi + 1].heure_debut.split(':')[0]) * 60 + parseInt(triees[bi + 1].heure_debut.split(':')[1]);
+        var gap = debNext - finAct;
+        if (gap > 0) blocsReposIntra.push(gap);
+      }
+      // Ajouter le bloc de fin de journee (apres derniere activite)
+      var dernFinMin = parseInt(triees[triees.length - 1].heure_fin.split(':')[0]) * 60 + parseInt(triees[triees.length - 1].heure_fin.split(':')[1]);
+      var blocFinJour = 1440 - dernFinMin;
+      if (blocFinJour > 0) blocsReposIntra.push(blocFinJour);
+      // Ajouter le bloc de debut de journee (avant premiere activite)
+      var premDebMin = parseInt(triees[0].heure_debut.split(':')[0]) * 60 + parseInt(triees[0].heure_debut.split(':')[1]);
+      if (premDebMin > 0) blocsReposIntra.push(premDebMin);
+
+      // Le plus long bloc intra-jour (en heures)
+      var maxBlocIntraH = blocsReposIntra.length > 0 ? Math.max.apply(null, blocsReposIntra) / 60 : 0;
+
+      // Utiliser le MAX entre repos inter-jour et plus long bloc intra-jour
+      // Car un repos de 11h en milieu de journee (ex: 08:00-19:00 libre) est valide
+      if (maxBlocIntraH > reposInterJourH) reposInterJourH = maxBlocIntraH;
+    }
+
+    const reposEstimeMin = reposInterJourH * 60;
+    const reposEstime = reposEstimeMin; // Compat avec le reste du code
+    const seuilReposIntraJourH = equipage === "double" ? R.MULTI_REPOS_JOURNALIER_MIN_H : REGLES_SLO.REPOS_JOURNALIER_REDUIT_H;
+
+    if (!estJourReposCompletCSV && totalActiviteHorsPause > 0 && reposInterJourH < seuilReposIntraJourH) {
+      const manqueH = seuilReposIntraJourH - reposInterJourH;
+      if (manqueH > 2.5) { // > 2h30 sous le minimum = classe 5
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
           limite: seuilReposIntraJourH + "h minimum (reduit)",
-          constate: (reposEstime / 60).toFixed(1) + "h estimees",
-          depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
+          constate: reposInterJourH.toFixed(1) + "h (fin " + Math.floor(24 - ((24 - (totalActiviteHorsPause/60)))) + "h -> debut J+1)",
+          depassement: "Manque " + manqueH.toFixed(1) + "h",
           classe: "5e classe",
           amende: amendeObj('5e classe')
         });
@@ -1635,17 +1719,17 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         infractionsJour.push({
           regle: "Repos journalier insuffisant (CE 561/2006 Art.8 + R3312-28)",
           limite: seuilReposIntraJourH + "h minimum (reduit)",
-          constate: (reposEstime / 60).toFixed(1) + "h estimees",
-          depassement: "Manque " + (manqueMin / 60).toFixed(1) + "h",
+          constate: reposInterJourH.toFixed(1) + "h (inter-journalier)",
+          depassement: "Manque " + manqueH.toFixed(1) + "h",
           classe: "4e classe",
           amende: amendeObj("4e classe")
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
-    } else if (reposEstime < R.REPOS_JOURNALIER_NORMAL_H * 60 && reposEstime >= seuilReposIntraJourH * 60 && totalActiviteJour > 0) {
+    } else if (!estJourReposCompletCSV && totalActiviteHorsPause > 0 && reposInterJourH < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H && reposInterJourH >= seuilReposIntraJourH) {
       avertissementsJour.push({
         regle: "Repos journalier en mode reduit",
-        message: "Repos estime de " + (reposEstime / 60).toFixed(1) + "h (norme = " + R.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + seuilReposIntraJourH + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
+        message: "Repos estime de " + reposInterJourH.toFixed(1) + "h (norme = " + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + seuilReposIntraJourH + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
       });
     }
 
@@ -1713,7 +1797,7 @@ totalConduiteMin += conduiteJour;
          })()
         : "N/A",
       conduite_continue_max_min: maxConduiteContinue,
-      repos_estime_h: estJourReposCompletCSV ? "24.0" : (totalActiviteJour > 0 ? ((24 * 60 - totalActiviteJour) / 60).toFixed(1) : "24.0"),
+      repos_estime_h: estJourReposCompletCSV ? "24.0" : (totalActiviteHorsPause > 0 ? reposInterJourH.toFixed(1) : "24.0"),
       repos_cumule_heures: totalActiviteJour === 0 ? 24 : (totalActiviteJour <= pauseJour ? 24 : Math.max(0, (24 * 60 - totalActiviteJour) / 60)),
       travail_nuit_min: travailNuitMin,
       ferry_min: ferryJour,
@@ -1821,7 +1905,7 @@ totalConduiteMin += conduiteJour;
       });
 
       // Verifier repos journalier minimum
-      const seuilReposMinH = equipage === "double" ? R.MULTI_REPOS_JOURNALIER_MIN_H : R.REPOS_JOURNALIER_REDUIT_H;
+      const seuilReposMinH = equipage === "double" ? R.MULTI_REPOS_JOURNALIER_MIN_H : REGLES_SLO.REPOS_JOURNALIER_REDUIT_H;
       if (reposH < seuilReposMinH && joursEcart <= 1) {
         // Repos insuffisant seulement entre jours CONSECUTIFS (pas entre ven->lun)
         const manqueH = seuilReposMinH - reposH;
@@ -1847,10 +1931,10 @@ totalConduiteMin += conduiteJour;
           });
           amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
         }
-      } else if (reposH < R.REPOS_JOURNALIER_NORMAL_H && reposH >= seuilReposMinH && joursEcart <= 1) {
+      } else if (reposH < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H && reposH >= seuilReposMinH && joursEcart <= 1) {
         avertissements.push({
           regle: "Repos journalier reduit inter-jours",
-          message: "Repos de " + reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date + " (norme " + R.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis " + seuilReposMinH + "h, max 3x entre 2 repos hebdo)"
+          message: "Repos de " + reposH.toFixed(1) + "h entre " + jourActuel.date + " et " + jourSuivant.date + " (norme " + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis " + seuilReposMinH + "h, max 3x entre 2 repos hebdo)"
         });
       }
     }
@@ -2538,8 +2622,8 @@ app.get('/api/qa', async (req, res) => {
   test('R2-PAUSES', 'Pause obligatoire complete = 45 min', REGLES_SLO.PAUSE_OBLIGATOIRE_MIN === 45, 'EUR-2', 'CE 561/2006 Art.7 (45min ou fractionne 15+30)', 'Attendu: 45. Obtenu: ' + REGLES_SLO.PAUSE_OBLIGATOIRE_MIN + '. Fractionnable en 15+30 min');
 
   // === R3-REPOS : CE 561/2006 Art.8 ===
-  test('R3-REPOS', 'Repos journalier normal = 11h', R.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + R.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
-  test('R3-REPOS', 'Repos journalier reduit = 9h', R.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + R.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
+  test('R3-REPOS', 'Repos journalier normal = 11h', REGLES_SLO.REPOS_JOURNALIER_NORMAL_H === 11, 'EUR-3', 'CE 561/2006 Art.8 para.1', 'Attendu: 11. Obtenu: ' + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + '. Cross-check: Wayground Q5, legistrans Q1');
+  test('R3-REPOS', 'Repos journalier reduit = 9h', REGLES_SLO.REPOS_JOURNALIER_REDUIT_H === 9, 'EUR-3', 'CE 561/2006 Art.8 para.2', 'Attendu: 9. Obtenu: ' + REGLES_SLO.REPOS_JOURNALIER_REDUIT_H + '. Max 3x entre 2 repos hebdo (Wayground Q6)');
   test('R3-REPOS', 'Repos hebdo normal = 45h', REGLES.REPOS_HEBDO_NORMAL_H === 45, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 45. Obtenu: ' + REGLES.REPOS_HEBDO_NORMAL_H + '. Cross-check: Wayground Q7');
   test('R3-REPOS', 'Repos hebdo reduit = 24h', REGLES.REPOS_HEBDO_REDUIT_H === 24, 'EUR-3', 'CE 561/2006 Art.8 para.6', 'Attendu: 24. Obtenu: ' + REGLES.REPOS_HEBDO_REDUIT_H);
 
