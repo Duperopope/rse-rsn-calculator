@@ -1,11 +1,13 @@
 # Tache en cours
 
-## Statut: TIMELINE V3 - AFFICHAGE PUR
+## Statut: TIMELINE V4 - STANDARD TACHYGRAPHE
 
 ## Details
-- Timeline reecrite : suppression mini-moteur analyserInfractions
-- Plus de zones de depassement, marqueurs, ou details infraction dans la timeline
-- Ajout barre de stats (conduite, travail, pause, amplitude)
-- Tooltip avec duree
-- Les infractions restent 100% gerees par le backend + InfractionCards
-- Build en cours
+- Timeline v4 : drapeaux infractions alimentes par le backend (zero moteur client)
+- Drapeaux positionnes temporellement via mapping regle -> minute
+- Tap drapeau -> bascule onglet Resultats + scroll vers InfractionCard
+- Tap bloc -> tooltip avec type + heures + duree
+- Labels sur blocs larges (>1h)
+- Suppression chips stats (doublon jauges)
+- CSS : flagsRow au-dessus du track, style Tachogram
+- Source UX : tachogram.com standard industrie

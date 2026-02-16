@@ -848,7 +848,7 @@ export default function Calculator() {
               <div data-tour="timeline" className={styles.timelineWrap}>
 
 
-                <Card><Timeline24h equipage={equipage} activites={jours[jourActifIndex].activites} theme={theme} onActiviteClick={function(idx) { setBottomTab('saisie'); setTimeout(function() { var el = document.getElementById('activite-' + idx); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow 0.3s'; el.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.5)'; setTimeout(function() { el.style.boxShadow = 'none'; }, 2000); } }, 100); }} /></Card>
+                <Card><Timeline24h equipage={equipage} activites={jours[jourActifIndex].activites} theme={theme} onActiviteClick={function(idx) { setBottomTab('saisie'); setTimeout(function() { var el = document.getElementById('activite-' + idx); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow 0.3s'; el.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.5)'; setTimeout(function() { el.style.boxShadow = 'none'; }, 2000); } }, 100); }}  infractions={resultat && resultat.infractions ? resultat.infractions : []} onInfractionClick={function(idx) { setBottomTab("resultats"); setTimeout(function() { var cards = document.querySelectorAll("[class*=\"card\"]"); if (cards[idx]) { cards[idx].scrollIntoView({ behavior: "smooth", block: "center" }); cards[idx].style.transition = "box-shadow 0.3s"; cards[idx].style.boxShadow = "0 0 20px rgba(255, 59, 48, 0.6)"; setTimeout(function() { cards[idx].style.boxShadow = "none"; }, 2500); } }, 400); }} /></Card>
 
 
               </div>
