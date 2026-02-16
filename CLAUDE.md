@@ -39,6 +39,8 @@
 - Pas de code inline complexe dans bash (utiliser cat > fichier.js)
 - Expliquer ce quon fait avant de le faire
 - Logger chaque etape (console.log avec prefixe)
+- Mettre a jour CLAUDE-current.md a chaque etape importante (debut tache, fichier modifie, build, commit)
+- Format: node -e "require(fs).writeFileSync(CLAUDE-current.md, contenu)" integre dans la commande
 
 ## Outils QA (dans tools/)
 - tools/analyse-qa.js : QA visuel rapide DOM + Claude Sonnet (~0.02$)
