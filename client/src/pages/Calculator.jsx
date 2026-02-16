@@ -20,7 +20,6 @@ import { STORAGE_KEY, HISTORIQUE_MAX } from '../config/constants.js';
 import { activitesToCSV } from '../utils/csv.js';
 
 
-import { calculerStatsJour } from '../utils/stats.js';
 
 
 import { Header } from '../components/layout/Header.jsx';
@@ -301,72 +300,19 @@ export default function Calculator() {
 
 
 
-  useEffect(() => {
-
-
-    localStorage.setItem('rse_jours', JSON.stringify(jours));
-
-
-  }, [jours]);
+  // localStorage rse_jours gere par useJours
 
 
 
 
 
-  useEffect(() => {
-
-
-    localStorage.setItem('rse_jours2', JSON.stringify(jours2));
-
-
-  }, [jours2]);
+  // localStorage rse_jours2 gere par useJours
 
 
 
 
 
-  useEffect(() => {
-
-
-    if (mode === 'formulaire' && jours.length > 0) {
-
-
-      const idx = Math.min(jourActifIndex, jours.length - 1);
-
-
-      if (jours[idx] && jours[idx].activites) {
-
-
-
-        // Compter les derogations conduite (>9h) deja utilisees dans la semaine (hors jour actif)
-        // CE 561/2006 Art.6 §1 : max 10h de conduite 2x/semaine
-        var nbDerogConduite = 0;
-        for (var di = 0; di < jours.length; di++) {
-          if (di === idx) continue; // exclure le jour en cours
-          var jourStats = calculerStatsJour(jours[di].activites);
-          if (jourStats && jourStats.conduiteTotale > 540) nbDerogConduite++;
-        }
-        // Stocker pour passer aux jauges
-        window.__nbDerogConduite = Math.min(nbDerogConduite, 2);
-        // Seuils amplitude dynamiques (C. transports R3312-9 / R3312-11)
-        var isSLOtype = (typeService === "OCCASIONNEL" || typeService === "SLO" || typeService === "INTERURBAIN" || typeService === "MARCHANDISES");
-        var amplNormal = isSLOtype ? 720 : 660;
-        var amplDerog = isSLOtype ? 840 : 780;
-        var statsAmpl = calculerStatsJour(jours[idx].activites);
-        var amplActuelle = statsAmpl ? statsAmpl.amplitude : 0;
-        window.__amplNormal = amplNormal;
-        window.__amplMax = amplActuelle > amplNormal ? amplDerog : amplNormal;
-
-        // statsJour fourni par useJours
-
-
-      }
-
-
-    }
-
-
-  }, [jours, mode, jourActifIndex]);
+  // useEffect derogations supprime — gere par useJours hook
 
 
 
