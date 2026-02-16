@@ -392,6 +392,8 @@ const LIENS_LEGAUX = {
   // ===== DECRET 2006-925 (transport urbain voyageurs) =====
   'Decret 2006-925': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000423284/',
   'Decret 2006-925 Art.9': 'https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000002439868',
+  'Décret 2006-925 art.6 + R3312-28': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000423284/',
+  'C. transports R3312-9 / R3312-11': 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651232',
 
   // ===== DECRET 2010-855 (sanctions tachygraphe communautaire) =====
   'Decret 2010-855': 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022512271',
@@ -1334,7 +1336,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       if (amplitudeH > amplitudeMax) {
         const depassement = (amplitudeH - amplitudeMax).toFixed(1);
         infractionsJour.push({
-          regle: "Amplitude journalière (Décret 2010-855 Art.6)",
+          regle: "Amplitude journalière (" + (R.EXEMPTION_CE_561 ? "Décret 2006-925 art.6 + R3312-28" : "C. transports R3312-9 / R3312-11") + ")",
           limite: amplitudeMax + "h",
           constate: amplitudeH.toFixed(1) + "h",
           depassement: depassement + "h",
@@ -1570,7 +1572,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       });
       if (maxTravailContinu > R.PAUSE_APRES_TRAVAIL_CONTINU_MIN) {
         infractionsJour.push({
-          regle: "Pause apres 6h de travail continu (Decret 2006-925 art.9)",
+          regle: "Pause apres 6h de travail continu (Decret 2006-925 Art.9)",
           limite: "6h (" + R.PAUSE_APRES_TRAVAIL_CONTINU_MIN + " min) de travail continu, puis pause >= " + R.PAUSE_MINIMALE_APRES_6H_MIN + " min",
           constate: maxTravailContinu + " min de travail continu sans pause >= " + R.PAUSE_MINIMALE_APRES_6H_MIN + " min",
           depassement: (maxTravailContinu - R.PAUSE_APRES_TRAVAIL_CONTINU_MIN) + " min",
