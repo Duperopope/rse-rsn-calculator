@@ -1,47 +1,39 @@
-# CLAUDE-current.md — Etat au 2026-02-16
+# CLAUDE-current.md — Etat du projet
 
-## Dernier commit
-1743503 fix(design): audit WCAG 2.2 + MD3 — score 100% (7/7 OK)
+## Date: 2026-02-16
+## Dernier commit: 7b057a0 (refonte v1 stable)
+## Version: v7.25.2
 
-## Version
-v7.25.1 (inchangee — corrections CSS uniquement)
+## Etat actuel
+- App fonctionnelle, fond AMOLED #0B0D10, jauges epaisses 8px
+- Couleurs inline JSX migrees (var(--danger/warning/success))
+- Score badge 44px, onglets jour avec bordure accent
+- Audit WCAG 100% (7/7 OK)
+- Vue Semaine fonctionnelle (2 bugs fixes: useEffect + onInfractionClick)
+- ErrorBoundary sur Timeline24h
+- Build: CSS 93kB, JS 376kB, 150+ modules
 
-## Etat design
-- Audit automatise: **100% — 7/7 OK**
-- Touch targets: 29/29 >= 44x44px
-- Font size: tous >= 12px
-- Contraste: 10/10 >= 4.5:1
-- Scroll horizontal: aucun
-- Espacement boutons: tous >= 8px
-- Padding conteneurs: tous >= 12px
-- Interligne: tous >= 1.3x
-- Progression: 13% -> 75% -> 80% -> 83% -> 86% -> 100%
+## LECONS CRITIQUES (NE JAMAIS OUBLIER)
+1. JAMAIS reecrire un fichier CSS module entier — les noms de classes sont un CONTRAT avec le JSX
+2. JAMAIS modifier plus de 3 fichiers CSS sans rebuild + screenshot entre chaque
+3. JAMAIS supprimer des variables CSS anciennes (--md-*) tant que des fichiers y font reference
+4. Pour refonte visuelle: modifier les VALEURS dans les classes existantes, jamais renommer/supprimer
+5. Toujours grep les noms de classes JSX AVANT de toucher un CSS: grep -o "styles\.[a-zA-Z]*" fichier.jsx | sort -u
+6. Regex massives sur CSS = danger — verifier parentheses apres chaque remplacement
+7. Un CSS module qui passe de 596 a 50 lignes = ALERTE ROUGE (classes manquantes)
+8. Verifier taille build apres chaque modif: CSS ~93kB, JS ~376kB, 150+ modules
 
-## Audit multi-expert (session 7)
-- UX (gemini-3-pro): 6.5/10
-- UI (gpt-5.2-chat): 7.4/10
-- Accessibilite (claude-opus-4-5): 5.5/10
-- Cout total audits: ~0.30$
-- Rapport: AUDIT-EXPERT.md
-
-## Corrections appliquees (9 commits)
-- Contrastes: --text-secondary #888->#b0b0b0 (57 fichiers)
-- Daltonisme: icones textuelles en plus des couleurs
-- Design tokens: 32 variables MD3 dans global.css
-- Palette: neon #00d4ff -> MD3 #60a5fa
-- BottomBar: Haut -> Aide (lance tour guide)
-- Tour guide: 10 -> 4 etapes
-- Typo: hierarchie 800/700/600/500/400
-- Padding/espacement: panels 12px, nav arrows 8-10px
-- ThemeToggle: height force 44px
-
-## Tests
-- Pipeline QA: couches 1+2 vertes (pre-deploy 6/6, parcours 6/6)
-- Design audit: 100% (7/7)
+## Fichiers CSS — JAMAIS reecrire sans grep JSX avant
+- Header.module.css (294 lignes, 24 classes JSX)
+- BottomBar.module.css (124 lignes, 8 classes JSX)
+- HistoriquePanel.module.css (592 lignes, 30+ classes JSX)
+- JourFormulaire.module.css (596 lignes, 40+ classes JSX)
+- Calculator.module.css (531 lignes, 50+ classes JSX)
+- Timeline24h.module.css (363 lignes)
+- ResultPanel.module.css (309 lignes)
+- InfractionCard.module.css (349 lignes)
 
 ## TODO
-- P3: pinch-to-zoom timeline
-- P3: copier jour precedent
-- P3: documentation design system
-- Feature: vue 2 semaines (14 barres, compteur 90h)
-- Feature: mode exercice FIMO
+- Refonte visuelle: fichier par fichier, validation apres chaque
+- P3: pinch-to-zoom, copy previous day, design-system doc
+- Features: vue 2 semaines, mode exercice FIMO

@@ -21,3 +21,4 @@ Audit design WCAG 13%->80%, 47 font-size fixes, 6 contraste fixes, touch targets
 
 ## 2026-02-16 Session 7
 Audit design 13%->100% (7/7 OK), 9 commits, audit multi-expert vision (UX 6.5 + UI 7.4 + A11y 5.5), palette MD3, daltonisme, tour guide 4 etapes. Commits: ab8535c..1743503
+Session 8 — rollback refonte CSS, lecons memoire
