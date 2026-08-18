@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from 'react';
-import { APP_NAME, APP_SUBTITLE } from '../../config/constants.js';
+import { APP_NAME } from '../../config/constants.js';
 import styles from './Header.module.css';
 import { AccountMenu } from '../auth/AccountMenu.jsx';
+import { useI18n } from '../../platform/i18n/I18nProvider.jsx';
 
 /**
  * FIMO Check — Header v7.11.0
@@ -50,14 +51,14 @@ function IconHistoDesktop() {
 }
 
 /* Theme toggle = mini interrupteur SVG, pas un emoji */
-function ThemeToggle({ theme, onToggle }) {
+function ThemeToggle({ theme, onToggle, t }) {
   const isDark = theme === 'dark';
   return (
     <button
       className={styles.themeToggle}
       onClick={() => { if (navigator.vibrate) navigator.vibrate(5); if (onToggle) onToggle(); }}
-      title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
-      aria-label={isDark ? 'Mode clair' : 'Mode sombre'}
+      title={isDark ? t('header.lightMode') : t('header.darkMode')}
+      aria-label={isDark ? t('header.lightMode') : t('header.darkMode')}
     >
       <span className={`${styles.themeTrack} ${isDark ? styles.themeTrackDark : styles.themeTrackLight}`}>
         <span className={`${styles.themeThumb} ${isDark ? styles.themeThumbDark : styles.themeThumbLight}`}>
@@ -89,6 +90,7 @@ export function Header({
   onAnalyse, analyseEnCours, analyseDisabled,
   historiqueCount, onToggleHistorique, voirHistorique, onStartTour
 }) {
+  const { t } = useI18n();
   const headerRef = useRef(null);
 
   useEffect(() => {
@@ -111,15 +113,15 @@ export function Header({
         <div className={styles.logo}><IconLogo /></div>
         <div className={styles.titles}>
           <h1 className={styles.title}>{APP_NAME}</h1>
-          <span className={styles.subtitle}>{APP_SUBTITLE}</span>
+          <span className={styles.subtitle}>{t('header.subtitle')}</span>
         </div>
       </div>
 
       {/* === Mobile: status + theme === */}
       <div className={styles.mobileRight}>
         <span className={online ? styles.statusOn : styles.statusOff} />
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-        <button data-tour="help" className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} t={t} />
+        <button data-tour="help" className={styles.helpBtn} onClick={onStartTour} title={t('header.guide')} aria-label={t('header.help')}>?</button>
       </div>
 
       {/* === Desktop: actions === */}
@@ -130,14 +132,14 @@ export function Header({
           disabled={analyseDisabled || analyseEnCours}
         >
           <IconAnalyseDesktop />
-          <span>{analyseEnCours ? 'Vérification...' : 'Vérifier le service'}</span>
+          <span>{analyseEnCours ? t('header.checking') : t('header.checkService')}</span>
         </button>
         <button
           className={`${styles.histBtn} ${voirHistorique ? styles.histBtnActive : ''}`}
           onClick={() => { if (onToggleHistorique) onToggleHistorique(); }}
         >
           <IconHistoDesktop />
-          <span>Historique</span>
+          <span>{t('header.history')}</span>
           {historiqueCount > 0 && (
             <span className={styles.badge}>{historiqueCount > 99 ? '99+' : historiqueCount}</span>
           )}
@@ -148,10 +150,10 @@ export function Header({
       <div className={styles.desktopRight}>
         <span className={online ? styles.statusOn : styles.statusOff}>
           {online && serverVersion ? 'v' + serverVersion : ''}
-          {!online ? 'Hors ligne' : ''}
+          {!online ? t('header.offline') : ''}
         </span>
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-        <button className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} t={t} />
+        <button className={styles.helpBtn} onClick={onStartTour} title={t('header.guide')} aria-label={t('header.help')}>?</button>
       </div>
       <div className={styles.accountSlot}><AccountMenu /></div>
     </header>

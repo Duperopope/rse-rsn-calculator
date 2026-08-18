@@ -75,6 +75,7 @@ import styles from './Calculator.module.css';
 
 import { HistoriquePanel } from '../components/history/HistoriquePanel.jsx';
 import { ErrorBoundary } from '../components/common/ErrorBoundary.jsx';
+import { useI18n } from '../platform/i18n/I18nProvider.jsx';
 
 
 
@@ -99,6 +100,8 @@ import { ErrorBoundary } from '../components/common/ErrorBoundary.jsx';
 
 
 export default function Calculator() {
+
+  const { t } = useI18n();
 
 
   const { theme, toggleTheme } = useTheme();
@@ -806,16 +809,16 @@ export default function Calculator() {
 
         <BeginnerGuide onStartTour={() => setShowTour(true)} />
 
-        <section className={styles.productBrief} aria-label="Usage de FIMO Check">
+        <section className={styles.productBrief} aria-label={t('product.aria')}>
           <div>
-            <p className={styles.productEyebrow}>Pré-contrôle d’exploitation</p>
-            <h2 className={styles.productTitle}>Valider une journée conducteur avant de l’affecter</h2>
-            <p className={styles.productText}>Saisissez le service prévu, repérez les dépassements et ajustez le planning. Le rapport reste une aide à la décision : les données tachygraphe font foi pour un contrôle réalisé.</p>
+            <p className={styles.productEyebrow}>{t('product.eyebrow')}</p>
+            <h2 className={styles.productTitle}>{t('product.title')}</h2>
+            <p className={styles.productText}>{t('product.text')}</p>
           </div>
-          <div className={styles.workflow} aria-label="Parcours en trois étapes">
-            <div className={styles.workflowStep}><span className={styles.workflowNumber}>01</span><span className={styles.workflowLabel}>Décrire</span></div>
-            <div className={styles.workflowStep}><span className={styles.workflowNumber}>02</span><span className={styles.workflowLabel}>Vérifier</span></div>
-            <div className={styles.workflowStep}><span className={styles.workflowNumber}>03</span><span className={styles.workflowLabel}>Corriger</span></div>
+          <div className={styles.workflow} aria-label={t('product.workflow')}>
+            <div className={styles.workflowStep}><span className={styles.workflowNumber}>01</span><span className={styles.workflowLabel}>{t('product.describe')}</span></div>
+            <div className={styles.workflowStep}><span className={styles.workflowNumber}>02</span><span className={styles.workflowLabel}>{t('product.check')}</span></div>
+            <div className={styles.workflowStep}><span className={styles.workflowNumber}>03</span><span className={styles.workflowLabel}>{t('product.correct')}</span></div>
           </div>
         </section>
 
