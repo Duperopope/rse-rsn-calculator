@@ -1,12 +1,11 @@
 {
   "name": "FIMO Check",
   "short_name": "FIMO Check",
-  "description": "Calculateur de conformite RSE/RSN tachygraphe",
+  "description": "Analyse des temps de conduite, de travail et de repos selon le règlement CE 561/2006",
   "start_url": "/",
-  "display": "fullscreen",
-  "orientation": "portrait",
-  "background_color": "#12141a",
-  "theme_color": "#12141a",
+  "display": "standalone",
+  "background_color": "#edf2f1",
+  "theme_color": "#136f6c",
   "icons": [
     {
       "src": "/icon-192.svg",

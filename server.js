@@ -1,5 +1,5 @@
 // ============================================================
-// FIMO Check - Serveur Backend v7.11.0
+// FIMO Check - Serveur Backend
 // Credits : Samir Medjaher
 // Sources reglementaires :
 //   Reglement CE 561/2006 (Art. 6-8) - https://eur-lex.europa.eu
@@ -19,8 +19,21 @@
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+const authStore = require('./auth-store.js');
+const secureStore = require('./secure-store.js');
+const maintenance = require('./maintenance.js');
+const profileStore = require('./profile-store.js');
+const sharp = require('sharp');
+const tachographStore = require('./tachograph-store.js');
+const {
+  generateRegistrationOptions, verifyRegistrationResponse,
+  generateAuthenticationOptions, verifyAuthenticationResponse,
+} = require('@simplewebauthn/server');
 
 const app = express();
 
@@ -30,8 +43,80 @@ const { genererRapportPDF } = require('./pdf-generator.js');
 // === FIN FIX-ENGINE IMPORT ===
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+const configuredOrigins = (process.env.FIMO_ALLOWED_ORIGINS || '').split(',').map(function(v) { return v.trim(); }).filter(Boolean);
+const localOrigins = ['http://localhost:' + PORT, 'http://127.0.0.1:' + PORT];
+const allowedOrigins = new Set(configuredOrigins.concat(process.env.NODE_ENV === 'production' ? [] : localOrigins));
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:'],
+      connectSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+}));
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error('Origine non autorisee'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+  maxAge: 600
+}));
+app.use(express.json({ limit: '6mb', type: 'application/json' }));
+app.use('/api', function(req, res, next) { res.setHeader('Cache-Control', 'no-store'); next(); });
+
+const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 180, standardHeaders: 'draft-8', legacyHeaders: false });
+const feedbackLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 12, standardHeaders: 'draft-8', legacyHeaders: false });
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: process.env.NODE_ENV === 'test' ? 100 : 10, standardHeaders: 'draft-8', legacyHeaders: false });
+app.use('/api', apiLimiter);
+
+function readCookie(req, name) {
+  const header = req.headers.cookie || '';
+  for (const item of header.split(';')) {
+    const index = item.indexOf('=');
+    if (index > 0 && item.slice(0, index).trim() === name) return decodeURIComponent(item.slice(index + 1).trim());
+  }
+  return '';
+}
+function sessionCookieName() { return process.env.NODE_ENV === 'production' ? '__Host-fimo_session' : 'fimo_session'; }
+function setSessionCookie(res, token, expires) {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', sessionCookieName() + '=' + encodeURIComponent(token) + '; Path=/; HttpOnly; SameSite=Strict; Priority=High; Expires=' + new Date(expires).toUTCString() + secure);
+}
+function clearSessionCookie(res) {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', sessionCookieName() + '=; Path=/; HttpOnly; SameSite=Strict; Priority=High; Max-Age=0' + secure);
+}
+function requireAuth(req, res, next) {
+  const session = authStore.getSession(readCookie(req, sessionCookieName()));
+  if (!session) return res.status(401).json({ error: 'Authentification requise.' });
+  req.auth = session;
+  next();
+}
+function requireAdmin(req, res, next) {
+  if (!req.auth || req.auth.user.role !== 'admin') return res.status(403).json({ error: 'Droits administrateur requis.' });
+  next();
+}
+function webAuthnContext(req) {
+  const host = String(req.get('host') || '').split(':')[0];
+  const rpID = process.env.FIMO_WEBAUTHN_RP_ID || host;
+  const origin = process.env.FIMO_WEBAUTHN_ORIGIN || `${req.protocol}://${req.get('host')}`;
+  return { rpID, origin, rpName: 'FIMOCheck' };
+}
+const requireComputationAccess = process.env.FIMO_ALLOW_ANONYMOUS_TESTS === '1' ? function(req,res,next){ next(); } : requireAuth;
 
 // Servir le frontend depuis client/dist
 const distPath = path.join(__dirname, 'client', 'dist');
@@ -40,11 +125,17 @@ if (fs.existsSync(distPath)) {
 }
 
 // Configuration upload
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = process.env.FIMO_UPLOAD_DIR || path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 const upload = multer({ dest: uploadsDir, limits: { fileSize: 5 * 1024 * 1024 } });
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+});
+const tachographUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024, files: 1 } });
+const APP_VERSION = require('./package.json').version;
 
 // ============================================================
 // CONSTANTES REGLEMENTAIRES
@@ -332,7 +423,7 @@ function verifierReposHebdomadaire(detailsJours, typeService) {
     }
     
     // Apres 6 periodes de 24h sans repos hebdo => infraction
-    // [PATCH UE 2024/1258] Art.8(6a) - 12 jours si occasionnel
+    // Art.8 §6 bis en français (§6a dans certaines versions linguistiques) - 12 jours si occasionnel
       const isOcc = (typeService === 'SLO' || typeService === 'OCCASIONNEL');
       const seuilMax = isOcc ? 12 : 6;
       if (joursDepuisDernierRepos > seuilMax) {
@@ -341,10 +432,10 @@ function verifierReposHebdomadaire(detailsJours, typeService) {
       infractions.push({
         regle: 'Repos hebdomadaire insuffisant',
         date: jour.date,
-        message: `${joursDepuisDernierRepos} jours sans repos hebdomadaire (max ${seuilMax} periodes de 24h${isOcc ? " - derogation occasionnel Art.8§6a" : ""})`,
+        message: `${joursDepuisDernierRepos} jours sans repos hebdomadaire (max ${seuilMax} periodes de 24h${isOcc ? " - derogation occasionnel Art.8§6 bis" : ""})`,
         classe: classe,
         amende: classe === '4e' ? { forfaitaire: 135, maximale: 750 } : { forfaitaire: 1500, maximale: 3000 },
-        ref_legale: isOcc ? 'CE 561/2006 Art.8§6a (UE 2024/1258)' : 'CE 561/2006 Art.8§6 + Code transports R3315-10§5',
+        ref_legale: isOcc ? 'CE 561/2006 Art.8§6 bis (UE 2024/1258)' : 'CE 561/2006 Art.8§6 + Code transports R3315-10§5',
         url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02006R0561-20240522#d1e982-1-1'
       });
     }
@@ -361,7 +452,8 @@ function getRegles(typeService) {
     case "OCCASIONNEL": return REGLES_OCCASIONNEL;
     case "INTERURBAIN": return REGLES_SLO; // CE 561/2006 complet (lignes >50km entre villes)
     case "MARCHANDISES": return REGLES_SLO; // CE 561/2006 complet (transport marchandises)
-    case "STANDARD": return REGLES_SLO; // Fallback
+    case "STANDARD": return REGLES_SLO; // Alias historique
+    default: return REGLES_SLO; // Entree externe inconnue : comportement sur et previsible
   }
 }
 
@@ -377,11 +469,11 @@ const REGLES = Object.assign({}, REGLES_COMMUN, REGLES_SLO);
 // ================================================================
 const LIENS_LEGAUX = {
   // ===== REGLEMENT EUROPEEN CE 561/2006 (texte consolidé) =====
-  'CE 561/2006': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561',
-  'CE 561/2006 Art.6': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e888-1-1',
-  'CE 561/2006 Art.7': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e940-1-1',
-  'CE 561/2006 Art.8': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e982-1-1',
-  'CE 561/2006 Art.12': 'https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32006R0561#d1e1157-1-1',
+  'CE 561/2006': 'https://eur-lex.europa.eu/eli/reg/2006/561/2024-12-31',
+  'CE 561/2006 Art.6': 'https://eur-lex.europa.eu/eli/reg/2006/561/2024-12-31',
+  'CE 561/2006 Art.7': 'https://eur-lex.europa.eu/eli/reg/2006/561/2024-12-31',
+  'CE 561/2006 Art.8': 'https://eur-lex.europa.eu/eli/reg/2006/561/2024-12-31',
+  'CE 561/2006 Art.12': 'https://eur-lex.europa.eu/eli/reg/2006/561/2024-12-31',
 
   // ===== REGLEMENT 2020/1054 (modification paquet mobilité) =====
   'Reglement 2020/1054': 'https://eur-lex.europa.eu/legal-content/FR/ALL/?uri=CELEX:32020R1054',
@@ -465,13 +557,13 @@ const SANCTIONS = {
 function amendeObj(classe) {
   if (classe === "5e classe") {
     return {
-      amende_forfaitaire: SANCTIONS.classe_5.amende_max,
+      amende_forfaitaire: null,
       amende_minoree: null,
       amende_majoree: null,
       amende_max: SANCTIONS.classe_5.amende_max,
       amende_recidive: SANCTIONS.classe_5.amende_recidive,
       classe: "5e classe",
-      texte: SANCTIONS.classe_5.amende_max + " EUR (max), " + SANCTIONS.classe_5.amende_recidive + " EUR en recidive"
+      texte: "jusqu'a " + SANCTIONS.classe_5.amende_max + " EUR, jusqu'a " + SANCTIONS.classe_5.amende_recidive + " EUR en cas de recidive"
     };
   }
   return {
@@ -1383,7 +1475,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
 // Verification conduite continue (CE 561/2006 Art.7 + R3312-9)
     if (maxConduiteContinue > REGLES.CONDUITE_CONTINUE_MAX_MIN) {
       const depassement = maxConduiteContinue - REGLES.CONDUITE_CONTINUE_MAX_MIN;
-      const classe = depassement > 90 ? "5e classe" : "4e classe";
+      const classe = depassement >= 90 ? "5e classe" : "4e classe";
       // [v7.4.5] ancien calcul amende string supprime
       infractionsJour.push({
         regle: "Conduite continue (CE 561/2006 Art.7 + R3312-9)",
@@ -1393,7 +1485,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         classe: classe,
         amende: amendeObj(classe)
       });
-      amendeEstimee += depassement > 90 ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
+      amendeEstimee += depassement >= 90 ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
     }
     } // fin garde CE 561 conduite continue
 
@@ -1456,9 +1548,11 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     if (!R.EXEMPTION_CE_561) {
 // Verification conduite journaliere (CE 561/2006 Art.6 + R3312-11)
     if (conduiteJour > REGLES.CONDUITE_JOURNALIERE_MAX_MIN) {
-      const depassement = conduiteJour - REGLES.CONDUITE_JOURNALIERE_MAX_MIN;
       if (conduiteJour > REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN) {
-        const classe = depassement > 120 ? "5e classe" : "4e classe";
+        // Le seuil penal se mesure au-dela des 10 h autorisees lors d'une
+        // prolongation, et non au-dela de la duree normale de 9 h.
+        const depassement = conduiteJour - REGLES.CONDUITE_JOURNALIERE_DEROGATOIRE_MAX_MIN;
+        const classe = depassement >= 120 ? "5e classe" : "4e classe";
         // [v7.4.5] ancien calcul amende string supprime
         infractionsJour.push({
           regle: "Conduite journaliere (CE 561/2006 Art.6 + R3312-11)",
@@ -1468,7 +1562,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
           classe: classe,
           amende: amendeObj(classe)
         });
-        amendeEstimee += depassement > 120 ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
+        amendeEstimee += depassement >= 120 ? SANCTIONS.classe_5.amende_max : SANCTIONS.classe_4.amende_forfaitaire;
       } else {
         avertissementsJour.push({
           regle: "Conduite journaliere proche du maximum derogatoire",
@@ -1662,16 +1756,19 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
 
       // Repos inter-journalier reel (fin jour N -> debut jour N+1)
       var reposInterJourBrut;
-      if (debutSuivantH >= 0) {
+      var reposMesurable = debutSuivantH >= 0;
+      if (reposMesurable) {
         reposInterJourBrut = (24 - finJourH) + debutSuivantH;
       } else {
-        reposInterJourBrut = 24 - finJourH;
+        // Borne droite absente : conserver une estimation d'affichage, mais
+        // ne jamais prononcer de conformite sur un repos non observe.
+        reposInterJourBrut = (24 * 60 - totalActiviteHorsPause) / 60;
       }
-      // Repos intra-periode 24h (CE 561/2006 Art.8 + Art.4 par.g)
-      // = 24h - (conduite + travail + dispo). Pause exclue (meme symbole tachy)
-      var reposIntraPeriodeH = (24 * 60 - totalActiviteHorsPause) / 60;
-      // Prendre le MAX des deux estimations
-      reposInterJourH = Math.max(reposInterJourBrut, reposIntraPeriodeH);
+      // Un repos est une periode ININTERROMPUE (CE 561/2006 Art.4 f-g).
+      // Ne jamais additionner les pauses et les trous d'une journee : leur somme
+      // n'est pas un repos journalier. Entre deux jours renseignes, la mesure
+      // fiable est le bloc continu fin du service N -> debut du service N+1.
+      reposInterJourH = reposInterJourBrut;
 
       // Verifier aussi le plus long bloc consecutif INTRA-jour
       // (pour detecter les repos fractionnes 3h+9h)
@@ -1694,8 +1791,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
       // Le plus long bloc intra-jour (en heures)
       var maxBlocIntraH = blocsReposIntra.length > 0 ? Math.max.apply(null, blocsReposIntra) / 60 : 0;
 
-      // Utiliser le MAX entre repos inter-jour et plus long bloc intra-jour
-      // Car un repos de 11h en milieu de journee (ex: 08:00-19:00 libre) est valide
+      // Un bloc continu situe dans la journee peut egalement constituer un repos.
       if (maxBlocIntraH > reposInterJourH) reposInterJourH = maxBlocIntraH;
     }
 
@@ -1703,7 +1799,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
     const reposEstime = reposEstimeMin; // Compat avec le reste du code
     const seuilReposIntraJourH = equipage === "double" ? R.MULTI_REPOS_JOURNALIER_MIN_H : REGLES_SLO.REPOS_JOURNALIER_REDUIT_H;
 
-    if (!estJourReposCompletCSV && totalActiviteHorsPause > 0 && reposInterJourH < seuilReposIntraJourH) {
+    if (reposMesurable && !estJourReposCompletCSV && totalActiviteHorsPause > 0 && reposInterJourH < seuilReposIntraJourH) {
       const manqueH = seuilReposIntraJourH - reposInterJourH;
       if (manqueH > 2.5) { // > 2h30 sous le minimum = classe 5
         infractionsJour.push({
@@ -1726,7 +1822,7 @@ function analyserCSV(csvTexte, typeService, codePays, equipage) {
         });
         amendeEstimee += SANCTIONS.classe_4.amende_forfaitaire;
       }
-    } else if (!estJourReposCompletCSV && totalActiviteHorsPause > 0 && reposInterJourH < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H && reposInterJourH >= seuilReposIntraJourH) {
+    } else if (reposMesurable && !estJourReposCompletCSV && totalActiviteHorsPause > 0 && reposInterJourH < REGLES_SLO.REPOS_JOURNALIER_NORMAL_H && reposInterJourH >= seuilReposIntraJourH) {
       avertissementsJour.push({
         regle: "Repos journalier en mode reduit",
         message: "Repos estime de " + reposInterJourH.toFixed(1) + "h (norme = " + REGLES_SLO.REPOS_JOURNALIER_NORMAL_H + "h, reduit admis = " + seuilReposIntraJourH + "h, max 3x entre 2 repos hebdo)" + (equipage === "double" ? " [Multi-equipage: delai 30h au lieu de 24h, Art.8 par.5]" : "")
@@ -1812,7 +1908,7 @@ totalConduiteMin += conduiteJour;
   if (joursTries.length >= 5) {
     if (totalConduiteMin > REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN) {
       const depassement = totalConduiteMin - REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN;
-      const classe = depassement > (14 * 60) ? "5e classe" : "4e classe";
+      const classe = depassement >= (14 * 60) ? "5e classe" : "4e classe";
       infractions.push({
         regle: "Conduite hebdomadaire (CE 561/2006 Art.6 + R3312-11)",
         limite: "56h (" + REGLES.CONDUITE_HEBDOMADAIRE_MAX_MIN + " min)",
@@ -1837,7 +1933,7 @@ totalConduiteMin += conduiteJour;
       const totalFenetre = fenetre.reduce((a, b) => a + b, 0);
       if (totalFenetre > REGLES.CONDUITE_BIHEBDO_MAX_MIN) {
         const depassement = totalFenetre - REGLES.CONDUITE_BIHEBDO_MAX_MIN;
-        const classe = depassement > (22.5 * 60) ? '5e classe' : '4e classe';
+        const classe = depassement >= (22.5 * 60) ? '5e classe' : '4e classe';
         infractions.push({
           regle: 'Conduite bi-hebdomadaire (CE 561/2006 Art.6 par.3)',
           limite: '90h (' + REGLES.CONDUITE_BIHEBDO_MAX_MIN + ' min) sur 2 semaines consecutives',
@@ -2000,7 +2096,7 @@ totalConduiteMin += conduiteJour;
       }
       if (joursConsecutifsSansReposHebdo > seuilMaxHebdo) {
         infractions.push({
-          regle: seuilMaxHebdo === 12 ? "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6a - UE 2024/1258)" : "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6)",
+          regle: seuilMaxHebdo === 12 ? "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6 bis - UE 2024/1258)" : "Delai repos hebdomadaire depasse (CE 561/2006 Art.8 par.6)",
           limite: "Repos hebdo au plus tard apres " + seuilMaxHebdo + " periodes de 24h",
           constate: joursConsecutifsSansReposHebdo + " jours consecutifs sans repos hebdomadaire",
           depassement: (joursConsecutifsSansReposHebdo - seuilMaxHebdo) + " jour(s) de trop",
@@ -2105,10 +2201,372 @@ totalConduiteMin += conduiteJour;
 // ROUTES API
 // ============================================================
 
-// POST /api/analyze - Analyse un CSV
-app.post('/api/analyze', (req, res) => {
+app.get('/api/auth/status', function(req, res) {
+  const session = authStore.getSession(readCookie(req, sessionCookieName()));
+  res.json({ authenticated: Boolean(session), user: session ? session.user : null });
+});
+
+app.get('/api/auth/passkeys', requireAuth, function(req, res) {
+  res.json({ passkeys: authStore.listPasskeys(req.auth.user.id), supported: true });
+});
+
+app.post('/api/auth/passkeys/register/options', authLimiter, requireAuth, async function(req, res) {
   try {
-    const { csv, csv2, typeService, pays, equipage } = req.body;
+    if (!authStore.verifyCurrentPassword(req.auth.user.id, req.body && req.body.currentPassword)) {
+      return res.status(403).json({ error: 'Mot de passe actuel incorrect.' });
+    }
+    const context = webAuthnContext(req);
+    const existing = authStore.listPasskeys(req.auth.user.id);
+    const options = await generateRegistrationOptions({
+      rpName: context.rpName,
+      rpID: context.rpID,
+      userID: Buffer.from(`fimocheck-user:${req.auth.user.id}`),
+      userName: req.auth.user.username,
+      userDisplayName: req.auth.user.username,
+      attestationType: 'none',
+      excludeCredentials: existing.map(item => ({ id: item.id, transports: item.transports })),
+      authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+      preferredAuthenticatorType: 'localDevice',
+    });
+    const challengeId = authStore.saveWebAuthnChallenge(req.auth.user.id, 'registration', options.challenge);
+    res.json({ options, challengeId });
+  } catch (error) { res.status(400).json({ error: 'Création de la passkey impossible.' }); }
+});
+
+app.post('/api/auth/passkeys/register/verify', authLimiter, requireAuth, async function(req, res) {
+  const challenge = authStore.consumeWebAuthnChallenge(req.body && req.body.challengeId, req.auth.user.id, 'registration');
+  if (!challenge) return res.status(400).json({ error: 'Challenge expiré ou déjà utilisé.' });
+  try {
+    const context = webAuthnContext(req);
+    const verification = await verifyRegistrationResponse({
+      response: req.body.response,
+      expectedChallenge: challenge,
+      expectedOrigin: context.origin,
+      expectedRPID: context.rpID,
+      requireUserVerification: true,
+    });
+    if (!verification.verified || !verification.registrationInfo) throw new Error('Réponse non vérifiée');
+    const info = verification.registrationInfo;
+    const saved = authStore.savePasskey(req.auth.user.id, info.credential, {
+      label: req.body.label,
+      deviceType: info.credentialDeviceType,
+      backedUp: info.credentialBackedUp,
+    });
+    res.status(201).json({ verified: true, passkey: saved });
+  } catch (error) {
+    authStore.recordAudit(req.auth.user.id, 'auth.passkey_registration_failed', error.name || 'verification');
+    res.status(400).json({ error: 'La passkey n’a pas pu être vérifiée.' });
+  }
+});
+
+app.post('/api/auth/passkeys/login/options', authLimiter, async function(req, res) {
+  const user = authStore.getActiveUserByUsername(req.body && req.body.username);
+  const credentials = user ? authStore.listPasskeys(user.id) : [];
+  if (!user || !credentials.length) return res.status(400).json({ error: 'Connexion par passkey indisponible pour ce compte.' });
+  try {
+    const context = webAuthnContext(req);
+    const options = await generateAuthenticationOptions({
+      rpID: context.rpID,
+      allowCredentials: credentials.map(item => ({ id: item.id, transports: item.transports })),
+      userVerification: 'required',
+    });
+    const challengeId = authStore.saveWebAuthnChallenge(user.id, 'authentication', options.challenge);
+    res.json({ options, challengeId });
+  } catch (error) { res.status(400).json({ error: 'Connexion par passkey indisponible.' }); }
+});
+
+app.post('/api/auth/passkeys/login/verify', authLimiter, async function(req, res) {
+  const user = authStore.getActiveUserByUsername(req.body && req.body.username);
+  if (!user) return res.status(400).json({ error: 'Challenge expiré ou déjà utilisé.' });
+  const challenge = authStore.consumeWebAuthnChallenge(req.body && req.body.challengeId, user.id, 'authentication');
+  if (!challenge) return res.status(400).json({ error: 'Challenge expiré ou déjà utilisé.' });
+  const passkey = authStore.getPasskeyForUser(user.id, req.body.response && req.body.response.id);
+  if (!passkey) return res.status(400).json({ error: 'Passkey inconnue.' });
+  try {
+    const context = webAuthnContext(req);
+    const verification = await verifyAuthenticationResponse({
+      response: req.body.response,
+      expectedChallenge: challenge,
+      expectedOrigin: context.origin,
+      expectedRPID: context.rpID,
+      credential: { id: passkey.id, publicKey: passkey.publicKey, counter: passkey.counter, transports: passkey.transports },
+      requireUserVerification: true,
+    });
+    if (!verification.verified) throw new Error('Réponse non vérifiée');
+    authStore.updatePasskeyUsage(user.id, passkey.id, verification.authenticationInfo.newCounter, verification.authenticationInfo.credentialBackedUp);
+    const result = authStore.issuePasskeySession(user.id);
+    setSessionCookie(res, result.token, result.expires);
+    res.json({ user: result.user, expiresAt: result.expires });
+  } catch (error) {
+    authStore.recordAudit(user.id, 'auth.passkey_login_failed', error.name || 'verification');
+    res.status(401).json({ error: 'Authentification par passkey refusée.' });
+  }
+});
+
+app.delete('/api/auth/passkeys/:id', requireAuth, function(req, res) {
+  try {
+    const deleted = authStore.deletePasskey(req.auth.user.id, req.params.id, req.body && req.body.currentPassword);
+    if (!deleted) return res.status(404).json({ error: 'Passkey introuvable.' });
+    res.json({ ok: true });
+  } catch (error) { res.status(403).json({ error: error.message }); }
+});
+
+app.get('/api/privacy', function(req, res) {
+  res.json({
+    analysesRetentionDays: Math.min(Math.max(Number(process.env.FIMO_ANALYSIS_RETENTION_DAYS) || 365, 1), 3650),
+    feedbackRetentionDays: Math.min(Math.max(Number(process.env.FIMO_FEEDBACK_RETENTION_DAYS) || 365, 1), 3650),
+    auditRetentionDays: Math.min(Math.max(Number(process.env.FIMO_AUDIT_RETENTION_DAYS) || 730, 30), 3650),
+    tachographRetentionDays: Math.min(Math.max(Number(process.env.FIMO_TACHOGRAPH_RETENTION_DAYS) || 90, 1), 3650),
+    sessionHours: 12,
+    planningRequiresDriverName: false,
+    behavioralAdvertising: false,
+    userControls: ['export_analyses', 'delete_analyses', 'delete_account'],
+    backupNotice: 'Une sauvegarde administrateur peut subsister jusqu’à son expiration selon la politique de conservation.'
+  });
+});
+
+app.post('/api/auth/login', authLimiter, function(req, res) {
+  const result = authStore.login(req.body && req.body.username, req.body && req.body.password);
+  if (!result) return res.status(401).json({ error: 'Identifiants invalides.' });
+  setSessionCookie(res, result.token, result.expires);
+  res.json({ user: result.user, expiresAt: result.expires });
+});
+
+app.post('/api/auth/logout', requireAuth, function(req, res) {
+  authStore.logout(readCookie(req, sessionCookieName()));
+  clearSessionCookie(res);
+  res.json({ ok: true });
+});
+
+app.post('/api/auth/change-password', authLimiter, requireAuth, function(req, res) {
+  try {
+    authStore.changePassword(req.auth.user.id, req.body && req.body.currentPassword, req.body && req.body.newPassword);
+    clearSessionCookie(res);
+    res.json({ ok: true, loginRequired: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/recovery-codes', authLimiter, requireAuth, function(req, res) {
+  try {
+    const codes = authStore.issueRecoveryCodes(req.auth.user.id, req.body && req.body.currentPassword);
+    res.setHeader('Content-Disposition', 'attachment; filename="fimocheck-recovery-codes.json"');
+    res.json({ generatedAt: new Date().toISOString(), warning: 'Affichage unique. Conserver hors ligne.', codes });
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+app.post('/api/auth/recover', authLimiter, function(req, res) {
+  try {
+    const ok = authStore.recoverAccount(req.body && req.body.username, req.body && req.body.code, req.body && req.body.newPassword);
+    if (!ok) return res.status(400).json({ error: 'Code de récupération invalide.' });
+    clearSessionCookie(res);
+    res.json({ ok: true, loginRequired: true });
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+app.delete('/api/account', authLimiter, requireAuth, function(req, res) {
+  try {
+    const result = authStore.deleteOwnAccount(req.auth.user.id, req.body && req.body.password, req.body && req.body.confirmation);
+    clearSessionCookie(res);
+    res.json({ ok: true, deleted: result });
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+app.get('/api/account/avatar', requireAuth, function(req, res) {
+  try {
+    const avatar = profileStore.getAvatar(req.auth.user.id);
+    if (!avatar) return res.status(404).json({ error: 'Aucun avatar.' });
+    res.setHeader('Content-Type', avatar.contentType);
+    res.setHeader('ETag', `"${avatar.hash}"`);
+    res.setHeader('Cache-Control', 'private, no-cache');
+    res.send(avatar.buffer);
+  } catch (error) {
+    res.status(500).json({ error: 'Avatar illisible.' });
+  }
+});
+
+app.put('/api/account/avatar', authLimiter, requireAuth, avatarUpload.single('avatar'), async function(req, res) {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Image manquante.' });
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(req.file.mimetype)) {
+      return res.status(415).json({ error: 'Format accepté : JPEG, PNG ou WebP.' });
+    }
+    const source = sharp(req.file.buffer, { failOn: 'error', limitInputPixels: 36_000_000 });
+    const metadata = await source.metadata();
+    if (!metadata.width || !metadata.height || metadata.width > 6000 || metadata.height > 6000) {
+      return res.status(400).json({ error: 'Dimensions d’image invalides.' });
+    }
+    const webp = await source.rotate().resize(256, 256, { fit: 'cover', position: 'attention' })
+      .webp({ quality: 84, effort: 4 }).toBuffer();
+    const saved = profileStore.saveAvatar(req.auth.user.id, webp);
+    authStore.recordAudit(req.auth.user.id, 'account.avatar_updated', `bytes=${saved.bytes}`);
+    res.json({ ok: true, avatar: saved });
+  } catch (error) {
+    res.status(400).json({ error: 'Le fichier ne contient pas une image valide.' });
+  }
+});
+
+app.delete('/api/account/avatar', requireAuth, function(req, res) {
+  const deleted = profileStore.deleteAvatar(req.auth.user.id);
+  authStore.recordAudit(req.auth.user.id, 'account.avatar_deleted', `existed=${deleted}`);
+  res.json({ ok: true, deleted });
+});
+
+app.get('/api/tachograph/capabilities', requireAuth, function(req, res) {
+  res.json({
+    intake: true,
+    acceptedExtensions: ['ddd', 'c1b', 'v1b'],
+    maxBytes: 12 * 1024 * 1024,
+    parser: { configured: false, status: 'not_integrated' },
+    signatureVerification: { configured: false, status: 'not_integrated' },
+    analysisEnabled: false,
+    warning: 'Réception sécurisée uniquement. Aucun résultat réglementaire n’est produit à partir de ces fichiers.',
+  });
+});
+app.get('/api/tachograph/imports', requireAuth, function(req, res) {
+  res.json({ imports: tachographStore.listImports(req.auth.user.id) });
+});
+app.post('/api/tachograph/imports', requireAuth, tachographUpload.single('tachograph'), function(req, res) {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Fichier tachygraphe manquant.' });
+    const extension = path.extname(req.file.originalname || '').slice(1).toLowerCase();
+    if (!['ddd', 'c1b', 'v1b'].includes(extension)) return res.status(415).json({ error: 'Extensions acceptées : DDD, C1B ou V1B.' });
+    if (req.file.buffer.length < 32) return res.status(400).json({ error: 'Fichier trop court pour être un téléchargement tachygraphe.' });
+    const sample = req.file.buffer.subarray(0, Math.min(req.file.buffer.length, 4096));
+    let controlBytes = 0;
+    for (const byte of sample) if (byte === 0 || (byte < 9 || (byte > 13 && byte < 32))) controlBytes += 1;
+    if (controlBytes / sample.length < 0.02) return res.status(400).json({ error: 'Le contenu paraît textuel et ne correspond pas à un téléchargement tachygraphe binaire.' });
+    const sourceHint = extension === 'c1b' ? 'driver_card' : extension === 'v1b' ? 'vehicle_unit' : 'unknown_ddd';
+    const saved = tachographStore.saveImport(req.auth.user.id, req.file.buffer, {
+      originalName: path.basename(req.file.originalname).slice(0, 180), declaredMime: req.file.mimetype, sourceHint,
+    });
+    authStore.recordAudit(req.auth.user.id, saved.duplicate ? 'tachograph.duplicate_received' : 'tachograph.received', `id=${saved.id};sha256=${saved.sha256}`);
+    res.status(saved.duplicate ? 200 : 201).json({ ...saved, interpretation: 'unverified', analysisEnabled: false });
+  } catch (error) { res.status(400).json({ error: 'Réception du fichier impossible.' }); }
+});
+app.get('/api/tachograph/imports/:id/original', requireAuth, function(req, res) {
+  const item = tachographStore.getImport(req.auth.user.id, req.params.id);
+  if (!item) return res.status(404).json({ error: 'Import introuvable.' });
+  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader('Content-Disposition', `attachment; filename="${path.basename(item.originalName).replace(/["\\]/g, '_')}"`);
+  res.setHeader('X-Content-SHA256', item.sha256);
+  res.send(item.buffer);
+});
+app.delete('/api/tachograph/imports/:id', requireAuth, function(req, res) {
+  const deleted = tachographStore.deleteImport(req.auth.user.id, req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Import introuvable.' });
+  authStore.recordAudit(req.auth.user.id, 'tachograph.deleted', `id=${req.params.id}`);
+  res.json({ ok: true });
+});
+
+app.get('/api/admin/users', requireAuth, requireAdmin, function(req, res) {
+  res.json({ users: authStore.listUsers() });
+});
+app.get('/api/admin/metrics', requireAuth, requireAdmin, function(req, res) {
+  res.json(authStore.getProductMetrics());
+});
+app.get('/api/admin/control-room', requireAuth, requireAdmin, function(req, res) {
+  const dataDir = process.env.FIMO_DATA_DIR || path.join(__dirname, 'data');
+  function readJson(file) {
+    try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (_) { return null; }
+  }
+  const databasePath = path.join(dataDir, 'fimo.sqlite');
+  const quality = readJson(path.join(__dirname, '.runtime', 'quality-attestation.json'));
+  const backup = readJson(path.join(dataDir, 'last-backup.json'));
+  const restore = readJson(path.join(dataDir, 'last-restore.json'));
+  const lastMaintenance = readJson(path.join(dataDir, 'last-maintenance.json'));
+  const audit = authStore.verifyAuditChain();
+  const metrics = authStore.getProductMetrics();
+  const production = process.env.NODE_ENV === 'production';
+  const security = {
+    audit,
+    dataEncryption: Boolean(process.env.FIMO_DATA_KEY) || (!production && fs.existsSync(path.join(dataDir, 'encryption.key'))),
+    backupEncryptionConfigured: Boolean(process.env.FIMO_BACKUP_KEY),
+    httpsOriginsConfigured: Boolean(process.env.FIMO_ALLOWED_ORIGINS) && process.env.FIMO_ALLOWED_ORIGINS.split(',').every(value => value.trim().startsWith('https://')),
+    sessionCookie: production ? '__Host + Secure + HttpOnly + SameSite=Strict' : 'HttpOnly + SameSite=Strict (local)',
+  };
+  const alerts = [];
+  if (!audit.ok) alerts.push({ severity: 'critical', code: 'audit-chain', title: 'Chaîne d’audit rompue' });
+  if (!quality) alerts.push({ severity: 'warning', code: 'quality-attestation', title: 'Aucune attestation du dernier passage qualité' });
+  if (!backup) alerts.push({ severity: 'warning', code: 'backup-missing', title: 'Aucune sauvegarde enregistrée sur cet environnement' });
+  else if (!restore) alerts.push({ severity: 'warning', code: 'restore-unverified', title: 'La dernière sauvegarde n’a pas de restauration vérifiée sur cet environnement' });
+  if (production && !security.backupEncryptionConfigured) alerts.push({ severity: 'critical', code: 'backup-key', title: 'Clé de sauvegarde absente' });
+  if (production && !security.httpsOriginsConfigured) alerts.push({ severity: 'critical', code: 'https-origin', title: 'Origine HTTPS de production non configurée' });
+  if (!metrics.economics.paymentProviderConnected) alerts.push({ severity: 'info', code: 'economics', title: 'Aucun paiement connecté ; revenu constaté à zéro' });
+  res.json({
+    generatedAt: new Date().toISOString(),
+    application: {
+      name: 'FIMOCheck', version: APP_VERSION, environment: process.env.NODE_ENV || 'development',
+      uptimeSeconds: Math.floor(process.uptime()), status: 'operational',
+    },
+    metrics,
+    security,
+    storage: {
+      databaseBytes: fs.existsSync(databasePath) ? fs.statSync(databasePath).size : 0,
+      dataDirectoryConfigured: Boolean(process.env.FIMO_DATA_DIR),
+      persistenceClaim: process.env.FIMO_DATA_DIR ? 'configured-path' : 'local-default',
+    },
+    backup: { lastBackup: backup, lastRestore: restore },
+    maintenance: { lastRun: lastMaintenance },
+    quality,
+    alerts,
+    sources: {
+      runtime: 'process + filesystem', metrics: 'SQLite', security: 'configuration + audit chain',
+      quality: quality ? '.runtime/quality-attestation.json' : null,
+    },
+  });
+});
+app.post('/api/admin/maintenance', requireAuth, requireAdmin, function(req, res) {
+  const dataDir = process.env.FIMO_DATA_DIR || path.join(__dirname, 'data');
+  const result = maintenance.runMaintenance(authStore, secureStore, dataDir, tachographStore);
+  fs.writeFileSync(path.join(dataDir, 'last-maintenance.json'), JSON.stringify(result, null, 2), { mode: 0o600 });
+  authStore.recordAudit(req.auth.user.id, 'maintenance.executed', `sessions=${result.sessionsRemoved};audit=${result.audit.removed};analyses=${result.analyses.removed};feedback=${result.feedback.removed};tachograph=${result.tachographImports.removed}`);
+  res.json(result);
+});
+app.post('/api/admin/users', authLimiter, requireAuth, requireAdmin, function(req, res) {
+  try { res.status(201).json(authStore.createUser(req.auth.user.id, req.body && req.body.username, req.body && req.body.role)); }
+  catch (err) { res.status(400).json({ error: err.message }); }
+});
+app.post('/api/admin/users/:id/revoke', requireAuth, requireAdmin, function(req, res) {
+  authStore.revokeUserSessions(req.auth.user.id, Number(req.params.id)); res.json({ ok:true });
+});
+app.post('/api/admin/users/:id/status', requireAuth, requireAdmin, function(req, res) {
+  const id=Number(req.params.id); if(id===req.auth.user.id && req.body && req.body.active===false) return res.status(400).json({error:'Le compte courant ne peut pas se desactiver lui-meme.'});
+  authStore.setUserActive(req.auth.user.id,id,Boolean(req.body && req.body.active)); res.json({ok:true});
+});
+
+app.get('/api/analyses', requireAuth, function(req,res) {
+  try { res.json({ analyses:secureStore.listAnalyses(req.auth.user.id,req.query.limit) }); }
+  catch(err){ console.error('[ANALYSES LECTURE]',err.message); res.status(500).json({error:'Historique illisible.'}); }
+});
+app.post('/api/analyses', requireAuth, function(req,res) {
+  try {
+    const payload=req.body&&req.body.payload;
+    if(!payload||typeof payload!=='object'||Array.isArray(payload)) return res.status(400).json({error:'Analyse manquante.'});
+    const saved=secureStore.saveAnalysis(req.auth.user.id,payload); authStore.recordAudit(req.auth.user.id,'analysis.saved','analysis_id='+saved.id); res.status(201).json(saved);
+  } catch(err){ console.error('[ANALYSE STOCKAGE]',err.message); res.status(500).json({error:'Analyse non enregistree.'}); }
+});
+app.get('/api/analyses/export', requireAuth, function(req,res) {
+  try { const rows=secureStore.listAnalyses(req.auth.user.id,100); authStore.recordAudit(req.auth.user.id,'analysis.exported','count='+rows.length); res.setHeader('Content-Disposition','attachment; filename="fimocheck-export.json"'); res.json({exportedAt:new Date().toISOString(),user:req.auth.user.username,analyses:rows}); }
+  catch(err){ res.status(500).json({error:'Export impossible.'}); }
+});
+app.get('/api/analyses/:id', requireAuth, function(req,res) {
+  try { const row=secureStore.getAnalysis(req.auth.user.id,req.params.id); if(!row)return res.status(404).json({error:'Analyse introuvable.'}); res.json(row); }
+  catch(err){ res.status(500).json({error:'Analyse illisible.'}); }
+});
+app.put('/api/analyses/:id', requireAuth, function(req,res){const payload=req.body&&req.body.payload;if(!payload||typeof payload!=='object'||Array.isArray(payload))return res.status(400).json({error:'Analyse manquante.'});try{if(!secureStore.updateAnalysis(req.auth.user.id,req.params.id,payload))return res.status(404).json({error:'Analyse introuvable.'});authStore.recordAudit(req.auth.user.id,'analysis.updated','analysis_id='+req.params.id);res.json({ok:true});}catch(err){res.status(500).json({error:'Mise a jour impossible.'});}});
+app.delete('/api/analyses/:id', requireAuth, function(req,res) {
+  const removed=secureStore.deleteAnalysis(req.auth.user.id,req.params.id); if(!removed)return res.status(404).json({error:'Analyse introuvable.'}); authStore.recordAudit(req.auth.user.id,'analysis.deleted','analysis_id='+req.params.id); res.json({ok:true});
+});
+app.delete('/api/analyses', requireAuth, function(req,res) {
+  const count=secureStore.deleteAllAnalyses(req.auth.user.id); authStore.recordAudit(req.auth.user.id,'analysis.deleted_all','count='+count); res.json({ok:true,count});
+});
+
+// POST /api/analyze - Analyse un CSV
+app.post('/api/analyze', requireComputationAccess, (req, res) => {
+  try {
+    const { csv, csv2, typeService, pays, equipage, mission } = req.body;
 
     if (!csv || csv.trim().length === 0) {
       return res.status(400).json({ error: "Aucun contenu CSV fourni." });
@@ -2131,6 +2589,12 @@ app.post('/api/analyze', (req, res) => {
     }
     resultat.conducteur = 1;
     if (resultat2) { resultat.conducteur2 = resultat2; }
+    const clean = function(value, max) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; };
+    resultat.mission = {
+      reference: clean(mission && mission.reference, 60),
+      site: clean(mission && mission.site, 60),
+      objet: clean(mission && mission.objet, 90)
+    };
 
     console.log("[RESULTAT] Score: " + resultat.score + "%, Infractions: " + resultat.infractions.length + ", Amende estimee: " + resultat.amende_estimee + " euros");
 
@@ -2161,8 +2625,29 @@ app.post('/api/analyze', (req, res) => {
   }
 });
 
+// POST /api/feedback — retour produit volontaire, sans données de planning
+app.post('/api/feedback', feedbackLimiter, (req, res) => {
+  try {
+    const allowedRoles = ['exploitant', 'conducteur', 'formateur', 'responsable', 'autre'];
+    const allowedSubjects = ['utilite', 'exactitude', 'ergonomie', 'fonction', 'bug'];
+    const note = Number(req.body && req.body.note);
+    const role = req.body && allowedRoles.includes(req.body.role) ? req.body.role : 'autre';
+    const sujet = req.body && allowedSubjects.includes(req.body.sujet) ? req.body.sujet : 'utilite';
+    const message = typeof (req.body && req.body.message) === 'string' ? req.body.message.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, 1200) : '';
+    if (!Number.isInteger(note) || note < 1 || note > 5 || message.length < 5) return res.status(400).json({ error: 'Retour incomplet.' });
+    const feedbackDir = process.env.FIMO_DATA_DIR || path.join(__dirname, 'data');
+    fs.mkdirSync(feedbackDir, { recursive: true, mode: 0o700 });
+    const contributionId = 'FC-' + crypto.randomBytes(6).toString('hex').toUpperCase();
+    fs.appendFileSync(path.join(feedbackDir, 'feedback.ndjson'), JSON.stringify({ contributionId, createdAt: new Date().toISOString(), status: 'pending_review', note, role, sujet, message }) + '\n', { encoding: 'utf8', mode: 0o600 });
+    res.status(201).json({ ok: true, contributionId, status: 'pending_review' });
+  } catch (err) {
+    console.error('[FEEDBACK ERREUR]', err);
+    res.status(500).json({ error: 'Retour non enregistré.' });
+  }
+});
+
 // POST /api/rapport/pdf - Genere un rapport PDF
-app.post('/api/rapport/pdf', function(req, res) {
+app.post('/api/rapport/pdf', requireComputationAccess, function(req, res) {
   try {
     var resultat = req.body.resultat;
     var options = req.body.options || {};
@@ -2190,7 +2675,7 @@ app.post('/api/rapport/pdf', function(req, res) {
   }
 });
 // POST /api/upload - Upload un fichier CSV
-app.post('/api/upload', upload.single('fichier'), (req, res) => {
+app.post('/api/upload', requireComputationAccess, upload.single('fichier'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "Aucun fichier recu." });
@@ -2203,6 +2688,9 @@ app.post('/api/upload', upload.single('fichier'), (req, res) => {
 
     res.json({ csv: contenu, nom_fichier: req.file.originalname });
   } catch (err) {
+    if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+      try { fs.unlinkSync(req.file.path); } catch (_) { /* nettoyage best effort */ }
+    }
     console.error("[ERREUR UPLOAD]", err);
     res.status(500).json({ error: "Erreur lors de l'upload : " + err.message });
   }
@@ -2243,7 +2731,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.11.0',
+    version: APP_VERSION,
     auteur: "Samir Medjaher",
     regles_version: "v7.6.10.1 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
@@ -2456,12 +2944,12 @@ app.get("/api/qa/avance", (req, res) => {
   // Source: Reglement CE 561/2006 consolide 31/12/2024
   // Ref: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02006R0561-20241231
 
-  // SCENARIO 1: Regle 12 jours (Art.8 par.6a modifie par UE 2024/1258)
+  // SCENARIO 1: Regle 12 jours (Art.8 par.6 bis modifie par UE 2024/1258)
   // Un conducteur en service occasionnel unique peut reporter le repos
   // hebdomadaire jusqu'a 12 periodes consecutives de 24h apres un repos
   // hebdomadaire normal (45h). Conditions: tachygraphe numerique,
   // conduite 22h-06h limitee a 3h sauf double equipage.
-  runTest("N5-12JOURS-01", "Regle 12 jours - Service occasionnel sans infraction (Art.8 par.6a)",
+  runTest("N5-12JOURS-01", "Regle 12 jours - Service occasionnel sans infraction (Art.8 par.6 bis)",
     [
       "2025-02-01;06:00;10:30;C", "2025-02-01;10:30;11:15;P", "2025-02-01;11:15;15:00;C", "2025-02-01;15:00;15:15;T",
       "2025-02-02;06:00;10:30;C", "2025-02-02;10:30;11:15;P", "2025-02-02;11:15;15:00;C", "2025-02-02;15:00;15:15;T",
@@ -2583,7 +3071,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: APP_VERSION,
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2684,7 +3172,7 @@ app.get('/api/qa', async (req, res) => {
   test('R8-MOTEUR', 'Depassement: journaliere detectee', rKO.infractions.some(function(i){return i.regle && i.regle.toLowerCase().indexOf('ournali')!==-1;}), 'EUR-1', 'Art.6 12h>9h', '');
   test('R8-MOTEUR', 'Depassement: amende > 0', rKO.amende_estimee > 0, 'FR-4+5', 'Sanctions', 'Amende: ' + rKO.amende_estimee + ' EUR');
 
-  var csvRP = '2025-01-06;04:00;08:30;C\n2025-01-06;08:30;09:00;P\n2025-01-06;09:00;13:00;C\n2025-01-06;13:00;13:30;P\n2025-01-06;13:30;17:30;C\n2025-01-06;17:30;18:00;T\n2025-01-06;18:00;22:00;D';
+  var csvRP = '2025-01-06;04:00;08:30;C\n2025-01-06;08:30;09:00;P\n2025-01-06;09:00;13:00;C\n2025-01-06;13:00;13:30;P\n2025-01-06;13:30;17:30;C\n2025-01-06;17:30;18:00;T\n2025-01-06;18:00;22:00;D\n2025-01-07;03:30;03:45;T';
   var rRP = analyserCSV(csvRP, 'STANDARD', 'FR');
   test('R8-MOTEUR', 'Repos insuff: detecte', rRP.infractions.some(function(i){return i.regle && i.regle.toLowerCase().indexOf('repos')!==-1;}), 'EUR-3', 'Art.8 repos<11h', '');
 
@@ -2744,7 +3232,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: APP_VERSION,
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -2955,7 +3443,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 
   // ========================================
   // CAT-B : CONDUITE CONTINUE CE 561/2006 Art.7 (cas 5-8)
-  // Seuil moteur: >270min = infraction, depassement>90min = 5e classe
+  // Seuil moteur: >270min = infraction, depassement >=90min = 5e classe
   // Pause >=30min remet compteur a 0
   // ========================================
 
@@ -2977,13 +3465,12 @@ app.get('/api/qa/cas-reels', (req, res) => {
     { infractions_contiennent: ['ontinue'], conduite_continue_max: 300, classe_contient: ['4e'], classe_absente: ['5e'] }
   );
 
-  // CAS 7 - Conduite continue 360min (seuil exact 4e/5e = 90min depassement)
-  // 6h = 360min, depassement 90min = seuil exact, moteur dit >90 pour 5e
-  testerCas('CAT-B', 'CAS 7 - Conduite continue 360min (seuil 4e/5e)',
-    '6h continues = depassement 90min exactement. Seuil bascule 4e/5e classe.',
+  // CAS 7 - Conduite continue 360min (5e classe au seuil exact de 90min)
+  testerCas('CAT-B', 'CAS 7 - Conduite continue 360min (5e classe)',
+    '6h continues = depassement 90min exactement. R3315-10 vise moins de 1h30 : le seuil exact releve donc de la 5e classe.',
     '2025-03-10;06:00;06:15;T\n2025-03-10;06:15;12:15;C\n2025-03-10;12:15;13:00;P\n2025-03-10;13:00;15:00;C\n2025-03-10;15:00;15:15;T',
     'OCCASIONNEL', 'FR',
-    { infractions_contiennent: ['ontinue'], conduite_continue_max: 360, classe_contient: ['4e'] }
+    { infractions_contiennent: ['ontinue'], conduite_continue_max: 360, classe_contient: ['5e'], classe_absente: ['4e'] }
   );
 
   // CAS 8 - Conduite continue 390min (5e classe, depassement 120min > 90min)
@@ -2998,7 +3485,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // ========================================
   // CAT-C : CONDUITE JOURNALIERE CE 561/2006 Art.6 (cas 9-12)
   // Seuil moteur: >540min avertissement (derog 600min)
-  // >600min infraction, depassement>120min = 5e classe
+  // >600min infraction ; la gravite se mesure au-dela des 10h derogatoires
   // ========================================
 
   // CAS 9 - Conduite 9h30 (avertissement derog, pas infraction)
@@ -3019,20 +3506,17 @@ app.get('/api/qa/cas-reels', (req, res) => {
     { infractions_absent: ['ournali', 'ravail'], infractions: 0, avertissements_min: 1, conduite_h: '9.8', score_min: 80 }
   );
 
-  // CAS 11 - Conduite 11h (4e classe, depassement 120min sur 540 = 2h)
-  // 660min, >600min derog, depassement = 660-540 = 120min = seuil exact 4e/5e
-  // Moteur: depassement > 120 pour 5e, donc 120 = 4e classe
+  // CAS 11 - Conduite 11h (4e classe, depassement 60min sur la limite de 10h)
   testerCas('CAT-C', 'CAS 11 - Conduite 11h (4e classe seuil)',
-    '11h conduite = 660min. Depassement 120min = seuil exact. 4e classe.',
+    '11h conduite = 660min. Depassement de 60min sur la prolongation autorisee a 10h. 4e classe.',
     '2025-03-10;04:30;04:45;T\n2025-03-10;04:45;09:15;C\n2025-03-10;09:15;10:00;P\n2025-03-10;10:00;14:00;C\n2025-03-10;14:00;14:45;P\n2025-03-10;14:45;17:15;C\n2025-03-10;17:15;17:30;T',
     'SLO', 'FR',
     { infractions_contiennent: ['ournali'], classe_contient: ['4e'], conduite_h: '11.0' }
   );
 
-  // CAS 12 - Conduite 12h (5e classe, depassement 180min > 120min)
-  // 720min, depassement 720-540 = 180min > 120 = 5e classe
+  // CAS 12 - Conduite 12h (5e classe au seuil exact de 2h au-dela des 10h)
   testerCas('CAT-C', 'CAS 12 - Conduite 12h (5e classe)',
-    '12h conduite = 720min. Depassement 180min > 120min. 5e classe 1500 EUR.',
+    '12h conduite = 720min. Depassement de 120min sur 10h ; R3315-10 vise moins de 2h. 5e classe.',
     '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;08:45;C\n2025-03-10;08:45;09:30;P\n2025-03-10;09:30;13:30;C\n2025-03-10;13:30;14:15;P\n2025-03-10;14:15;17:45;C\n2025-03-10;17:45;18:00;T',
     'SLO', 'FR',
     { infractions_contiennent: ['ournali'], classe_contient: ['5e'], amende_min: 1500, conduite_h: '12.0' }
@@ -3057,7 +3541,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // Amplitude 16h, repos = 24-16 = 8h, manque 1h sous 9h reduit = 4e
   testerCas('CAT-D', 'CAS 14 - Repos 8h (4e classe, manque 60min)',
     'Amplitude 16h, repos 8h. Manque 1h sur 9h minimum. 4e classe.',
-    '2025-03-10;04:00;04:30;T\n2025-03-10;04:30;09:00;C\n2025-03-10;09:00;09:45;P\n2025-03-10;09:45;13:45;C\n2025-03-10;13:45;14:30;P\n2025-03-10;14:30;17:00;C\n2025-03-10;17:00;18:00;D\n2025-03-10;18:00;20:00;T',
+    '2025-03-10;04:00;04:30;T\n2025-03-10;04:30;09:00;C\n2025-03-10;09:00;09:45;P\n2025-03-10;09:45;13:45;C\n2025-03-10;13:45;14:30;P\n2025-03-10;14:30;17:00;C\n2025-03-10;17:00;18:00;D\n2025-03-10;18:00;20:00;T\n2025-03-11;04:00;04:15;T',
     'REGULIER', 'FR',
     { infractions_contiennent: ['epos'], classe_contient: ['4e'], repos_estime_max: 9 }
   );
@@ -3066,7 +3550,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // Amplitude 18h30, repos = 24-18.5 = 5.5h, manque 3h30 = 210min > 150 = 5e
   testerCas('CAT-D', 'CAS 15 - Repos 5h30 (5e classe, manque 210min)',
     'Journee massive 18h30 activite. Repos 5h30. Manque 210min > 150min. 5e classe.',
-    '2025-03-10;03:30;04:00;T\n2025-03-10;04:00;08:30;C\n2025-03-10;08:30;09:00;P\n2025-03-10;09:00;13:00;C\n2025-03-10;13:00;13:30;P\n2025-03-10;13:30;17:30;C\n2025-03-10;17:30;18:00;D\n2025-03-10;18:00;22:00;T',
+    '2025-03-10;03:30;04:00;T\n2025-03-10;04:00;08:30;C\n2025-03-10;08:30;09:00;P\n2025-03-10;09:00;13:00;C\n2025-03-10;13:00;13:30;P\n2025-03-10;13:30;17:30;C\n2025-03-10;17:30;18:00;D\n2025-03-10;18:00;22:00;T\n2025-03-11;03:30;03:45;T',
     'REGULIER', 'FR',
     { infractions_contiennent: ['epos'], classe_contient: ['5e'], amende_min: 1500, repos_estime_max: 6 }
   );
@@ -3168,7 +3652,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
   // Continue + journaliere + repos + amplitude + travail
   testerCas('CAT-G', 'CAS 25 - Catastrophe cumul 18h (toutes infractions)',
     '18h conduite sans repos. Cumul: continue, journaliere 5e, repos 5e, amplitude, travail nuit.',
-    '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;10:15;C\n2025-03-10;10:15;10:30;P\n2025-03-10;10:30;16:30;C\n2025-03-10;16:30;16:45;P\n2025-03-10;16:45;22:45;C\n2025-03-10;22:45;23:00;T',
+    '2025-03-10;04:00;04:15;T\n2025-03-10;04:15;10:15;C\n2025-03-10;10:15;10:30;P\n2025-03-10;10:30;16:30;C\n2025-03-10;16:30;16:45;P\n2025-03-10;16:45;22:45;C\n2025-03-10;22:45;23:00;T\n2025-03-11;04:00;04:15;T',
     'SLO', 'FR',
     { infractions_min: 4, infractions_contiennent: ['ontinue', 'ournali'], amende_min: 270, score_max: 20 }
   );
@@ -3182,10 +3666,10 @@ app.get('/api/qa/cas-reels', (req, res) => {
     instruction: 'Pour diagnostiquer une anomalie, verifier: (1) le champ verifications[] du cas en echec, (2) comparer attendu vs obtenu, (3) consulter resultat_brut.infractions_detail pour les regles declenchees, (4) verifier moteur_info pour les seuils utilises',
     seuils_critiques: {
       conduite_continue_4e: 'depassement <= 90min au-dela de 270min',
-      conduite_continue_5e: 'depassement > 90min au-dela de 270min',
+      conduite_continue_5e: 'depassement >= 90min au-dela de 270min',
       conduite_journaliere_avert: '540min < conduite <= 600min (derog)',
       conduite_journaliere_4e: 'depassement <= 120min au-dela de 540min ET conduite > 600min',
-      conduite_journaliere_5e: 'depassement > 120min au-dela de 540min',
+      conduite_journaliere_5e: 'depassement >= 120min au-dela de 600min en cas de prolongation',
       repos_4e: 'manque <= 150min sous 540min (9h)',
       repos_5e: 'manque > 150min sous 540min (9h)',
       amplitude_regulier: '> 13h',
@@ -3210,7 +3694,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: APP_VERSION,
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -3409,7 +3893,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: APP_VERSION,
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3856,7 +4340,7 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: APP_VERSION,
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
@@ -3874,14 +4358,31 @@ app.get('*', (req, res) => {
   }
 });
 
+// Reponse uniforme sans trace interne pour les erreurs de politique reseau.
+app.use(function(err, req, res, next) {
+  if (err && err.message === 'Origine non autorisee') {
+    return res.status(403).json({ error: 'Origine non autorisee.' });
+  }
+  console.error('[ERREUR HTTP]', err && err.message ? err.message : err);
+  return res.status(500).json({ error: 'Erreur interne.' });
+});
+
 // Demarrage du serveur
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  FIMO Check v7.11.0");
+  console.log("  FIMO Check v" + APP_VERSION);
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
   console.log("============================================");
   console.log("");
 });
+
+const maintenanceInterval = setInterval(function() {
+  try { maintenance.runMaintenance(authStore, secureStore, process.env.FIMO_DATA_DIR || path.join(__dirname, 'data'), tachographStore); }
+  catch (error) { console.error('[MAINTENANCE]', error.message); }
+}, 24 * 60 * 60 * 1000);
+maintenanceInterval.unref();
+try { maintenance.runMaintenance(authStore, secureStore, process.env.FIMO_DATA_DIR || path.join(__dirname, 'data'), tachographStore); }
+catch (error) { console.error('[MAINTENANCE INITIALE]', error.message); }

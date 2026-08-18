@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './BottomBar.module.css';
+import { useI18n } from '../../platform/i18n/I18nProvider.jsx';
 
 /**
  * FIMO Check — BottomBar v7.10.3
@@ -36,6 +37,7 @@ export function BottomBar({
   historiqueCount, onToggleHistorique, voirHistorique,
   onStartTour
 }) {
+  const { t } = useI18n();
   const handleAnalyse = () => {
     if (navigator.vibrate) navigator.vibrate(15);
     if (onAnalyse) onAnalyse();
@@ -52,23 +54,23 @@ export function BottomBar({
   };
 
   return (
-    <nav className={styles.bottomBar} aria-label="Actions principales">
+    <nav className={styles.bottomBar} aria-label={t('bottom.actions')}>
       <button
         className={styles.item + ' ' + styles.itemPrimary + (analyseEnCours ? ' ' + styles.itemLoading : '')}
         onClick={handleAnalyse}
         disabled={analyseDisabled || analyseEnCours}
-        data-tour="analyser" aria-label="Analyser la conformite"
+        data-tour="analyser" aria-label={t('header.checkService')}
       >
         <span className={styles.iconWrap}>
           <IconAnalyse />
         </span>
-        <span className={styles.label}>{analyseEnCours ? 'Analyse...' : 'Analyser'}</span>
+        <span className={styles.label}>{analyseEnCours ? t('header.checking') : t('bottom.check')}</span>
       </button>
 
       <button
         className={styles.item + (voirHistorique ? ' ' + styles.itemActive : '')}
         onClick={handleHisto}
-        aria-label={'Historique' + (historiqueCount > 0 ? ', ' + historiqueCount + ' analyses' : '')}
+        aria-label={t('bottom.historyLabel', { count: historiqueCount })}
       >
         <span className={styles.iconWrap}>
           <IconHistorique />
@@ -76,13 +78,13 @@ export function BottomBar({
             <span className={styles.badge}>{historiqueCount > 99 ? '99+' : historiqueCount}</span>
           ) : null}
         </span>
-        <span className={styles.label}>Historique</span>
+        <span className={styles.label}>{t('header.history')}</span>
       </button>
 
       <button
         className={styles.item}
         onClick={handleAide}
-        aria-label="Guide interactif"
+        aria-label={t('header.guide')}
       >
         <span className={styles.iconWrap}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -91,7 +93,7 @@ export function BottomBar({
             <circle cx="12" cy="18" r="0.5" fill="currentColor" />
           </svg>
         </span>
-        <span className={styles.label}>Aide</span>
+        <span className={styles.label}>{t('header.help')}</span>
       </button>
     </nav>
   );

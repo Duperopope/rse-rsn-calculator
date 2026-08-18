@@ -1,15 +1,16 @@
 .card {
   background: var(--bg-card, #151A21);
   border: 1px solid var(--border, #2D3748);
-  border-radius: 16px;
+  border-radius: 10px;
   padding: 20px;
-  transition: border-color 0.25s;
+  box-shadow: 0 1px 2px rgba(23, 36, 38, 0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 @media (hover: hover) {
   .card:hover {
   border-color: #3B82F6;
-  transform: translateY(-1px);
+  box-shadow: 0 7px 20px rgba(23, 36, 38, 0.08);
 }
 }
 

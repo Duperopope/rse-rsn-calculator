@@ -1,0 +1,32 @@
+services:
+  fimocheck:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      FIMO_DATA_DIR: /data
+      FIMO_DATA_KEY: ${FIMO_DATA_KEY:?FIMO_DATA_KEY requis}
+      FIMO_BACKUP_KEY: ${FIMO_BACKUP_KEY:?FIMO_BACKUP_KEY requis}
+      FIMO_ALLOWED_ORIGINS: ${FIMO_ALLOWED_ORIGINS:?origine HTTPS requise}
+      FIMO_WEBAUTHN_RP_ID: ${FIMO_WEBAUTHN_RP_ID:?RP ID WebAuthn requis}
+      FIMO_WEBAUTHN_ORIGIN: ${FIMO_WEBAUTHN_ORIGIN:?origine WebAuthn HTTPS requise}
+      FIMO_ANALYSIS_RETENTION_DAYS: ${FIMO_ANALYSIS_RETENTION_DAYS:-365}
+      FIMO_FEEDBACK_RETENTION_DAYS: ${FIMO_FEEDBACK_RETENTION_DAYS:-365}
+      FIMO_AUDIT_RETENTION_DAYS: ${FIMO_AUDIT_RETENTION_DAYS:-730}
+      FIMO_TACHOGRAPH_RETENTION_DAYS: ${FIMO_TACHOGRAPH_RETENTION_DAYS:-90}
+    volumes:
+      - fimocheck-data:/data
+    tmpfs:
+      - /app/uploads:mode=700,uid=1000,gid=1000
+      - /tmp:mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  fimocheck-data:

@@ -1,0 +1,149 @@
+.shell,
+.loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background:
+    linear-gradient(90deg, rgba(19, 111, 108, 0.08) 1px, transparent 1px),
+    #edf2f1;
+  background-size: 32px 100%;
+  color: #172426;
+}
+.loading {
+  font-weight: 700;
+}
+.card {
+  width: min(430px, 100%);
+  padding: 30px;
+  background: #fbfdfc;
+  border: 1px solid #c9d5d3;
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(23, 36, 38, 0.14);
+}
+.brand {
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+.brand span {
+  color: #136f6c;
+  font-weight: 900;
+}
+.brand strong {
+  color: #172426;
+}
+.kicker {
+  margin: 24px 0 5px;
+  color: #136f6c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.card h1 {
+  margin: 0;
+  font-size: 26px;
+}
+.subtitle {
+  margin: 7px 0 22px;
+  color: #5b6c6c;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.card form,
+.card label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.card form {
+  gap: 14px;
+}
+.card label {
+  color: #435656;
+  font-size: 12px;
+  font-weight: 750;
+}
+.card input {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #aebcba;
+  border-radius: 7px;
+  background: #fff;
+  color: #172426;
+  font: inherit;
+}
+.card input:focus {
+  outline: 3px solid rgba(19, 111, 108, 0.16);
+  border-color: #136f6c;
+}
+.card small {
+  font-size: 10px;
+  font-weight: 500;
+  color: #6d7d7b;
+}
+.card form > button {
+  min-height: 45px;
+  border: 0;
+  border-radius: 7px;
+  background: #136f6c;
+  color: #fff;
+  font-weight: 850;
+}
+.passkeyChoice {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.passkeyChoice::before,
+.passkeyChoice::after { content: ""; height: 1px; background: #d9e2e0; }
+.passkeyChoice span { color: #71817f; font-size: 11px; font-weight: 650; }
+.card form > .passkeyChoice { margin-top: 1px; }
+.card form .passkeyButton {
+  grid-column: 1 / -1;
+  min-height: 45px;
+  border: 1px solid #91aaa6;
+  border-radius: 7px;
+  background: #fff;
+  color: #174b49;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.card form .passkeyButton:hover { background: #edf6f4; border-color: #136f6c; }
+.card form .passkeyButton:disabled { opacity: .55; cursor: wait; }
+.error {
+  margin: 0;
+  color: #a3312c;
+  font-size: 12px;
+}
+.textButton {
+  display: block;
+  margin: 12px auto 0;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #136f6c;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.card aside {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #d9e2e0;
+  font-size: 11px;
+}
+.card aside span {
+  color: #6d7d7b;
+}

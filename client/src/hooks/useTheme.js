@@ -10,9 +10,9 @@ import { THEME_COLORS } from '../config/constants.js';
 export function useTheme() {
   const [theme, setTheme] = useState(() => {
     try {
-      return window.localStorage.getItem('rse_theme') || 'dark';
+      return window.localStorage.getItem('rse_theme') || 'light';
     } catch (e) {
-      return 'dark';
+      return 'light';
     }
   });
 

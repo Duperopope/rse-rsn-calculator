@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './JaugeLineaire.module.css';
+import { Icon } from '../../platform/assets/Icon.jsx';
 
 /**
  * Jauge lineaire interactive avec seuils colores et preview sanctions
@@ -129,7 +130,7 @@ export function JaugeLineaire({
       {expanded ? (
         <div className={styles.details} data-status={status}>
           <div className={styles.detailRow}>
-            <span className={styles.detailIcon}>{status === 'danger' ? '⚠' : status === 'warning' ? '⏱' : '✅'}</span>
+            <span className={styles.detailIcon}><Icon name={status === 'danger' ? 'warning' : status === 'warning' ? 'timer' : 'success'} size={16} /></span>
             <span>{statusLabel}</span>
             <span className={styles.detailSep}>|</span>
             <span>{pourcent}%</span>
@@ -150,7 +151,7 @@ export function JaugeLineaire({
           ) : null}
           {status !== 'ok' ? (
             <div className={styles.conseil}>
-              <span className={styles.conseilIcon}>💡</span>
+              <span className={styles.conseilIcon}><Icon name="idea" size={17} /></span>
               <span>{
                 label.includes('Conduite continue') && status === 'danger'
                   ? 'Pause obligatoire de 45 min (ou 15+30 min) requise maintenant'

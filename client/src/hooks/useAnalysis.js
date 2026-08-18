@@ -6,12 +6,9 @@ import { API_URL } from '../config/constants.js';
  * @returns {{ analyser: Function, resultat: Object|null, erreur: string|null, chargement: boolean }}
  */
 export function useAnalysis() {
-  const [resultat, setResultat] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem('fimo_resultat');
-      return saved ? JSON.parse(saved) : null;
-    } catch (e) { return null; }
-  });
+  // Ne pas restaurer une analyse sans pouvoir prouver qu'elle correspond
+  // encore aux horaires visibles. L'historique reste disponible séparément.
+  const [resultat, setResultat] = useState(null);
   const [erreur, setErreur] = useState(null);
 
   function setResultatPersist(data) {
@@ -23,7 +20,7 @@ export function useAnalysis() {
   }
   const [chargement, setChargement] = useState(false);
 
-  async function analyser(csvTexte, csv2, typeService, pays, equipage) {
+  async function analyser(csvTexte, csv2, typeService, pays, equipage, mission) {
     setChargement(true);
     setErreur(null);
     setResultatPersist(null);
@@ -32,7 +29,7 @@ export function useAnalysis() {
       const res = await fetch(API_URL + '/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.assign({ csv: csvTexte, typeService: typeService || "REGULIER", pays: pays || "FR", equipage: equipage || "solo" }, csv2 && csv2.trim().length > 0 ? { csv2: csv2 } : {})),
+        body: JSON.stringify(Object.assign({ csv: csvTexte, typeService: typeService || "REGULIER", pays: pays || "FR", equipage: equipage || "solo", mission: mission || {} }, csv2 && csv2.trim().length > 0 ? { csv2: csv2 } : {})),
         signal: AbortSignal.timeout(30000)
       });
 

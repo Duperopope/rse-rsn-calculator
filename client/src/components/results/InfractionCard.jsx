@@ -3,7 +3,7 @@ import styles from './InfractionCard.module.css';
 
 const BAREMES = {
   '4e classe': { forfait: 135, minore: 90, majore: 375, max: 750 },
-  '5e classe': { forfait: 1500, minore: null, majore: null, max: 1500 }
+  '5e classe': { forfait: null, minore: null, majore: null, max: 1500, recidive: 3000 }
 };
 
 
@@ -148,7 +148,7 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
   // Override avec les donnees API si disponibles (v7.4.5+)
   const amendeAPI = infraction.amende;
   const bareme = (amendeAPI && typeof amendeAPI === 'object' && amendeAPI.amende_forfaitaire !== undefined)
-    ? { forfait: amendeAPI.amende_forfaitaire, minore: amendeAPI.amende_minoree, majore: amendeAPI.amende_majoree, max: amendeAPI.amende_max }
+    ? { forfait: amendeAPI.amende_forfaitaire, minore: amendeAPI.amende_minoree, majore: amendeAPI.amende_majoree, max: amendeAPI.amende_max, recidive: amendeAPI.amende_recidive }
     : baremeBase;
 
   const sourceFromRegle = trouverSource(message);
@@ -199,12 +199,24 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
         if (!expl) return null;
         return (
           <div className={styles.explicationBlock}>
-            <span className={styles.explicationIcon}>💡</span>
+            <span className={styles.explicationIcon} aria-hidden="true">i</span>
             <p className={styles.explicationText}>{expl}</p>
           </div>
         );
       })()}
 
+      {classe === '5e classe' ? (
+        <div className={styles.amendeGrid}>
+          <div className={styles.amendeItem + ' ' + styles.amendeMax}>
+            <span className={styles.amendeLabel}>Maximum encouru</span>
+            <span className={styles.amendeValue}>{bareme.max} €</span>
+          </div>
+          <div className={styles.amendeItem + ' ' + styles.amendeMajore}>
+            <span className={styles.amendeLabel}>Maximum en récidive</span>
+            <span className={styles.amendeValue}>{bareme.recidive || 3000} €</span>
+          </div>
+        </div>
+      ) : (
       <div className={styles.amendeGrid}>
         <div className={styles.amendeItem + ' ' + styles.amendeMinore}>
           <span className={styles.amendeLabel}>Minorée</span>
@@ -223,14 +235,15 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
           <span className={styles.amendeValue}>{bareme.max} €</span>
         </div>
       </div>
+      )}
 
       {/* Explications amende - responsabilite et conditions */}
       <div className={styles.amendeExplain}>
         <div className={styles.amendeWho}>
-          <span className={styles.amendeWhoIcon}>{classe === "5e classe" ? "\uD83C\uDFE2" : "\uD83D\uDC64"}</span>
-          <span><strong>Responsable :</strong> {classe === "5e classe" ? "Entreprise (personne morale)" : "Conducteur (personne physique)"}</span>
+          <span><strong>Montant indicatif :</strong> la personne poursuivie et le montant effectivement prononcé dépendent du contrôle et de la procédure.</span>
         </div>
         <div className={styles.amendeConditions}>
+          {classe === '4e classe' ? <>
           <div className={styles.amendeCondItem}>
             <span className={styles.condBadge + " " + styles.condMinore}>{"\u2193"}</span>
             <span><strong>Minoree</strong> ({bareme.minore || "N/A"} {"\u20AC"}) : paiement sous 15 jours</span>
@@ -243,16 +256,15 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
             <span className={styles.condBadge + " " + styles.condMajore}>{"\u2191"}</span>
             <span><strong>Majoree</strong> ({bareme.majore || "N/A"} {"\u20AC"}) : non-paiement apres 45 jours</span>
           </div>
-          {classe === "5e classe" && (
+          </> : (
             <div className={styles.amendeCondItem}>
               <span className={styles.condBadge + " " + styles.condMax}>{"\u26A0"}</span>
-              <span><strong>Recidive</strong> : {bareme.max * 2} {"\u20AC"} (doublement)</span>
+              <span><strong>5e classe :</strong> jusqu'à {bareme.max} €, et jusqu'à {bareme.recidive || 3000} € en cas de récidive lorsque le règlement le prévoit.</span>
             </div>
           )}
         </div>
         <p className={styles.amendeNote}>
-          Art. R49-7 C. proc. pen. (minoration/majoration).
-          {classe === "5e classe" ? " Art. L3315-4 C. transports (employeur)." : " Art. R3315-4 C. transports (conducteur)."}
+          Barème présenté à titre informatif : Code des transports R3315-10 et R3315-11 ; Code pénal 131-13.
         </p>
       </div>
 
@@ -264,7 +276,7 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
           className={styles.sourceLink}
           onClick={handleSourceClick}
         >
-          <span className={styles.sourceLinkIcon}>📜</span>
+          <span className={styles.sourceLinkIcon} aria-hidden="true">§</span>
           <span className={styles.sourceLinkText}>{source.label}</span>
           <span className={styles.sourceLinkArrow}>↗</span>
         </a>
@@ -282,4 +294,3 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
     </div>
   );
 }
-

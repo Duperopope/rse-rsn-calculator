@@ -35,6 +35,7 @@ _patch_*.js
 # Resultats de tests (generes localement)
 test_56jours_resultat*.json
 test_56jours.csv
+!tests/fixtures/test_56jours.csv
 
 # Backups JSX
 v51_backup.jsx
@@ -45,3 +46,11 @@ v51_backup.jsx
 
 tests/*.pdf
 backups/
+data/feedback.ndjson
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
+data/encryption.key
+data/backup.key
+*.fimobak
+.runtime/

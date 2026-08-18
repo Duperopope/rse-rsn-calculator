@@ -101,7 +101,7 @@
 .amountMinore {
   background: rgba(0, 212, 255, 0.06);
   border: 1px solid var(--accent-glow, rgba(96, 165, 250, 0.15));
-  color: #00d4ff;
+  color: var(--accent);
 }
 
 .amountForfait {
@@ -124,7 +124,7 @@
 
 .sanctionArticle {
   font-size: 12px;
-  color: var(--accent, #00d4ff);
+  color: var(--accent);
   font-weight: 500;
 }
 
@@ -142,11 +142,11 @@
   gap: 8px;
   padding: 8px 12px;
   margin-top: 8px;
-  background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(0, 122, 255, 0.15));
+  background: color-mix(in srgb, var(--accent) 9%, var(--bg-card));
   border: 1px solid rgba(0, 122, 255, 0.25);
   border-radius: var(--md-radius-sm, 8px);
   text-decoration: none;
-  color: #4da3ff;
+  color: var(--accent);
   font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -154,7 +154,7 @@
 
 .sourceLink:active {
   transform: scale(0.97);
-  background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(0, 122, 255, 0.25));
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-card));
 }
 
 .sourceLinkIcon {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
 
 /* ============================================================
-   GuidedTour v4.0 — 4 etapes adaptees a la visibilite DOM
+   GuidedTour — parcours débutant, cibles toujours visibles
    Etapes 1-6: elements toujours presents
    Etapes 7-10: elements toujours presents (header, params, input)
    Les cibles conditionnelles (timeline, gauges, results)
@@ -12,29 +12,43 @@ import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
 var STEPS = [
     {
       target: '[data-tour="header"]',
-      title: '\uD83C\uDFAF Bienvenue sur FIMO Check !',
-      content: 'Verifiez en quelques clics si vos temps de conduite et repos respectent la reglementation europeenne (CE 561/2006). Suivez ce guide rapide en 4 etapes.',
-      placement: 'bottom',
-      disableBeacon: true
-    },
-    {
-      target: '[data-tour="templates"]',
-      title: '\u26A1 Saisissez vos activites',
-      content: 'Utilisez un modele pre-rempli (journee type, longue, nuit) ou ajoutez vos activites manuellement. Chaque activite a un type (conduite, pause, repos), une heure de debut et de fin. Ajoutez des jours avec le bouton "+".',
-      placement: 'bottom',
-      disableBeacon: true
-    },
-    {
-      target: '[data-tour="header"]',
-      title: '\uD83D\uDE80 Analysez et consultez',
-      content: 'Cliquez sur "Analyser" (en bas sur mobile) pour obtenir votre score sur 100, les infractions avec references legales, les amendes estimees et un export PDF. Les jauges en temps reel vous alertent avant meme l\'analyse.',
+      title: 'Bienvenue sur FIMO Check',
+      content: 'FIMOCheck prépare un service avant son affectation. Il signale les écarts possibles, mais ne remplace ni les données tachygraphe ni la décision du responsable transport.',
       placement: 'bottom',
       disableBeacon: true
     },
     {
       target: '[data-tour="params"]',
-      title: '\u2753 Besoin d\'aide ?',
-      content: 'Relancez ce guide via le bouton "Aide" en bas de l\'ecran ou le "?" en haut. Parametrez votre type de service, pays et equipage dans la barre du haut. Bonne route !',
+      title: 'Définissez le contexte',
+      content: 'Choisissez le type de service, le pays, l’équipage et le mode de saisie. Ces choix déterminent les règles utilisées : ne les laissez pas au hasard.',
+      placement: 'bottom',
+      disableBeacon: true
+    },
+    {
+      target: '[data-tour="mission"]',
+      title: 'Identifiez la mission',
+      content: 'Ajoutez une référence, un site et un objet. N’indiquez pas le nom du conducteur : il n’est pas nécessaire au calcul.',
+      placement: 'bottom',
+      disableBeacon: true
+    },
+    {
+      target: '[data-tour="templates"]',
+      title: 'Décrivez la journée',
+      content: 'Partez d’un modèle ou saisissez chaque période de conduite, travail, pause et repos. Les heures utilisent toujours le format 24 heures.',
+      placement: 'bottom',
+      disableBeacon: true
+    },
+    {
+      target: '[data-tour="header"]',
+      title: 'Vérifiez le service',
+      content: 'Cliquez sur « Vérifier le service ». Le résultat donne une décision, les règles concernées et un plan d’action. Après toute modification, relancez la vérification.',
+      placement: 'bottom',
+      disableBeacon: true
+    },
+    {
+      target: '[data-tour="params"]',
+      title: 'Gardez la preuve, pas le doute',
+      content: 'Exportez le rapport pour documenter le pré-contrôle, puis confirmez les données réelles. Vous pouvez relancer ce parcours à tout moment avec « Aide ».',
       placement: 'bottom',
       disableBeacon: true
     }
@@ -44,19 +58,19 @@ var HIDE_DASHBOARD_STEPS = [4, 5];
 
 var JOYRIDE_STYLES = {
   options: {
-    arrowColor: '#1e293b',
-    backgroundColor: '#1e293b',
-    overlayColor: 'rgba(0, 0, 0, 0.85)',
-    primaryColor: '#06b6d4',
-    textColor: '#e2e8f0',
-    spotlightShadow: '0 0 25px rgba(6, 182, 212, 0.5)',
+    arrowColor: '#fbfdfc',
+    backgroundColor: '#fbfdfc',
+    overlayColor: 'rgba(15, 31, 32, 0.66)',
+    primaryColor: '#136f6c',
+    textColor: '#172426',
+    spotlightShadow: '0 0 0 3px rgba(19, 111, 108, 0.28)',
     zIndex: 10000,
   },
   tooltip: {
-    borderRadius: '16px',
-    padding: '20px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(6,182,212,0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.2)',
+    borderRadius: '10px',
+    padding: '22px',
+    boxShadow: '0 18px 48px rgba(23,36,38,0.22)',
+    border: '1px solid #c9d5d3',
     maxWidth: '420px',
   },
   tooltipContainer: {
@@ -66,40 +80,40 @@ var JOYRIDE_STYLES = {
     fontSize: '1.1rem',
     fontWeight: 700,
     marginBottom: '8px',
-    color: '#f1f5f9',
+    color: '#172426',
   },
   tooltipContent: {
     fontSize: '15px',
     lineHeight: 1.6,
-    color: '#cbd5e1',
+    color: '#5b6c6c',
   },
   buttonNext: {
-    backgroundColor: '#06b6d4',
-    borderRadius: '10px',
+    backgroundColor: '#136f6c',
+    borderRadius: '7px',
     color: '#fff',
     fontWeight: 600,
     fontSize: '14px',
     padding: '8px 20px',
   },
   buttonBack: {
-    color: '#94a3b8',
+    color: '#5b6c6c',
     fontWeight: 500,
     fontSize: '14px',
     marginRight: '8px',
   },
   buttonSkip: {
-    color: '#64748b',
+    color: '#5b6c6c',
     fontSize: '0.85rem',
   },
   buttonClose: {
-    color: '#94a3b8',
+    color: '#5b6c6c',
   },
   overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(15, 31, 32, 0.66)',
   },
   spotlight: {
-    borderRadius: '14px',
-    boxShadow: '0 0 0 3px #06b6d4, 0 0 30px rgba(6, 182, 212, 0.6), 0 0 60px rgba(6, 182, 212, 0.3)',
+    borderRadius: '10px',
+    boxShadow: '0 0 0 3px #136f6c, 0 0 24px rgba(19,111,108,0.24)',
   },
 };
 
@@ -108,6 +122,7 @@ var LOCALE = {
   close: 'Fermer',
   last: 'C\'est parti !',
   next: 'Suivant \u2192',
+  nextLabelWithProgress: 'Suivant ({step} sur {steps})',
   open: 'Ouvrir',
   skip: 'Passer le guide',
 };

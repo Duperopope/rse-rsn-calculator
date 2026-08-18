@@ -1,15 +1,17 @@
 import React from 'react';
 import { APP_NAME } from '../../config/constants.js';
 import styles from './Footer.module.css';
+import { useI18n } from '../../platform/i18n/I18nProvider.jsx';
 
 /**
  * Pied de page avec sources reglementaires et infos
  */
-export function Footer() {
+export function Footer({ onFeedback, onContributions }) {
+  const { t } = useI18n();
   return (
     <footer className={styles.footer}>
       <div className={styles.sources}>
-        <span className={styles.label}>Sources :</span>
+        <span className={styles.label}>{t('footer.sources')}</span>
         <a href="https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32006R0561" target="_blank" rel="noopener noreferrer">
           CE 561/2006
         </a>
@@ -26,6 +28,12 @@ export function Footer() {
         <span>{APP_NAME}</span>
         <span className={styles.sep}>|</span>
         <span>Samir Medjaher</span>
+      </div>
+      <div className={styles.productModel}>
+        <span>{t('footer.free')}</span>
+        <button onClick={onFeedback}>{t('footer.feedback')}</button>
+        <button onClick={onContributions}>{t('footer.contribution')}</button>
+        <span>{t('footer.professional')}</span>
       </div>
     </footer>
   );

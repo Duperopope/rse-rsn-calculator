@@ -4,7 +4,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-secondary);
   margin-bottom: 6px;
   padding-left: 2px;
 }
@@ -14,23 +14,24 @@
   gap: 6px;
 }
 .metricCard {
-  background: rgba(255,255,255,0.04);
+  background: var(--bg-card);
   border-radius: var(--md-radius-sm, 8px);
   padding: 8px 6px;
-  border-left: 2px solid transparent;
+  border: 1px solid var(--border);
+  border-top: 3px solid transparent;
   text-align: center;
   transition: background 0.15s;
 }
-.metricCard:hover { background: rgba(255,255,255,0.07); }
-.metricOk { border-left-color: var(--accent-green, var(--md-success, #34d399)); }
-.metricWarning { border-left-color: var(--accent-orange, var(--md-warning, #f59e0b)); }
-.metricDanger { border-left-color: var(--accent-red, var(--md-error, #ef4444)); }
-.metricInfo { border-left-color: var(--accent-blue, #0084ff); }
+.metricCard:hover { background: color-mix(in srgb, var(--accent) 4%, var(--bg-card)); }
+.metricOk { border-top-color: var(--accent-green); }
+.metricWarning { border-top-color: var(--accent-orange); }
+.metricDanger { border-top-color: var(--accent-red); }
+.metricInfo { border-top-color: var(--accent); }
 .metricLabel {
   font-size: 0.55rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-secondary);
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -39,12 +40,12 @@
 .metricValue {
   font-size: 1rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text);
   line-height: 1.2;
 }
 .metricSub {
   font-size: 0.5rem;
-  color: rgba(255,255,255,0.3);
+  color: var(--text-secondary);
   margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
@@ -54,7 +55,8 @@
 /* Detail sections */
 .detailSection {
   margin-top: 8px;
-  background: rgba(255,255,255,0.03);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   border-radius: var(--md-radius-sm, 8px);
   padding: 8px;
   animation: fadeIn 0.2s ease;
@@ -63,7 +65,7 @@
 .detailTitle {
   font-size: 0.6rem;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-secondary);
   margin-bottom: 6px;
   letter-spacing: 0.04em;
 }
@@ -74,9 +76,9 @@
   display: grid;
   grid-template-columns: 50px 50px 70px 35px 45px 45px 45px;
   gap: 4px;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-secondary);
   padding-bottom: 4px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 2px;
   font-size: 0.5rem;
   text-transform: uppercase;
@@ -86,14 +88,14 @@
   grid-template-columns: 50px 50px 70px 35px 45px 45px 45px;
   gap: 4px;
   padding: 3px 0;
-  color: rgba(255,255,255,0.7);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
 }
 .reposRowReduit { background: rgba(255,170,0,0.06); }
 .reposRowInsuffisant { background: rgba(255,68,68,0.08); }
-.reposDate { font-weight: 600; color: #fff; }
+.reposDate { font-weight: 600; color: var(--text); }
 .reposDuree { font-weight: 600; }
-.reposResiduel { color: rgba(255,255,255,0.4); font-size: 0.55rem; }
+.reposResiduel { color: var(--text-secondary); font-size: 0.55rem; }
 
 /* Type tags */
 .tagNormal {
@@ -122,7 +124,7 @@
 }
 .legendeResiduel {
   font-size: 0.45rem;
-  color: rgba(255,255,255,0.25);
+  color: var(--text-secondary);
   margin-top: 4px;
   font-style: italic;
 }
@@ -134,12 +136,12 @@
   grid-template-columns: 50px 40px 1fr 65px;
   gap: 6px;
   padding: 3px 0;
-  color: rgba(255,255,255,0.7);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
 }
-.detteDate { font-weight: 600; color: #fff; }
+.detteDate { font-weight: 600; color: var(--text); }
 .detteH { font-weight: 600; color: var(--accent-orange, var(--md-warning, #f59e0b)); }
-.detteEcheance { color: rgba(255,255,255,0.4); font-size: 0.55rem; }
+.detteEcheance { color: var(--text-secondary); font-size: 0.55rem; }
 .detteStatut { font-size: 0.5rem; font-weight: 600; }
 .detteEnCours { color: var(--accent-orange, var(--md-warning, #f59e0b)); }
 .detteCompense { color: var(--accent-green, var(--md-success, #34d399)); }
@@ -148,18 +150,18 @@
 .rappelsSection {
   margin-top: 8px;
   padding: 6px 8px;
-  background: rgba(0,132,255,0.06);
-  border-left: 2px solid var(--accent-blue, #0084ff);
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
+  border-left: 2px solid var(--accent);
   border-radius: 0 6px 6px 0;
 }
 .rappelItem {
   font-size: 0.55rem;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-secondary);
   padding: 2px 0;
   line-height: 1.4;
 }
 .rappelItem + .rappelItem {
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid var(--border);
   margin-top: 2px;
   padding-top: 4px;
 }

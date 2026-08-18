@@ -1,0 +1,11 @@
+.git
+.github
+client/node_modules
+client/dist
+node_modules
+data
+uploads
+feedback
+*.fimobak
+*.log
+.env*

@@ -3,9 +3,9 @@ import styles from './Timeline24h.module.css';
 
 // Couleurs par type d activite (standard tachygraphe)
 var COULEURS = {
-  C: { bg: '#4CAF50', label: 'Conduite' },
-  T: { bg: '#2196F3', label: 'Travail' },
-  P: { bg: '#9C27B0', label: 'Pause' },
+  C: { bg: '#18794e', label: 'Conduite' },
+  T: { bg: '#356a84', label: 'Travail' },
+  P: { bg: '#735a86', label: 'Pause' },
   D: { bg: '#FF9800', label: 'Disponibilite' },
   R: { bg: '#78909C', label: 'Repos' }
 };
@@ -112,7 +112,7 @@ function VueJour(props) {
     // Badge equipage
     React.createElement('div', { className: styles.badgeRow },
       React.createElement('span', { className: styles.badge },
-        (equipage === 'double' ? '\uD83D\uDC65 Duo' : '\uD83D\uDC64 Solo')
+        (equipage === 'double' ? 'Deux conducteurs' : 'Un conducteur')
       )
     ),
     // Tooltip

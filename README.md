@@ -12,11 +12,11 @@
 | Element | Valeur |
 | --- | --- |
 | Version | **v7.25.1** |
-| Tests backend | **56/56 (100%)** |
-| Tests QA complets | **203/203 (100%)** |
-| URLs legales verifiees | **44/44** (15 Legifrance + 27 EUR-Lex + 2 autres) |
-| Couverture reglementaire | 100% (standard + transport occasionnel voyageurs) |
-| Demo | [rse-rsn-calculator.onrender.com](https://rse-rsn-calculator.onrender.com/) |
+| Tests backend | **35/35 reproductibles sur un clone propre** |
+| Tests QA embarques | **167/167** |
+| Sources primaires revues | EUR-Lex consolidé au 31/12/2024 + Légifrance en vigueur en 2026 |
+| Couverture reglementaire | Périmètre automatisé documenté ; validation indépendante encore requise |
+| Ancienne démo | Render, disponibilité et persistance non garanties |
 
 ## Fonctionnalites
 
@@ -33,6 +33,12 @@
 - **Tour guide** — 10 etapes interactives via react-joyride pour decouvrir l interface
 - **Mode sombre/clair** — toggle iOS-style avec persistance localStorage
 - **Historique** — sauvegarde des analyses precedentes
+
+### Exploitation et identité
+- **Centre de commandement** — santé runtime, comptes, usage, chaîne d audit, sauvegardes, entretien, économie constatée et attestation qualité
+- **Avatars privés** — recadrage 256 px, réencodage WebP sans métadonnées et stockage chiffré
+- **Localisation extensible** — socle FR/EN sur les parcours de connexion et de compte, catalogues contrôlés automatiquement
+- **Réception tachygraphe** — originaux DDD/C1B/V1B chiffrés, dédupliqués et isolés par compte ; décodage et signatures explicitement non activés
 
 ### Export et rapports
 - **Export PDF** — rapport de conformite professionnel (pdfkit 0.17.2)
@@ -59,10 +65,14 @@
 | N4 - Robustesse | `GET /api/qa/robustesse` | 29 | Edge cases, inputs malformes, CSV vides, sequences absurdes |
 | N5 - Avances | `GET /api/qa/avance` | 18 | OUT, FERRY, multi-equipage, bi-hebdo 90h, repos hebdo, transport occasionnel |
 | N6 - Multi-semaines | `GET /api/qa/multi-semaines` | 18 | Tracking multi-semaines, compensation repos, retour domicile, derogations |
-| CSV - Integration | `node tests/run-tests.js` | 36 | Fichiers CSV complets, scores, infractions, fix-engine |
-| **Total** | | **203** | **100% de reussite** |
+| CSV - Integration | `node tests/run-tests.js` | 35 | Fichier CSV sur 56 jours, scores, infractions, fix-engine |
+| **Total** | | **202** | **202 reussites** |
 
 ## Pipeline QA automatise
+
+La commande `npm run rehearse:production` reconstruit et éprouve l'image Docker
+durcie, puis restaure une sauvegarde chiffrée sur un volume vierge. Les
+ressources et secrets de répétition sont supprimés à la fin.
 
 | Outil | Fichier | Cout | Description |
 | --- | --- | --- | --- |
@@ -76,20 +86,27 @@
 
 | Derogation | Article | Description |
 | --- | --- | --- |
-| Regle 12 jours | Art.8 par.6a | Report du repos hebdomadaire jusqu a 12 periodes de 24h consecutives |
+| Regle 12 jours | Art.8 par.6 bis (numérotation française) | Report du repos hebdomadaire jusqu a 12 periodes de 24h consecutives |
 | Pause fractionnee 15+15 | Art.7 al.3 | Pause de 45 min remplacable par 2 pauses de 15 min minimum |
 | Report repos 25h | Art.8 par.2a | Repos journalier etendu a 25h max si conduite <= 7h |
-| Conduite nuit solo | Art.8 par.6a | En service 12 jours, conduite nuit (22h-6h) limitee a 3h sans pause |
+| Conduite nuit solo | Art.8 par.6 bis | En service 12 jours, conduite nuit (22h-6h) limitee a 3h sans pause |
 | Retour domicile | Art.8 par.8bis | Apres 12 jours : 2 repos normaux OU 1 normal + 1 reduit (avec compensation) |
 
 ## API Endpoints
 
 | Methode | Route | Body | Description |
 | --- | --- | --- | --- |
-| `POST` | `/api/analyze` | `{csv, typeService, pays, equipage}` | Analyse CSV tachygraphe (JSON) |
+| `POST` | `/api/analyze` | `{csv, typeService, pays, equipage}` | Analyse d'un planning d'activités CSV (JSON) |
 | `POST` | `/api/fix` | `{csv, typeService, pays, equipage}` | Correction automatique infractions |
 | `POST` | `/api/rapport/pdf` | `{resultat, options}` | Generation rapport PDF |
 | `GET` | `/api/health` | — | Health check + version |
+| `GET` | `/api/admin/control-room` | — | Signaux d exploitation vérifiables (administrateur) |
+| `PUT` | `/api/account/avatar` | multipart `avatar` | Import et normalisation de la photo du compte |
+| `GET/DELETE` | `/api/account/avatar` | — | Lecture ou suppression de sa photo |
+| `GET` | `/api/tachograph/capabilities` | — | Capacités et limites tachygraphe effectivement actives |
+| `GET/POST` | `/api/tachograph/imports` | multipart `tachograph` | Inventaire ou réception chiffrée d'un original |
+| `GET` | `/api/tachograph/imports/:id/original` | — | Restitution de son original |
+| `DELETE` | `/api/tachograph/imports/:id` | — | Suppression de son original |
 | `GET` | `/api/qa` | — | Tests QA N1 (56 tests) |
 | `GET` | `/api/qa/cas-reels` | — | Tests QA N2 (25 tests) |
 | `GET` | `/api/qa/limites` | — | Tests QA N3 (21 tests) |
@@ -125,20 +142,14 @@ Types : `C` = Conduite, `P` = Pause, `T` = Travail, `D` = Disponibilite, `R` = R
 
 | Texte | Lien | Statut |
 | --- | --- | --- |
-| CE 561/2006 consolide | [EUR-Lex](https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02006R0561-20240522) | Verifie |
+| CE 561/2006 consolide | [EUR-Lex](https://eur-lex.europa.eu/eli/reg/2006/561/2024-12-31) | Revu le 18/08/2026 |
 | UE 2024/1258 | [EUR-Lex](https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32024R1258) | Verifie |
-| Code des transports R3315-10 | [Legifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006841659) | Verifie |
-| Code des transports R3315-11 | [Legifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006841660) | Verifie |
-| Decret 2010-855 | [Legifrance](https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022503681) | Verifie |
-| Code des transports Art. R3312-9 | [Legifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046177522) | Verifie |
-| Decret 83-40 du 26 janv 1983 | [Legifrance](https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000423284/) | Verifie |
-| Decret 2006-925 Art.1 | [Legifrance](https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000002439868) | Verifie |
-| Code des transports Art. L3312-2 | [Legifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651232) | Verifie |
-| Decret 2010-541 | [Legifrance](https://www.legifrance.gouv.fr/loda/id/JORFTEXT000022512271) | Verifie |
-| Code des transports Art. L3312-1 | [Legifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651204) | Verifie |
-| Code des transports Art. R3312-13 | [Legifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033450503) | Verifie |
+| Sanctions R3315-9 à R3315-11 | [Légifrance](https://www.legifrance.gouv.fr/codes/id/LEGISCTA000033450515) | Revu en vigueur au 30/07/2026 |
+| Amplitude R3312-9 | [Légifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651238) | Revu le 18/08/2026 |
+| Amplitude voyageurs R3312-28 | [Légifrance](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651204) | Revu le 18/08/2026 |
+| Transport urbain, décret 2000-118 consolidé | [Légifrance](https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000567711/) | Revu le 18/08/2026 |
 
-> Les 15 URLs Legifrance ont ete verifiees par identifiant LEGIARTI/JORFTEXT. Les reponses HTTP 403 sont dues a la protection anti-bot de Legifrance ; les pages sont accessibles en navigateur.
+> Les tests prouvent la stabilité du comportement implémenté, pas l’exhaustivité juridique. La matrice de conformité identifie les contrôles encore soumis à validation d’un responsable transport indépendant.
 
 ## Changelog
 

@@ -98,6 +98,7 @@ function startServer() {
     }
     env.PORT = String(CONFIG.port);
     env.NODE_ENV = 'test';
+    env.FIMO_ALLOW_ANONYMOUS_TESTS = '1';
     
     var spawn = require('child_process').spawn;
     serverProcess = spawn('node', [CONFIG.serverFile], {

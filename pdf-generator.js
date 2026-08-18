@@ -12,19 +12,20 @@
  */
 
 var PDFDocument = require('pdfkit');
+var APP_VERSION = require('./package.json').version;
 
 // Couleurs du theme
 var COLORS = {
-  primary: '#1a1a2e',
-  accent: '#00cc6a',
-  red: '#cc3333',
-  orange: '#cc8800',
-  gray: '#666666',
-  lightGray: '#999999',
+  primary: '#172426',
+  accent: '#18794e',
+  red: '#b84038',
+  orange: '#a96310',
+  gray: '#5b6c6c',
+  lightGray: '#7d8c8a',
   white: '#ffffff',
   black: '#000000',
-  bgLight: '#f5f5fa',
-  border: '#ccccdd'
+  bgLight: '#edf2f1',
+  border: '#c9d5d3'
 };
 
 function getScoreColor(score) {
@@ -74,10 +75,10 @@ function genererRapportPDF(resultat, options) {
     size: 'A4',
     margins: { top: 50, bottom: 50, left: 50, right: 50 },
     info: {
-      Title: 'Rapport RSE/RSN - Analyse temps de conduite',
-      Author: 'RSE/RSN Calculator v7.8.0',
+      Title: 'FIMO Check - Rapport d analyse',
+      Author: 'FIMO Check v' + APP_VERSION,
       Subject: 'Conformite reglementaire transport routier',
-      Creator: 'RSE/RSN Calculator - Samir Medjaher'
+      Creator: 'FIMO Check - Samir Medjaher'
     }
   });
   
@@ -93,17 +94,16 @@ function genererRapportPDF(resultat, options) {
   var details = resultat.details_jours || [];
   var typeService = options.typeService || 'REGULIER';
   var pays = options.pays || 'FR';
+  var mission = resultat.mission || {};
   
   // ========================================
   // EN-TETE
   // ========================================
   doc.fontSize(22).font('Helvetica-Bold').fillColor(COLORS.primary);
-  doc.text('RAPPORT D\'ANALYSE RSE/RSN', 50, 50, { align: 'center', width: pageWidth });
-  
-  doc.fontSize(11).font('Helvetica').fillColor(COLORS.gray);
-  doc.text('Conformite temps de conduite - Transport routier de personnes', 50, 78, { align: 'center', width: pageWidth });
-  
-  doc.moveDown(0.5);
+  doc.text('FIMO CHECK', 50, 50, { align: 'center', width: pageWidth });
+  doc.fontSize(10).font('Helvetica').fillColor(COLORS.gray);
+  doc.text('Rapport d analyse des temps de conduite et de repos', 50, 78, { align: 'center', width: pageWidth });
+  doc.y = 96;
   drawHorizontalLine(doc, doc.y, pageWidth);
   doc.moveDown(0.5);
   
@@ -115,7 +115,10 @@ function genererRapportPDF(resultat, options) {
   doc.text('Date du rapport : ' + dateRapport + ' a ' + heureRapport, 50, doc.y);
   doc.text('Periode analysee : ' + (periode || 'Non specifiee'), 50, doc.y + 2);
   doc.text('Type de service : ' + typeService + ' | Pays : ' + pays + ' | Equipage : ' + equipage, 50, doc.y + 2);
-  doc.text('Jours analyses : ' + details.length + ' | Generateur : RSE/RSN Calculator v7.8.0', 50, doc.y + 2);
+  doc.text('Jours analyses : ' + details.length + ' | FIMO Check v' + APP_VERSION, 50, doc.y + 2);
+  if (mission.reference || mission.site || mission.objet) {
+    doc.text('Mission : ' + [mission.reference, mission.objet, mission.site].filter(Boolean).join(' | '), 50, doc.y + 2);
+  }
   
   doc.moveDown(1);
   
@@ -428,7 +431,7 @@ function genererRapportPDF(resultat, options) {
   doc.moveDown(0.3);
   
   doc.fontSize(7).font('Helvetica-Oblique').fillColor(COLORS.lightGray);
-  doc.text('Ce rapport est genere automatiquement par RSE/RSN Calculator v7.8.0.', 50, doc.y, { align: 'center', width: pageWidth });
+  doc.text('Rapport genere par FIMO Check v' + APP_VERSION + '.', 50, doc.y, { align: 'center', width: pageWidth });
   doc.text('Il ne constitue pas un document officiel et ne remplace pas l\'avis d\'un expert en reglementation sociale.', 50, doc.y + 1, { align: 'center', width: pageWidth });
   doc.text('Auteur : Samir Medjaher | https://rse-rsn-calculator.onrender.com', 50, doc.y + 1, { align: 'center', width: pageWidth });
   

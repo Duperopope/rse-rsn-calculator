@@ -6,6 +6,7 @@ import { SanctionTable } from './SanctionTable.jsx';
 // import { FixEnginePanel } from './FixEnginePanel.jsx';
 import { TrackingDashboard } from './TrackingDashboard.jsx';
 import { CalendrierSynthese } from './CalendrierSynthese.jsx';
+import { ActionPlan } from './ActionPlan.jsx';
 import styles from './ResultPanel.module.css';
 
 /**
@@ -72,17 +73,19 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
   const tracking = resultat.tracking || null;
     const fixEngine = resultat._fix_engine || null;
   const periode = resultat.periode || '';
+  const mission = resultat.mission || {};
 
   function getScoreColor() {
-    if (score >= 90) return 'var(--accent-green, #00ff88)';
-    if (score >= 70) return 'var(--accent-orange, #ffaa00)';
-    return 'var(--accent-red, #ff4444)';
+    if (infractions.some(i => String(i.classe || '').includes('5e'))) return 'var(--accent-red, #ff4444)';
+    if (infractions.length > 0 || avertissements.length > 0) return 'var(--accent-orange, #ffaa00)';
+    return 'var(--accent-green, #00ff88)';
   }
 
   function getScoreLabel() {
-    if (score >= 90) return 'Conforme';
-    if (score >= 70) return 'Attention';
-    return 'Non conforme';
+    if (infractions.some(i => String(i.classe || '').includes('5e'))) return 'Service à bloquer et corriger';
+    if (infractions.length > 0) return 'Service à corriger';
+    if (avertissements.length > 0) return 'Points à confirmer';
+    return 'Aucun écart détecté';
   }
 
   return (
@@ -97,7 +100,7 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
         <div className={styles.scoreMeta}>
           <span className={styles.scoreLabel} style={{ color: getScoreColor() }}>{getScoreLabel()}</span>
           {amende > 0 ? (
-            <span className={styles.amende}>Amende estimee : {amende.toLocaleString('fr-FR')} {EURO}</span>
+            <span className={styles.amende}>Exposition indicative : {amende.toLocaleString('fr-FR')} {EURO}</span>
           ) : null}
           <span className={styles.scoreSummary}>
             {infractions.length} infraction(s), {avertissements.length} avertissement(s)
@@ -106,9 +109,20 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
             <span className={styles.equipageBadge}>Double equipage (Art.8 par.5)</span>
           ) : null}
           {periode ? <span className={styles.periode}>Periode : {periode}</span> : null}
+          <span className={styles.legalCaveat}>Simulation de planning — les fichiers tachygraphe et l’analyse du responsable transport font foi.</span>
           </div>
       </div>
       )}
+
+      {(mission.reference || mission.site || mission.objet) ? (
+        <div className={styles.missionSummary}>
+          <span>Mission</span>
+          <strong>{mission.reference || 'Sans référence'}</strong>
+          <small>{[mission.objet, mission.site].filter(Boolean).join(' · ')}</small>
+        </div>
+      ) : null}
+
+      <ActionPlan infractions={infractions} avertissements={avertissements} />
 
       {/* Statistiques globales */}
       {stats.conduite_totale_h ? (
