@@ -30,8 +30,8 @@ son retour arrière sont documentés.
 | Tachygraphe | Import DDD/C1B/V1B avant connecteurs matériels | Corpus anonymisé, signatures et comparaison tierce | Réception chiffrée testée ; décodage à faire |
 | Matériel | Lecteurs et téléchargement distant compatibles | Matrice VDO/Stoneridge/Actia sur appareils réels | Bloqué par matériel |
 | Production | Déploiement persistant, sauvegardé et réversible | Test de restauration, supervision et rollback | Image et restauration testées ; hébergement public à qualifier |
-| Économie | Gratuit utile, revenus non invasifs et traçables | Coûts/recettes réels, politique publique | Hypothèse |
-| Communication | Aucune promesse supérieure aux preuves | Dossier de preuves relu avant publication | À faire |
+| Économie | Gratuit utile, revenus non invasifs et traçables | Coûts/recettes réels, politique publique | Modèle documenté ; aucune recette observée |
+| Communication | Aucune promesse supérieure aux preuves | Dossier de preuves relu avant publication | Matrice et brouillon préparés ; non publiés |
 
 ## Portes obligatoires
 
