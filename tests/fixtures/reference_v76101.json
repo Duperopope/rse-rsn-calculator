@@ -15,9 +15,9 @@
     "infractions_exact": 25,
     "infractions_min": 22,
     "infractions_max": 28,
-    "amende_exact": 8625,
-    "amende_min": 7500,
-    "amende_max": 10000
+    "amende_exact": 7470,
+    "amende_min": 7470,
+    "amende_max": 7470
   },
   "fix_engine": {
     "version_attendue": "7.6.10.2",
@@ -25,8 +25,8 @@
     "originales_max": 105,
     "retirees_min": 60,
     "classes": {
-      "5e": 2,
-      "4e": 23
+      "5e": 3,
+      "4e": 22
     }
   }
 }

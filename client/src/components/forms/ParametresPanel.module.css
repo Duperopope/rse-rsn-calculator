@@ -3,7 +3,7 @@
 .panel {
   background: var(--bg-card, #151A21);
   border: 1px solid var(--border, #2D3748);
-  border-radius: 14px;
+  border-radius: 9px;
   overflow: hidden;
   padding: 8px 16px;
   transition: border-color 0.2s;
@@ -32,10 +32,15 @@
 }
 
 .chipsRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
   align-items: center;
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--bg-card);
 }
 
 /* Chips de base */
@@ -43,13 +48,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 14px;
-  border-radius: 20px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 9px 12px;
+  border-radius: 0;
   font-size: 13px;
   font-weight: 500;
-  background: var(--bg-elevated, #1E2433);
+  background: transparent;
   color: var(--text, #E2E8F0);
-  border: 1px solid var(--border, #2D3748);
+  border: 0;
+  border-right: 1px solid var(--border);
   transition: all 0.15s;
 }
 
@@ -58,13 +66,16 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  border-radius: 9999px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 9px 12px;
+  border-radius: 0;
   font-size: 14px;
   font-weight: 600;
-  background-color: #2D3748;
-  color: #E2E8F0;
-  border: none;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+  color: var(--accent);
+  border: 0;
+  border-right: 1px solid var(--border);
 }
 .chipIcon {
   font-size: 13px;
@@ -73,10 +84,21 @@
 
 /* Chip mode = accent leger */
 .chipMode {
-  background: var(--success-dim, #064E3B);
-  color: var(--success, #10B981);
-  border-color: var(--success, #10B981);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 9px 12px;
+  background: transparent;
+  color: var(--text, #172426);
+  border: 0;
 }
+.chipText { display: flex; flex: 1; flex-direction: column; min-width: 0; text-align: left; line-height: 1.15; }
+.chipKey { color: var(--text-secondary); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+.chipValue { margin-top: 3px; color: var(--text); font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chipService .chipValue { color: var(--accent); }
+.flag { font-size: 16px; line-height: 1; }
 
 /* Chevron SVG */
 .chevron {
@@ -125,7 +147,7 @@
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   padding: 8px 10px;
   font-size: 13px;
   cursor: pointer;
@@ -147,7 +169,7 @@
 .toggle {
   display: flex;
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: 9px;
   padding: 3px;
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   gap: 2px;
@@ -160,7 +182,7 @@
   justify-content: center;
   gap: 4px;
   padding: 7px 6px;
-  border-radius: var(--md-radius-sm, 8px);
+  border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
   background: transparent;
@@ -174,7 +196,7 @@
 @media (hover: hover) and (pointer: fine) {
   .toggleBtn:hover {
     color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
-    background: rgba(255, 255, 255, 0.04);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
   }
 }
 
@@ -185,14 +207,14 @@
   justify-content: center;
   gap: 4px;
   padding: 7px 6px;
-  border-radius: var(--md-radius-sm, 8px);
+  border-radius: 6px;
   font-size: 13px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
+  background: var(--accent, #136f6c);
   color: white;
   border: none;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
+  box-shadow: none;
 }
 
 .toggleIcon {
@@ -207,9 +229,9 @@
   gap: 6px;
   margin-top: 10px;
   padding: 8px 12px;
-  background: rgba(0, 212, 255, 0.06);
-  border: 1px solid rgba(0, 212, 255, 0.12);
-  border-radius: var(--md-radius-md, 12px);
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: var(--control-radius, 7px);
   font-size: 12px;
   color: var(--text-secondary, #aaa);
   line-height: 1.35;
@@ -225,6 +247,10 @@
   .chip, .chipMode { font-size: 12px; padding: 4px 8px;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
   background: var(--accent-glow, rgba(96, 165, 250, 0.15));
   border: 1px solid rgba(0, 212, 255, 0.4);
+}
+
+[data-theme='dark'] .chipService {
+  color: #d7f0ed;
 }
   .chipService { font-size: 12px; padding: 4px 10px;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
 }
@@ -253,10 +279,34 @@
 
 /* min-font-mobile-fix-v2 */
 @media (max-width: 480px) {
-  .chip, .chipService, .chipMode { font-size: 14px; min-height: 34px;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
-  background: var(--accent-glow, rgba(96, 165, 250, 0.15));
-  border: 1px solid rgba(0, 212, 255, 0.4);
-}
-  .chipIcon { font-size: 14px; }
+  .panel { padding: 5px; }
+  .summaryBtn { padding: 4px; }
+  .chipsRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+    gap: 0;
+  }
+  .chip, .chipService, .chipMode {
+    min-height: 54px;
+    padding: 8px 9px;
+    font-size: 13px;
+    color: var(--text, #172426);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    justify-content: flex-start;
+  }
+  .chipService {
+    color: var(--accent, #136f6c);
+    background: color-mix(in srgb, var(--accent) 9%, var(--bg-card));
+    border-right: 1px solid var(--border);
+  }
+  .chip:nth-child(3), .chipMode { border-bottom: 0; }
+  .chip:nth-child(2), .chipMode { border-right: 0; }
+  .chipKey { font-size: 9px; }
+  .chipValue { font-size: 12px; }
+  .chipIcon, .flag { display: none; }
   .label { font-size: 13px; }
 }

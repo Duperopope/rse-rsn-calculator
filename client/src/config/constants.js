@@ -7,20 +7,20 @@ export const API_URL = '/api';
 
 // Nom de l'application (la version est recuperee du backend via /api/health)
 export const APP_NAME = 'FIMO Check';
-export const APP_SUBTITLE = 'Driver CPC Compliance Tool';
+export const APP_SUBTITLE = 'Préparer un service conforme avant le départ';
 
 // Symbole euro (evite problemes encodage)
 export const EURO = '€';
 
 // Types d'activite tachygraphe
 export const TYPES_ACTIVITE = [
-  { code: 'C', label: 'Conduite', couleur: '#4CAF50', icone: 'conduite' },
-  { code: 'T', label: 'Autre tache', couleur: '#2196F3', icone: 'tache' },
-  { code: 'D', label: 'Disponibilite', couleur: '#FF9800', icone: 'disponibilite' },
-  { code: 'P', label: 'Pause / Repos', couleur: '#9C27B0', icone: 'pause' },
-  { code: 'R', label: 'Repos', couleur: '#607D8B', icone: 'repos' },
-  { code: 'O', label: 'Hors champ (OUT)', couleur: '#795548', icone: 'out' },
-  { code: 'F', label: 'Ferry / Train', couleur: '#00BCD4', icone: 'ferry' }
+  { code: 'C', label: 'Conduite', couleur: '#18794e', icone: 'conduite' },
+  { code: 'T', label: 'Autre tache', couleur: '#356a84', icone: 'tache' },
+  { code: 'D', label: 'Disponibilite', couleur: '#a96310', icone: 'disponibilite' },
+  { code: 'P', label: 'Pause / Repos', couleur: '#735a86', icone: 'pause' },
+  { code: 'R', label: 'Repos', couleur: '#607372', icone: 'repos' },
+  { code: 'O', label: 'Hors champ (OUT)', couleur: '#765f51', icone: 'out' },
+  { code: 'F', label: 'Ferry / Train', couleur: '#277b82', icone: 'ferry' }
 ];
 
 // Types de service (CE 561/2006 Art.4)
@@ -104,34 +104,34 @@ export const LIMITES = {
 // Couleurs du theme (utilisees par les composants)
 export const THEME_COLORS = {
   dark: {
-    bg: '#0a0a0f',
-    bgCard: '#12121a',
-    bgInput: '#1a1a2e',
-    text: '#e0e0e0',
-    textSecondary: '#888',
-    border: '#2a2a3e',
-    accent: '#60a5fa',
-    accentGreen: '#00ff88',
-    accentRed: '#ff4444',
-    accentOrange: '#ffaa00',
-    accentPurple: '#aa44ff',
-    gradientStart: '#667eea',
-    gradientEnd: '#764ba2'
+    bg: '#101719',
+    bgCard: '#172124',
+    bgInput: '#1d2a2e',
+    text: '#eef5f3',
+    textSecondary: '#a8b8b5',
+    border: '#33474a',
+    accent: '#56b3ad',
+    accentGreen: '#52c98b',
+    accentRed: '#f07067',
+    accentOrange: '#efa74a',
+    accentPurple: '#8ea8c7',
+    gradientStart: '#166b69',
+    gradientEnd: '#124f58'
   },
   light: {
-    bg: '#f5f5f5',
-    bgCard: '#ffffff',
-    bgInput: '#f0f0f0',
-    text: '#1a1a2e',
-    textSecondary: '#666',
-    border: '#ddd',
-    accent: '#0088cc',
-    accentGreen: '#00aa55',
-    accentRed: '#cc0000',
-    accentOrange: '#cc8800',
-    accentPurple: '#7733cc',
-    gradientStart: '#667eea',
-    gradientEnd: '#764ba2'
+    bg: '#edf2f1',
+    bgCard: '#fbfdfc',
+    bgInput: '#f1f5f4',
+    text: '#172426',
+    textSecondary: '#5b6c6c',
+    border: '#c9d5d3',
+    accent: '#136f6c',
+    accentGreen: '#18794e',
+    accentRed: '#b84038',
+    accentOrange: '#a96310',
+    accentPurple: '#49667e',
+    gradientStart: '#136f6c',
+    gradientEnd: '#0f555c'
   }
 };
 
@@ -140,5 +140,3 @@ export const STORAGE_KEY = 'rse_rsn_historique';
 
 // Nombre max d'entrees historique
 export const HISTORIQUE_MAX = 50;
-
-

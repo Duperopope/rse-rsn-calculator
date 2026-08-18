@@ -1,0 +1,200 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(8, 18, 19, 0.7);
+  backdrop-filter: blur(5px);
+}
+.dialog {
+  position: relative;
+  width: min(650px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 25px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  box-shadow: 0 30px 90px rgba(5, 20, 21, 0.3);
+}
+.close {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font-size: 25px;
+  cursor: pointer;
+}
+.close:hover { border-color: var(--accent); color: var(--accent); }
+.close:focus-visible,
+.dialog button:focus-visible,
+.dialog input:focus-visible,
+.dialog select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  outline-offset: 2px;
+}
+.kicker {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.dialog h2 {
+  margin: 4px 0;
+}
+.dialog > p {
+  margin: 5px 0 17px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.metrics article {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent) 4%, var(--bg-card));
+}
+.metrics strong {
+  font-size: 17px;
+}
+.metrics span {
+  color: var(--text-secondary);
+  font-size: 9px;
+  line-height: 1.35;
+}
+.dialog form {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr auto;
+  align-items: end;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 750;
+}
+.dialog input,
+.dialog select {
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+.dialog form button,
+.dialog aside button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+}
+.dialog aside {
+  display: grid;
+  gap: 7px;
+  margin: 12px 0;
+  padding: 12px;
+  border-left: 3px solid var(--accent-orange, #a96310);
+  background: color-mix(
+    in srgb,
+    var(--accent-orange, #a96310) 6%,
+    var(--bg-card)
+  );
+  font-size: 12px;
+}
+.dialog aside code {
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+.list {
+  margin-top: 15px;
+  border-top: 1px solid var(--border);
+}
+.list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.list article > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.list span {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+.row {
+  display: flex;
+  gap: 6px;
+}
+.row button {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text);
+  font-size: 10px;
+}
+.error {
+  color: var(--accent-red, #b84038);
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .backdrop {
+    align-items: end;
+    padding: 0;
+  }
+  .dialog {
+    width: 100%;
+    max-height: 92dvh;
+    padding: 22px 18px max(22px, env(safe-area-inset-bottom));
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 16px 16px 0 0;
+  }
+  .dialog form {
+    grid-template-columns: 1fr;
+  }
+  .list article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .row {
+    width: 100%;
+  }
+  .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+}

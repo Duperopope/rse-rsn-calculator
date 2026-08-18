@@ -1,6 +1,7 @@
 import React from 'react';
 import Calculator from './pages/Calculator.jsx';
 import './styles/global.css';
+import { AuthGate } from './components/auth/AuthGate.jsx';
 
 /**
  * FIMO Check v7.11.0
@@ -17,5 +18,5 @@ import './styles/global.css';
  * @author Samir Medjaher
  */
 export default function App() {
-  return <Calculator />;
+  return <AuthGate><Calculator /></AuthGate>;
 }

@@ -136,10 +136,15 @@ function phase3(detailsJours) {
     // Derog conduite (>9h conduite pure)
     var jc = sem.jours.filter(function(x) { return x.conduite_h > SEUILS.CONDUITE_JOURNALIERE_MAX_H; })
       .sort(function(a, b) { return (a.conduite_h - SEUILS.CONDUITE_JOURNALIERE_MAX_H) - (b.conduite_h - SEUILS.CONDUITE_JOURNALIERE_MAX_H); });
+    // Seules les journees entre 9 h et 10 h peuvent consommer l'une des deux
+    // prolongations hebdomadaires. Une journee au-dela de 10 h reste toujours
+    // en infraction et ne doit jamais etre "couverte" par cette derogation.
+    var jcEligibles = jc.filter(function(x) { return x.conduite_h <= 10; });
+    var jcHorsLimite = jc.filter(function(x) { return x.conduite_h > 10; });
     derogConduite[wk] = {
       total: jc.length,
-      couverts: jc.slice(0, SEUILS.CONDUITE_DEROG_MAX_PAR_SEMAINE).map(function(x) { return x.date; }),
-      enInfraction: jc.slice(SEUILS.CONDUITE_DEROG_MAX_PAR_SEMAINE).map(function(x) { return x.date; })
+      couverts: jcEligibles.slice(0, SEUILS.CONDUITE_DEROG_MAX_PAR_SEMAINE).map(function(x) { return x.date; }),
+      enInfraction: jcHorsLimite.concat(jcEligibles.slice(SEUILS.CONDUITE_DEROG_MAX_PAR_SEMAINE)).map(function(x) { return x.date; })
     };
 
     // Derog travail (>10h total)
@@ -289,12 +294,12 @@ function phase5(semaines) {
     var cH = round1(semaines[keys[i]].conduite_totale_h);
     if (cH > SEUILS.CONDUITE_HEBDO_MAX_H) {
       var dep = round1(cH - SEUILS.CONDUITE_HEBDO_MAX_H);
-      var cls = dep > 14 ? '5e classe' : '4e classe';
+      var cls = dep >= 14 ? '5e classe' : '4e classe';
       result.push({
         regle: 'Conduite hebdomadaire (CE 561/2006 Art.6 par.2)',
         limite: SEUILS.CONDUITE_HEBDO_MAX_H + 'h', constate: cH + 'h', depassement: dep + 'h', classe: cls,
         amende: cls === '5e classe' ?
-          { amende_forfaitaire: 1500, amende_minoree: null, amende_majoree: null, amende_max: 3000, amende_recidive: null, classe: cls, texte: '1500 EUR' } :
+          { amende_forfaitaire: null, amende_minoree: null, amende_majoree: null, amende_max: 1500, amende_recidive: 3000, classe: cls, texte: "jusqu'a 1500 EUR, 3000 EUR en recidive" } :
           { amende_forfaitaire: 135, amende_minoree: 90, amende_majoree: 375, amende_max: 750, amende_recidive: null, classe: cls, texte: '135 EUR' },
         url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32006R0561',
         ref_legale: 'CE 561/2006 Art.6', _source: 'fix-engine-v7', _semaine: keys[i]
@@ -306,12 +311,12 @@ function phase5(semaines) {
     var bi = round1(semaines[keys[i]].conduite_totale_h + semaines[keys[i+1]].conduite_totale_h);
     if (bi > SEUILS.CONDUITE_BIHEBDO_MAX_H) {
       var dep = round1(bi - SEUILS.CONDUITE_BIHEBDO_MAX_H);
-      var cls = dep > 22.5 ? '5e classe' : '4e classe';
+      var cls = dep >= 22.5 ? '5e classe' : '4e classe';
       result.push({
         regle: 'Conduite bi-hebdomadaire (CE 561/2006 Art.6 par.3)',
         limite: SEUILS.CONDUITE_BIHEBDO_MAX_H + 'h', constate: bi + 'h', depassement: dep + 'h', classe: cls,
         amende: cls === '5e classe' ?
-          { amende_forfaitaire: 1500, amende_minoree: null, amende_majoree: null, amende_max: 3000, amende_recidive: null, classe: cls, texte: '1500 EUR' } :
+          { amende_forfaitaire: null, amende_minoree: null, amende_majoree: null, amende_max: 1500, amende_recidive: 3000, classe: cls, texte: "jusqu'a 1500 EUR, 3000 EUR en recidive" } :
           { amende_forfaitaire: 135, amende_minoree: 90, amende_majoree: 375, amende_max: 750, amende_recidive: null, classe: cls, texte: '135 EUR' },
         url_legale: 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32006R0561',
         ref_legale: 'CE 561/2006 Art.6', _source: 'fix-engine-v7', _semaines: keys[i] + '+' + keys[i+1]
@@ -329,13 +334,17 @@ function phase6(infractions) {
   for (var i = 0; i < infractions.length; i++) {
     var a = infractions[i].amende;
     if (a) {
-      ff += parseNum(a.amende_forfaitaire);
+      ff += parseNum(a.amende_forfaitaire !== null ? a.amende_forfaitaire : a.amende_max);
       fm += parseNum(a.amende_majoree);
       if ((infractions[i].classe || '').indexOf('5e') >= 0) c5++; else c4++;
     }
   }
-  var est = fm > 0 ? fm : ff;
-  log('P6', 'Forfaitaire=' + ff + ' Majoree=' + fm + ' Estimee=' + est);
+  // Estimation homogene : forfaitaire de 4e classe (135 EUR) et maximum
+  // encouru de 5e classe (pas d'amende forfaitaire standard a afficher).
+  // Ne jamais substituer le total des seules amendes majorees de 4e classe :
+  // cela faisait disparaitre toutes les sanctions de 5e classe du total.
+  var est = ff;
+  log('P6', 'Reference=' + ff + ' Majoree4e=' + fm + ' Estimee=' + est);
   return { totalForfaitaire: ff, totalMajoree: fm, amendeEstimee: est, count4e: c4, count5e: c5 };
 }
 
@@ -459,6 +468,8 @@ function corrigerResultat(resultat) {
           // Si l'une des dates est un jour de repos complet, c'est un overlap
           if ((joursRepos[dateDebut] || joursRepos[dateFin]) && parseNum(infr.constate) >= 7) {
             p4bRemoved++;
+            infr._retire = true;
+            infr._raison = 'repos_hebdo_overlap';
             log('P4b', 'Repos hebdo overlap: ' + infr.constate);
             continue; // Ne pas garder
           }
@@ -478,6 +489,15 @@ function corrigerResultat(resultat) {
     log('MAIN', 'DONE orig=' + resultat.infractions.length + ' ret=' + (p4.retirees.length + p4bRemoved) + ' cons=' + p4bFiltered.length + ' hebdo=' + hebdo.length + ' final=' + finales.length + ' amende=' + amendes.amendeEstimee + ' score=' + score);
 
     resultat.infractions = finales;
+    // Garder les vues par jour coherentes avec la liste finale. Les cartes,
+    // badges de calendrier et compteurs ne doivent jamais afficher les
+    // infractions que le moteur de correction a retirees.
+    for (var d = 0; d < resultat.details_jours.length; d++) {
+      var jourDetail = resultat.details_jours[d];
+      if (Array.isArray(jourDetail.infractions)) {
+        jourDetail.infractions = jourDetail.infractions.filter(function(inf) { return !inf._retire; });
+      }
+    }
     resultat.amende_estimee = amendes.amendeEstimee;
     resultat.score = score;
     resultat._fix_engine = {

@@ -3,10 +3,10 @@
 .jour {
   background: var(--bg-card, var(--md-surface, #0F172A));
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
-  border-radius: var(--md-radius-lg, 16px);
+  border-radius: 10px;
   padding: 20px;
   animation: fadeIn 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(23, 36, 38, 0.07);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -29,12 +29,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--gradient-start, #667eea), var(--gradient-end, #764ba2));
+  background: var(--accent, #136f6c);
   color: #fff;
   font-weight: 700;
   font-size: 13px;
   padding: 4px 12px;
-  border-radius: var(--md-radius-lg, 16px);
+  border-radius: 6px;
   white-space: nowrap;
 }
 
@@ -42,7 +42,7 @@
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   padding: 8px 12px;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -58,7 +58,7 @@
 .actionBtn, .removeBtn {
   width: 34px;
   height: 34px;
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,8 +100,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  border-radius: var(--md-radius-md, 12px);
+  padding: 10px 14px;
+  border-radius: var(--control-radius, 7px);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -120,15 +120,15 @@
   .templateCard:hover {
     border-color: var(--accent, #00d4ff);
     color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
-    background: rgba(0, 212, 255, 0.06);
+    background: color-mix(in srgb, var(--accent) 7%, var(--bg-card));
   }
 }
 
 .templateCardActive {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
-  border-color: var(--gradient-start, #667eea);
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-card));
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .templateIcon {
@@ -147,7 +147,8 @@
 }
 
 .activitesHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: 140px 95px 20px 95px 56px 34px;
   align-items: center;
   gap: 8px;
   padding: 0 4px 6px;
@@ -162,17 +163,15 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.colHead:first-child { flex: 0 0 140px; }
-.colHead:nth-child(2), .colHead:nth-child(4) { width: 95px; text-align: center; }
-.colHead:nth-child(3) { width: 20px; }
-.colHead:nth-child(5) { flex: 1; }
+.colHead:nth-child(2), .colHead:nth-child(4) { text-align: center; }
 
 .activiteLine {
-  display: flex;
+  display: grid;
+  grid-template-columns: 140px 95px 20px 95px 56px 34px;
   align-items: center;
   gap: 8px;
   padding: 8px 4px;
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: 6px;
   transition: background 0.15s;
 }
 @media (hover: hover) {
@@ -185,7 +184,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   border: 1px solid;
   cursor: pointer;
   transition: all 0.2s;
@@ -207,13 +206,15 @@
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   padding: 10px 12px;
   font-size: 14px;
   width: 95px;
   font-variant-numeric: tabular-nums;
   text-align: center;
   transition: border-color 0.2s;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  letter-spacing: .03em;
 }
 .timeInput:focus { border-color: var(--accent, #00d4ff); outline: none; }
 
@@ -237,9 +238,9 @@
   width: 28px;
   height: 28px;
   border-radius: var(--md-radius-sm, 8px);
-  background: rgba(255, 68, 68, 0.08);
-  border: 1px solid rgba(255, 68, 68, 0.15);
-  color: #ff6b6b;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent-red) 30%, var(--border));
+  color: var(--accent-red);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -253,7 +254,7 @@
     color: var(--md-error, #ef4444);
     background: rgba(255, 68, 68, 0.18);
     border-color: rgba(255, 68, 68, 0.35);
-    transform: scale(1.08);
+    transform: translateY(-1px);
   }
 }
 .deleteActBtn:disabled {
@@ -281,7 +282,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -313,7 +314,7 @@
   margin-top: 4px;
   width: 100%;
   padding: 12px;
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   background: transparent;
   border: 2px dashed var(--border, var(--md-outline-variant, #2a2a4e));
   color: var(--text-secondary, #888);
@@ -326,7 +327,7 @@
   .addActBtn:hover {
     border-color: var(--accent, #00d4ff);
     color: var(--accent, #00d4ff);
-    background: rgba(0, 212, 255, 0.04);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
   }
 }
 
@@ -337,9 +338,9 @@
   justify-content: center;
   gap: 16px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: var(--md-radius-md, 12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-input);
+  border-radius: var(--control-radius, 7px);
+  border: 1px solid var(--border);
 }
 
 .resumeItem {
@@ -399,12 +400,13 @@
   .activitesHeader { display: none; }
 
   .activiteLine {
+    display: flex;
     flex-wrap: nowrap;
     gap: 6px;
     padding: 8px 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: var(--md-radius-md, 12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-input);
+    border-radius: var(--control-radius, 7px);
+    border: 1px solid var(--border);
     margin-bottom: 4px;
     align-items: center;
   }
@@ -412,9 +414,9 @@
   .activiteTypeBtn { flex: 0 0 auto; min-height: 44px; padding: 6px 10px; }
   .activiteTypeName { display: none; }
 
-  .timeInput { width: 72px; flex: 0 0 72px; min-height: 36px; font-size: 13px; padding: 6px 5px; border-radius: var(--md-radius-sm, 8px); border: 1px solid rgba(255,255,255,0.1); }
+  .timeInput { width: 72px; flex: 0 0 72px; min-height: 36px; font-size: 13px; padding: 6px 5px; border-radius: var(--md-radius-sm, 8px); border: 1px solid var(--border); }
 
-  .fleche { width: auto; font-size: 13px; color: rgba(255,255,255,0.5); }
+  .fleche { width: auto; font-size: 13px; color: var(--text-secondary); }
 
   .dureeLabel { width: auto; min-width: auto; text-align: center; font-size: 12px; background: none; padding: 0; border-radius: 0; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; }
 
@@ -464,7 +466,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   font-size: 13px;
   font-weight: 600;
   transition: all 0.2s;
@@ -518,7 +520,7 @@
 .swipeWrapper {
   position: relative;
   overflow: hidden;
-  border-radius: var(--md-radius-md, 12px);
+  border-radius: var(--control-radius, 7px);
   margin-bottom: 2px;
 }
 

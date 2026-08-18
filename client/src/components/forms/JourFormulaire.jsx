@@ -178,7 +178,7 @@ function resumeJour(activites) {
 /* Composant carte template */
 function TemplateCard({ templateKey, template, selected, onClick }) {
   const iconeMap = { journeeType: 'C', journeeLongue: 'C', serviceNuit: 'T' };
-  const couleurMap = { journeeType: '#4CAF50', journeeLongue: '#FF9800', serviceNuit: '#9C27B0' };
+  const couleurMap = { journeeType: '#136f6c', journeeLongue: '#136f6c', serviceNuit: '#136f6c' };
 
   return (
     <button
@@ -259,14 +259,22 @@ function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTy
           </button>
 
           <input
-            type="time"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-2][0-9]:[0-5][0-9]"
+            maxLength="5"
+            aria-label={'Heure de début, ' + typeInfo.label}
             className={styles.timeInput}
             value={act.debut}
             onChange={(e) => updateActivite(actIdx, 'debut', e.target.value)}
           />
           <span className={styles.fleche}>&rarr;</span>
           <input
-            type="time"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-2][0-9]:[0-5][0-9]"
+            maxLength="5"
+            aria-label={'Heure de fin, ' + typeInfo.label}
             className={styles.timeInput}
             value={act.fin}
             onChange={(e) => updateActivite(actIdx, 'fin', e.target.value)}

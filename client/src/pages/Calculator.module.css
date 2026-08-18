@@ -1,15 +1,41 @@
-.app { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg, #0B0D10); }
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--border) 28%, transparent) 1px, transparent 1px),
+    var(--bg, #edf2f1);
+  background-size: 32px 100%;
+}
 
 .main {
   flex: 1;
-  max-width: 900px;
+  max-width: 1040px;
   width: 100%;
   margin: 0 auto;
-  padding: 16px 20px 100px;
+  padding: 24px 24px 100px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
+
+.productBrief {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 24px;
+  padding: 18px 20px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: 10px;
+}
+.productEyebrow { margin: 0 0 5px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.productTitle { margin: 0; color: var(--text); font-size: 18px; line-height: 1.25; }
+.productText { margin: 6px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.workflow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; align-self: center; }
+.workflowStep { min-width: 0; padding: 9px 8px; border-left: 2px solid var(--border); }
+.workflowStep:first-child { border-left-color: var(--accent); }
+.workflowNumber { display: block; color: var(--accent); font: 700 11px/1 ui-monospace, monospace; }
+.workflowLabel { display: block; margin-top: 5px; color: var(--text); font-size: 12px; font-weight: 650; }
 
 .inputSection { display: flex; flex-direction: column; gap: 20px; }
 .formulaire { display: flex; flex-direction: column; gap: 20px; }
@@ -18,7 +44,7 @@
 
 .offlineMsg { font-size: 13px; color: var(--accent-red, var(--md-error, #ef4444)); text-align: center; margin: 0; }
 .erreur { color: var(--accent-red, var(--md-error, #ef4444)); font-size: 14px; margin: 0; }
-.equipageInfo { text-align: center; color: #00d4ff; font-size: 14px; margin-top: 0.5rem; }
+.equipageInfo { text-align: center; color: var(--accent); font-size: 14px; margin-top: 0.5rem; }
 
 /* === Historique === */
 .historique { display: flex; flex-direction: column; gap: 10px; }
@@ -57,19 +83,19 @@
 /* === Onglets jour (dashboard) === */
 .realtimeSticky {
   display: flex; flex-direction: column; gap: 14px;
-  position: sticky; top: var(--header-height, 70px); z-index: 50;
+  position: relative; z-index: 1;
   background: var(--bg, #0B0D10);
   padding: 14px 20px 10px;
   border-bottom: 2px solid var(--border, #2D3748);
   margin: 0 -20px;
-  border-radius: 0 0 20px 20px;
+  border-radius: 0;
 }
 
 /* Bouton expand/collapse — cache sur desktop */
 .expandToggle {
   display: none;
   width: 100%; padding: 10px; border: none; border-radius: 10px;
-  background: var(--bg-elevated, #1E2433); color: var(--text, #E2E8F0);
+  background: var(--bg-card, #fbfdfc); color: var(--text, #172426);
   font-size: 13px; font-weight: 500; cursor: pointer;
   transition: background 0.2s;
   border: 1px solid var(--border, #2D3748);
@@ -83,7 +109,13 @@
 @media (max-width: 768px) {
   .main { padding: 12px; gap: 14px; }
 
+  .productBrief { grid-template-columns: 1fr; gap: 12px; padding: 15px; }
+  .productTitle { font-size: 16px; }
+  .productText { display: none; }
+  .workflow { width: 100%; }
+
   .realtimeSticky {
+    position: sticky; z-index: 50;
     padding: 8px 12px; top: var(--header-height, 70px);
     margin: 0 -12px;
     gap: 6px;
@@ -95,8 +127,7 @@
   }
 
   /* Montrer le bouton toggle */
-  .expandToggle { display: block;   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
-}
+  .expandToggle { display: block; color: var(--text, #172426); }
 
   /* Quand expanded, montrer tout */
   .dashExpanded .timelineWrap {
@@ -147,7 +178,7 @@
   flex-direction: column;
   align-items: center;
   padding: 8px 12px;
-  border-radius: 12px;
+  border-radius: var(--control-radius, 7px);
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary, #94A3B8);
@@ -176,19 +207,19 @@
 @media (hover: hover) and (pointer: fine) {
   .jourNavBtn:hover {
     color: var(--text-primary, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
-    background: rgba(255, 255, 255, 0.04);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
   }
 }
 
 /* Pressed state */
 .jourNavBtn:active {
-  background: rgba(0, 132, 255, 0.08);
+  background: color-mix(in srgb, var(--accent) 9%, var(--bg-card));
   transition: background 0.05s;
 }
 
 /* === Onglet actif === */
 .jourNavActive {
-  background: var(--bg-elevated, #1E2433);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
   color: var(--text, #E2E8F0);
   border: 1px solid var(--accent, #3B82F6);
   font-weight: 700;
@@ -203,7 +234,7 @@
   right: 10%;
   height: 3px;
   border-radius: 3px 3px 0 0;
-  background: #0084ff;
+  background: var(--accent);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -227,9 +258,9 @@
 .jourNav_danger { color: #e74c3c; }
 
 /* Statut sur onglet actif — garde le texte blanc, underline prend la couleur */
-.jourNavActive.jourNav_ok { color: #fff; }
-.jourNavActive.jourNav_warning { color: #fff; }
-.jourNavActive.jourNav_danger { color: #fff; }
+.jourNavActive.jourNav_ok { color: var(--text); }
+.jourNavActive.jourNav_warning { color: var(--text); }
+.jourNavActive.jourNav_danger { color: var(--text); }
 
 
 /* === Fleches scroll PC (masquees sur tactile) === */
@@ -239,7 +270,7 @@
   height: 44px;
   border: none;
   background: none;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--text-secondary);
   font-size: 18px;
   cursor: pointer;
   display: flex;
@@ -253,11 +284,11 @@
 }
 
 .jourNavArrow:hover {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--accent);
 }
 
 .jourNavArrow:active {
-  color: #0084ff;
+  color: var(--accent);
 }
 
 .jourNavArrowLeft { margin-right: 8px; }
@@ -292,15 +323,15 @@
 /* === Bouton + dans la barre === */
 @media (hover: hover) and (pointer: fine) {
   .jourNavAddInline:hover {
-    background: rgba(0, 132, 255, 0.08);
-    border-color: rgba(0, 132, 255, 0.5);
-    color: #0084ff;
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+    border-color: var(--accent);
+    color: var(--accent);
   }
 }
 
 .jourNavAddInline:active {
   transform: scale(0.92);
-  background: rgba(0, 132, 255, 0.12);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-card));
 }
 
 /* === Menu contextuel (dupliquer/supprimer) === */
@@ -342,8 +373,8 @@
 }
 
 .jourMenuDup {
-  background: rgba(0, 132, 255, 0.12);
-  color: #0084ff;
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
+  color: var(--accent);
 }
 
 .jourMenuDel {
@@ -352,7 +383,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .jourMenuDup:hover { background: rgba(0, 132, 255, 0.2); }
+  .jourMenuDup:hover { background: color-mix(in srgb, var(--accent) 16%, var(--bg-card)); }
   .jourMenuDel:hover { background: rgba(255, 68, 68, 0.2); }
 }
 

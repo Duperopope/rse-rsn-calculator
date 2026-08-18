@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { APP_NAME, APP_SUBTITLE } from '../../config/constants.js';
 import styles from './Header.module.css';
+import { AccountMenu } from '../auth/AccountMenu.jsx';
 
 /**
  * FIMO Check — Header v7.11.0
@@ -12,22 +13,16 @@ import styles from './Header.module.css';
 function IconLogo() {
   return (
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="18" cy="18" r="16" stroke="url(#logoGrad)" strokeWidth="2" />
-      <circle cx="18" cy="18" r="12.5" stroke="url(#logoGrad)" strokeWidth="0.5" opacity="0.3" />
-      <line x1="18" y1="6" x2="18" y2="8" stroke="url(#logoGrad)" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="18" y1="28" x2="18" y2="30" stroke="url(#logoGrad)" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="6" y1="18" x2="8" y2="18" stroke="url(#logoGrad)" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="28" y1="18" x2="30" y2="18" stroke="url(#logoGrad)" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M18 10 L18 18 L24 21" stroke="url(#logoGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="18" cy="18" r="16" stroke="var(--accent)" strokeWidth="2" />
+      <circle cx="18" cy="18" r="12.5" stroke="var(--accent)" strokeWidth="0.75" opacity="0.35" />
+      <line x1="18" y1="6" x2="18" y2="8" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="18" y1="28" x2="18" y2="30" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="6" y1="18" x2="8" y2="18" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="28" y1="18" x2="30" y2="18" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M18 10 L18 18 L24 21" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="27" cy="27" r="7" fill="var(--bg-card, #12121a)" />
       <circle cx="27" cy="27" r="6.5" stroke="#00ff88" strokeWidth="1.5" />
       <path d="M24 27 L26 29 L30.5 24.5" stroke="#00ff88" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <defs>
-        <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36">
-          <stop offset="0%" stopColor="var(--gradient-start, #667eea)" />
-          <stop offset="100%" stopColor="var(--gradient-end, #764ba2)" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }
@@ -135,7 +130,7 @@ export function Header({
           disabled={analyseDisabled || analyseEnCours}
         >
           <IconAnalyseDesktop />
-          <span>{analyseEnCours ? 'Analyse...' : 'Analyser la conformite'}</span>
+          <span>{analyseEnCours ? 'Vérification...' : 'Vérifier le service'}</span>
         </button>
         <button
           className={`${styles.histBtn} ${voirHistorique ? styles.histBtnActive : ''}`}
@@ -158,6 +153,7 @@ export function Header({
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         <button className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
       </div>
+      <div className={styles.accountSlot}><AccountMenu /></div>
     </header>
   );
 }

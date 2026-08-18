@@ -57,12 +57,12 @@ export function BottomBar({
         className={styles.item + ' ' + styles.itemPrimary + (analyseEnCours ? ' ' + styles.itemLoading : '')}
         onClick={handleAnalyse}
         disabled={analyseDisabled || analyseEnCours}
-        data-tour="analyser" aria-label="Analyser la conformite"
+        data-tour="analyser" aria-label="Vérifier le service"
       >
         <span className={styles.iconWrap}>
           <IconAnalyse />
         </span>
-        <span className={styles.label}>{analyseEnCours ? 'Analyse...' : 'Analyser'}</span>
+        <span className={styles.label}>{analyseEnCours ? 'Vérification...' : 'Vérifier'}</span>
       </button>
 
       <button

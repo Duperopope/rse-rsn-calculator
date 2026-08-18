@@ -124,7 +124,7 @@
 .amendeMinore {
   background: var(--accent-subtle, rgba(96, 165, 250, 0.08));
   border: 1px solid rgba(96, 165, 250, 0.2);
-  color: #00d4ff;
+  color: var(--accent);
 }
 
 .amendeForfait {
@@ -197,11 +197,11 @@
   gap: 8px;
   padding: 10px 14px;
   margin: 8px 0;
-  background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(0, 122, 255, 0.15));
+  background: color-mix(in srgb, var(--accent) 9%, var(--bg-card));
   border: 1px solid rgba(0, 122, 255, 0.25);
   border-radius: var(--md-radius-md, 12px);
   text-decoration: none;
-  color: #4da3ff;
+  color: var(--accent);
   font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -209,7 +209,7 @@
 
 .sourceLink:active {
   transform: scale(0.97);
-  background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(0, 122, 255, 0.25));
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-card));
 }
 
 .sourceLinkIcon {
@@ -235,7 +235,7 @@
   padding: 2px 8px;
   border-radius: var(--md-radius-md, 12px);
   background: rgba(0, 132, 255, 0.15);
-  color: #0084ff;
+  color: var(--accent);
   font-size: 12px;
   font-weight: 600;
   margin-left: 6px;
@@ -243,24 +243,24 @@
 }
 
 /* === Explications Amende === */
-.amendeExplain { margin-top: 8px; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: var(--md-radius-sm, 8px); border: 1px solid rgba(255,255,255,0.06); font-size: 13px; line-height: 1.5; }
-.amendeWho { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: rgba(255,255,255,0.8); }
+.amendeExplain { margin-top: 8px; padding: 10px 12px; background: color-mix(in srgb, var(--text, #17211e) 3%, transparent); border-radius: var(--md-radius-sm, 8px); border: 1px solid color-mix(in srgb, var(--text, #17211e) 10%, transparent); font-size: 13px; line-height: 1.5; color: var(--text, #17211e); }
+.amendeWho { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: var(--text, #17211e); }
 .amendeWhoIcon { font-size: 1rem; }
 .amendeConditions { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
-.amendeCondItem { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.7); }
+.amendeCondItem { display: flex; align-items: center; gap: 6px; color: var(--text-secondary, #56625e); }
 .condBadge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: var(--md-radius-full, 9999px); font-size: 12px; font-weight: 700; }
-.condMinore { background: rgba(0,200,100,0.15); color: #00c864; }
-.condForfait { background: rgba(0,150,255,0.15); color: #0096ff; }
+.condMinore { background: color-mix(in srgb, var(--accent-green) 12%, transparent); color: var(--accent-green); }
+.condForfait { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
 .condMajore { background: rgba(255,170,0,0.15); color: var(--md-warning, #f59e0b); }
 .condMax { background: rgba(255,68,68,0.15); color: var(--md-error, #ef4444); }
-.amendeNote { color: rgba(255,255,255,0.45); font-size: 12px; font-style: italic; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; }
+.amendeNote { color: var(--text-secondary, #56625e); font-size: 12px; font-style: normal; border-top: 1px solid color-mix(in srgb, var(--text, #17211e) 10%, transparent); padding-top: 6px; }
 /* Explications amende */
 .amendeExplain {
   margin-top: 10px;
   padding: 10px 12px;
-  background: rgba(255,255,255,0.03);
+  background: color-mix(in srgb, var(--text, #17211e) 3%, transparent);
   border-radius: var(--md-radius-sm, 8px);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid color-mix(in srgb, var(--text, #17211e) 10%, transparent);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -270,7 +270,7 @@
   gap: 8px;
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--text, #17211e) 10%, transparent);
 }
 .amendeWhoIcon {
   font-size: 1.2rem;
@@ -315,7 +315,7 @@
 .amendeNote {
   margin: 8px 0 0 0;
   padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid color-mix(in srgb, var(--text, #17211e) 10%, transparent);
   font-size: 12px;
   color: var(--text-secondary, #888);
   font-style: italic;
@@ -326,8 +326,8 @@
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  background: rgba(0, 132, 255, 0.06);
-  border-left: 2px solid rgba(0, 132, 255, 0.4);
+  background: color-mix(in srgb, var(--accent, #147e6f) 7%, var(--bg-card, #fff));
+  border-left: 3px solid var(--accent, #147e6f);
   border-radius: 0 8px 8px 0;
   padding: 10px 12px;
   margin: 8px 0;
@@ -340,7 +340,7 @@
 .explicationText {
   font-size: 12px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary, #46534f);
   margin: 0;
 }
 @media (max-width: 480px) {

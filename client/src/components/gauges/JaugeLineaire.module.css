@@ -55,15 +55,15 @@
 }
 
 .fill[data-status="ok"] {
-  background: linear-gradient(90deg, var(--accent-green, var(--md-success, #34d399)), #00cc66);
+  background: var(--accent-green, #18794e);
 }
 
 .fill[data-status="warning"] {
-  background: linear-gradient(90deg, var(--accent-orange, var(--md-warning, #f59e0b)), #ff8800);
+  background: var(--accent-orange, #a96310);
 }
 
 .fill[data-status="danger"] {
-  background: linear-gradient(90deg, var(--accent-red, var(--md-error, #ef4444)), #cc0000);
+  background: var(--accent-red, #b84038);
 }
 
 

@@ -29,12 +29,17 @@ import { BottomBar } from '../components/layout/BottomBar.jsx';
 
 
 import { Footer } from '../components/layout/Footer.jsx';
+import { FeedbackDialog } from '../components/layout/FeedbackDialog.jsx';
+import { ContributionDialog } from '../components/layout/ContributionDialog.jsx';
+import { BeginnerGuide } from '../components/layout/BeginnerGuide.jsx';
 
 
 import GuidedTour from '../components/layout/GuidedTour.jsx';
 
 
 import { ParametresPanel } from '../components/forms/ParametresPanel.jsx';
+import { MissionPanel } from '../components/forms/MissionPanel.jsx';
+import { TachographImportPanel } from '../components/forms/TachographImportPanel.jsx';
 
 
 import { JourFormulaire } from '../components/forms/JourFormulaire.jsx';
@@ -110,6 +115,17 @@ export default function Calculator() {
 
   const [onboardingDone, setOnboardingDone] = useLocalStorage('rse_onboarding_done', false);
   const [showTour, setShowTour] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showContributions, setShowContributions] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/analyses?limit=' + HISTORIQUE_MAX).then(r => r.ok ? r.json() : Promise.reject()).then(data => {
+      if (active && data.analyses && data.analyses.length) setHistorique(data.analyses.map(row => ({ ...row.payload, id: row.id })));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const [mission, setMission] = useLocalStorage('fimo_mission', { reference: '', site: '', objet: '' });
 
 
 
@@ -163,7 +179,7 @@ export default function Calculator() {
 
 
   const [dashExpanded, setDashExpanded] = useState(false);
-  const [showResultDetail, setShowResultDetail] = useState(() => { try { return !!sessionStorage.getItem('fimo_resultat'); } catch(e) { return false; } });
+  const [showResultDetail, setShowResultDetail] = useState(false);
   const [bottomTab, setBottomTab] = useState('saisie');
   const touchStartX = React.useRef(0);
   const touchStartY = React.useRef(0);
@@ -308,6 +324,20 @@ export default function Calculator() {
 
 
   }, [jours2]);
+
+  // Un résultat n'est valable que pour les données qui ont été analysées.
+  // Dès qu'un horaire ou un paramètre change, retirer le score précédent afin
+  // d'éviter qu'un exploitant prenne une décision sur une analyse périmée.
+  const analyseInputReady = useRef(false);
+  useEffect(() => {
+    if (!analyseInputReady.current) {
+      analyseInputReady.current = true;
+      return;
+    }
+    reset();
+    setShowResultDetail(false);
+    setBottomTab('saisie');
+  }, [jours, jours2, typeService, pays, equipage, csvTexte, csvTexte2, mission]);
 
 
 
@@ -462,7 +492,7 @@ export default function Calculator() {
     const csv2 = equipage === "double" ? (mode === "csv" ? csvTexte2 : activitesToCSV(jours2)) : null;
 
 
-    const data = await analyser(csv, csv2, typeService, pays, equipage);
+    const data = await analyser(csv, csv2, typeService, pays, equipage, mission);
 
 
     if (data) {
@@ -478,7 +508,7 @@ export default function Calculator() {
           jours: JSON.parse(JSON.stringify(jours)),
 
 
-          parametres: { typeService, pays, equipage },
+          parametres: { typeService, pays, equipage, mission },
 
 
         score: data.score || 0,
@@ -493,6 +523,10 @@ export default function Calculator() {
       };
 
 
+      try {
+        const savedResponse = await fetch('/api/analyses', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({payload:entry}) });
+        if (savedResponse.ok) { const saved = await savedResponse.json(); entry.id = saved.id; }
+      } catch (_) { /* conservation locale si le stockage distant echoue */ }
       setHistorique(prev => [entry, ...(prev || [])].slice(0, HISTORIQUE_MAX));
 
 
@@ -574,7 +608,9 @@ export default function Calculator() {
     const updated = [...historique];
 
 
+    const removed = updated[index];
     updated.splice(index, 1);
+    if (removed && removed.id) fetch('/api/analyses/' + encodeURIComponent(removed.id), { method:'DELETE' }).catch(() => {});
 
 
     setHistorique(updated);
@@ -591,6 +627,7 @@ export default function Calculator() {
 
   const deleteAllHistorique = () => {
     setHistorique([]);
+    fetch('/api/analyses', { method:'DELETE' }).catch(() => {});
     setVoirHistorique(false);
   };
 
@@ -599,7 +636,9 @@ export default function Calculator() {
     setHistorique(prev => prev.map(entry => {
       const key = entry.id || entry.date;
       if (key === id) {
-        return { ...entry, nom: nouveauNom || '' };
+        const updated = { ...entry, nom: nouveauNom || '' };
+        if (entry.id) fetch('/api/analyses/' + encodeURIComponent(entry.id), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({payload:updated}) }).catch(() => {});
+        return updated;
       }
       return entry;
     }));
@@ -634,6 +673,7 @@ export default function Calculator() {
 
 
       if (entry.parametres.equipage) setEquipage(entry.parametres.equipage);
+      if (entry.parametres.mission) setMission(entry.parametres.mission);
 
 
     }
@@ -760,6 +800,25 @@ export default function Calculator() {
 
         />
 
+        <MissionPanel mission={mission} onChange={setMission} />
+
+        <TachographImportPanel />
+
+        <BeginnerGuide onStartTour={() => setShowTour(true)} />
+
+        <section className={styles.productBrief} aria-label="Usage de FIMO Check">
+          <div>
+            <p className={styles.productEyebrow}>Pré-contrôle d’exploitation</p>
+            <h2 className={styles.productTitle}>Valider une journée conducteur avant de l’affecter</h2>
+            <p className={styles.productText}>Saisissez le service prévu, repérez les dépassements et ajustez le planning. Le rapport reste une aide à la décision : les données tachygraphe font foi pour un contrôle réalisé.</p>
+          </div>
+          <div className={styles.workflow} aria-label="Parcours en trois étapes">
+            <div className={styles.workflowStep}><span className={styles.workflowNumber}>01</span><span className={styles.workflowLabel}>Décrire</span></div>
+            <div className={styles.workflowStep}><span className={styles.workflowNumber}>02</span><span className={styles.workflowLabel}>Vérifier</span></div>
+            <div className={styles.workflowStep}><span className={styles.workflowNumber}>03</span><span className={styles.workflowLabel}>Corriger</span></div>
+          </div>
+        </section>
+
 
 
 
@@ -826,13 +885,13 @@ export default function Calculator() {
             {resultat && (
               <div className={styles.scoreStickyRow} onClick={() => setShowResultDetail(!showResultDetail)} style={{ cursor: 'pointer' }}>
                 <div className={styles.scoreCircleMini} style={{
-                  background: resultat.score >= 90 ? 'var(--success, #10B981)' : resultat.score >= 70 ? 'var(--warning, #F59E0B)' : 'var(--danger, #EF4444)',
-                  color: resultat.score >= 90 ? '#000' : '#fff'
+                  background: (resultat.infractions || []).some(i => String(i.classe || '').includes('5e')) ? 'var(--danger, #EF4444)' : (resultat.infractions || []).length ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)',
+                  color: (resultat.infractions || []).length ? '#fff' : '#062b20'
                 }}>
-                  {Math.round(resultat.score)}
+                  {(resultat.infractions || []).length ? '!' : '\u2713'}
                 </div>
                 <span className={styles.scoreStickyLabel}>
-                  Score FIMO {String.fromCharCode(8226)} {resultat.infractions?.length || 0} infraction{(resultat.infractions?.length || 0) > 1 ? 's' : ''}{resultat.avertissements?.length ? ' ' + String.fromCharCode(183) + ' ' + resultat.avertissements.length + ' alerte' + (resultat.avertissements.length > 1 ? 's' : '') : ''}
+                  {(resultat.infractions || []).length ? 'Service à corriger' : 'Aucun écart détecté'} {String.fromCharCode(8226)} {resultat.infractions?.length || 0} infraction{(resultat.infractions?.length || 0) > 1 ? 's' : ''}{resultat.avertissements?.length ? ' ' + String.fromCharCode(183) + ' ' + resultat.avertissements.length + ' alerte' + (resultat.avertissements.length > 1 ? 's' : '') : ''}
                 </span>
                 <span className={styles.scoreChevron}>{showResultDetail ? '\u25B2' : '\u25BC'}</span>
               </div>
@@ -1113,7 +1172,9 @@ export default function Calculator() {
 
 
 
-      <Footer />
+      <Footer onFeedback={() => setShowFeedback(true)} onContributions={() => setShowContributions(true)} />
+      <FeedbackDialog open={showFeedback} onClose={() => setShowFeedback(false)} />
+      <ContributionDialog open={showContributions} onClose={() => setShowContributions(false)} onContribute={() => { setShowContributions(false); setShowFeedback(true); }} />
 
 
     </div>
@@ -1123,6 +1184,3 @@ export default function Calculator() {
 
 
 }
-
-
-

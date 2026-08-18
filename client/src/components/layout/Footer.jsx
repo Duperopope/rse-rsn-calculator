@@ -5,7 +5,7 @@ import styles from './Footer.module.css';
 /**
  * Pied de page avec sources reglementaires et infos
  */
-export function Footer() {
+export function Footer({ onFeedback, onContributions }) {
   return (
     <footer className={styles.footer}>
       <div className={styles.sources}>
@@ -26,6 +26,12 @@ export function Footer() {
         <span>{APP_NAME}</span>
         <span className={styles.sep}>|</span>
         <span>Samir Medjaher</span>
+      </div>
+      <div className={styles.productModel}>
+        <span>Gratuit pour préparer un service · sans publicité comportementale</span>
+        <button onClick={onFeedback}>Donner un retour</button>
+        <button onClick={onContributions}>Pacte de contribution</button>
+        <span>Offres professionnelles : déploiement équipe, marque blanche et intégrations</span>
       </div>
     </footer>
   );

@@ -10,3 +10,19 @@ services:
         value: production
       - key: PORT
         value: 3001
+      - key: FIMO_ALLOWED_ORIGINS
+        sync: false
+      - key: FIMO_DATA_DIR
+        sync: false
+      - key: FIMO_DATA_KEY
+        sync: false
+      - key: FIMO_BACKUP_KEY
+        sync: false
+      - key: FIMO_ANALYSIS_RETENTION_DAYS
+        value: 365
+      - key: FIMO_FEEDBACK_RETENTION_DAYS
+        value: 365
+      - key: FIMO_AUDIT_RETENTION_DAYS
+        value: 730
+      - key: FIMO_TACHOGRAPH_RETENTION_DAYS
+        value: 90
