@@ -23,7 +23,7 @@ son retour arrière sont documentés.
 | Garde-fous | Un échec critique interdit la publication | Pipeline bloquant testé par scénarios négatifs | À renforcer |
 | Comptes | Comptes individuels, rôles, sessions, récupération | Tests API, révocation, suppression, audit | Testé |
 | Avatar | Initiales, import sûr, recadrage, suppression, caméra consentie | Fichiers adverses, portrait synthétique, QA mobile | Import testé ; caméra réelle non testée |
-| Assets | Bibliothèque visuelle commune et traçable | Inventaire, licences, variantes, tests visuels | À faire |
+| Assets | Bibliothèque visuelle commune et traçable | Inventaire, licences, variantes, tests visuels | Registre SVG et parcours critiques testés ; migration restante |
 | Localisation | Catalogue extensible sans texte métier en dur | Détection des clés manquantes, pseudo-langue, RTL | Socle compte FR/EN testé ; application restante |
 | Données | Chiffrement, minimisation, export, purge et restauration | Tests de lecture croisée, purge et restauration | Testé localement |
 | Exploitation | Centre de commandement comptes/santé/sécurité/coûts | Métriques mesurées, alertes actionnables | Pilote local testé |

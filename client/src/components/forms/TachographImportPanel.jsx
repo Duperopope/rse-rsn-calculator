@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { API_URL } from '../../config/constants.js';
 import { useI18n } from '../../platform/i18n/I18nProvider.jsx';
+import { Icon } from '../../platform/assets/Icon.jsx';
 import styles from './TachographImportPanel.module.css';
 
 function shortHash(value) {
@@ -70,7 +71,7 @@ export function TachographImportPanel() {
     <section className={styles.panel} aria-label={t('tachograph.region')}>
       <button className={styles.summary} type="button" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>
         <span className={styles.symbol} aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2M4.5 5.5l2 2M19.5 5.5l-2 2"/></svg>
+          <Icon name="tachograph" size={23} />
         </span>
         <span className={styles.summaryText}>
           <span className={styles.kicker}>{t('tachograph.kicker')}</span>

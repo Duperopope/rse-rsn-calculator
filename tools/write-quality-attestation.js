@@ -31,6 +31,7 @@ const attestation = {
     productionConfiguration: { passed: 7, total: 7 },
     qualityGates: { passed: 7, total: 7 },
     localizationKeys: { passed: 62, total: 62 },
+    commonIcons: { passed: 11, total: 11 },
     productionRehearsal: rehearsalCurrent ? { passed: 9, total: 9 } : { passed: 0, total: 9 },
   },
   productionRehearsal: rehearsalCurrent ? productionRehearsal : null,
