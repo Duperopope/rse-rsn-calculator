@@ -45,6 +45,8 @@ try {
     FIMO_DATA_KEY: crypto.randomBytes(32).toString('base64'),
     FIMO_BACKUP_KEY: crypto.randomBytes(32).toString('base64'),
     FIMO_ALLOWED_ORIGINS: 'http://pilot.fimocheck.example',
+    FIMO_WEBAUTHN_RP_ID: 'pilot.fimocheck.example',
+    FIMO_WEBAUTHN_ORIGIN: 'http://pilot.fimocheck.example',
   };
   const insecureOrigin = run(['tools/readiness-check.js', '--production'], insecureOriginEnv);
   assert.notStrictEqual(insecureOrigin.status, 0, 'la porte doit refuser une origine HTTP');
@@ -53,12 +55,16 @@ try {
   const validEnv = {
     ...insecureOriginEnv,
     FIMO_ALLOWED_ORIGINS: 'https://pilot.fimocheck.example',
+    FIMO_WEBAUTHN_ORIGIN: 'https://pilot.fimocheck.example',
   };
   const valid = run(['tools/readiness-check.js', '--production'], validEnv);
   assert.strictEqual(valid.status, 0, valid.stderr || valid.stdout);
   assert.strictEqual(parse(valid).ready, true, 'une configuration complète doit passer');
+  const validReport = parse(valid);
+  assert.strictEqual(validReport.checks.find(item => item.name === 'production.webauthn-rp-id').status, 'pass');
+  assert.strictEqual(validReport.checks.find(item => item.name === 'production.webauthn-origin').status, 'pass');
 
-  console.log('PORTES QUALITE: 7/7');
+  console.log('PORTES QUALITE: 9/9');
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });
 }

@@ -43,6 +43,26 @@ db.exec(`
     head_hash TEXT NOT NULL,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS webauthn_credentials (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    public_key BLOB NOT NULL,
+    counter INTEGER NOT NULL DEFAULT 0,
+    transports TEXT NOT NULL DEFAULT '[]',
+    device_type TEXT,
+    backed_up INTEGER NOT NULL DEFAULT 0,
+    label TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    last_used_at TEXT
+  );
+  CREATE TABLE IF NOT EXISTS webauthn_challenges (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    purpose TEXT NOT NULL CHECK(purpose IN ('registration','authentication')),
+    challenge TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
 `);
 try { db.exec('ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1'); } catch (_) { /* colonne deja presente */ }
 try { db.exec('ALTER TABLE audit_log ADD COLUMN prev_hash TEXT'); } catch (_) { /* colonne deja presente */ }
@@ -123,15 +143,21 @@ function login(username, password) {
   username = normalizeUsername(username);
   const user = db.prepare('SELECT * FROM users WHERE username=? AND active=1').get(username);
   if (!user || !verifyPassword(password, user.password_hash)) { audit(user && user.id, 'auth.failure', 'Identifiants invalides'); return null; }
+  return issueSession(user, 'auth.login');
+}
+function issueSession(user, event = 'auth.login') {
   const token = crypto.randomBytes(32).toString('base64url');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
   const expires = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
   db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(now());
   db.prepare('INSERT INTO sessions(token_hash,user_id,created_at,expires_at) VALUES (?,?,?,?)').run(tokenHash, user.id, now(), expires);
-  audit(user.id, 'auth.login', null);
+  audit(user.id, event, null);
   return { token, expires, user: publicUser(user) };
 }
-function publicUser(user) { return { id: user.id, username: user.username, role: user.role, mustChangePassword: Boolean(user.must_change_password) }; }
+function publicUser(user) {
+  const count = db.prepare('SELECT COUNT(*) AS n FROM webauthn_credentials WHERE user_id=?').get(user.id).n;
+  return { id: user.id, username: user.username, role: user.role, mustChangePassword: Boolean(user.must_change_password), passkeyCount: count };
+}
 function getSession(token) {
   if (!token) return null;
   const hash = crypto.createHash('sha256').update(token).digest('hex');
@@ -240,6 +266,66 @@ function getProductMetrics() {
     }
   };
 }
-function purgeExpiredSessions() { return db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(now()).changes; }
+function purgeExpiredSessions() {
+  const timestamp = now();
+  const removed = db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(timestamp).changes;
+  db.prepare('DELETE FROM webauthn_challenges WHERE expires_at < ?').run(timestamp);
+  return removed;
+}
 
-module.exports = { createInitialAdmin, login, getSession, logout, changePassword, issueRecoveryCodes, recoverAccount, deleteOwnAccount, listUsers, createUser, revokeUserSessions, setUserActive, recordAudit, verifyAuditChain, getProductMetrics, purgeExpiredSessions, purgeAuditEvents };
+function getActiveUserByUsername(username) {
+  return db.prepare('SELECT * FROM users WHERE username=? AND active=1').get(normalizeUsername(username)) || null;
+}
+function verifyCurrentPassword(userId, password) {
+  const user = db.prepare('SELECT * FROM users WHERE id=? AND active=1').get(userId);
+  return Boolean(user && verifyPassword(password, user.password_hash));
+}
+function listPasskeys(userId, includePublicKey = false) {
+  const columns = includePublicKey ? '*' : 'id,label,transports,device_type,backed_up,created_at,last_used_at';
+  return db.prepare(`SELECT ${columns} FROM webauthn_credentials WHERE user_id=? ORDER BY created_at`).all(userId).map(row => ({
+    id: row.id, label: row.label, transports: JSON.parse(row.transports || '[]'), deviceType: row.device_type,
+    backedUp: Boolean(row.backed_up), createdAt: row.created_at, lastUsedAt: row.last_used_at,
+    ...(includePublicKey ? { publicKey: new Uint8Array(row.public_key), counter: row.counter } : {}),
+  }));
+}
+function savePasskey(userId, credential, metadata = {}) {
+  const label = String(metadata.label || 'Passkey').trim().slice(0, 60) || 'Passkey';
+  db.prepare(`INSERT INTO webauthn_credentials(id,user_id,public_key,counter,transports,device_type,backed_up,label,created_at)
+    VALUES (?,?,?,?,?,?,?,?,?)`).run(credential.id, userId, Buffer.from(credential.publicKey), credential.counter || 0,
+    JSON.stringify(credential.transports || []), metadata.deviceType || null, metadata.backedUp ? 1 : 0, label, now());
+  audit(userId, 'auth.passkey_registered', `credential=${crypto.createHash('sha256').update(credential.id).digest('hex').slice(0,16)};device=${metadata.deviceType || 'unknown'};backed_up=${Boolean(metadata.backedUp)}`);
+  return listPasskeys(userId).find(item => item.id === credential.id);
+}
+function getPasskeyForUser(userId, credentialId) {
+  return listPasskeys(userId, true).find(item => item.id === credentialId) || null;
+}
+function updatePasskeyUsage(userId, credentialId, counter, backedUp) {
+  db.prepare('UPDATE webauthn_credentials SET counter=?,backed_up=?,last_used_at=? WHERE id=? AND user_id=?')
+    .run(counter, backedUp ? 1 : 0, now(), credentialId, userId);
+}
+function deletePasskey(userId, credentialId, currentPassword) {
+  const user = db.prepare('SELECT * FROM users WHERE id=? AND active=1').get(userId);
+  if (!user || !verifyPassword(currentPassword, user.password_hash)) throw new Error('Mot de passe actuel incorrect.');
+  const removed = db.prepare('DELETE FROM webauthn_credentials WHERE id=? AND user_id=?').run(credentialId, userId).changes;
+  if (removed) audit(userId, 'auth.passkey_deleted', `credential=${crypto.createHash('sha256').update(credentialId).digest('hex').slice(0,16)}`);
+  return removed === 1;
+}
+function saveWebAuthnChallenge(userId, purpose, challenge) {
+  db.prepare('DELETE FROM webauthn_challenges WHERE expires_at<? OR (user_id=? AND purpose=?)').run(now(), userId, purpose);
+  const id = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+  db.prepare('INSERT INTO webauthn_challenges(id,user_id,purpose,challenge,expires_at,created_at) VALUES (?,?,?,?,?,?)')
+    .run(id, userId, purpose, challenge, expiresAt, now());
+  return id;
+}
+function consumeWebAuthnChallenge(id, userId, purpose) {
+  const row = db.prepare('SELECT * FROM webauthn_challenges WHERE id=? AND user_id=? AND purpose=? AND expires_at>?').get(id, userId, purpose, now());
+  db.prepare('DELETE FROM webauthn_challenges WHERE id=?').run(id);
+  return row ? row.challenge : null;
+}
+function issuePasskeySession(userId) {
+  const user = db.prepare('SELECT * FROM users WHERE id=? AND active=1').get(userId);
+  return user ? issueSession(user, 'auth.passkey_login') : null;
+}
+
+module.exports = { createInitialAdmin, login, getSession, logout, changePassword, issueRecoveryCodes, recoverAccount, deleteOwnAccount, listUsers, createUser, revokeUserSessions, setUserActive, recordAudit, verifyAuditChain, getProductMetrics, purgeExpiredSessions, purgeAuditEvents, getActiveUserByUsername, verifyCurrentPassword, listPasskeys, savePasskey, getPasskeyForUser, updatePasskeyUsage, deletePasskey, saveWebAuthnChallenge, consumeWebAuthnChallenge, issuePasskeySession };

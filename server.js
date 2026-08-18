@@ -30,6 +30,10 @@ const maintenance = require('./maintenance.js');
 const profileStore = require('./profile-store.js');
 const sharp = require('sharp');
 const tachographStore = require('./tachograph-store.js');
+const {
+  generateRegistrationOptions, verifyRegistrationResponse,
+  generateAuthenticationOptions, verifyAuthenticationResponse,
+} = require('@simplewebauthn/server');
 
 const app = express();
 
@@ -105,6 +109,12 @@ function requireAuth(req, res, next) {
 function requireAdmin(req, res, next) {
   if (!req.auth || req.auth.user.role !== 'admin') return res.status(403).json({ error: 'Droits administrateur requis.' });
   next();
+}
+function webAuthnContext(req) {
+  const host = String(req.get('host') || '').split(':')[0];
+  const rpID = process.env.FIMO_WEBAUTHN_RP_ID || host;
+  const origin = process.env.FIMO_WEBAUTHN_ORIGIN || `${req.protocol}://${req.get('host')}`;
+  return { rpID, origin, rpName: 'FIMOCheck' };
 }
 const requireComputationAccess = process.env.FIMO_ALLOW_ANONYMOUS_TESTS === '1' ? function(req,res,next){ next(); } : requireAuth;
 
@@ -2194,6 +2204,111 @@ totalConduiteMin += conduiteJour;
 app.get('/api/auth/status', function(req, res) {
   const session = authStore.getSession(readCookie(req, sessionCookieName()));
   res.json({ authenticated: Boolean(session), user: session ? session.user : null });
+});
+
+app.get('/api/auth/passkeys', requireAuth, function(req, res) {
+  res.json({ passkeys: authStore.listPasskeys(req.auth.user.id), supported: true });
+});
+
+app.post('/api/auth/passkeys/register/options', authLimiter, requireAuth, async function(req, res) {
+  try {
+    if (!authStore.verifyCurrentPassword(req.auth.user.id, req.body && req.body.currentPassword)) {
+      return res.status(403).json({ error: 'Mot de passe actuel incorrect.' });
+    }
+    const context = webAuthnContext(req);
+    const existing = authStore.listPasskeys(req.auth.user.id);
+    const options = await generateRegistrationOptions({
+      rpName: context.rpName,
+      rpID: context.rpID,
+      userID: Buffer.from(`fimocheck-user:${req.auth.user.id}`),
+      userName: req.auth.user.username,
+      userDisplayName: req.auth.user.username,
+      attestationType: 'none',
+      excludeCredentials: existing.map(item => ({ id: item.id, transports: item.transports })),
+      authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+      preferredAuthenticatorType: 'localDevice',
+    });
+    const challengeId = authStore.saveWebAuthnChallenge(req.auth.user.id, 'registration', options.challenge);
+    res.json({ options, challengeId });
+  } catch (error) { res.status(400).json({ error: 'Création de la passkey impossible.' }); }
+});
+
+app.post('/api/auth/passkeys/register/verify', authLimiter, requireAuth, async function(req, res) {
+  const challenge = authStore.consumeWebAuthnChallenge(req.body && req.body.challengeId, req.auth.user.id, 'registration');
+  if (!challenge) return res.status(400).json({ error: 'Challenge expiré ou déjà utilisé.' });
+  try {
+    const context = webAuthnContext(req);
+    const verification = await verifyRegistrationResponse({
+      response: req.body.response,
+      expectedChallenge: challenge,
+      expectedOrigin: context.origin,
+      expectedRPID: context.rpID,
+      requireUserVerification: true,
+    });
+    if (!verification.verified || !verification.registrationInfo) throw new Error('Réponse non vérifiée');
+    const info = verification.registrationInfo;
+    const saved = authStore.savePasskey(req.auth.user.id, info.credential, {
+      label: req.body.label,
+      deviceType: info.credentialDeviceType,
+      backedUp: info.credentialBackedUp,
+    });
+    res.status(201).json({ verified: true, passkey: saved });
+  } catch (error) {
+    authStore.recordAudit(req.auth.user.id, 'auth.passkey_registration_failed', error.name || 'verification');
+    res.status(400).json({ error: 'La passkey n’a pas pu être vérifiée.' });
+  }
+});
+
+app.post('/api/auth/passkeys/login/options', authLimiter, async function(req, res) {
+  const user = authStore.getActiveUserByUsername(req.body && req.body.username);
+  const credentials = user ? authStore.listPasskeys(user.id) : [];
+  if (!user || !credentials.length) return res.status(400).json({ error: 'Connexion par passkey indisponible pour ce compte.' });
+  try {
+    const context = webAuthnContext(req);
+    const options = await generateAuthenticationOptions({
+      rpID: context.rpID,
+      allowCredentials: credentials.map(item => ({ id: item.id, transports: item.transports })),
+      userVerification: 'required',
+    });
+    const challengeId = authStore.saveWebAuthnChallenge(user.id, 'authentication', options.challenge);
+    res.json({ options, challengeId });
+  } catch (error) { res.status(400).json({ error: 'Connexion par passkey indisponible.' }); }
+});
+
+app.post('/api/auth/passkeys/login/verify', authLimiter, async function(req, res) {
+  const user = authStore.getActiveUserByUsername(req.body && req.body.username);
+  if (!user) return res.status(400).json({ error: 'Challenge expiré ou déjà utilisé.' });
+  const challenge = authStore.consumeWebAuthnChallenge(req.body && req.body.challengeId, user.id, 'authentication');
+  if (!challenge) return res.status(400).json({ error: 'Challenge expiré ou déjà utilisé.' });
+  const passkey = authStore.getPasskeyForUser(user.id, req.body.response && req.body.response.id);
+  if (!passkey) return res.status(400).json({ error: 'Passkey inconnue.' });
+  try {
+    const context = webAuthnContext(req);
+    const verification = await verifyAuthenticationResponse({
+      response: req.body.response,
+      expectedChallenge: challenge,
+      expectedOrigin: context.origin,
+      expectedRPID: context.rpID,
+      credential: { id: passkey.id, publicKey: passkey.publicKey, counter: passkey.counter, transports: passkey.transports },
+      requireUserVerification: true,
+    });
+    if (!verification.verified) throw new Error('Réponse non vérifiée');
+    authStore.updatePasskeyUsage(user.id, passkey.id, verification.authenticationInfo.newCounter, verification.authenticationInfo.credentialBackedUp);
+    const result = authStore.issuePasskeySession(user.id);
+    setSessionCookie(res, result.token, result.expires);
+    res.json({ user: result.user, expiresAt: result.expires });
+  } catch (error) {
+    authStore.recordAudit(user.id, 'auth.passkey_login_failed', error.name || 'verification');
+    res.status(401).json({ error: 'Authentification par passkey refusée.' });
+  }
+});
+
+app.delete('/api/auth/passkeys/:id', requireAuth, function(req, res) {
+  try {
+    const deleted = authStore.deletePasskey(req.auth.user.id, req.params.id, req.body && req.body.currentPassword);
+    if (!deleted) return res.status(404).json({ error: 'Passkey introuvable.' });
+    res.json({ ok: true });
+  } catch (error) { res.status(403).json({ error: error.message }); }
 });
 
 app.get('/api/privacy', function(req, res) {

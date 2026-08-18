@@ -16,7 +16,7 @@ try {
     const db = new Database(dbPath, { readonly: true, fileMustExist: true });
     check('database.integrity', db.pragma('integrity_check', { simple: true }) === 'ok', 'PRAGMA integrity_check');
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(row => row.name);
-    for (const table of ['users', 'sessions', 'audit_log', 'audit_checkpoints', 'recovery_codes', 'analyses', 'profile_avatars', 'tachograph_imports']) check('schema.' + table, tables.includes(table), 'table requise');
+    for (const table of ['users', 'sessions', 'audit_log', 'audit_checkpoints', 'recovery_codes', 'analyses', 'profile_avatars', 'tachograph_imports', 'webauthn_credentials', 'webauthn_challenges']) check('schema.' + table, tables.includes(table), 'table requise');
     check('accounts.admin', db.prepare("SELECT COUNT(*) AS n FROM users WHERE role='admin' AND active=1").get().n >= 1, 'au moins un administrateur actif', production);
     check('accounts.supported-roles', db.prepare("SELECT COUNT(*) AS n FROM users WHERE role NOT IN ('admin','member')").get().n === 0, 'aucun rôle sans workflow livré');
     db.close();
@@ -29,6 +29,8 @@ try {
   check('production.backup-key', Boolean(process.env.FIMO_BACKUP_KEY), 'secret FIMO_BACKUP_KEY injecté', production);
   check('production.origins', Boolean(process.env.FIMO_ALLOWED_ORIGINS), 'origine HTTPS explicite', production);
   check('production.https-origin', !process.env.FIMO_ALLOWED_ORIGINS || process.env.FIMO_ALLOWED_ORIGINS.split(',').every(value => value.trim().startsWith('https://')), 'toutes les origines sont HTTPS', production);
+  check('production.webauthn-rp-id', Boolean(process.env.FIMO_WEBAUTHN_RP_ID), 'RP ID WebAuthn injecté', production);
+  check('production.webauthn-origin', Boolean(process.env.FIMO_WEBAUTHN_ORIGIN) && process.env.FIMO_WEBAUTHN_ORIGIN.startsWith('https://'), 'origine WebAuthn HTTPS explicite', production);
 } catch (error) { check('readiness.execution', false, error.message); }
 
 const failures = checks.filter(item => item.status === 'fail');

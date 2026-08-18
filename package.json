@@ -21,6 +21,7 @@
     "pretest": "node -c server.js && node -c fix-engine.js"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^13.3.2",
     "better-sqlite3": "^12.11.1",
     "cors": "^2.8.5",
     "express": "^4.21.0",
@@ -32,6 +33,6 @@
     "sharp": "^0.35.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }

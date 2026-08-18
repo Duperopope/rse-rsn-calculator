@@ -5,6 +5,7 @@ const os = require('os');
 const path = require('path');
 const { spawn, spawnSync } = require('child_process');
 const sharp = require('sharp');
+const { encodeCBOR } = require('@levischuck/tiny-cbor');
 
 const root = path.join(__dirname, '..');
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'fimocheck-auth-api-'));
@@ -14,6 +15,44 @@ const ownerPassword = 'PhraseTemporaire!API-12345';
 const uploadDir = path.join(temp, 'uploads');
 const env = { ...process.env, FIMO_DATA_DIR: temp, FIMO_UPLOAD_DIR: uploadDir, PORT: String(port), NODE_ENV: 'test' };
 let server;
+const b64url = value => Buffer.from(value).toString('base64url');
+function webauthnClientData(type, challenge, origin) {
+  return Buffer.from(JSON.stringify({ type, challenge, origin, crossOrigin: false }));
+}
+function rawEcdsaToDer(raw) {
+  const integer = bytes => {
+    let value = Buffer.from(bytes);
+    while (value.length > 1 && value[0] === 0) value = value.subarray(1);
+    if (value[0] & 0x80) value = Buffer.concat([Buffer.from([0]), value]);
+    return Buffer.concat([Buffer.from([0x02, value.length]), value]);
+  };
+  const r = integer(raw.subarray(0, 32));
+  const s = integer(raw.subarray(32));
+  return Buffer.concat([Buffer.from([0x30, r.length + s.length]), r, s]);
+}
+async function createSoftwarePasskey(options, origin) {
+  const keys = await crypto.webcrypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const jwk = await crypto.webcrypto.subtle.exportKey('jwk', keys.publicKey);
+  const credentialId = crypto.randomBytes(32);
+  const coseKey = new Map([[1, 2], [3, -7], [-1, 1], [-2, Buffer.from(jwk.x, 'base64url')], [-3, Buffer.from(jwk.y, 'base64url')]]);
+  const rpHash = crypto.createHash('sha256').update(options.rp.id).digest();
+  const authenticatorData = Buffer.concat([rpHash, Buffer.from([0x45]), Buffer.alloc(4), Buffer.alloc(16), Buffer.from([0, credentialId.length]), credentialId, Buffer.from(encodeCBOR(coseKey))]);
+  const attestation = encodeCBOR(new Map([['fmt', 'none'], ['attStmt', new Map()], ['authData', authenticatorData]]));
+  return {
+    credentialId, privateKey: keys.privateKey,
+    response: { id: b64url(credentialId), rawId: b64url(credentialId), type: 'public-key', authenticatorAttachment: 'platform',
+      response: { clientDataJSON: b64url(webauthnClientData('webauthn.create', options.challenge, origin)), attestationObject: b64url(attestation), transports: ['internal'] },
+      clientExtensionResults: {} },
+  };
+}
+async function createSoftwareAssertion(options, origin, passkey) {
+  const authenticatorData = Buffer.concat([crypto.createHash('sha256').update(options.rpId).digest(), Buffer.from([0x05]), Buffer.from([0, 0, 0, 1])]);
+  const clientData = webauthnClientData('webauthn.get', options.challenge, origin);
+  const signed = Buffer.concat([authenticatorData, crypto.createHash('sha256').update(clientData).digest()]);
+  const rawSignature = Buffer.from(await crypto.webcrypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, passkey.privateKey, signed));
+  return { id: b64url(passkey.credentialId), rawId: b64url(passkey.credentialId), type: 'public-key', authenticatorAttachment: 'platform',
+    response: { clientDataJSON: b64url(clientData), authenticatorData: b64url(authenticatorData), signature: b64url(rawEcdsaToDer(rawSignature)), userHandle: null }, clientExtensionResults: {} };
+}
 
 function cookieFrom(response) {
   const raw = response.headers.get('set-cookie') || '';
@@ -68,6 +107,52 @@ async function waitForServer() {
     response = await request('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: 'member-api', password: created.temporaryPassword }) });
     assert.strictEqual(response.status, 200, 'connexion membre');
     const memberCookie = cookieFrom(response);
+
+    response = await request('/api/auth/passkeys', {}, memberCookie);
+    assert.strictEqual(response.status, 200, 'inventaire passkeys accessible');
+    assert.deepStrictEqual((await response.json()).passkeys, [], 'aucune passkey au départ');
+    response = await request('/api/auth/passkeys/register/options', {
+      method: 'POST', body: JSON.stringify({ currentPassword: 'mot-de-passe-incorrect' }),
+    }, memberCookie);
+    assert.strictEqual(response.status, 403, 'mot de passe actuel exigé avant enrôlement passkey');
+    response = await request('/api/auth/passkeys/register/options', {
+      method: 'POST', body: JSON.stringify({ currentPassword: created.temporaryPassword, label: 'Navigateur de recette' }),
+    }, memberCookie);
+    assert.strictEqual(response.status, 200, 'options passkey générées');
+    const passkeyOptions = await response.json();
+    assert.strictEqual(passkeyOptions.options.authenticatorSelection.userVerification, 'required', 'vérification utilisateur obligatoire');
+    assert.strictEqual(passkeyOptions.options.authenticatorSelection.residentKey, 'required', 'identifiant découvrable obligatoire');
+    response = await request('/api/auth/passkeys/register/verify', {
+      method: 'POST', body: JSON.stringify({ challengeId: passkeyOptions.challengeId, label: 'Recette', response: { id: 'invalide' } }),
+    }, memberCookie);
+    assert.strictEqual(response.status, 400, 'attestation invalide refusée');
+    response = await request('/api/auth/passkeys/register/verify', {
+      method: 'POST', body: JSON.stringify({ challengeId: passkeyOptions.challengeId, label: 'Recette', response: { id: 'invalide' } }),
+    }, memberCookie);
+    assert.strictEqual(response.status, 400, 'challenge consommé impossible à rejouer');
+    response = await request('/api/auth/passkeys/login/options', {
+      method: 'POST', body: JSON.stringify({ username: 'member-api' }),
+    });
+    assert.strictEqual(response.status, 400, 'connexion passkey refusée sans clé enregistrée');
+
+    response = await request('/api/auth/passkeys/register/options', {
+      method: 'POST', body: JSON.stringify({ currentPassword: created.temporaryPassword, label: 'Authentificateur logiciel de recette' }),
+    }, memberCookie);
+    const registrationPayload = await response.json();
+    const softwarePasskey = await createSoftwarePasskey(registrationPayload.options, base);
+    response = await request('/api/auth/passkeys/register/verify', {
+      method: 'POST', body: JSON.stringify({ challengeId: registrationPayload.challengeId, label: 'Authentificateur logiciel de recette', response: softwarePasskey.response }),
+    }, memberCookie);
+    assert.strictEqual(response.status, 201, 'attestation WebAuthn cryptographique acceptée');
+    response = await request('/api/auth/passkeys/login/options', { method: 'POST', body: JSON.stringify({ username: 'member-api' }) });
+    assert.strictEqual(response.status, 200, 'options de connexion passkey disponibles');
+    const authenticationPayload = await response.json();
+    const assertion = await createSoftwareAssertion(authenticationPayload.options, base, softwarePasskey);
+    response = await request('/api/auth/passkeys/login/verify', {
+      method: 'POST', body: JSON.stringify({ username: 'member-api', challengeId: authenticationPayload.challengeId, response: assertion }),
+    });
+    assert.strictEqual(response.status, 200, 'signature WebAuthn vérifiée et session créée');
+    assert.ok(cookieFrom(response).startsWith('fimo_session='), 'cookie de session passkey émis');
 
     response = await request('/api/account/avatar', {}, memberCookie);
     assert.strictEqual(response.status, 404, 'avatar absent au départ');
@@ -205,7 +290,7 @@ async function waitForServer() {
     assert.strictEqual(deleted.deleted.analysesDeleted, 1, 'donnée rattachée supprimée en cascade');
     response = await request('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: 'owner-api', password: recoveredPassword }) });
     assert.strictEqual(response.status, 401, 'compte supprimé inutilisable');
-    console.log('SECURITE API: 66/66');
+    console.log('SECURITE API: 79/79');
   } finally {
     if (server) server.kill('SIGTERM');
     fs.rmSync(temp, { recursive: true, force: true });

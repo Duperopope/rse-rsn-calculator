@@ -13,7 +13,8 @@ const password = 'ProductionTest!Phrase-12345';
 const env = {
   ...process.env, NODE_ENV: 'production', PORT: String(port), FIMO_DATA_DIR: temp,
   FIMO_UPLOAD_DIR: path.join(temp, 'uploads'), FIMO_DATA_KEY: crypto.randomBytes(32).toString('base64'),
-  FIMO_BACKUP_KEY: crypto.randomBytes(32).toString('base64'), FIMO_ALLOWED_ORIGINS: allowedOrigin
+  FIMO_BACKUP_KEY: crypto.randomBytes(32).toString('base64'), FIMO_ALLOWED_ORIGINS: allowedOrigin,
+  FIMO_WEBAUTHN_RP_ID: 'pilot.fimocheck.example', FIMO_WEBAUTHN_ORIGIN: allowedOrigin
 };
 let server;
 async function wait() { for (let i=0;i<50;i+=1) { try { if ((await fetch(`http://127.0.0.1:${port}/api/health`)).ok) return; } catch (_) {} await new Promise(r=>setTimeout(r,100)); } throw new Error('serveur production indisponible'); }
@@ -33,8 +34,11 @@ async function wait() { for (let i=0;i<50;i+=1) { try { if ((await fetch(`http:/
     assert.ok(/; HttpOnly/i.test(cookie),'attribut HttpOnly');
     assert.ok(/SameSite=Strict/i.test(cookie),'SameSite strict');
     assert.ok(/Priority=High/i.test(cookie),'priorité haute');
+    response=await fetch(`http://127.0.0.1:${port}/api/auth/passkeys/register/options`,{method:'POST',headers:{'Content-Type':'application/json',Origin:allowedOrigin,Cookie:cookie.split(';')[0]},body:JSON.stringify({currentPassword:password})});
+    assert.strictEqual(response.status,200,'enrôlement passkey protégé accessible');
+    assert.strictEqual((await response.json()).options.rp.id,'pilot.fimocheck.example','RP ID passkey explicite');
     response=await fetch(`http://127.0.0.1:${port}/api/auth/status`,{headers:{Origin:'https://hostile.example'}});
     assert.strictEqual(response.status,403,'origine étrangère refusée');
-    console.log('CONFIGURATION PRODUCTION: 7/7');
+    console.log('CONFIGURATION PRODUCTION: 9/9');
   } finally { if(server)server.kill('SIGTERM'); fs.rmSync(temp,{recursive:true,force:true}); }
 })().catch(error=>{console.error(error.stack||error.message);process.exitCode=1;});

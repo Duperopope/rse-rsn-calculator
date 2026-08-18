@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { API_URL } from "../../config/constants.js";
 import styles from "./AccountSecurityDialog.module.css";
 import { useModalDialog } from "./useModalDialog.js";
+import { startRegistration } from "@simplewebauthn/browser";
 
 export function AccountSecurityDialog({ open, user, onClose, onDeleted, onAvatarChanged }) {
   const dialogRef = useModalDialog(open, onClose);
@@ -12,12 +13,20 @@ export function AccountSecurityDialog({ open, user, onClose, onDeleted, onAvatar
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [avatarBusy, setAvatarBusy] = useState(false);
+  const [passkeys, setPasskeys] = useState([]);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+  async function loadPasskeys() {
+    const response = await fetch(API_URL + "/auth/passkeys");
+    if (response.ok) setPasskeys((await response.json()).passkeys || []);
+  }
   useEffect(() => {
-    if (open)
+    if (open) {
+      loadPasskeys().catch(() => {});
       fetch(API_URL + "/privacy")
         .then((response) => (response.ok ? response.json() : null))
         .then(setPrivacy)
         .catch(() => {});
+    }
   }, [open]);
   useEffect(() => {
     if (!avatarFile) { setAvatarPreview(""); return undefined; }
@@ -104,6 +113,49 @@ export function AccountSecurityDialog({ open, user, onClose, onDeleted, onAvatar
     } finally { setAvatarBusy(false); }
   }
 
+  async function registerPasskey(event) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setPasskeyBusy(true);
+    setMessage("");
+    try {
+      const optionsResponse = await fetch(API_URL + "/auth/passkeys/register/options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: form.get("password"), label: form.get("label") }),
+      });
+      const payload = await optionsResponse.json();
+      if (!optionsResponse.ok) throw new Error(payload.error || "Enrôlement impossible.");
+      const credential = await startRegistration({ optionsJSON: payload.options });
+      const verifyResponse = await fetch(API_URL + "/auth/passkeys/register/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ challengeId: payload.challengeId, label: form.get("label"), response: credential }),
+      });
+      const verified = await verifyResponse.json();
+      if (!verifyResponse.ok) throw new Error(verified.error || "Vérification impossible.");
+      event.currentTarget.reset();
+      await loadPasskeys();
+      setMessage("Passkey enregistrée. La biométrie ou le code de déverrouillage reste sur votre appareil.");
+    } catch (error) {
+      setMessage(error.message || "Enrôlement annulé.");
+    } finally { setPasskeyBusy(false); }
+  }
+
+  async function removePasskey(event, id) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const response = await fetch(API_URL + "/auth/passkeys/" + encodeURIComponent(id), {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: form.get("password") }),
+    });
+    const data = await response.json();
+    if (!response.ok) return setMessage(data.error || "Suppression impossible.");
+    await loadPasskeys();
+    setMessage("Passkey retirée de ce compte.");
+  }
+
   return (
     <div
       className={styles.backdrop}
@@ -169,6 +221,47 @@ export function AccountSecurityDialog({ open, user, onClose, onDeleted, onAvatar
               <button type="button" className={styles.secondary} disabled={avatarBusy} onClick={deleteAvatar}>Utiliser les initiales</button>
             </div>
           </form>
+        </section>
+        <section className={styles.block}>
+          <h3>Passkeys</h3>
+          <p>
+            Connexion résistante au phishing avec la sécurité de votre appareil.
+            FIMOCheck reçoit une preuve cryptographique, jamais votre visage,
+            votre empreinte ni votre code de déverrouillage.
+          </p>
+          {typeof window !== "undefined" && window.PublicKeyCredential ? (
+            <>
+              <form onSubmit={registerPasskey}>
+                <label>
+                  Nom de cet appareil
+                  <input name="label" maxLength="60" placeholder="Portable personnel" autoComplete="off" required />
+                </label>
+                <label>
+                  Mot de passe actuel
+                  <input name="password" type="password" autoComplete="current-password" required />
+                </label>
+                <button className={styles.primary} disabled={passkeyBusy}>
+                  {passkeyBusy ? "Vérification de l’appareil…" : "Ajouter une passkey"}
+                </button>
+              </form>
+              {passkeys.length ? (
+                <ul className={styles.passkeyList}>
+                  {passkeys.map((passkey) => (
+                    <li key={passkey.id}>
+                      <div><strong>{passkey.label}</strong><small>Ajoutée le {new Date(passkey.createdAt).toLocaleDateString()}</small></div>
+                      <details>
+                        <summary>Retirer</summary>
+                        <form onSubmit={(event) => removePasskey(event, passkey.id)}>
+                          <label>Mot de passe actuel<input name="password" type="password" autoComplete="current-password" required /></label>
+                          <button className={styles.delete}>Confirmer le retrait</button>
+                        </form>
+                      </details>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className={styles.empty}>Aucune passkey enregistrée.</p>}
+            </>
+          ) : <p className={styles.empty}>Ce navigateur ne prend pas en charge les passkeys.</p>}
         </section>
         <section className={styles.block}>
           <h3>Exporter mes analyses</h3>

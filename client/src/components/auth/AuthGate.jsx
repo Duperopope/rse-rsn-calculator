@@ -6,6 +6,7 @@ import { AccountSecurityDialog } from "./AccountSecurityDialog.jsx";
 import { AccountSessionProvider } from "./AccountSessionContext.jsx";
 import { useI18n } from "../../platform/i18n/I18nProvider.jsx";
 import { OperationsCenter } from "./OperationsCenter.jsx";
+import { startAuthentication } from "@simplewebauthn/browser";
 
 export function AuthGate({ children }) {
   const { t } = useI18n();
@@ -15,6 +16,8 @@ export function AuthGate({ children }) {
   const [securityOpen, setSecurityOpen] = useState(false);
   const [avatarRevision, setAvatarRevision] = useState(0);
   const [operationsOpen, setOperationsOpen] = useState(false);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
   useEffect(() => {
     refresh();
   }, []);
@@ -46,6 +49,39 @@ export function AuthGate({ children }) {
         error: data.error || "Connexion impossible.",
       }));
     setState({ loading: false, user: data.user, error: "" });
+  }
+  async function loginWithPasskey() {
+    if (!loginUsername.trim()) {
+      return setState((s) => ({ ...s, error: t("auth.passkeyUsernameRequired") }));
+    }
+    setPasskeyBusy(true);
+    setState((s) => ({ ...s, error: "" }));
+    try {
+      const optionsResponse = await fetch(API_URL + "/auth/passkeys/login/options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: loginUsername }),
+      });
+      const payload = await optionsResponse.json();
+      if (!optionsResponse.ok) throw new Error(payload.error || t("auth.passkeyUnavailable"));
+      const credential = await startAuthentication({ optionsJSON: payload.options });
+      const verifyResponse = await fetch(API_URL + "/auth/passkeys/login/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: loginUsername,
+          challengeId: payload.challengeId,
+          response: credential,
+        }),
+      });
+      const verified = await verifyResponse.json();
+      if (!verifyResponse.ok) throw new Error(verified.error || t("auth.passkeyFailed"));
+      setState({ loading: false, user: verified.user, error: "" });
+    } catch (error) {
+      setState((s) => ({ ...s, error: error.message || t("auth.passkeyFailed") }));
+    } finally {
+      setPasskeyBusy(false);
+    }
   }
   async function changePassword(e) {
     e.preventDefault();
@@ -137,7 +173,7 @@ export function AuthGate({ children }) {
       >
         <label>
           {t("auth.username")}
-          <input name="username" autoComplete="username" required />
+          <input name="username" autoComplete="username" value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} required />
         </label>
         <label>
           {t("auth.recoveryCode")}
@@ -200,6 +236,14 @@ export function AuthGate({ children }) {
           />
         </label>
         <button>{t("auth.login")}</button>
+        {typeof window !== "undefined" && window.PublicKeyCredential ? (
+          <div className={styles.passkeyChoice}>
+            <span>{t("auth.or")}</span>
+            <button type="button" className={styles.passkeyButton} disabled={passkeyBusy} onClick={loginWithPasskey}>
+              {passkeyBusy ? t("auth.passkeyWaiting") : t("auth.passkeyLogin")}
+            </button>
+          </div>
+        ) : null}
       </AuthScreen>
     );
   if (state.user.mustChangePassword)

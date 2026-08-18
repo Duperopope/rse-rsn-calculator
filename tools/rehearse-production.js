@@ -20,6 +20,7 @@ function docker(args, options = {}) {
 function envArgs() {
   return ['-e', 'NODE_ENV=production', '-e', 'FIMO_DATA_DIR=/data', '-e', `FIMO_DATA_KEY=${dataKey}`,
     '-e', `FIMO_BACKUP_KEY=${backupKey}`, '-e', 'FIMO_ALLOWED_ORIGINS=https://pilot.fimocheck.invalid',
+    '-e', 'FIMO_WEBAUTHN_RP_ID=pilot.fimocheck.invalid', '-e', 'FIMO_WEBAUTHN_ORIGIN=https://pilot.fimocheck.invalid',
     '-e', 'FIMO_TACHOGRAPH_RETENTION_DAYS=90'];
 }
 function cleanup() {
