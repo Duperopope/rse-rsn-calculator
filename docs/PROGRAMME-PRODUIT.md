@@ -27,7 +27,7 @@ son retour arrière sont documentés.
 | Localisation | Catalogue extensible sans texte métier en dur | Détection des clés manquantes, pseudo-langue, RTL | Socle compte FR/EN testé ; application restante |
 | Données | Chiffrement, minimisation, export, purge et restauration | Tests de lecture croisée, purge et restauration | Testé localement |
 | Exploitation | Centre de commandement comptes/santé/sécurité/coûts | Métriques mesurées, alertes actionnables | Pilote local testé |
-| Tachygraphe | Import DDD/C1B/V1B avant connecteurs matériels | Corpus anonymisé, signatures et comparaison tierce | Réception chiffrée testée ; décodage à faire |
+| Tachygraphe | Import DDD/C1B/V1B avant connecteurs matériels | Corpus anonymisé, signatures et comparaison tierce | Réception et contrat canonique testés ; banc de comparaison livré ; corpus/décodeur réels requis |
 | Matériel | Lecteurs et téléchargement distant compatibles | Matrice VDO/Stoneridge/Actia sur appareils réels | Bloqué par matériel |
 | Production | Déploiement persistant, sauvegardé et réversible | Test de restauration, supervision et rollback | Image et restauration testées ; hébergement public à qualifier |
 | Économie | Gratuit utile, revenus non invasifs et traçables | Coûts/recettes réels, politique publique | Modèle documenté ; aucune recette observée |

@@ -33,6 +33,7 @@ Sources primaires :
 - [ERCA — documentation, certificats racine et jeux d'essai officiels](https://dtc.jrc.ec.europa.eu/dtc_erca_official_documentation_st.php.html)
 - [JRC — certificats publics délivrés par l'ERCA](https://dtc.jrc.ec.europa.eu/dtc_public_key_certificates_dt.php.html)
 - [JRC — demandes de tests d'interopérabilité](https://dtc.jrc.ec.europa.eu/dtc_test_requests.php.html)
+- [JRC — documentation technique et spécification de tests d’interopérabilité](https://dtc.jrc.ec.europa.eu/dtc_smart_tachograph.php.html)
 
 ## Pipeline de qualification
 
@@ -46,6 +47,42 @@ Sources primaires :
 | 6. Matériel | Lecteur carte et connecteur unité véhicule | Matrice appareils/OS/fabricants réelle | Bloqué par matériel |
 | 7. Terrain | Résultats et ergonomie exploitables | Pilote transport + responsable compétent | À organiser |
 | 8. Certification | Dossier conforme au dispositif applicable | Organisme habilité/JRC selon périmètre | Non engagée |
+
+## Banc de qualification livré
+
+Le dépôt contient désormais un contrat canonique versionné
+`fimocheck.tachograph.v1` et une commande qui confronte la sortie d’un décodeur
+à une référence indépendante, sans importer le corpus sensible dans Git :
+
+```sh
+FIMO_TACHOGRAPH_DECODER=/opt/decodeur-tachy \
+  node tools/qualify-tachograph-corpus.js /media/corpus-anonyme/manifest.json
+```
+
+Le décodeur est appelé sans shell, avec un délai maximal de 30 secondes. Il
+reçoit `--input <fichier> --format fimocheck.tachograph.v1` et doit écrire un
+unique objet JSON sur sa sortie standard. Le manifeste externe suit cette
+forme :
+
+```json
+{
+  "schemaVersion": "fimocheck.tachograph-corpus.v1",
+  "cases": [
+    {
+      "id": "carte-gen2v2-anonyme-01",
+      "source": "originaux/carte-01.ddd",
+      "sha256": "<64 caractères hexadécimaux>",
+      "reference": "references/carte-01.json"
+    }
+  ]
+}
+```
+
+Chaque activité normalisée doit indiquer son type, ses bornes ISO et la plage
+d’octets dont elle provient. Un résultat n’est éligible au calcul que si la
+signature est `verified` et qu’aucune activité ne reste `unknown`. Une simple
+sortie JSON valide ne prouve donc ni le décodeur, ni le fichier : il faut une
+égalité avec la référence tierce pour chaque cas du corpus.
 
 ## Architecture cible
 
