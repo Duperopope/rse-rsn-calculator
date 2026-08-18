@@ -17,7 +17,7 @@ try {
     check('database.integrity', db.pragma('integrity_check', { simple: true }) === 'ok', 'PRAGMA integrity_check');
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(row => row.name);
     for (const table of ['users', 'sessions', 'audit_log', 'audit_checkpoints', 'recovery_codes', 'analyses', 'profile_avatars', 'tachograph_imports']) check('schema.' + table, tables.includes(table), 'table requise');
-    check('accounts.admin', db.prepare("SELECT COUNT(*) AS n FROM users WHERE role='admin' AND active=1").get().n >= 1, 'au moins un administrateur actif');
+    check('accounts.admin', db.prepare("SELECT COUNT(*) AS n FROM users WHERE role='admin' AND active=1").get().n >= 1, 'au moins un administrateur actif', production);
     check('accounts.supported-roles', db.prepare("SELECT COUNT(*) AS n FROM users WHERE role NOT IN ('admin','member')").get().n === 0, 'aucun rôle sans workflow livré');
     db.close();
   }
