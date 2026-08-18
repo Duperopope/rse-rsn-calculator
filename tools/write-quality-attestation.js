@@ -12,9 +12,14 @@ let commit = null;
 try { commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(); } catch {}
 let productionRehearsal = null;
 try { productionRehearsal = JSON.parse(fs.readFileSync(path.join(runtimeDir, 'production-rehearsal.json'), 'utf8')); } catch {}
+let qualitySuite = null;
+try { qualitySuite = JSON.parse(fs.readFileSync(path.join(runtimeDir, 'quality-suite.json'), 'utf8')); } catch {}
+if (!qualitySuite || qualitySuite.sourceEvidence?.sha256 !== evidence.sha256) {
+  throw new Error('La suite qualité manque ou ne correspond pas exactement aux sources courantes. Exécutez npm test.');
+}
 const rehearsalCurrent = productionRehearsal?.status === 'passed' && productionRehearsal?.sourceEvidence?.sha256 === evidence.sha256;
 const attestation = {
-  schema: 1,
+  schema: 2,
   generatedAt: new Date().toISOString(),
   version: require('../package.json').version,
   commit,
@@ -22,16 +27,7 @@ const attestation = {
   evidenceFiles: evidence.files,
   gate: 'npm run verify',
   results: {
-    functional: { passed: 35, total: 35 },
-    embeddedQa: { passed: 167, total: 167 },
-    dataSecurity: { passed: 6, total: 6 },
-    apiSecurity: { passed: 66, total: 66 },
-    backupRestore: { passed: 6, total: 6 },
-    retention: { passed: 12, total: 12 },
-    productionConfiguration: { passed: 7, total: 7 },
-    qualityGates: { passed: 7, total: 7 },
-    localizationKeys: { passed: 62, total: 62 },
-    commonIcons: { passed: 11, total: 11 },
+    ...qualitySuite.results,
     productionRehearsal: rehearsalCurrent ? { passed: 9, total: 9 } : { passed: 0, total: 9 },
   },
   productionRehearsal: rehearsalCurrent ? productionRehearsal : null,

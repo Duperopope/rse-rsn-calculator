@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node server.js",
     "build": "cd client && npm install && npx vite build",
-    "test": "node tests/run-tests.js && node tests/run-qa.js && node tests/run-security.js && node tests/run-auth-api.js && node tests/run-backup.js && node tests/run-maintenance.js && node tests/run-production-security.js && node tests/run-quality-gates.js && node tests/run-i18n.js && node tests/run-assets.js && node tests/run-tachograph-contract.js && node tests/run-tachograph-qualification.js && node tests/run-public-pilot-qualification.js",
+    "test": "node tools/run-quality-suite.js",
     "test:regression": "node tests/run-tests.js",
     "test:qa": "node tests/run-qa.js",
     "test:security": "node tests/run-security.js && node tests/run-auth-api.js && node tests/run-backup.js && node tests/run-maintenance.js && node tests/run-production-security.js",

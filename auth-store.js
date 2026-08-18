@@ -261,7 +261,7 @@ function getProductMetrics() {
     },
     economics: {
       currency: 'EUR', revenueGrossCents: 0, revenueNetCents: 0,
-      paymentProviderConnected: false,
+      paymentProviderConnected: false, evidenceCode: 'no-payment-provider',
       evidence: 'Aucun prestataire de paiement ni registre de transactions connecté.'
     }
   };
