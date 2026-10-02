@@ -11,6 +11,7 @@ import { useTheme } from '../hooks/useTheme.js';
 
 
 import { useServerHealth } from '../hooks/useServerHealth.js';
+import { useMediaQuery } from '../hooks/useMediaQuery.js';
 
 
 import { STORAGE_KEY, HISTORIQUE_MAX } from '../config/constants.js';
@@ -43,7 +44,6 @@ import { JourFormulaire } from '../components/forms/JourFormulaire.jsx';
 import { CsvInput } from '../components/forms/CsvInput.jsx';
 
 
-import { IconeConduite, IconePause } from '../components/icons/TachyIcons.jsx';
 import { PanneauJauges } from '../components/gauges/PanneauJauges.jsx';
 
 
@@ -70,9 +70,10 @@ import styles from './Calculator.module.css';
 
 import { HistoriquePanel } from '../components/history/HistoriquePanel.jsx';
 import { ErrorBoundary } from '../components/common/ErrorBoundary.jsx';
-
-
-
+import { ScoreSummary } from '../components/dashboard/ScoreSummary.jsx';
+import { MiniGauges } from '../components/dashboard/MiniGauges.jsx';
+import { ContentTabs } from '../components/navigation/ContentTabs.jsx';
+import { DriverTabs } from '../components/navigation/DriverTabs.jsx';
 
 
 /**
@@ -100,6 +101,7 @@ export default function Calculator() {
 
 
   const { online, version: serverVersion, loading: healthLoading } = useServerHealth();
+  const isDesktop = useMediaQuery('(min-width: 769px)');
 
 
   const { analyser, resultat, setResultat, erreur, chargement, reset } = useAnalysis();
@@ -110,9 +112,6 @@ export default function Calculator() {
 
   const [onboardingDone, setOnboardingDone] = useLocalStorage('rse_onboarding_done', false);
   const [showTour, setShowTour] = useState(false);
-
-
-
 
 
   const [typeService, setTypeService] = useState('REGULIER');
@@ -174,13 +173,7 @@ export default function Calculator() {
   const touchStartY = React.useRef(0);
 
 
-
-
-
   const today = new Date().toISOString().slice(0, 10);
-
-
-
 
 
   /* === Navigation jour-tabs === */
@@ -205,9 +198,6 @@ export default function Calculator() {
 
 
   };
-
-
-
 
 
   /* === Couleur des onglets jours === */
@@ -237,9 +227,6 @@ export default function Calculator() {
   };
 
 
-
-
-
   /* === Jours conducteur 1 === */
 
 
@@ -262,9 +249,6 @@ export default function Calculator() {
 
 
   });
-
-
-
 
 
   /* === Jours conducteur 2 === */
@@ -291,9 +275,6 @@ export default function Calculator() {
   });
 
 
-
-
-
   useEffect(() => {
 
 
@@ -303,9 +284,6 @@ export default function Calculator() {
   }, [jours]);
 
 
-
-
-
   useEffect(() => {
 
 
@@ -313,9 +291,6 @@ export default function Calculator() {
 
 
   }, [jours2]);
-
-
-
 
 
   useEffect(() => {
@@ -360,90 +335,6 @@ export default function Calculator() {
     });
     setStatsJour(nextStats);
   }, [jours, jours2, mode, jourActifIndex, equipage, conducteurActif, typeService]);
-
-
-  /* === CRUD Jours conducteur 1 === */
-
-
-  function updateJour(index, newJour) {
-
-
-    setJours(prev => prev.map((j, i) => i === index ? newJour : j));
-
-
-  }
-
-
-
-
-
-  function ajouterJour() {
-
-
-    const lastDate = jours[jours.length - 1]?.date || today;
-
-
-    const d = new Date(lastDate);
-
-
-    d.setDate(d.getDate() + 1);
-
-
-    setJours(prev => [...prev, {
-
-
-      date: d.toISOString().slice(0, 10),
-
-
-      activites: [{ debut: '06:00', fin: '06:15', type: 'T' }]
-
-
-    }]);
-
-
-  }
-
-
-
-
-
-  function supprimerJour(index) {
-
-
-    if (jours.length <= 1) return;
-
-
-    setJours(prev => prev.filter((_, i) => i !== index));
-
-
-  }
-
-
-
-
-
-  function dupliquerJour(index) {
-
-
-    const src = jours[index];
-
-
-    const d = new Date(src.date);
-
-
-    d.setDate(d.getDate() + 1);
-
-
-    const copy = { date: d.toISOString().slice(0, 10), activites: src.activites.map(a => ({ ...a })) };
-
-
-    setJours(prev => { const arr = [...prev]; arr.splice(index + 1, 0, copy); return arr; });
-
-
-  }
-
-
-
 
 
   /* === Analyse === */
@@ -505,9 +396,6 @@ export default function Calculator() {
   }
 
 
-
-
-
   /* === Equipage double : jours actifs === */
 
 
@@ -562,9 +450,6 @@ export default function Calculator() {
   }
 
 
-
-
-
   const safeIndex = Math.min(jourActifIndex, joursActifs.length - 1);
 
 
@@ -589,9 +474,6 @@ export default function Calculator() {
   };
 
 
-
-
-
   const deleteAllHistorique = () => {
     setHistorique([]);
     setVoirHistorique(false);
@@ -607,9 +489,6 @@ export default function Calculator() {
       return entry;
     }));
   };
-
-
-
 
 
   const reloadHistorique = (entry) => {
@@ -656,9 +535,6 @@ export default function Calculator() {
   };
 
 
-
-
-
   const viewHistorique = (entry) => {
 
 
@@ -680,24 +556,13 @@ export default function Calculator() {
   };
 
 
-
-
-
-
-
-
   return (
 
 
     <div className={styles.app}>
 
 
-
         <GuidedTour visible={!onboardingDone || showTour} onClose={() => { setOnboardingDone(true); setShowTour(false); }} />
-
-
-
-
 
 
       <Header
@@ -739,9 +604,6 @@ export default function Calculator() {
       />
 
 
-
-
-
       <main className={styles.main}>
 
 
@@ -760,64 +622,12 @@ export default function Calculator() {
           mode={mode} onModeChange={(m) => { setMode(m); reset(); }}
 
 
-
-
-
         />
 
 
-
-
-
         {equipage === 'double' ? (
-
-
-          <div className={styles.conducteurTabs}>
-
-
-            <button
-
-
-              className={conducteurActif === 1 ? styles.tabActive : styles.tab}
-
-
-              onClick={() => setConducteurActif(1)}
-
-
-            >
-
-
-              Conducteur 1
-
-
-            </button>
-
-
-            <button
-
-
-              className={conducteurActif === 2 ? styles.tabActive : styles.tab}
-
-
-              onClick={() => setConducteurActif(2)}
-
-
-            >
-
-
-              Conducteur 2
-
-
-            </button>
-
-
-          </div>
-
-
+          <DriverTabs activeDriver={conducteurActif} onChange={setConducteurActif} />
         ) : null}
-
-
-
 
 
         {/* === DASHBOARD STICKY === */}
@@ -827,42 +637,17 @@ export default function Calculator() {
 
 
           <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')} data-tour-sticky="dashboard">
-            {/* -- Score principal compact -- */}
-            {resultat && (
-              <div
-                className={styles.scoreStickyRow}
-                onClick={() => setShowResultDetail(!showResultDetail)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setShowResultDetail(!showResultDetail);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-expanded={showResultDetail}
-                aria-label="Afficher ou masquer le detail du resultat"
-                style={{ cursor: 'pointer' }}
-              >
-                <div className={styles.scoreCircleMini} style={{
-                  background: resultat.score >= 90 ? 'var(--success, #10B981)' : resultat.score >= 70 ? 'var(--warning, #F59E0B)' : 'var(--danger, #EF4444)',
-                  color: resultat.score >= 90 ? '#000' : '#fff'
-                }}>
-                  {Math.round(resultat.score)}
-                </div>
-                <span className={styles.scoreStickyLabel}>
-                  Score FIMO {String.fromCharCode(8226)} {resultat.infractions?.length || 0} infraction{(resultat.infractions?.length || 0) > 1 ? 's' : ''}{resultat.avertissements?.length ? ' ' + String.fromCharCode(183) + ' ' + resultat.avertissements.length + ' alerte' + (resultat.avertissements.length > 1 ? 's' : '') : ''}
-                </span>
-                <span className={styles.scoreChevron}>{showResultDetail ? '\u25B2' : '\u25BC'}</span>
-              </div>
-            )}
+            <ScoreSummary
+              resultat={resultat}
+              expanded={showResultDetail}
+              onToggle={() => setShowResultDetail((value) => !value)}
+            />
 
 
+            {(dashExpanded || isDesktop) && <PanneauJauges stats={statsJour} typeService={typeService} nbDerogConduite={jaugeContext.nbDerogConduite} jours={jours} jourActifIndex={jourActifIndex} />}
 
-            {(dashExpanded || window.innerWidth >= 769) && <PanneauJauges stats={statsJour} typeService={typeService} nbDerogConduite={jaugeContext.nbDerogConduite} jours={jours} jourActifIndex={jourActifIndex} />}
 
-
-            {(dashExpanded || window.innerWidth >= 769) && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
+            {(dashExpanded || isDesktop) && jours[jourActifIndex] && jours[jourActifIndex].activites.length > 0 ? (
 
 
               <div data-tour="timeline" className={styles.timelineWrap}>
@@ -955,30 +740,8 @@ export default function Calculator() {
                   tabIndex={-1}
                 >&rsaquo;</button>
               </div>
-            {/* -- Mini-jauges compactes (toujours visibles) -- */}
-            {!dashExpanded && statsJour && statsJour.nbActivites > 0 && (
-              <div className={styles.miniJauges}>
-                <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteBloc >= 270 ? 'var(--danger, #EF4444)' : statsJour.conduiteBloc >= 216 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)'} /> Cont.</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteBloc || 0) / 270 * 100, 100) + '%', background: statsJour.conduiteBloc >= 270 ? 'var(--danger, #EF4444)' : statsJour.conduiteBloc >= 216 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteBloc >= 270 ? 'var(--danger, #EF4444)' : statsJour.conduiteBloc >= 216 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.conduiteBloc || 0) / 60)}h{String(Math.round((statsJour.conduiteBloc || 0) % 60)).padStart(2, '0')}</span>
-                </div>
-                <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><IconeConduite size={14} color={statsJour.conduiteTotale >= (jaugeContext.nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)'} /> Jour</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.conduiteTotale || 0) / (jaugeContext.nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) * 100, 100) + '%', background: statsJour.conduiteTotale >= (jaugeContext.nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.conduiteTotale >= (jaugeContext.nbDerogConduite < 2 && statsJour.conduiteTotale > 540 ? 600 : 540) ? 'var(--danger, #EF4444)' : statsJour.conduiteTotale >= 432 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.conduiteTotale || 0) / 60)}h{String(Math.round((statsJour.conduiteTotale || 0) % 60)).padStart(2, '0')}</span>
-                </div>
-                <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke={statsJour.amplitude >= (jaugeContext.amplMax) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (jaugeContext.amplNormal) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Ampl.</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.amplitude || 0) / (jaugeContext.amplMax) * 100, 100) + '%', background: statsJour.amplitude >= (jaugeContext.amplMax) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (jaugeContext.amplNormal) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: statsJour.amplitude >= (jaugeContext.amplMax) ? 'var(--danger, #EF4444)' : statsJour.amplitude >= (jaugeContext.amplNormal) * 0.92 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }}>{Math.floor((statsJour.amplitude || 0) / 60)}h{String(Math.round((statsJour.amplitude || 0) % 60)).padStart(2, '0')}</span>
-                </div>
-                <div className={styles.miniJauge}>
-                  <span className={styles.miniJaugeLabel}><IconePause size={14} color={(statsJour.pauseTotale || 0) >= 45 ? 'var(--success, #10B981)' : (statsJour.pauseTotale || 0) >= 22 ? 'var(--warning, #F59E0B)' : 'var(--danger, #EF4444)'} /> Pause</span>
-                  <div className={styles.miniJaugeTrack}><div className={styles.miniJaugeFill} style={{ width: Math.min((statsJour.pauseTotale || 0) / 45 * 100, 100) + '%', background: (statsJour.pauseTotale || 0) >= 45 ? 'var(--success, #10B981)' : (statsJour.pauseTotale || 0) >= 22 ? 'var(--warning, #F59E0B)' : 'var(--danger, #EF4444)' }} /></div>
-                  <span className={styles.miniJaugeVal} style={{ color: (statsJour.pauseTotale || 0) >= 45 ? 'var(--success, #10B981)' : (statsJour.pauseTotale || 0) >= 22 ? 'var(--warning, #F59E0B)' : 'var(--danger, #EF4444)' }}>{(statsJour.pauseTotale || 0)}m</span>
-                </div>
-              </div>
+            {!dashExpanded && (
+              <MiniGauges stats={statsJour} context={jaugeContext} />
             )}
 
             <button
@@ -1008,10 +771,6 @@ export default function Calculator() {
         ) : null}
 
 
-
-
-
-
         {/* === ZONE BASSE : Onglets Saisie / Resultats === */}
         <div
           onTouchStart={function(e) { touchStartX.current = e.touches[0].clientX; touchStartY.current = e.touches[0].clientY; }}
@@ -1028,20 +787,7 @@ export default function Calculator() {
         {erreur && <Card variant="danger" animate><p role="alert" className={styles.erreur}>{erreur}</p></Card>}
 
         {resultat && (
-          <div data-tour="bottom-tabs" className={styles.bottomTabs} role="tablist" aria-label="Saisie et resultats">
-            <button
-              role="tab"
-              aria-selected={bottomTab === "saisie"}
-              className={styles.bottomTab + (bottomTab === "saisie" ? " " + styles.bottomTabActive : "")}
-              onClick={() => setBottomTab('saisie')}
-            >Saisie</button>
-            <button
-              role="tab"
-              aria-selected={bottomTab === "resultats"}
-              className={styles.bottomTab + (bottomTab === "resultats" ? " " + styles.bottomTabActive : "")}
-              onClick={() => setBottomTab('resultats')}
-            >Resultats</button>
-          </div>
+          <ContentTabs activeTab={bottomTab} onChange={setBottomTab} />
         )}
 
         {bottomTab === "resultats" && resultat && !chargement ? (
@@ -1079,8 +825,6 @@ export default function Calculator() {
         </div>
 
 
-
-
         {/* === Info equipage double === */}
 
 
@@ -1102,7 +846,6 @@ export default function Calculator() {
         ) : null}
 
 
-
         {/* === Historique (panneau deroulant, controle par le header) === */}
 
 
@@ -1119,9 +862,6 @@ export default function Calculator() {
       </main>
 
 
-
-
-
       <BottomBar
         onAnalyse={() => { if (navigator.vibrate) navigator.vibrate(10); lancerAnalyse(); }}
         analyseEnCours={chargement}
@@ -1131,9 +871,6 @@ export default function Calculator() {
         voirHistorique={voirHistorique}
         onStartTour={() => setShowTour(true)}
       />
-
-
-
 
 
       <Footer />
@@ -1146,6 +883,5 @@ export default function Calculator() {
 
 
 }
-
 
 
