@@ -27,6 +27,7 @@ const contentTabs = read('client/src/components/navigation/ContentTabs.jsx');
 const miniGauges = read('client/src/components/dashboard/MiniGauges.jsx');
 const constants = read('client/src/config/constants.js');
 const renderConfig = read('render.yaml');
+const diagnosticRoutes = read('server/diagnostic-routes.js');
 
 check('versions root/client identiques', pkg.version === clientPkg.version, pkg.version + ' / ' + clientPkg.version);
 check('README sur la version courante', readme.includes('v' + pkg.version), pkg.version);
@@ -59,6 +60,9 @@ check('mini jauges extraites du monolithe', calculator.includes('<MiniGauges') &
 check('README ne documente pas /api/fix fantome', !readme.includes('| `POST` | `/api/fix`'));
 check('fichier parasite "=" absent', !fs.existsSync(path.join(root, '=')));
 check('server.err absent', !fs.existsSync(path.join(root, 'server.err')));
+check('serveur principal sous 2500 lignes', server.split('\n').length < 2500, server.split('\n').length + ' lignes');
+check('routes QA extraites du serveur principal', server.includes("require('./server/diagnostic-routes')") && diagnosticRoutes.includes("module.exports = function registerDiagnosticRoutes"));
+check('routes QA absentes du serveur principal', !server.includes("app.get('/api/qa'") && !server.includes('app.get("/api/qa/avance"'));
 
 const failed = checks.filter((c) => !c.ok);
 for (const c of checks) {
