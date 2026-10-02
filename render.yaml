@@ -3,7 +3,7 @@ services:
     name: rse-rsn-calculator
     runtime: node
     plan: free
-    buildCommand: npm ci --omit=dev && npm --prefix client ci && npm --prefix client run build
+    buildCommand: npm ci --omit=dev && npm --prefix client ci --include=dev && npm --prefix client run build
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
