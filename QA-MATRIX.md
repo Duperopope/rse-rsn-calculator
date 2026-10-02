@@ -29,6 +29,12 @@ Cette matrice complete les tests reglementaires. Un taux de reussite des regles 
 | Regression | 203 scenarios metier documentes | resultats attendus inchanges |
 | Visuel | etats canoniques clair/sombre/mobile/desktop | changement explicite et approuve |
 
+## Couverture automatisee actuelle
+
+La CI execute maintenant un parcours navigateur reel en plus des tests reglementaires. Il verifie notamment le mobile 375px, l absence de debordement horizontal, les 29 pays, un template de journee, une analyse complete, la persistance du resultat et de l historique, un PDF binaire valide, le clavier sur le score, le theme persistant, le dialogue historique, le desktop, les headers securite et le CORS.
+
+Les scenarios restant manuels dans cette matrice doivent etre automatises progressivement lorsqu ils apportent une preuve deterministe utile, plutot que de fabriquer un compteur artificiel de "100 %".
+
 ## Golden Journey
 
 1. Ouvrir l application sur un telephone vierge.
