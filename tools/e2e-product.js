@@ -142,7 +142,17 @@ async function main() {
   const templateClicked = await clickByText(page, 'button', 'Journee type');
   assert(templateClicked, 'template Journee type cliquable');
   await sleep(250);
-  assert((await page.$$('input[type="time"]')).length >= 2, 'horaires du template charges');
+  assert((await page.$('input[type="time"]')).length >= 2, 'horaires du template charges');
+
+  const mobileTargets = await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll('[class*="mobileActivityButton"]'));
+    return {
+      count: buttons.length,
+      minHeights: buttons.map((b) => b.getBoundingClientRect().height)
+    };
+  });
+  assert(mobileTargets.count >= 3, 'liste tactile mobile des activites disponible');
+  assert(mobileTargets.minHeights.every((h) => h >= 44), 'cibles timeline mobile >= 44px');
 
   await page.waitForFunction(() => {
     const b = document.querySelector('button[aria-label="Analyser la conformite"]');
