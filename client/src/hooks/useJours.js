@@ -1,6 +1,6 @@
 // FIMO Check — useJours.js
 // Hook unifie pour gestion des jours (solo + duo)
-// Remplace: jours/jours2/joursActifs + 8 fonctions doublees + window.__
+// Remplace les etats jours dupliques et les anciens globals implicites
 // Source: ARCHITECTURE-V8.md section 3a
 
 import { useState, useEffect, useMemo } from "react";
@@ -67,7 +67,7 @@ export function useJours(equipage, typeService) {
     setJours(function(prev) { var arr = prev.slice(); arr.splice(index + 1, 0, copy); return arr; });
   }
 
-  // === Calculs derogations (remplace window.__) ===
+  // === Calculs derogations en etat derive ===
   var derogations = useMemo(function() {
     var nbDerogConduite = 0;
     for (var di = 0; di < jours.length; di++) {
