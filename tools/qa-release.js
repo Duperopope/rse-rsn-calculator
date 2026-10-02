@@ -23,6 +23,7 @@ const globalCss = read('client/src/styles/global.css');
 const params = read('client/src/components/forms/ParametresPanel.jsx');
 const infractions = read('client/src/components/results/InfractionCard.jsx');
 const calculator = read('client/src/pages/Calculator.jsx');
+const constants = read('client/src/config/constants.js');
 
 check('versions root/client identiques', pkg.version === clientPkg.version, pkg.version + ' / ' + clientPkg.version);
 check('README sur la version courante', readme.includes('v' + pkg.version), pkg.version);
@@ -44,6 +45,7 @@ check('pas de script SW inline', !indexHtml.includes("navigator.serviceWorker.re
 check('focus visible global', globalCss.includes(':focus-visible'));
 check('reduced motion gere', globalCss.includes('prefers-reduced-motion'));
 check('parametres exposes aux lecteurs d ecran', params.includes('htmlFor="type-service"') && params.includes('aria-pressed'));
+check('29 pays exposes dans l interface', (constants.match(/code: '[A-Z]{2}'/g) || []).length >= 29);
 check('cartes infraction clavier', infractions.includes('onKeyDown={handleKeyDown}'));
 check('onglets resultats semantiques', calculator.includes('role="tablist"') && calculator.includes('aria-selected'));
 check('README ne documente pas /api/fix fantome', !readme.includes('| `POST` | `/api/fix`'));
