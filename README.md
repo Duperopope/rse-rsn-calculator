@@ -1,6 +1,6 @@
 # FIMO Check
 
-> **Driver CPC Compliance Tool**
+> **Conformite des temps de conduite, pauses et repos**
 >
 > Outil de verification de conformite des temps de conduite et de repos pour le transport routier.
 > Reglementation europeenne CE 561/2006 (modifie par UE 2024/1258), Code des transports francais (L3312-1/2), Decret 2010-855.
@@ -11,11 +11,11 @@
 
 | Element | Valeur |
 | --- | --- |
-| Version | **v7.25.1** |
-| Tests backend | **56/56 (100%)** |
-| Tests QA complets | **203/203 (100%)** |
+| Version | **v7.25.2** |
+| Tests backend | **56 scenarios N1 documentes** |
+| Tests reglementaires | **203 scenarios automatises** |
 | URLs legales verifiees | **44/44** (15 Legifrance + 27 EUR-Lex + 2 autres) |
-| Couverture reglementaire | 100% (standard + transport occasionnel voyageurs) |
+| Perimetre reglementaire | standard + transport occasionnel voyageurs |
 | Demo | [rse-rsn-calculator.onrender.com](https://rse-rsn-calculator.onrender.com/) |
 
 ## Fonctionnalites
@@ -30,7 +30,7 @@
 - **Mobile first** — bottom bar WCAG 48px, chips parametres, touch feedback, swipe navigation
 - **Multi-jours** — navigation J1/J2/J3... avec code couleur (vert/orange/rouge)
 - **Double equipage** — bascule Solo/Duo avec calculs separes
-- **Tour guide** — 10 etapes interactives via react-joyride pour decouvrir l interface
+- **Tour guide** — 4 etapes courtes via react-joyride pour decouvrir l interface
 - **Mode sombre/clair** — toggle iOS-style avec persistance localStorage
 - **Historique** — sauvegarde des analyses precedentes
 
@@ -47,7 +47,7 @@
 - **Dashboard** — jauges conduite continue, conduite journaliere, amplitude, pauses
 - **Resultats** — score anime, infractions avec explications, synthese calendaire, bareme sanctions
 - **Suivi reglementaire** — repos reduits, repos hebdo, compensation dette, conduite de nuit
-- **Bottom bar mobile** — Analyser, Historique (badge count), Haut
+- **Bottom bar mobile** — Analyser, Historique (badge count), Aide
 
 ## Tests QA — 6 niveaux
 
@@ -60,7 +60,7 @@
 | N5 - Avances | `GET /api/qa/avance` | 18 | OUT, FERRY, multi-equipage, bi-hebdo 90h, repos hebdo, transport occasionnel |
 | N6 - Multi-semaines | `GET /api/qa/multi-semaines` | 18 | Tracking multi-semaines, compensation repos, retour domicile, derogations |
 | CSV - Integration | `node tests/run-tests.js` | 36 | Fichiers CSV complets, scores, infractions, fix-engine |
-| **Total** | | **203** | **100% de reussite** |
+| **Total** | | **203** | **scenarios documentes** |
 
 ## Pipeline QA automatise
 
@@ -69,7 +69,7 @@
 | QA visuel DOM | `tools/analyse-qa.js` | ~0.02$ | Capture DOM + analyse Claude Sonnet |
 | Verification bugs | `tools/verify-bugs.js` | 0$ | Verification DOM des corrections |
 | Audit complet | `tools/audit-complet.js` | ~0.05$ | Parcours utilisateur complet Puppeteer |
-| Test tour guide | `tools/test-tour.js` | 0$ | Validation 10 etapes GuidedTour |
+| Test tour guide | `tools/test-tour.js` | 0$ | Validation du GuidedTour |
 | Verif data-tour | `tools/check-targets.js` | 0$ | Presence des cibles dans le DOM |
 
 ## Transport occasionnel de voyageurs (UE 2024/1258)
@@ -87,7 +87,6 @@
 | Methode | Route | Body | Description |
 | --- | --- | --- | --- |
 | `POST` | `/api/analyze` | `{csv, typeService, pays, equipage}` | Analyse CSV tachygraphe (JSON) |
-| `POST` | `/api/fix` | `{csv, typeService, pays, equipage}` | Correction automatique infractions |
 | `POST` | `/api/rapport/pdf` | `{resultat, options}` | Generation rapport PDF |
 | `GET` | `/api/health` | — | Health check + version |
 | `GET` | `/api/qa` | — | Tests QA N1 (56 tests) |
@@ -142,6 +141,15 @@ Types : `C` = Conduite, `P` = Pause, `T` = Travail, `D` = Disponibilite, `R` = R
 
 ## Changelog
 
+### v7.25.2 (2026-10-02) — Hardening produit + QA release
+- securite Express : Helmet, CSP, rate limiting, CORS controle, erreurs non verbeuses
+- validation PDF corrigee et upload CSV filtre/nettoye
+- versions root/client/backend synchronisees via package.json
+- PWA avec app-shell reel et orientation non forcee
+- accessibilite clavier, labels, focus visible et reduced-motion
+- CI GitHub + QA release + matrice QA produit + politique de securite
+- nettoyage documentation, API fantome et fichiers parasites
+
 ### v7.25.1 (2026-02-16) — Explications pedagogiques + boutons export
 - **Explications pedagogiques** : chaque infraction affiche un bloc explicatif (12 types couverts)
 - **Bouton Telecharger PDF** : branche dans ResultPanel (etait code mais absent du JSX)
@@ -169,9 +177,16 @@ Types : `C` = Conduite, `P` = Pause, `T` = Travail, `D` = Disponibilite, `R` = R
 ### v7.6.12 — Documentation QA
 - 203 tests (N1-N6 + CSV), 6 niveaux QA
 
+## Securite et QA release
+
+- `npm run qa:release` verifie les invariants de packaging, securite, PWA et accessibilite.
+- La CI GitHub execute syntaxe, tests reglementaires, build frontend et audit des dependances critiques.
+- Voir `SECURITY.md` pour les principes de securite et `QA-MATRIX.md` pour le parcours QA produit complet.
+- Les appels API couteux sont limites en frequence ; les uploads sont limites, filtres et nettoyes.
+
 ## Licence
 
-Projet prive — Tous droits reserves.
+MIT — voir `LICENSE`.
 
 ---
 
