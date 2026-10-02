@@ -2241,7 +2241,7 @@ app.post('/api/analyze', expensiveLimiter, (req, res) => {
     res.json(resultat);
   } catch (err) {
     console.error("[ERREUR ANALYSE]", err);
-    res.status(500).json({ error: "Erreur lors de l'analyse : " + err.message });
+    res.status(500).json({ error: "Erreur lors de l'analyse." });
   }
 });
 
@@ -2270,7 +2270,7 @@ app.post('/api/rapport/pdf', expensiveLimiter, function(req, res) {
     console.log('[PDF] Rapport genere: ' + filename);
   } catch (err) {
     console.error('[PDF ERREUR]', err);
-    res.status(500).json({ error: 'Erreur generation PDF: ' + err.message });
+    res.status(500).json({ error: 'Erreur generation PDF.' });
   }
 });
 // POST /api/upload - Upload un fichier CSV
