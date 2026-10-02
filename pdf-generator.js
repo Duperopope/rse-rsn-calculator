@@ -1,6 +1,6 @@
 /**
  * pdf-generator.js - Generateur de rapport PDF
- * RSE/RSN Calculator v7.8.0
+ * FIMO Check
  * 
  * Utilise pdfkit pour generer un rapport professionnel
  * contenant: score, infractions, sanctions, fix-engine, recommandations
@@ -12,13 +12,14 @@
  */
 
 var PDFDocument = require('pdfkit');
+var APP_VERSION = require('./package.json').version;
 
 // Couleurs du theme
 var COLORS = {
   primary: '#1a1a2e',
-  accent: '#00cc6a',
-  red: '#cc3333',
-  orange: '#cc8800',
+  accent: '#10B981',
+  red: '#EF4444',
+  orange: '#F59E0B',
   gray: '#666666',
   lightGray: '#999999',
   white: '#ffffff',
@@ -115,7 +116,7 @@ function genererRapportPDF(resultat, options) {
   doc.text('Date du rapport : ' + dateRapport + ' a ' + heureRapport, 50, doc.y);
   doc.text('Periode analysee : ' + (periode || 'Non specifiee'), 50, doc.y + 2);
   doc.text('Type de service : ' + typeService + ' | Pays : ' + pays + ' | Equipage : ' + equipage, 50, doc.y + 2);
-  doc.text('Jours analyses : ' + details.length + ' | Generateur : RSE/RSN Calculator v7.8.0', 50, doc.y + 2);
+  doc.text('Jours analyses : ' + details.length + ' | Generateur : FIMO Check v' + APP_VERSION, 50, doc.y + 2);
   
   doc.moveDown(1);
   
