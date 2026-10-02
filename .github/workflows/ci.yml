@@ -34,13 +34,11 @@ jobs:
         run: npm ci
 
       - name: Runtime dependency audit
-        continue-on-error: true
-        run: npm audit --omit=dev --json || true
+        run: npm audit --omit=dev --audit-level=moderate
 
       - name: Frontend dependency audit
-        continue-on-error: true
         working-directory: client
-        run: npm audit --omit=dev --json || true
+        run: npm audit --omit=dev --audit-level=moderate
 
       - name: Syntax check
         run: npm run pretest
