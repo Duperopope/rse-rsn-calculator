@@ -18,7 +18,7 @@ var path = require('path');
 // ============================================================
 var CONFIG = {
   serverFile: path.join(__dirname, '..', 'server.js'),
-  csvFile: path.join(__dirname, 'fixtures', 'test_56jours.csv'),
+  sourceCsvFile: path.join(__dirname, 'test_12semaines.csv'),
   referenceFile: path.join(__dirname, 'fixtures', 'reference_v76101.json'),
   port: 3098,
   startupDelay: 4000,
@@ -73,6 +73,34 @@ function assertExists(name, obj, key) {
   } else {
     fail(name, 'exists', 'undefined/null');
   }
+}
+
+function buildLastNDaysFixture(csvText, days) {
+  var lines = csvText.split(/\r?\n/).filter(function(line) {
+    return line.trim().length > 0 && line.trim().charAt(0) !== '#';
+  });
+  var dates = [];
+  var seen = {};
+  lines.forEach(function(line) {
+    var date = line.split(';')[0];
+    if (date && !seen[date]) {
+      seen[date] = true;
+      dates.push(date);
+    }
+  });
+  if (dates.length < days) {
+    throw new Error('Fixture source insuffisante: ' + dates.length + ' jours, ' + days + ' requis');
+  }
+  var keep = {};
+  dates.slice(-days).forEach(function(date) { keep[date] = true; });
+  var selected = lines.filter(function(line) {
+    return keep[line.split(';')[0]];
+  });
+  var selectedDates = Object.keys(keep);
+  if (selectedDates.length !== days) {
+    throw new Error('Generation fixture invalide: ' + selectedDates.length + ' jours');
+  }
+  return selected.join('\n') + '\n';
 }
 
 function assertType(name, value, expectedType) {
@@ -360,13 +388,13 @@ async function main() {
   console.log('');
   console.log('============================================================');
   console.log(' RSE-RSN Calculator - Tests automatises');
-  console.log(' Reference: v7.6.10.1 | Fixture: test_56jours.csv');
+  console.log(' Reference: v7.20.2 | Fixture: 56 derniers jours de test_12semaines.csv');
   console.log('============================================================');
   console.log('');
   
   // Verifier fichiers
-  if (!fs.existsSync(CONFIG.csvFile)) {
-    log('ERREUR: Fixture CSV introuvable: ' + CONFIG.csvFile);
+  if (!fs.existsSync(CONFIG.sourceCsvFile)) {
+    log('ERREUR: Source CSV introuvable: ' + CONFIG.sourceCsvFile);
     process.exit(1);
   }
   if (!fs.existsSync(CONFIG.referenceFile)) {
@@ -375,7 +403,8 @@ async function main() {
   }
   
   var reference = JSON.parse(fs.readFileSync(CONFIG.referenceFile, 'utf8'));
-  var csvContent = fs.readFileSync(CONFIG.csvFile, 'utf8');
+  var sourceCsvContent = fs.readFileSync(CONFIG.sourceCsvFile, 'utf8');
+  var csvContent = buildLastNDaysFixture(sourceCsvContent, 56);
   
   try {
     await startServer();
