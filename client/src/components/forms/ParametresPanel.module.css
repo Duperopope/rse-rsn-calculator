@@ -115,7 +115,7 @@
 
 .label {
   font-size: 13px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -165,7 +165,7 @@
   font-weight: 600;
   background: transparent;
   border: none;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
   -webkit-tap-highlight-color: transparent;
