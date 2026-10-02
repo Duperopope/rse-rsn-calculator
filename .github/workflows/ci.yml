@@ -36,9 +36,17 @@ jobs:
       - name: Syntax check
         run: npm run pretest
 
-      - name: Backend and regulatory tests
+      - name: Static quality gate
+        run: npm run quality
+
+      - name: Backend, regulatory and PDF tests
         run: npm test
 
       - name: Frontend production build
         working-directory: client
         run: npm run build
+
+      - name: Browser user journey
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: npm run test:e2e
