@@ -3,10 +3,8 @@ import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
 
 /* ============================================================
    GuidedTour v4.0 — 4 etapes adaptees a la visibilite DOM
-   Etapes 1-6: elements toujours presents
-   Etapes 7-10: elements toujours presents (header, params, input)
-   Les cibles conditionnelles (timeline, gauges, results)
-   sont couvertes par le texte explicatif.
+   Quatre etapes courtes, uniquement sur des cibles toujours disponibles.
+   Les fonctions avancees restent decouvrables dans le contexte d usage.
    ============================================================ */
 
 var STEPS = [
@@ -40,23 +38,23 @@ var STEPS = [
     }
   ];
 
-var HIDE_DASHBOARD_STEPS = [4, 5];
+var HIDE_DASHBOARD_STEPS = [];
 
 var JOYRIDE_STYLES = {
   options: {
     arrowColor: '#1e293b',
     backgroundColor: '#1e293b',
     overlayColor: 'rgba(0, 0, 0, 0.85)',
-    primaryColor: '#06b6d4',
+    primaryColor: '#3B82F6',
     textColor: '#e2e8f0',
-    spotlightShadow: '0 0 25px rgba(6, 182, 212, 0.5)',
+    spotlightShadow: '0 0 25px rgba(59, 130, 246, 0.5)',
     zIndex: 10000,
   },
   tooltip: {
     borderRadius: '16px',
     padding: '20px',
     boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(6,182,212,0.15)',
-    border: '1px solid rgba(6, 182, 212, 0.2)',
+    border: '1px solid rgba(59, 130, 246, 0.2)',
     maxWidth: '420px',
   },
   tooltipContainer: {
@@ -74,7 +72,7 @@ var JOYRIDE_STYLES = {
     color: '#cbd5e1',
   },
   buttonNext: {
-    backgroundColor: '#06b6d4',
+    backgroundColor: '#3B82F6',
     borderRadius: '10px',
     color: '#fff',
     fontWeight: 600,
@@ -88,7 +86,7 @@ var JOYRIDE_STYLES = {
     marginRight: '8px',
   },
   buttonSkip: {
-    color: '#64748b',
+    color: '#A8B0C0',
     fontSize: '0.85rem',
   },
   buttonClose: {
@@ -99,7 +97,7 @@ var JOYRIDE_STYLES = {
   },
   spotlight: {
     borderRadius: '14px',
-    boxShadow: '0 0 0 3px #06b6d4, 0 0 30px rgba(6, 182, 212, 0.6), 0 0 60px rgba(6, 182, 212, 0.3)',
+    boxShadow: '0 0 0 3px #3B82F6, 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3)',
   },
 };
 

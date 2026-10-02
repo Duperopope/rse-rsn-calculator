@@ -38,6 +38,14 @@ export function useTheme() {
     root.style.setProperty('--accent-red', colors.accentRed);
     root.style.setProperty('--accent-orange', colors.accentOrange);
     root.style.setProperty('--accent-purple', colors.accentPurple);
+    root.style.setProperty('--success', colors.accentGreen);
+    root.style.setProperty('--warning', colors.accentOrange);
+    root.style.setProperty('--danger', colors.accentRed);
+    root.style.setProperty('--bg-elevated', theme === 'dark' ? '#1E2433' : '#E2E8F0');
+    root.style.setProperty('--text-muted', theme === 'dark' ? '#94A3B8' : '#64748B');
+    root.style.setProperty('--success-dim', theme === 'dark' ? '#064E3B' : '#D1FAE5');
+    root.style.setProperty('--warning-dim', theme === 'dark' ? '#451A03' : '#FEF3C7');
+    root.style.setProperty('--danger-dim', theme === 'dark' ? '#450A0A' : '#FEE2E2');
     root.style.setProperty('--gradient-start', colors.gradientStart);
     root.style.setProperty('--gradient-end', colors.gradientEnd);
     root.setAttribute('data-theme', theme);

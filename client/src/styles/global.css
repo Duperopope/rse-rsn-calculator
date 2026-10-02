@@ -21,14 +21,14 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --text-secondary: #94A3B8;
-  --text-tertiary: #8a8a9a;
+  --text-tertiary: #A8B0C0;
   --accent: #3B82F6;
   --accent-glow: rgba(59,130,246,0.15);
   --accent-subtle: rgba(59,130,246,0.08);
   --bg: #0B0D10;
   --bg-elevated: #1E2433;
   --border-light: #374151;
-  --text-muted: #64748B;
+  --text-muted: #94A3B8;
   --success: #10B981;
   --warning: #F59E0B;
   --danger: #EF4444;
@@ -41,15 +41,15 @@ body {
   font-variant-numeric: tabular-nums;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  background: #0B0D10;
-  color: var(--text, #e0e0e0);
+  background: var(--bg, #0B0D10);
+  color: var(--text, #E2E8F0);
   line-height: 1.6;
   min-height: 100vh;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
 a {
-  color: var(--accent, #00d4ff);
+  color: var(--accent, #3B82F6);
   text-decoration: none;
 }
 @media (hover: hover) {
@@ -77,7 +77,12 @@ input, textarea, select {
   transition: border-color 0.2s;
 }
 input:focus, textarea:focus, select:focus {
-  border-color: var(--accent, #00d4ff);
+  border-color: var(--accent, #3B82F6);
+}
+
+:where(button, a, input, select, textarea, [role="button"], [role="tab"], [tabindex]):focus-visible {
+  outline: 3px solid var(--accent, #3B82F6);
+  outline-offset: 3px;
 }
 
 /* ========== Animations ========== */
@@ -128,7 +133,7 @@ input:focus, textarea:focus, select:focus {
 }
 @media (hover: hover) {
   ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent, #00d4ff);
+  background: var(--accent, #3B82F6);
 }
 }
 
@@ -207,10 +212,8 @@ button:active, .btn:active, [role="button"]:active {
   transition: transform 0.1s ease;
 }
 
-/* Desactiver le delay 300ms iOS */
-* {
-  touch-action: manipulation;
-}
+/* Les controles interactifs utilisent touch-action: manipulation.
+   Ne pas l appliquer globalement afin de conserver zoom et gestes natifs. */
 
 
 /* === QOL 2: Prevent iOS auto-zoom on input focus === */
@@ -238,7 +241,7 @@ body {
   outline: none;
 }
 [role="button"]:focus-visible {
-  outline: 2px solid var(--accent, #00d4ff);
+  outline: 2px solid var(--accent, #3B82F6);
   outline-offset: 2px;
 }
 
@@ -329,4 +332,29 @@ html {
   --md-shadow-lg: 0 8px 24px rgba(0,0,0,0.35), 0 4px 8px rgba(0,0,0,0.2);
   --md-shadow-md: 0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
   --md-shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* === Accessibilite mouvement / contraste === */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  button, a, input, select, textarea, [role="button"], [role="tab"] {
+    forced-color-adjust: auto;
+  }
+}
+
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
 }

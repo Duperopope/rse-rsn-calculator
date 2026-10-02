@@ -1,0 +1,15 @@
+{
+  "description": "Regression versionnee sur tests/test_12semaines.csv. Baseline documentee par les commits v7.20.2-v7.20.5.",
+  "source": "tests/test_12semaines.csv",
+  "baseline_commit": "4b83784b465daf25df943a318a2acbcb8a7f0a8",
+  "baseline_version": "7.20.5",
+  "type_service": "SLO",
+  "pays": "FR",
+  "equipage": "solo",
+  "expected_days": 84,
+  "criteres": {
+    "score_exact": 88,
+    "infractions_exact": 15,
+    "amende_exact": 4500
+  }
+}

@@ -86,6 +86,9 @@ function VueJour(props) {
           key: b.index,
           className: styles.bloc,
           style: { left: b.left + '%', width: b.width + '%', backgroundColor: b.bg },
+          role: 'button',
+          tabIndex: 0,
+          'aria-label': b.label + ' de ' + b.debut + ' a ' + b.fin + ', ' + formatDuree(b.duree),
           onClick: function(e) {
             e.stopPropagation();
             if (tooltip && tooltip.index === b.index) {
@@ -94,9 +97,44 @@ function VueJour(props) {
               setTooltip(b);
             }
             if (onActiviteClick) onActiviteClick(b.index);
+          },
+          onKeyDown: function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+              if (tooltip && tooltip.index === b.index) setTooltip(null);
+              else setTooltip(b);
+              if (onActiviteClick) onActiviteClick(b.index);
+            }
           }
         },
           b.showLabel ? React.createElement('span', { className: styles.blocLabel }, b.type) : null
+        );
+      })
+    ),
+    // Sur mobile, les segments tres courts gardent leur largeur chronologique.
+    // Cette liste fournit des cibles tactiles confortables sans deformer la timeline.
+    React.createElement('div', { className: styles.mobileActivityList, 'aria-label': 'Activites de la journee' },
+      blocs.map(function(b) {
+        return React.createElement('button', {
+          key: 'mobile-' + b.index,
+          type: 'button',
+          className: styles.mobileActivityButton,
+          onClick: function() {
+            if (tooltip && tooltip.index === b.index) setTooltip(null);
+            else setTooltip(b);
+            if (onActiviteClick) onActiviteClick(b.index);
+          },
+          'aria-label': b.label + ' de ' + b.debut + ' a ' + b.fin + ', ' + formatDuree(b.duree)
+        },
+          React.createElement('span', {
+            className: styles.mobileActivityDot,
+            style: { backgroundColor: b.bg },
+            'aria-hidden': 'true'
+          }),
+          React.createElement('span', { className: styles.mobileActivityType }, b.label),
+          React.createElement('span', { className: styles.mobileActivityTimes }, b.debut + ' – ' + b.fin),
+          React.createElement('span', { className: styles.mobileActivityDuration }, formatDuree(b.duree))
         );
       })
     ),
@@ -145,7 +183,7 @@ function VueSemaine(props) {
     React.createElement('div', { className: styles.semaineHeader },
       React.createElement('span', { className: styles.semaineTitle }, 'Vue semaine'),
       React.createElement('span', { className: styles.semaineCounter,
-        style: { color: conduiteTotaleSemaine > 3360 ? '#ff4444' : conduiteTotaleSemaine > 2880 ? '#ffaa00' : '#00ff88' }
+        style: { color: conduiteTotaleSemaine > 3360 ? 'var(--danger, #EF4444)' : conduiteTotaleSemaine > 2880 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }
       }, formatDuree(conduiteTotaleSemaine) + ' / 56h conduite')
     ),
     // Lignes jours
@@ -164,7 +202,17 @@ function VueSemaine(props) {
       return React.createElement('div', {
         key: i,
         className: styles.semaineLigne + (isActif ? ' ' + styles.semaineLigneActive : ''),
-        onClick: function() { if (onJourClick) onJourClick(i); }
+        role: 'button',
+        tabIndex: 0,
+        'aria-current': isActif ? 'true' : undefined,
+        'aria-label': 'Jour ' + (i + 1) + (jour.date ? ', ' + jour.date : ''),
+        onClick: function() { if (onJourClick) onJourClick(i); },
+        onKeyDown: function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (onJourClick) onJourClick(i);
+          }
+        }
       },
         // Label date
         React.createElement('div', { className: styles.semaineDate },
@@ -197,8 +245,22 @@ function VueSemaine(props) {
         // Stats rapides
         React.createElement('div', { className: styles.semaineStats },
           detail.conduite_h ? React.createElement('span', { className: styles.semaineStat }, detail.conduite_h + 'h C') : null,
-          nbInf > 0 ? React.createElement('span', { className: styles.semaineInfBadge, onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'infraction'); } }, nbInf) : null,
-          nbAvert > 0 ? React.createElement('span', { className: styles.semaineAvertBadge, onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'avertissement'); } }, nbAvert) : null
+          nbInf > 0 ? React.createElement('span', {
+            className: styles.semaineInfBadge,
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': nbInf + ' infraction' + (nbInf > 1 ? 's' : '') + ' ce jour',
+            onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'infraction'); },
+            onKeyDown: function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'infraction'); } }
+          }, nbInf) : null,
+          nbAvert > 0 ? React.createElement('span', {
+            className: styles.semaineAvertBadge,
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': nbAvert + ' avertissement' + (nbAvert > 1 ? 's' : '') + ' ce jour',
+            onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'avertissement'); },
+            onKeyDown: function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'avertissement'); } }
+          }, nbAvert) : null
         )
       );
     }),

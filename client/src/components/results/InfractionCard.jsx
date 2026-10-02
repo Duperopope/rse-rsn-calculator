@@ -172,8 +172,23 @@ export function InfractionCard({ infraction, index, onNavigate, grouped, count, 
     e.stopPropagation();
   }
 
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleTap();
+    }
+  }
+
   return (
-    <div className={styles.card} onClick={handleTap} role="button" tabIndex={0} data-infraction-index={index}>
+    <div
+      className={styles.card}
+      onClick={handleTap}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={'Infraction ' + (index + 1) + ' : ' + message}
+      data-infraction-index={index}
+    >
       <div className={styles.header}>
         <span className={styles.badge}>{index + 1}</span>
               {grouped && count > 1 ? (

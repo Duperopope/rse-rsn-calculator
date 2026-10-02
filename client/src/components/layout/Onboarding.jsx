@@ -8,8 +8,14 @@ import styles from './Onboarding.module.css';
 export function Onboarding({ onClose }) {
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.title}>Bienvenue sur FIMO Check</h2>
+      <div
+        className={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+      >
+        <h2 id="onboarding-title" className={styles.title}>Bienvenue sur FIMO Check</h2>
         <div className={styles.content}>
           <div className={styles.step}>
             <span className={styles.num}>1</span>
@@ -36,7 +42,7 @@ export function Onboarding({ onClose }) {
         <div className={styles.reglements}>
           <p>Basee sur le reglement CE 561/2006, L3312-1 et C. transports R3312-9</p>
         </div>
-        <button className={styles.btn} onClick={onClose}>
+        <button className={styles.btn} type="button" onClick={onClose}>
           Commencer
         </button>
       </div>

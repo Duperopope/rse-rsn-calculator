@@ -361,3 +361,51 @@
   font-weight: 600;
   color: #e69500;
 }
+
+/* Mobile: les blocs temporels gardent leur largeur exacte, une liste separee
+   fournit les cibles tactiles WCAG sans deformer la chronologie. */
+.mobileActivityList {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .mobileActivityList {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .mobileActivityButton {
+    width: 100%;
+    min-height: 44px;
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--border, #2D3748);
+    border-radius: var(--md-radius-sm, 8px);
+    background: var(--bg-input, #1A1F2B);
+    color: var(--text, #E2E8F0);
+    text-align: left;
+  }
+
+  .mobileActivityDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+  }
+
+  .mobileActivityType {
+    min-width: 0;
+    font-weight: 650;
+  }
+
+  .mobileActivityTimes,
+  .mobileActivityDuration {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary, #A8B0C0);
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+}

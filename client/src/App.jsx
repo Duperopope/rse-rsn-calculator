@@ -3,7 +3,7 @@ import Calculator from './pages/Calculator.jsx';
 import './styles/global.css';
 
 /**
- * FIMO Check v7.11.0
+ * FIMO Check
  * Shell minimal - tout le contenu est dans Calculator.jsx
  *
  * Architecture :

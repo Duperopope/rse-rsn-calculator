@@ -1,26 +1,33 @@
 {
   "name": "fimo-check",
-  "version": "7.11.0",
+  "version": "7.25.2",
   "private": true,
-  "description": "FIMO Check - Driver CPC Compliance Tool - Conformite CE 561/2006",
+  "description": "FIMO Check - conformite des temps de conduite, pauses et repos",
   "author": "Samir Medjaher",
   "license": "MIT",
   "scripts": {
     "start": "node server.js",
-    "build": "cd client && npm install && npx vite build",
+    "build": "npm --prefix client run build",
+    "check:syntax": "node -c server.js && node -c fix-engine.js && node -c pdf-generator.js && node -c qa_check.js",
     "test": "node tests/run-tests.js",
-    "pretest": "node -c server.js && node -c fix-engine.js"
+    "qa:release": "node tools/qa-release.js",
+    "test:parcours": "node tools/test-parcours.js",
+    "pretest": "npm run check:syntax",
+    "ci": "npm run qa:release && npm run check:syntax && npm test && npm run build && npm run test:e2e",
+    "test:e2e": "node tools/e2e-product.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
-    "multer": "^1.4.5-lts.1",
-    "pdfkit": "^0.17.2",
-    "puppeteer-core": "^24.37.3"
+    "multer": "^2.4.0",
+    "pdfkit": "^0.17.2"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.37.3"
   }
 }

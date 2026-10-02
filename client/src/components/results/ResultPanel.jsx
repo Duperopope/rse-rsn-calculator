@@ -16,9 +16,11 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
   const [animScore, setAnimScore] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfErreur, setPdfErreur] = useState('');
 
   function telechargerPDF() {
     setPdfLoading(true);
+    setPdfErreur('');
     fetch(API_URL + '/rapport/pdf', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -32,7 +34,7 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
       var url = window.URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url;
-      a.download = 'rapport_rse_rsn_' + new Date().toISOString().slice(0, 10) + '.pdf';
+      a.download = 'rapport_fimo_check_' + new Date().toISOString().slice(0, 10) + '.pdf';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -40,7 +42,7 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
     })
     .catch(function(err) {
       console.error('Erreur PDF:', err);
-      alert('Erreur lors de la generation du PDF. Veuillez reessayer.');
+      setPdfErreur('Le rapport PDF n a pas pu etre genere. Reessayez dans quelques instants.');
     })
     .finally(function() {
       setPdfLoading(false);
@@ -74,9 +76,9 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
   const periode = resultat.periode || '';
 
   function getScoreColor() {
-    if (score >= 90) return 'var(--accent-green, #00ff88)';
-    if (score >= 70) return 'var(--accent-orange, #ffaa00)';
-    return 'var(--accent-red, #ff4444)';
+    if (score >= 90) return 'var(--success, #10B981)';
+    if (score >= 70) return 'var(--warning, #F59E0B)';
+    return 'var(--danger, #EF4444)';
   }
 
   function getScoreLabel() {
@@ -181,7 +183,7 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
                           {av.regle || ''}
                         </a>
                       ) : (av.regle || '')}
-                      {av.count > 1 ? <span style={{marginLeft:'6px',padding:'1px 6px',borderRadius:'8px',background:'rgba(255,170,0,0.15)',color:'#ffaa00',fontSize:'0.7rem',fontWeight:600}}>{String.fromCharCode(215)}{av.count}{av.jours.length > 0 ? ' (' + av.jours.join(', ') + ')' : ''}</span> : null}
+                      {av.count > 1 ? <span style={{marginLeft:'6px',padding:'1px 6px',borderRadius:'8px',background:'rgba(255,170,0,0.15)',color:'var(--warning, #F59E0B)',fontSize:'0.7rem',fontWeight:600}}>{String.fromCharCode(215)}{av.count}{av.jours.length > 0 ? ' (' + av.jours.join(', ') + ')' : ''}</span> : null}
                     </strong>
                     <p>{av.message || av.description || ''}</p>
                   </div>
@@ -246,13 +248,14 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
             Retour a la saisie
           </button>
         ) : null}
-        <button className={styles.pdfBtn} onClick={telechargerPDF} disabled={pdfLoading}>
+        <button className={styles.pdfBtn} onClick={telechargerPDF} disabled={pdfLoading} aria-busy={pdfLoading}>
           {pdfLoading ? "Generation..." : "Telecharger PDF"}
         </button>
         <button className={styles.printBtn} onClick={function() { window.print(); }}>
           Imprimer
         </button>
       </div>
+      {pdfErreur ? <p role="alert" className={styles.pdfError}>{pdfErreur}</p> : null}
     </div>
   );
 }
