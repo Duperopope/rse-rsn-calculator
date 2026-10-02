@@ -31,6 +31,7 @@ export function ParametresPanel({
       {/* === Barre de chips cliquable === */}
       <button
         className={styles.summaryBtn}
+        type="button"
         onClick={togglePanel}
         aria-expanded={ouvert}
         aria-label="Modifier les parametres"
@@ -62,8 +63,9 @@ export function ParametresPanel({
         <div className={styles.content}>
           <div className={styles.grid}>
             <div className={styles.group}>
-              <label className={styles.label}>Type de trajet</label>
+              <label className={styles.label} htmlFor="type-service">Type de trajet</label>
               <select
+                id="type-service"
                 className={styles.select}
                 value={typeService}
                 onChange={(e) => onTypeServiceChange(e.target.value)}
@@ -76,8 +78,9 @@ export function ParametresPanel({
               </select>
             </div>
             <div className={styles.group}>
-              <label className={styles.label}>Pays</label>
+              <label className={styles.label} htmlFor="pays-reglementation">Pays</label>
               <select
+                id="pays-reglementation"
                 className={styles.select}
                 value={pays}
                 onChange={(e) => onPaysChange(e.target.value)}
@@ -88,12 +91,13 @@ export function ParametresPanel({
               </select>
             </div>
             <div className={styles.group}>
-              <label className={styles.label}>Equipage</label>
-              <div className={styles.toggle}>
+              <span id="equipage-label" className={styles.label}>Equipage</span>
+              <div className={styles.toggle} role="group" aria-labelledby="equipage-label">
                 <button
                   className={equipage === 'solo' ? styles.toggleActive : styles.toggleBtn}
                   onClick={() => onEquipageChange('solo')}
                   type="button"
+                  aria-pressed={equipage === 'solo'}
                 >
                   <span className={styles.toggleIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0113 0"/></svg></span> Solo
                 </button>
@@ -101,18 +105,20 @@ export function ParametresPanel({
                   className={equipage === 'double' ? styles.toggleActive : styles.toggleBtn}
                   onClick={() => onEquipageChange('double')}
                   type="button"
+                  aria-pressed={equipage === 'double'}
                 >
                   <span className={styles.toggleIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="7" r="3.5"/><circle cx="17" cy="8" r="3"/><path d="M2 21a7 7 0 0114 0"/><path d="M16 21a5.5 5.5 0 015-5"/></svg></span> Duo
                 </button>
               </div>
             </div>
             <div className={styles.group}>
-              <label className={styles.label}>Mode de saisie</label>
-              <div className={styles.toggle}>
+              <span id="mode-saisie-label" className={styles.label}>Mode de saisie</span>
+              <div className={styles.toggle} role="group" aria-labelledby="mode-saisie-label">
                 <button
                   className={mode === 'formulaire' ? styles.toggleActive : styles.toggleBtn}
                   onClick={() => onModeChange('formulaire')}
                   type="button"
+                  aria-pressed={mode === 'formulaire'}
                 >
                   <span className={styles.toggleIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 3l4 4L7 21H3v-4L17 3z"/></svg></span> Manuel
                 </button>
@@ -120,6 +126,7 @@ export function ParametresPanel({
                   className={mode === 'csv' ? styles.toggleActive : styles.toggleBtn}
                   onClick={() => onModeChange('csv')}
                   type="button"
+                  aria-pressed={mode === 'csv'}
                 >
                   <span className={styles.toggleIcon}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> Fichier CSV
                 </button>
