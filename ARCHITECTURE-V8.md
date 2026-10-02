@@ -56,12 +56,10 @@ BottomBar
 
 ## 3. Composants a creer (extraction de Calculator.jsx)
 
-### useJours.js (hook) — fusionne gestion jours solo+duo
-- Unifie jours/jours2/joursActifs en un seul etat
-- updateJour(index, data)
-- ajouterJour(), supprimerJour(index), dupliquerJour(index)
-- Calculs derog/amplitude dans le hook (plus de window.__)
-- Gere equipage solo/double en interne
+### Gestion des jours
+- L ancien hook useJours non branche a ete supprime en v8.
+- Les anciens globals window.__ ont ete elimines.
+- Une future extraction de la gestion solo/duo doit partir du code effectivement utilise et etre protegee par le parcours E2E.
 
 ### DashboardSticky.jsx (~150 lignes)
 - Extrait de Calculator.jsx lignes 824-980
@@ -123,9 +121,9 @@ BottomBar
 ## 5. Plan implementation (ordre)
 
 ### Etape 1 — Nettoyage (0 impact visuel)
-1. Supprimer JaugeHebdo.jsx + JaugeHebdo.module.css
-2. Creer hooks/useJours.js (extraire logique jours de Calculator)
-3. Tester: build + screenshot + memes fonctionnalites
+1. Supprimer le code orphelin et les hooks non branches
+2. Extraire les composants UI sans modifier le moteur
+3. Tester chaque extraction par CI + parcours navigateur
 
 ### Etape 2 — Extraction composants (0 impact visuel)
 4. Creer DashboardSticky.jsx (extraire lignes 824-980)
