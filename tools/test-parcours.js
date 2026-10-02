@@ -224,7 +224,7 @@ async function closeGuide(page) {
       const before = await page.evaluate((b) => b.getAttribute('aria-label'), theme);
       await theme.click();
       await sleep(150);
-      const after = await page.evaluate((b) => b.getAttribute('aria-label'), b = theme).catch(() => null);
+      const after = await page.evaluate((b) => b.getAttribute('aria-label'), theme).catch(() => null);
       ok(before !== after || after === null, 'theme reagit au clic');
     }
 
