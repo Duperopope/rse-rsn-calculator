@@ -7,13 +7,13 @@
   "license": "MIT",
   "scripts": {
     "start": "node server.js",
-    "build": "npm --prefix client ci && npm --prefix client run build",
+    "build": "npm --prefix client run build",
     "check:syntax": "node -c server.js && node -c fix-engine.js && node -c pdf-generator.js && node -c qa_check.js",
     "test": "node tests/run-tests.js",
     "qa:release": "node tools/qa-release.js",
     "test:parcours": "node tools/test-parcours.js",
     "pretest": "npm run check:syntax",
-    "ci": "npm run qa:release && npm test && npm run build"
+    "ci": "npm run qa:release && npm run check:syntax && npm test && npm run build"
   },
   "dependencies": {
     "cors": "^2.8.5",
