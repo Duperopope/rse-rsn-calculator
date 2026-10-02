@@ -2342,6 +2342,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
     version: APP_VERSION,
+    deploy_commit: process.env.RENDER_GIT_COMMIT || process.env.GITHUB_SHA || null,
+    runtime: process.env.RENDER === 'true' ? 'render' : 'local',
     auteur: "Samir Medjaher",
     regles_version: "v7.6.10.1 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,

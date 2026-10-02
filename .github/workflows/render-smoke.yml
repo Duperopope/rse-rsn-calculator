@@ -1,0 +1,59 @@
+name: Render Deployment Smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-production-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for exact Render deployment
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          RENDER_URL: https://rse-rsn-calculator.onrender.com
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "Expected version: $VERSION"
+          echo "Expected commit:  $EXPECTED_SHA"
+
+          for attempt in $(seq 1 30); do
+            echo "Render probe $attempt/30..."
+            BODY="$(curl -fsS --max-time 20 "$RENDER_URL/api/health" || true)"
+
+            if [ -n "$BODY" ]; then
+              echo "$BODY"
+              if HEALTH_BODY="$BODY" EXPECTED_VERSION="$VERSION" EXPECTED_SHA="$EXPECTED_SHA" node <<'NODE'
+          const body = JSON.parse(process.env.HEALTH_BODY || '{}');
+          const expectedVersion = process.env.EXPECTED_VERSION;
+          const expectedSha = process.env.EXPECTED_SHA;
+          if (body.status !== 'ok') process.exit(1);
+          if (body.version !== expectedVersion) process.exit(1);
+          if (body.runtime !== 'render') process.exit(1);
+          if (!body.deploy_commit || body.deploy_commit !== expectedSha) process.exit(1);
+          NODE
+              then
+                HTML="$(curl -fsS --max-time 20 "$RENDER_URL/" || true)"
+                echo "$HTML" | grep -q "FIMO Check"
+                echo "Render serves the exact expected commit."
+                exit 0
+              fi
+            fi
+
+            sleep 10
+          done
+
+          echo "Render did not expose the expected deployment in time." >&2
+          exit 1
