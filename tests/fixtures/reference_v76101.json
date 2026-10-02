@@ -28,5 +28,7 @@
       "5e": 2,
       "4e": 23
     }
-  }
+  },
+  "status": "archive_non_reproductible",
+  "note": "Le CSV test_56jours.csv n a jamais ete suivi par Git malgre un ancien message de commit. Conserve pour historique, non utilise par la CI."
 }
