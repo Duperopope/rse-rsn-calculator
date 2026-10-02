@@ -307,3 +307,14 @@
   background: rgba(255,255,255,0.1);
   color: #fff;
 }
+
+.pdfError {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--danger, #EF4444);
+  border-radius: var(--md-radius-sm, 10px);
+  background: var(--danger-dim, #450A0A);
+  color: var(--text, #E2E8F0);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
