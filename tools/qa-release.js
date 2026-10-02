@@ -35,6 +35,7 @@ check('validation PDF corrigee', !server.includes('!resultat.score === undefined
 check('CORS non ouvert globalement', !server.includes('app.use(cors());'));
 check('upload limite et filtre', server.includes('fileFilter: function') && server.includes('fileSize: 5 * 1024 * 1024'));
 check('multer 2.x minimum', /^\^?2\./.test(pkg.dependencies.multer), pkg.dependencies.multer);
+check('Puppeteer absent des dependances production', !pkg.dependencies['puppeteer-core'] && Boolean(pkg.devDependencies && pkg.devDependencies['puppeteer-core']));
 check('manifest standalone', manifest.display === 'standalone');
 check('manifest sans orientation forcee', !Object.prototype.hasOwnProperty.call(manifest, 'orientation'));
 check('service worker ignore API', sw.includes("url.pathname.startsWith('/api/')"));
