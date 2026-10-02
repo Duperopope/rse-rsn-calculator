@@ -824,7 +824,21 @@ export default function Calculator() {
           <div className={styles.realtimeSticky + (dashExpanded ? ' ' + styles.dashExpanded : '')} data-tour-sticky="dashboard">
             {/* -- Score principal compact -- */}
             {resultat && (
-              <div className={styles.scoreStickyRow} onClick={() => setShowResultDetail(!showResultDetail)} style={{ cursor: 'pointer' }}>
+              <div
+                className={styles.scoreStickyRow}
+                onClick={() => setShowResultDetail(!showResultDetail)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setShowResultDetail(!showResultDetail);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={showResultDetail}
+                aria-label="Afficher ou masquer le detail du resultat"
+                style={{ cursor: 'pointer' }}
+              >
                 <div className={styles.scoreCircleMini} style={{
                   background: resultat.score >= 90 ? 'var(--success, #10B981)' : resultat.score >= 70 ? 'var(--warning, #F59E0B)' : 'var(--danger, #EF4444)',
                   color: resultat.score >= 90 ? '#000' : '#fff'
@@ -1005,16 +1019,20 @@ export default function Calculator() {
             }
           }}
         >
-        {chargement && <div style={{ padding: "16px", textAlign: "center" }}><Loader /></div>}
-        {erreur && <Card variant="danger" animate><p className={styles.erreur}>{erreur}</p></Card>}
+        {chargement && <div role="status" aria-live="polite" style={{ padding: "16px", textAlign: "center" }}><Loader /></div>}
+        {erreur && <Card variant="danger" animate><p role="alert" className={styles.erreur}>{erreur}</p></Card>}
 
         {resultat && (
-          <div data-tour="bottom-tabs" className={styles.bottomTabs}>
+          <div data-tour="bottom-tabs" className={styles.bottomTabs} role="tablist" aria-label="Saisie et resultats">
             <button
+              role="tab"
+              aria-selected={bottomTab === "saisie"}
               className={styles.bottomTab + (bottomTab === "saisie" ? " " + styles.bottomTabActive : "")}
               onClick={() => setBottomTab('saisie')}
             >Saisie</button>
             <button
+              role="tab"
+              aria-selected={bottomTab === "resultats"}
               className={styles.bottomTab + (bottomTab === "resultats" ? " " + styles.bottomTabActive : "")}
               onClick={() => setBottomTab('resultats')}
             >Resultats</button>
@@ -1073,7 +1091,7 @@ export default function Calculator() {
         {!online && !healthLoading ? (
 
 
-          <p className={styles.offlineMsg}>Serveur hors ligne. Verifiez que le backend est demarre.</p>
+          <p className={styles.offlineMsg} role="status">Serveur hors ligne. Verifiez votre connexion puis reessayez.</p>
 
 
         ) : null}
