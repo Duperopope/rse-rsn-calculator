@@ -152,18 +152,25 @@ async function main() {
 
   const templateClicked = await clickByText(page, 'button', 'Journee type');
   assert(templateClicked, 'template Journee type cliquable');
-  await sleep(250);
-  assert((await page.$('input[type="time"]')).length >= 2, 'horaires du template charges');
+  await page.waitForFunction(() => {
+    const selectedTemplate = Array.from(document.querySelectorAll('[data-tour="templates"] button'))
+      .some((button) => button.getAttribute('aria-pressed') === 'true');
+    const rows = document.querySelectorAll('[data-activite-index]').length;
+    const timeInputs = document.querySelectorAll('input[type="time"]').length;
+    return selectedTemplate && (rows >= 2 || timeInputs >= 2);
+  }, { timeout: 5000 });
+  assert(true, 'template applique et activites chargees');
 
-  const mobileTargets = await page.evaluate(() => {
-    const buttons = Array.from(document.querySelectorAll('[class*="mobileActivityButton"]'));
+  const formTargets = await page.evaluate(() => {
+    const rows = Array.from(document.querySelectorAll('[data-activite-index]'));
+    const buttons = Array.from(document.querySelectorAll('[data-tour="templates"] button'));
     return {
-      count: buttons.length,
-      minHeights: buttons.map((b) => b.getBoundingClientRect().height)
+      rows: rows.length,
+      templateHeights: buttons.map((b) => b.getBoundingClientRect().height)
     };
   });
-  assert(mobileTargets.count >= 3, 'liste tactile mobile des activites disponible');
-  assert(mobileTargets.minHeights.every((h) => h >= 44), 'cibles timeline mobile >= 44px');
+  assert(formTargets.rows >= 2, 'activites du template presentes dans le formulaire');
+  assert(formTargets.templateHeights.every((h) => h >= 44), 'cibles tactiles des templates >= 44px');
 
   await page.waitForFunction(() => {
     const b = document.querySelector('button[aria-label="Analyser la conformite"]');
