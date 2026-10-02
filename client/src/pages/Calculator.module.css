@@ -18,25 +18,25 @@
 
 .offlineMsg { font-size: 13px; color: var(--accent-red, var(--md-error, #ef4444)); text-align: center; margin: 0; }
 .erreur { color: var(--accent-red, var(--md-error, #ef4444)); font-size: 14px; margin: 0; }
-.equipageInfo { text-align: center; color: #00d4ff; font-size: 14px; margin-top: 0.5rem; }
+.equipageInfo { text-align: center; color: #3B82F6; font-size: 14px; margin-top: 0.5rem; }
 
 /* === Historique === */
 .historique { display: flex; flex-direction: column; gap: 10px; }
 .histToggle {
   padding: 8px 16px; border-radius: var(--md-radius-sm, 8px);
-  background: var(--bg-input, var(--md-surface-container, #1a1a2e)); color: var(--text-secondary, #888);
+  background: var(--bg-input, var(--md-surface-container, #1a1a2e)); color: var(--text-secondary, #94A3B8);
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e)); font-size: 13px; font-weight: 600;
   transition: border-color 0.2s, color 0.2s; align-self: flex-start;
 }
-@media (hover: hover) { .histToggle:hover { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); } }
-.histToggle:active { border-color: var(--accent, #00d4ff); color: var(--accent, #00d4ff); opacity: 0.85; }
+@media (hover: hover) { .histToggle:hover { border-color: var(--accent, #3B82F6); color: var(--accent, #3B82F6); } }
+.histToggle:active { border-color: var(--accent, #3B82F6); color: var(--accent, #3B82F6); opacity: 0.85; }
 .histList {
   display: flex; flex-direction: column; gap: 6px; padding: 12px;
   background: var(--bg-card, var(--md-surface, #0F172A)); border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e)); border-radius: var(--md-radius-md, 12px);
 }
 .histItem { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(42, 42, 62, 0.3); }
-.histDate { font-size: 12.5px; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; min-width: 90px; }
-.histMeta { font-size: 12.5px; color: var(--text-secondary, #888); }
+.histDate { font-size: 12.5px; color: var(--text-secondary, #94A3B8); font-variant-numeric: tabular-nums; min-width: 90px; }
+.histMeta { font-size: 12.5px; color: var(--text-secondary, #94A3B8); }
 .histClear {
   margin-top: var(--header-height, 70px); padding: 6px 12px; border-radius: var(--md-radius-sm, 8px);
   background: transparent; color: var(--accent-red, var(--md-error, #ef4444));
@@ -74,7 +74,7 @@
   transition: background 0.2s;
   border: 1px solid var(--border, #2D3748);
 }
-.expandToggle:active { color: #00d4ff; }
+.expandToggle:active { color: #3B82F6; }
 
 /* Timeline wrapper — pour pouvoir le cacher sur mobile */
 .timelineWrap { display: block; }
@@ -281,7 +281,7 @@
   border-radius: var(--md-radius-md, 12px);
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   background: transparent;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
