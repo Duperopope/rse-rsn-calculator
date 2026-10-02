@@ -18,9 +18,9 @@ function formatDate(iso) {
 }
 
 function scoreColor(s) {
-  if (s >= 90) return '#00ff88';
-  if (s >= 70) return '#ffaa00';
-  return '#ff4444';
+  if (s >= 90) return 'var(--success, #10B981)';
+  if (s >= 70) return 'var(--warning, #F59E0B)';
+  return 'var(--danger, #EF4444)';
 }
 
 function scoreBg(s) {
