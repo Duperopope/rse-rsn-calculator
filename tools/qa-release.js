@@ -40,6 +40,7 @@ check('validation PDF corrigee', !server.includes('!resultat.score === undefined
 check('CORS non ouvert globalement', !server.includes('app.use(cors());'));
 check('upload limite et filtre', server.includes('fileFilter: function') && server.includes('fileSize: 5 * 1024 * 1024'));
 check('multer 2.x minimum', /^\^?2\./.test(pkg.dependencies.multer), pkg.dependencies.multer);
+check('Express 4.x securise minimum', /^\^4\.22\.[3-9]/.test(pkg.dependencies.express) || /^\^[5-9]\./.test(pkg.dependencies.express), pkg.dependencies.express);
 check('Puppeteer absent des dependances production', !pkg.dependencies['puppeteer-core'] && Boolean(pkg.devDependencies && pkg.devDependencies['puppeteer-core']));
 check('Render exclut Puppeteer mais inclut Vite au build', renderConfig.includes('npm ci --omit=dev') && renderConfig.includes('client ci --include=dev'));
 check('manifest standalone', manifest.display === 'standalone');
