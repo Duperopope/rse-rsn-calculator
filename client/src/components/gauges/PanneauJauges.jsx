@@ -153,9 +153,9 @@ export function PanneauJauges({ stats, typeService = "REGULIER", nbDerogConduite
   var reposCouleurOk, reposCouleurWarning, reposCouleurDanger;
   if (vue2 === 1) {
     // Repos : danger = pas assez, ok = assez
-    reposCouleurOk = reposOk ? "var(--accent-green, #00ff88)" : reposReduit ? "var(--accent-orange, #ffaa00)" : "var(--accent-red, #ff4444)";
-    reposCouleurWarning = "var(--accent-orange, #ffaa00)";
-    reposCouleurDanger = "var(--accent-red, #ff4444)";
+    reposCouleurOk = reposOk ? "var(--accent-green, #10B981)" : reposReduit ? "var(--accent-orange, #F59E0B)" : "var(--accent-red, #EF4444)";
+    reposCouleurWarning = "var(--accent-orange, #F59E0B)";
+    reposCouleurDanger = "var(--accent-red, #EF4444)";
   }
 
   // Petit composant Dots
