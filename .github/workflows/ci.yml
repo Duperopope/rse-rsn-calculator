@@ -33,6 +33,15 @@ jobs:
         working-directory: client
         run: npm ci
 
+      - name: Runtime dependency audit
+        continue-on-error: true
+        run: npm audit --omit=dev --json || true
+
+      - name: Frontend dependency audit
+        continue-on-error: true
+        working-directory: client
+        run: npm audit --omit=dev --json || true
+
       - name: Syntax check
         run: npm run pretest
 
