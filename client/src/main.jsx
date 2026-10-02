@@ -7,3 +7,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 );
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function registerFimoServiceWorker() {
+    navigator.serviceWorker.register('/sw.js').catch(function() {
+      // L'application reste utilisable en ligne meme si l'enregistrement PWA echoue.
+    });
+  }, { once: true });
+}
