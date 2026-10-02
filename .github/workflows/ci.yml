@@ -14,7 +14,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -44,6 +44,13 @@ jobs:
           npm audit fix --package-lock-only --omit=dev --ignore-scripts || true
           echo "=== PACKAGE_LOCK_AUDIT_FIX_DIFF ==="
           git diff -- package-lock.json
+          if ! git diff --quiet -- package-lock.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "chore: refresh production dependency lock"
+            git push origin HEAD:audit/pro-hardening-2026-10-02
+          fi
           npm ci
 
       - name: Release invariants
