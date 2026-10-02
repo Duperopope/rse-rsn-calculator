@@ -112,9 +112,6 @@
 }
 
 /* Fix: supprimer carre focus visible au tap mobile */
-.container:focus {
-  outline: none;
-}
 .container:focus-visible {
   outline: 2px solid var(--accent, #3B82F6);
   outline-offset: 2px;
