@@ -124,9 +124,13 @@ async function main() {
   });
 
   await page.evaluateOnNewDocument(() => {
-    localStorage.setItem('rse_onboarding_done', 'true');
-    if (!localStorage.getItem('rse_theme')) {
-      localStorage.setItem('rse_theme', 'dark');
+    try {
+      localStorage.setItem('rse_onboarding_done', 'true');
+      if (!localStorage.getItem('rse_theme')) {
+        localStorage.setItem('rse_theme', 'dark');
+      }
+    } catch (_) {
+      // about:blank and opaque documents may deny storage before navigation.
     }
   });
 
