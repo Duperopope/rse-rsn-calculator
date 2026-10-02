@@ -186,6 +186,7 @@ function TemplateCard({ templateKey, template, selected, onClick }) {
       onClick={onClick}
       type="button"
       title={template.label}
+      aria-pressed={selected}
     >
       <span className={styles.templateIcon}>
         <IconeActivite type={iconeMap[templateKey] || 'C'} size={18} color={couleurMap[templateKey] || '#888'} />
@@ -206,6 +207,7 @@ function TypeActiviteSelector({ value, onChange }) {
           className={value === t.code ? styles.typeBtnActive : styles.typeBtn}
           onClick={() => onChange(t.code)}
           title={t.label}
+          aria-pressed={value === t.code}
           style={value === t.code ? { borderColor: t.couleur, background: t.couleur + '18' } : {}}
         >
           <IconeActivite type={t.code} size={18} color={value === t.code ? t.couleur : undefined} />
@@ -261,6 +263,7 @@ function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTy
           <input
             type="time"
             className={styles.timeInput}
+            aria-label={'Heure de debut de l activite ' + (actIdx + 1)}
             value={act.debut}
             onChange={(e) => updateActivite(actIdx, 'debut', e.target.value)}
           />
@@ -268,6 +271,7 @@ function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTy
           <input
             type="time"
             className={styles.timeInput}
+            aria-label={'Heure de fin de l activite ' + (actIdx + 1)}
             value={act.fin}
             onChange={(e) => updateActivite(actIdx, 'fin', e.target.value)}
           />
@@ -409,6 +413,7 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
           <input
             type="date"
             className={styles.dateInput}
+            aria-label={'Date du jour ' + (index + 1)}
             value={jour.date}
             onChange={(e) => updateDate(e.target.value)}
           />
