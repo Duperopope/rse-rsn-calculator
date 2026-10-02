@@ -2640,7 +2640,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2801,7 +2801,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -3267,7 +3267,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -3466,7 +3466,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3913,13 +3913,39 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
     tests: tests,
     resume: { ok: ok, total: total, status: ok === total ? 'PARFAIT' : 'ECHECS' }
   });
+});
+
+
+// Gestion centralisee des erreurs HTTP/API.
+app.use(function apiErrorHandler(err, req, res, next) {
+  if (!err) return next();
+
+  if (err instanceof multer.MulterError) {
+    var status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return res.status(status).json({
+      error: err.code === 'LIMIT_FILE_SIZE'
+        ? 'Fichier trop volumineux (5 Mo maximum).'
+        : 'Fichier invalide.'
+    });
+  }
+
+  if (err.message === 'Format de fichier non autorise. Utilisez un fichier CSV ou TXT.') {
+    return res.status(415).json({ error: err.message });
+  }
+
+  if (err.message === 'Origin non autorisee') {
+    return res.status(403).json({ error: 'Origin non autorisee.' });
+  }
+
+  console.error('[HTTP ERROR]', err && err.message ? err.message : err);
+  return res.status(500).json({ error: 'Erreur interne du serveur.' });
 });
 
 app.get('*', (req, res) => {
@@ -3932,7 +3958,7 @@ app.get('*', (req, res) => {
 });
 
 // Demarrage du serveur
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
   console.log("  FIMO Check v8.0.0");
@@ -3942,3 +3968,17 @@ app.listen(PORT, () => {
   console.log("============================================");
   console.log("");
 });
+
+function shutdownServer(signal) {
+  console.log('[SHUTDOWN] ' + signal + ' recu, fermeture propre...');
+  server.close(function() {
+    process.exit(0);
+  });
+  setTimeout(function() {
+    console.error('[SHUTDOWN] fermeture forcee apres delai');
+    process.exit(1);
+  }, 10000).unref();
+}
+
+process.once('SIGTERM', function() { shutdownServer('SIGTERM'); });
+process.once('SIGINT', function() { shutdownServer('SIGINT'); });
