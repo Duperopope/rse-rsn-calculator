@@ -157,7 +157,7 @@ function VueSemaine(props) {
     React.createElement('div', { className: styles.semaineHeader },
       React.createElement('span', { className: styles.semaineTitle }, 'Vue semaine'),
       React.createElement('span', { className: styles.semaineCounter,
-        style: { color: conduiteTotaleSemaine > 3360 ? '#ff4444' : conduiteTotaleSemaine > 2880 ? '#ffaa00' : '#00ff88' }
+        style: { color: conduiteTotaleSemaine > 3360 ? 'var(--danger, #EF4444)' : conduiteTotaleSemaine > 2880 ? 'var(--warning, #F59E0B)' : 'var(--success, #10B981)' }
       }, formatDuree(conduiteTotaleSemaine) + ' / 56h conduite')
     ),
     // Lignes jours
