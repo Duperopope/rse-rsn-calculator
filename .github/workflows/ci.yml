@@ -14,7 +14,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -39,19 +39,6 @@ jobs:
       - name: Install frontend dependencies
         run: npm --prefix client ci
 
-      - name: Preview dependency lock remediation
-        run: |
-          npm audit fix --package-lock-only --omit=dev --ignore-scripts || true
-          echo "=== PACKAGE_LOCK_AUDIT_FIX_DIFF ==="
-          git diff -- package-lock.json
-          if ! git diff --quiet -- package-lock.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add package-lock.json
-            git commit -m "chore: refresh production dependency lock"
-            git push origin HEAD:audit/pro-hardening-2026-10-02
-          fi
-          npm ci
 
       - name: Release invariants
         run: npm run qa:release
@@ -74,8 +61,8 @@ jobs:
 
       - name: Critical dependency audit
         run: |
-          npm audit --omit=dev --audit-level=critical
-          npm --prefix client audit --omit=dev --audit-level=critical
+          npm audit --omit=dev --audit-level=high
+          npm --prefix client audit --omit=dev --audit-level=high
 
       - name: Product E2E
         run: npm run test:e2e
