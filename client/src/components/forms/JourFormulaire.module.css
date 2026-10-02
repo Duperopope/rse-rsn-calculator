@@ -47,7 +47,7 @@
   font-size: 14px;
   transition: border-color 0.2s;
 }
-.dateInput:focus { border-color: var(--accent, #00d4ff); outline: none; }
+.dateInput:focus { border-color: var(--accent, #3B82F6); outline: none; }
 
 .jourActions {
   display: flex;
@@ -66,10 +66,10 @@
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
 }
-.actionBtn { color: var(--accent, #00d4ff); }
+.actionBtn { color: var(--accent, #3B82F6); }
 .removeBtn { color: var(--accent-red, var(--md-error, #ef4444)); }
 @media (hover: hover) {
-  .actionBtn:hover { border-color: var(--accent, #00d4ff); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
+  .actionBtn:hover { border-color: var(--accent, #3B82F6); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
   .removeBtn:hover { border-color: var(--accent-red, var(--md-error, #ef4444)); background: rgba(255, 68, 68, 0.08); }
 }
 
@@ -82,7 +82,7 @@
 
 .templatesLabel {
   font-size: 13px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
@@ -114,11 +114,11 @@
 
 .templateCard {
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
 }
 @media (hover: hover) {
   .templateCard:hover {
-    border-color: var(--accent, #00d4ff);
+    border-color: var(--accent, #3B82F6);
     color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0)));
     background: rgba(0, 212, 255, 0.06);
   }
@@ -157,7 +157,7 @@
 
 .colHead {
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -215,10 +215,10 @@
   text-align: center;
   transition: border-color 0.2s;
 }
-.timeInput:focus { border-color: var(--accent, #00d4ff); outline: none; }
+.timeInput:focus { border-color: var(--accent, #3B82F6); outline: none; }
 
 .fleche {
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-size: 14px;
   flex-shrink: 0;
   width: 20px;
@@ -227,7 +227,7 @@
 
 .dureeLabel {
   font-size: 13px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   min-width: 50px;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -291,11 +291,11 @@
 .typeBtn {
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   min-height: 44px;
 }
 @media (hover: hover) {
-  .typeBtn:hover { color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0))); border-color: var(--text-secondary, #888); }
+  .typeBtn:hover { color: var(--text, var(--md-on-surface, var(--md-on-surface, #e2e2f0))); border-color: var(--text-secondary, #94A3B8); }
 }
 
 .typeBtnActive {
@@ -316,7 +316,7 @@
   border-radius: var(--md-radius-md, 12px);
   background: transparent;
   border: 2px dashed var(--border, var(--md-outline-variant, #2a2a4e));
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s;
@@ -324,8 +324,8 @@
 }
 @media (hover: hover) {
   .addActBtn:hover {
-    border-color: var(--accent, #00d4ff);
-    color: var(--accent, #00d4ff);
+    border-color: var(--accent, #3B82F6);
+    color: var(--accent, #3B82F6);
     background: rgba(0, 212, 255, 0.04);
   }
 }
@@ -350,14 +350,14 @@
 
 .resumeLabel {
   font-size: 13px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   font-weight: 600;
 }
 
 .resumeValueOk {
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent-green, var(--md-success, #34d399));
+  color: var(--accent-green, var(--md-success, #10B981));
   font-variant-numeric: tabular-nums;
 }
 
@@ -416,7 +416,7 @@
 
   .fleche { width: auto; font-size: 13px; color: rgba(255,255,255,0.5); }
 
-  .dureeLabel { width: auto; min-width: auto; text-align: center; font-size: 12px; background: none; padding: 0; border-radius: 0; color: var(--text-secondary, #888); font-variant-numeric: tabular-nums; }
+  .dureeLabel { width: auto; min-width: auto; text-align: center; font-size: 12px; background: none; padding: 0; border-radius: 0; color: var(--text-secondary, #94A3B8); font-variant-numeric: tabular-nums; }
 
   .resume { flex-direction: row; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: flex-start; }
   .resumeSep { display: none; }
@@ -474,13 +474,13 @@
   white-space: nowrap;
 }
 .actionBtnLabel {
-  color: var(--accent, #00d4ff);
+  color: var(--accent, #3B82F6);
 }
 .removeBtnLabel {
   color: var(--accent-red, var(--md-error, #ef4444));
 }
 @media (hover: hover) {
-  .actionBtnLabel:hover { border-color: var(--accent, #00d4ff); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
+  .actionBtnLabel:hover { border-color: var(--accent, #3B82F6); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
   .removeBtnLabel:hover { border-color: var(--accent-red, var(--md-error, #ef4444)); background: rgba(255, 68, 68, 0.08); }
 }
 .actionBtnLabel span, .removeBtnLabel span {
