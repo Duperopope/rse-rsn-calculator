@@ -37,7 +37,7 @@
   padding: 6px 4px;
   background: none;
   border: none;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   cursor: pointer;
   transition: color 0.15s, transform 0.1s ease;
   -webkit-tap-highlight-color: transparent;
@@ -71,7 +71,7 @@
   50% { opacity: 0.6; transform: scale(0.95); }
 }
 
-.itemActive { color: var(--accent, #00d4ff); }
+.itemActive { color: var(--accent, #3B82F6); }
 .itemActive::after {
   content: '';
   position: absolute;
@@ -81,7 +81,7 @@
   width: 20px;
   height: 3px;
   border-radius: 2px;
-  background: var(--accent, #00d4ff);
+  background: var(--accent, #3B82F6);
 }
 
 .iconWrap {
