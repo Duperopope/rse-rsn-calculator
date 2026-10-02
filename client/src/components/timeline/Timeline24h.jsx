@@ -112,6 +112,32 @@ function VueJour(props) {
         );
       })
     ),
+    // Sur mobile, les segments tres courts gardent leur largeur chronologique.
+    // Cette liste fournit des cibles tactiles confortables sans deformer la timeline.
+    React.createElement('div', { className: styles.mobileActivityList, 'aria-label': 'Activites de la journee' },
+      blocs.map(function(b) {
+        return React.createElement('button', {
+          key: 'mobile-' + b.index,
+          type: 'button',
+          className: styles.mobileActivityButton,
+          onClick: function() {
+            if (tooltip && tooltip.index === b.index) setTooltip(null);
+            else setTooltip(b);
+            if (onActiviteClick) onActiviteClick(b.index);
+          },
+          'aria-label': b.label + ' de ' + b.debut + ' a ' + b.fin + ', ' + formatDuree(b.duree)
+        },
+          React.createElement('span', {
+            className: styles.mobileActivityDot,
+            style: { backgroundColor: b.bg },
+            'aria-hidden': 'true'
+          }),
+          React.createElement('span', { className: styles.mobileActivityType }, b.label),
+          React.createElement('span', { className: styles.mobileActivityTimes }, b.debut + ' – ' + b.fin),
+          React.createElement('span', { className: styles.mobileActivityDuration }, formatDuree(b.duree))
+        );
+      })
+    ),
     // Barre infractions jour
     detailJour && detailJour.infractions && detailJour.infractions.length > 0 ? React.createElement('div', { className: styles.jourInfBar },
       React.createElement('span', { className: styles.jourInfIcon }, '\u26A0'),
