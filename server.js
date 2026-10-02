@@ -64,18 +64,28 @@ app.use(helmet({
   }
 }));
 
-app.use(cors({
-  origin: function(origin, callback) {
-    // Requetes same-origin et clients serveur n'envoient pas toujours Origin.
-    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
-    var err = new Error('Origin CORS non autorisee');
-    err.status = 403;
-    return callback(err);
-  },
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type'],
-  maxAge: 86400
-}));
+app.use(function(req, res, next) {
+  return cors({
+    origin: function(origin, callback) {
+      // Autoriser les clients serveur, les origines explicites et le host courant
+      // (Render ou futur domaine custom) sans ouvrir CORS a tout Internet.
+      if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+      try {
+        var originUrl = new URL(origin);
+        var requestHost = req.get('x-forwarded-host') || req.get('host');
+        if (requestHost && originUrl.host === requestHost) return callback(null, true);
+      } catch (parseErr) {
+        // Une Origin invalide est refusee ci-dessous.
+      }
+      var err = new Error('Origin CORS non autorisee');
+      err.status = 403;
+      return callback(err);
+    },
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    maxAge: 86400
+  })(req, res, next);
+});
 
 app.use(express.json({ limit: '2mb', strict: true }));
 
