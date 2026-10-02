@@ -478,6 +478,7 @@ export default function Calculator() {
 
 
           jours: JSON.parse(JSON.stringify(jours)),
+          jours2: equipage === 'double' ? JSON.parse(JSON.stringify(jours2)) : null,
 
 
           parametres: { typeService, pays, equipage },
@@ -618,6 +619,8 @@ export default function Calculator() {
 
 
       setJours(entry.jours);
+      if (entry.jours2) setJours2(entry.jours2);
+      setConducteurActif(1);
 
 
       setJourActifIndex(0);
