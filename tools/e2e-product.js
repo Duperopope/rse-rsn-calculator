@@ -125,7 +125,9 @@ async function main() {
 
   await page.evaluateOnNewDocument(() => {
     localStorage.setItem('rse_onboarding_done', 'true');
-    localStorage.setItem('rse_theme', 'dark');
+    if (!localStorage.getItem('rse_theme')) {
+      localStorage.setItem('rse_theme', 'dark');
+    }
   });
 
   await page.setViewport({ width: 375, height: 812, isMobile: true, hasTouch: true });
