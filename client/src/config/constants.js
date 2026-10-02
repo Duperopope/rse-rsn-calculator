@@ -7,7 +7,7 @@ export const API_URL = '/api';
 
 // Nom de l'application (la version est recuperee du backend via /api/health)
 export const APP_NAME = 'FIMO Check';
-export const APP_SUBTITLE = 'Driver CPC Compliance Tool';
+export const APP_SUBTITLE = 'Conformité conduite & repos';
 
 // Symbole euro (evite problemes encodage)
 export const EURO = '€';
@@ -104,34 +104,34 @@ export const LIMITES = {
 // Couleurs du theme (utilisees par les composants)
 export const THEME_COLORS = {
   dark: {
-    bg: '#0a0a0f',
-    bgCard: '#12121a',
-    bgInput: '#1a1a2e',
-    text: '#e0e0e0',
-    textSecondary: '#888',
-    border: '#2a2a3e',
-    accent: '#60a5fa',
-    accentGreen: '#00ff88',
-    accentRed: '#ff4444',
-    accentOrange: '#ffaa00',
-    accentPurple: '#aa44ff',
-    gradientStart: '#667eea',
-    gradientEnd: '#764ba2'
+    bg: '#0B0F14',
+    bgCard: '#111827',
+    bgInput: '#18212F',
+    text: '#F1F5F9',
+    textSecondary: '#B6C2D1',
+    border: '#334155',
+    accent: '#3B82F6',
+    accentGreen: '#10B981',
+    accentRed: '#EF4444',
+    accentOrange: '#F59E0B',
+    accentPurple: '#8B5CF6',
+    gradientStart: '#2563EB',
+    gradientEnd: '#4F46E5'
   },
   light: {
-    bg: '#f5f5f5',
-    bgCard: '#ffffff',
-    bgInput: '#f0f0f0',
-    text: '#1a1a2e',
-    textSecondary: '#666',
-    border: '#ddd',
-    accent: '#0088cc',
-    accentGreen: '#00aa55',
-    accentRed: '#cc0000',
-    accentOrange: '#cc8800',
-    accentPurple: '#7733cc',
-    gradientStart: '#667eea',
-    gradientEnd: '#764ba2'
+    bg: '#F8FAFC',
+    bgCard: '#FFFFFF',
+    bgInput: '#F1F5F9',
+    text: '#0F172A',
+    textSecondary: '#475569',
+    border: '#CBD5E1',
+    accent: '#2563EB',
+    accentGreen: '#047857',
+    accentRed: '#B91C1C',
+    accentOrange: '#B45309',
+    accentPurple: '#6D28D9',
+    gradientStart: '#2563EB',
+    gradientEnd: '#4F46E5'
   }
 };
 
