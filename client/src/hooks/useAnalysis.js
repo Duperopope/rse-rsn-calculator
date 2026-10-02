@@ -36,10 +36,20 @@ export function useAnalysis() {
         signal: AbortSignal.timeout(30000)
       });
 
-      const data = await res.json();
+      const raw = await res.text();
+      let data = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch (parseError) {
+        throw new Error('Reponse serveur invalide');
+      }
 
       if (!res.ok) {
-        setErreur(data.error || data.message || 'Erreur serveur (' + res.status + ')');
+        if (res.status === 429) {
+          setErreur('Trop de requetes ont ete envoyees. Attendez une minute puis reessayez.');
+        } else {
+          setErreur(data.error || data.message || 'Erreur serveur (' + res.status + ')');
+        }
         return null;
       }
 
@@ -51,7 +61,7 @@ export function useAnalysis() {
       if (e.name === 'AbortError' || e.name === 'TimeoutError') {
         setErreur('Timeout: le serveur ne repond pas (30s). Verifiez la connexion.');
       } else if (e.message && e.message.includes('fetch')) {
-        setErreur('Impossible de contacter le serveur. Est-il demarre ?');
+        setErreur('Impossible de contacter le serveur. Verifiez votre connexion.');
       } else {
         setErreur('Erreur inattendue: ' + e.message);
       }
