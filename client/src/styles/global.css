@@ -49,7 +49,7 @@ body {
 }
 
 a {
-  color: var(--accent, #00d4ff);
+  color: var(--accent, #3B82F6);
   text-decoration: none;
 }
 @media (hover: hover) {
@@ -130,7 +130,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 }
 @media (hover: hover) {
   ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent, #00d4ff);
+  background: var(--accent, #3B82F6);
 }
 }
 
