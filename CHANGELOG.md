@@ -9,6 +9,13 @@
 - Validation PDF corrigée et erreurs API centralisées.
 - Arrêt propre du serveur sur SIGTERM/SIGINT pour Render.
 
+### Dépendances
+- Express maintenu sur la branche 4 stable et mis à jour en 4.22.3.
+- express-rate-limit mis à jour en 8.7.0.
+- Multer migré de 1.x vers 2.4.0.
+- Puppeteer Core déplacé en devDependency et mis à jour en 25.12.0.
+- L audit npm des dépendances de production est désormais bloquant en CI.
+
 ### Release et déploiement
 - Version 8.0.0 unifiée entre backend, frontend, health check et packages.
 - Render passe à `npm ci` et expose un health check explicite.
