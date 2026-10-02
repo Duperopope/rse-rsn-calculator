@@ -1,10 +1,9 @@
 {
   "name": "FIMO Check",
   "short_name": "FIMO Check",
-  "description": "Calculateur de conformite RSE/RSN tachygraphe",
+  "description": "Conformite des temps de conduite, pauses et repos pour le transport routier",
   "start_url": "/",
-  "display": "fullscreen",
-  "orientation": "portrait",
+  "display": "standalone",
   "background_color": "#12141a",
   "theme_color": "#12141a",
   "icons": [
