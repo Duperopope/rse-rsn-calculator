@@ -428,7 +428,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  min-height: 44px;
   padding: 4px 0 8px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  border-radius: 10px;
 }
 .scoreCircleMini {
   width: 44px;
