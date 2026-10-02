@@ -42,6 +42,9 @@ check('upload limite et filtre', server.includes('fileFilter: function') && serv
 check('multer 2.x minimum', /^\^?2\./.test(pkg.dependencies.multer), pkg.dependencies.multer);
 check('Puppeteer absent des dependances production', !pkg.dependencies['puppeteer-core'] && Boolean(pkg.devDependencies && pkg.devDependencies['puppeteer-core']));
 check('Render exclut Puppeteer mais inclut Vite au build', renderConfig.includes('npm ci --omit=dev') && renderConfig.includes('client ci --include=dev'));
+check('Render blueprint pointe sur le bon depot', renderConfig.includes('repo: https://github.com/Duperopope/rse-rsn-calculator'));
+check('Render blueprint pointe sur main', renderConfig.includes('branch: main'));
+check('Render auto-deploy actif sur commit', renderConfig.includes('autoDeployTrigger: commit'));
 check('manifest standalone', manifest.display === 'standalone');
 check('manifest sans orientation forcee', !Object.prototype.hasOwnProperty.call(manifest, 'orientation'));
 check('service worker ignore API', sw.includes("url.pathname.startsWith('/api/')"));
