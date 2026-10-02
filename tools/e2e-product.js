@@ -8,6 +8,12 @@ const puppeteer = require('puppeteer-core');
 const PORT = 3100;
 const BASE = 'http://localhost:' + PORT;
 let server;
+let browser;
+const watchdog = setTimeout(() => {
+  console.error('\nE2E produit: TIMEOUT global apres 120s');
+  try { if (server) server.kill('SIGKILL'); } catch (_) {}
+  process.exit(2);
+}, 120000);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -104,7 +110,7 @@ async function main() {
   const browserPath = findBrowser();
   assert(Boolean(browserPath), 'navigateur Chrome/Chromium disponible pour E2E');
 
-  const browser = await puppeteer.launch({
+  browser = await puppeteer.launch({
     executablePath: browserPath,
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -244,6 +250,7 @@ async function main() {
   assert(desktop.hasDesktopAnalyze, 'action Analyser disponible sur desktop');
 
   await browser.close();
+  browser = null;
 
   const significantErrors = runtimeErrors.filter((msg) =>
     !msg.includes('Failed to load resource') &&
@@ -260,8 +267,14 @@ main()
     console.error(err && err.stack ? err.stack : err);
     process.exitCode = 1;
   })
-  .finally(() => {
+  .finally(async () => {
+    clearTimeout(watchdog);
+    if (browser) {
+      try { await browser.close(); } catch (_) {}
+      browser = null;
+    }
     if (server) {
       try { server.kill('SIGTERM'); } catch (_) {}
+      server = null;
     }
   });
