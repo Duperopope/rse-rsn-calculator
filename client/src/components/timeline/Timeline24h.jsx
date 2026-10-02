@@ -5,7 +5,7 @@ import styles from './Timeline24h.module.css';
 var COULEURS = {
   C: { bg: '#4CAF50', label: 'Conduite' },
   T: { bg: '#2196F3', label: 'Travail' },
-  P: { bg: '#9C27B0', label: 'Pause' },
+  P: { bg: '#8B5CF6', label: 'Pause' },
   D: { bg: '#FF9800', label: 'Disponibilite' },
   R: { bg: '#78909C', label: 'Repos' }
 };
@@ -156,7 +156,7 @@ function VueSemaine(props) {
     React.createElement('div', { className: styles.semaineHeader },
       React.createElement('span', { className: styles.semaineTitle }, 'Vue semaine'),
       React.createElement('span', { className: styles.semaineCounter,
-        style: { color: conduiteTotaleSemaine > 3360 ? '#ff4444' : conduiteTotaleSemaine > 2880 ? '#ffaa00' : '#00ff88' }
+        style: { color: conduiteTotaleSemaine > 3360 ? '#EF4444' : conduiteTotaleSemaine > 2880 ? '#F59E0B' : '#10B981' }
       }, formatDuree(conduiteTotaleSemaine) + ' / 56h conduite')
     ),
     // Lignes jours
