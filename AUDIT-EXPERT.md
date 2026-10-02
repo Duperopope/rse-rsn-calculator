@@ -1,4 +1,6 @@
 # Audit Multi-Expert FIMO Check
+
+> Audit historique. Les corrections et leur statut v8 sont suivis dans [AUDIT-RESOLUTION-V8.md](AUDIT-RESOLUTION-V8.md).
 ## Date: 2026-02-16 | Cout: 0.18$
 
 ## Scores
