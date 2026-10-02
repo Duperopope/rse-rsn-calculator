@@ -34,6 +34,7 @@ check('x-powered-by desactive', server.includes("app.disable('x-powered-by')"));
 check('validation PDF corrigee', !server.includes('!resultat.score === undefined') && server.includes("typeof resultat.score !== 'number'"));
 check('CORS non ouvert globalement', !server.includes('app.use(cors());'));
 check('upload limite et filtre', server.includes('fileFilter: function') && server.includes('fileSize: 5 * 1024 * 1024'));
+check('multer 2.x minimum', /^\^?2\./.test(pkg.dependencies.multer), pkg.dependencies.multer);
 check('manifest standalone', manifest.display === 'standalone');
 check('manifest sans orientation forcee', !Object.prototype.hasOwnProperty.call(manifest, 'orientation'));
 check('service worker ignore API', sw.includes("url.pathname.startsWith('/api/')"));
