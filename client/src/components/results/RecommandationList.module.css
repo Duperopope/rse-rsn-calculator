@@ -7,7 +7,7 @@
 .title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--accent, #00d4ff);
+  color: var(--accent, #3B82F6);
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(96, 165, 250, 0.2);
 }
@@ -47,8 +47,8 @@
 
 .icon[data-niveau="danger"] { background: var(--accent-red, var(--md-error, #ef4444)); color: white; }
 .icon[data-niveau="warning"] { background: var(--accent-orange, var(--md-warning, #f59e0b)); color: black; }
-.icon[data-niveau="info"] { background: var(--accent, #00d4ff); color: black; }
-.icon[data-niveau="ok"] { background: var(--accent-green, var(--md-success, #34d399)); color: black; }
+.icon[data-niveau="info"] { background: var(--accent, #3B82F6); color: black; }
+.icon[data-niveau="ok"] { background: var(--accent-green, var(--md-success, #10B981)); color: black; }
 
 .texte {
   line-height: 1.4;

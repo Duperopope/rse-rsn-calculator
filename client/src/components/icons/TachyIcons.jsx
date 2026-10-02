@@ -47,7 +47,7 @@ export function IconeDisponibilite({ size = 24, color = '#FF9800' }) {
 }
 
 // PAUSE / REPOS - Lit (rectangle + cercle oreiller)
-export function IconePause({ size = 24, color = '#9C27B0' }) {
+export function IconePause({ size = 24, color = '#8B5CF6' }) {
   return (
     <svg width={size} height={size} viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
       <rect x='2' y='10' width='20' height='10' rx='2' stroke={color} strokeWidth='2' />
@@ -105,7 +105,7 @@ export function IconeActivite({ type, size = 24, color }) {
     case 'C': return <IconeConduite size={size} color={color || '#4CAF50'} />;
     case 'T': return <IconeAutreTache size={size} color={color || '#2196F3'} />;
     case 'D': return <IconeDisponibilite size={size} color={color || '#FF9800'} />;
-    case 'P': return <IconePause size={size} color={color || '#9C27B0'} />;
+    case 'P': return <IconePause size={size} color={color || '#8B5CF6'} />;
     case 'R': return <IconeRepos size={size} color={color || '#607D8B'} />;
     case 'O': return <IconeOut size={size} color={color || '#795548'} />;
     case 'F': return <IconeFerry size={size} color={color || '#00BCD4'} />;

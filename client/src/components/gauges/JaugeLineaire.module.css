@@ -17,7 +17,7 @@
 
 .label {
   font-size: 13px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
 }
 
 .texteValeur {
@@ -55,7 +55,7 @@
 }
 
 .fill[data-status="ok"] {
-  background: linear-gradient(90deg, var(--accent-green, var(--md-success, #34d399)), #00cc66);
+  background: linear-gradient(90deg, var(--accent-green, var(--md-success, #10B981)), #00cc66);
 }
 
 .fill[data-status="warning"] {
@@ -88,7 +88,7 @@
   font-size: 12px;
   margin-top: 4px;
   padding: 4px 0;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #94A3B8);
   animation: detailSlide 0.2s ease;
 }
 .details[data-status="danger"] {
@@ -98,7 +98,7 @@
   color: var(--accent-orange, var(--md-warning, #f59e0b));
 }
 .details[data-status="ok"] {
-  color: var(--accent-green, var(--md-success, #34d399));
+  color: var(--accent-green, var(--md-success, #10B981));
 }
 .detailIcon {
   font-size: 14px;
@@ -112,11 +112,8 @@
 }
 
 /* Fix: supprimer carre focus visible au tap mobile */
-.container:focus {
-  outline: none;
-}
 .container:focus-visible {
-  outline: 2px solid var(--accent, #00d4ff);
+  outline: 2px solid var(--accent, #3B82F6);
   outline-offset: 2px;
   border-radius: var(--md-radius-sm, 8px);
 }
@@ -171,9 +168,9 @@
   padding: 5px 8px;
   background: rgba(0, 212, 255, 0.06);
   border-radius: var(--md-radius-sm, 8px);
-  border-left: 3px solid var(--accent, #00d4ff);
+  border-left: 3px solid var(--accent, #3B82F6);
   font-size: 12px;
-  color: var(--accent, #00d4ff);
+  color: var(--accent, #3B82F6);
   animation: detailSlide 0.2s ease;
   line-height: 1.4;
 }

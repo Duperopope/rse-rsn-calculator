@@ -1,3 +1,50 @@
+## v8.0.0 (2026-10-02)
+
+### Qualité produit et sécurité
+- Helmet activé, X-Powered-By désactivé.
+- Rate limiting global API et spécifique à l'analyse.
+- CORS fermé par défaut, configurable avec `CORS_ORIGIN`.
+- Payload JSON limité à 2 Mo.
+- Upload CSV/TXT filtré, limité à 5 Mo et toujours nettoyé.
+- Validation PDF corrigée et erreurs API centralisées.
+- Arrêt propre du serveur sur SIGTERM/SIGINT pour Render.
+
+### Dépendances
+- Express maintenu sur la branche 4 stable et mis à jour en 4.22.3.
+- express-rate-limit mis à jour en 8.7.0.
+- Multer migré de 1.x vers 2.4.0.
+- Puppeteer Core déplacé en devDependency et mis à jour en 25.12.0.
+- L audit npm des dépendances de production est désormais bloquant en CI.
+
+### Release et déploiement
+- Version 8.0.0 unifiée entre backend, frontend, health check et packages.
+- Render passe à `npm ci` et expose un health check explicite.
+- Suppression de `server.err` et du fichier parasite `=`.
+- Licence/documentation alignées sur MIT.
+- Service worker réécrit avec cache réel et exclusion des routes API.
+- Orientation PWA libre, utile pour la timeline en paysage.
+
+### UX, design et accessibilité
+- Suppression des états frontend `window.__*`.
+- Score principal converti en vrai bouton accessible.
+- Labels explicites sur paramètres, dates et horaires.
+- Navigation clavier ajoutée aux cartes d'infraction et à la timeline.
+- Focus visible normalisé.
+- Contrastes secondaires renforcés.
+- Palette runtime unifiée : bleu, vert, orange, rouge et violet fonctionnels.
+- Suppression de l'onboarding dupliqué et de l'ancien FixEnginePanel approximatif.
+- Guide utilisateur conservé en 4 étapes courtes.
+
+### QA reproductible
+- Fixture 56 jours restaurée et versionnée dans `tests/fixtures`.
+- CI GitHub : syntaxe, quality gate, tests métier/API/PDF, build et parcours Chromium.
+- Tests négatifs ajoutés pour analyse vide et PDF invalide.
+- Génération PDF réelle vérifiée par Content-Type et signature `%PDF-`.
+- Parcours mobile + desktop automatisé : paramètres, saisie, chaînage, duplication, analyse, score clavier, timeline semaine, historique, thème et débordements.
+- Quality gate bloquant les anciennes palettes, `window.__*`, `outline:none` et plusieurs régressions de packaging.
+
+---
+
 # Changelog
 
 ## v7.8.0 (2026-02-14)

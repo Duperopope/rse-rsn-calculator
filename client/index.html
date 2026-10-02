@@ -8,9 +8,9 @@
   <meta property="og:description" content="Calculateur de conformite CE 561/2006 - temps de conduite, repos, amplitude, sanctions"/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://rse-rsn-calculator.onrender.com/"/>
-  <meta name="description" content="FIMO Check - Conformite temps de conduite et repos pour le transport routier (CE 561/2006)"/>
+  <meta name="description" content="FIMO Check - Assistant de conformité des temps de conduite, pauses et repos pour le transport routier (CE 561/2006)"/>
   <meta name="author" content="Samir Medjaher"/>
-  <title>FIMO Check — Driver CPC Compliance Tool</title>
+  <title>FIMO Check — Conformité conduite et repos</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -67,13 +67,5 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
-        });
-      }
-    </script>
-  </body>
+</body>
 </html>

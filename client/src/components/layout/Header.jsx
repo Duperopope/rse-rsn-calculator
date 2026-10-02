@@ -20,8 +20,8 @@ function IconLogo() {
       <line x1="28" y1="18" x2="30" y2="18" stroke="url(#logoGrad)" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M18 10 L18 18 L24 21" stroke="url(#logoGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="27" cy="27" r="7" fill="var(--bg-card, #12121a)" />
-      <circle cx="27" cy="27" r="6.5" stroke="#00ff88" strokeWidth="1.5" />
-      <path d="M24 27 L26 29 L30.5 24.5" stroke="#00ff88" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="27" cy="27" r="6.5" stroke="#10B981" strokeWidth="1.5" />
+      <path d="M24 27 L26 29 L30.5 24.5" stroke="#10B981" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       <defs>
         <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36">
           <stop offset="0%" stopColor="var(--gradient-start, #667eea)" />
@@ -38,7 +38,7 @@ function IconAnalyseDesktop() {
       <circle cx="11" cy="11" r="9" stroke="currentColor" strokeWidth="1.8" />
       <path d="M8 5.5 A6.5 6.5 0 0 1 16.5 8" stroke="#4CAF50" strokeWidth="2.5" strokeLinecap="round" />
       <path d="M16.5 14 A6.5 6.5 0 0 1 14 16.5" stroke="#FF9800" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M5.5 14 A6.5 6.5 0 0 1 5.5 8" stroke="#9C27B0" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M5.5 14 A6.5 6.5 0 0 1 5.5 8" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" />
       <line x1="18" y1="18" x2="22.5" y2="22.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );

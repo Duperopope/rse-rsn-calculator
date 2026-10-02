@@ -19,6 +19,8 @@
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
+const helmet = require('helmet');
+const { rateLimit } = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 
@@ -30,8 +32,40 @@ const { genererRapportPDF } = require('./pdf-generator.js');
 // === FIN FIX-ENGINE IMPORT ===
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+app.use(helmet());
+
+const corsOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map(function(origin) { return origin.trim(); })
+  .filter(Boolean);
+if (corsOrigins.length > 0) {
+  app.use(cors({
+    origin: function(origin, callback) {
+      if (!origin || corsOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Origin non autorisee'));
+    }
+  }));
+}
+
+app.use(express.json({ limit: '2mb' }));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Trop de requetes. Reessayez dans quelques minutes.' }
+});
+const analyzeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Trop d analyses en peu de temps. Reessayez dans une minute.' }
+});
+app.use('/api', apiLimiter);
 
 // Servir le frontend depuis client/dist
 const distPath = path.join(__dirname, 'client', 'dist');
@@ -44,7 +78,23 @@ const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
-const upload = multer({ dest: uploadsDir, limits: { fileSize: 5 * 1024 * 1024 } });
+const upload = multer({
+  dest: uploadsDir,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: function(req, file, callback) {
+    var ext = path.extname(file.originalname || '').toLowerCase();
+    var allowedExt = ext === '.csv' || ext === '.txt';
+    var allowedMime = !file.mimetype ||
+      file.mimetype === 'text/csv' ||
+      file.mimetype === 'text/plain' ||
+      file.mimetype === 'application/vnd.ms-excel' ||
+      file.mimetype === 'application/octet-stream';
+    if (!allowedExt || !allowedMime) {
+      return callback(new Error('Format de fichier non autorise. Utilisez un fichier CSV ou TXT.'));
+    }
+    callback(null, true);
+  }
+});
 
 // ============================================================
 // CONSTANTES REGLEMENTAIRES
@@ -2106,7 +2156,7 @@ totalConduiteMin += conduiteJour;
 // ============================================================
 
 // POST /api/analyze - Analyse un CSV
-app.post('/api/analyze', (req, res) => {
+app.post('/api/analyze', analyzeLimiter, (req, res) => {
   try {
     const { csv, csv2, typeService, pays, equipage } = req.body;
 
@@ -2167,7 +2217,7 @@ app.post('/api/rapport/pdf', function(req, res) {
     var resultat = req.body.resultat;
     var options = req.body.options || {};
     
-    if (!resultat || !resultat.score === undefined) {
+    if (!resultat || resultat.score === undefined || !Number.isFinite(Number(resultat.score))) {
       return res.status(400).json({ error: 'Donnees d analyse manquantes' });
     }
     
@@ -2191,20 +2241,27 @@ app.post('/api/rapport/pdf', function(req, res) {
 });
 // POST /api/upload - Upload un fichier CSV
 app.post('/api/upload', upload.single('fichier'), (req, res) => {
+  var tempPath = req.file && req.file.path;
   try {
     if (!req.file) {
       return res.status(400).json({ error: "Aucun fichier recu." });
     }
 
     const contenu = fs.readFileSync(req.file.path, 'utf-8');
+    if (contenu.length > 5 * 1024 * 1024) {
+      return res.status(413).json({ error: "Fichier trop volumineux." });
+    }
 
-    // Nettoyer le fichier temporaire
-    fs.unlinkSync(req.file.path);
-
-    res.json({ csv: contenu, nom_fichier: req.file.originalname });
+    res.json({ csv: contenu, nom_fichier: path.basename(req.file.originalname || 'import.csv') });
   } catch (err) {
     console.error("[ERREUR UPLOAD]", err);
-    res.status(500).json({ error: "Erreur lors de l'upload : " + err.message });
+    res.status(500).json({ error: "Erreur lors de l'upload." });
+  } finally {
+    if (tempPath) {
+      try { fs.unlinkSync(tempPath); } catch (cleanupErr) {
+        if (cleanupErr.code !== 'ENOENT') console.warn("[UPLOAD CLEANUP]", cleanupErr.message);
+      }
+    }
   }
 });
 
@@ -2243,7 +2300,7 @@ app.get('/api/example-csv', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: "ok",
-    version: '7.11.0',
+    version: '8.0.0',
     auteur: "Samir Medjaher",
     regles_version: "v7.6.10.1 - Double moteur: REGULIER(Decret 2006-925) / SLO+OCCASIONNEL(CE 561/2006)",
     pays_supportes: Object.keys(PAYS).length,
@@ -2583,7 +2640,7 @@ app.get('/api/regles', (req, res) => {
 app.get('/api/qa', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: "Tests reglementaires sources - Niveau 1",
     methode: "Chaque assertion cite son article de loi exact",
     sources: [
@@ -2744,7 +2801,7 @@ app.get('/api/qa', async (req, res) => {
 app.get('/api/qa/cas-reels', (req, res) => {
   var rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: '25 cas de test avances pour diagnostic LLM - 7 categories reglementaires',
     moteur_info: {
       pause_reset_min: 30,
@@ -3210,7 +3267,7 @@ app.get('/api/qa/cas-reels', (req, res) => {
 app.get('/api/qa/limites', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: "Tests aux limites reglementaires - Niveau 3",
     methode: "Chaque seuil est teste a -1, pile, +1",
     tests: [],
@@ -3409,7 +3466,7 @@ app.get('/api/qa/limites', async (req, res) => {
 app.get('/api/qa/robustesse', async (req, res) => {
   const rapport = {
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: "Tests de robustesse - Edge cases, inputs malformes, multi-jours",
     tests: [],
     resume: { total: 0, ok: 0, ko: 0, pourcentage: 0 }
@@ -3856,13 +3913,39 @@ app.get('/api/qa/multi-semaines', (req, res) => {
 
   res.json({
     timestamp: new Date().toISOString(),
-    version: '7.11.0',
+    version: '8.0.0',
     description: 'Tests QA multi-semaines et tracking (CE 561/2006, 2020/1054, 2024/1258)',
     sources: sources,
     categories: categories,
     tests: tests,
     resume: { ok: ok, total: total, status: ok === total ? 'PARFAIT' : 'ECHECS' }
   });
+});
+
+
+// Gestion centralisee des erreurs HTTP/API.
+app.use(function apiErrorHandler(err, req, res, next) {
+  if (!err) return next();
+
+  if (err instanceof multer.MulterError) {
+    var status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return res.status(status).json({
+      error: err.code === 'LIMIT_FILE_SIZE'
+        ? 'Fichier trop volumineux (5 Mo maximum).'
+        : 'Fichier invalide.'
+    });
+  }
+
+  if (err.message === 'Format de fichier non autorise. Utilisez un fichier CSV ou TXT.') {
+    return res.status(415).json({ error: err.message });
+  }
+
+  if (err.message === 'Origin non autorisee') {
+    return res.status(403).json({ error: 'Origin non autorisee.' });
+  }
+
+  console.error('[HTTP ERROR]', err && err.message ? err.message : err);
+  return res.status(500).json({ error: 'Erreur interne du serveur.' });
 });
 
 app.get('*', (req, res) => {
@@ -3875,13 +3958,27 @@ app.get('*', (req, res) => {
 });
 
 // Demarrage du serveur
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  FIMO Check v7.11.0");
+  console.log("  FIMO Check v8.0.0");
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
   console.log("============================================");
   console.log("");
 });
+
+function shutdownServer(signal) {
+  console.log('[SHUTDOWN] ' + signal + ' recu, fermeture propre...');
+  server.close(function() {
+    process.exit(0);
+  });
+  setTimeout(function() {
+    console.error('[SHUTDOWN] fermeture forcee apres delai');
+    process.exit(1);
+  }, 10000).unref();
+}
+
+process.once('SIGTERM', function() { shutdownServer('SIGTERM'); });
+process.once('SIGINT', function() { shutdownServer('SIGINT'); });

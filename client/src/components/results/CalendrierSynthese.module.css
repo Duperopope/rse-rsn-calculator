@@ -12,7 +12,7 @@
   width: 100%;
   padding: 0.7rem 1rem;
   background: var(--bg-input, var(--md-surface-container, #1a1a2e));
-  color: var(--accent, #00d4ff);
+  color: var(--accent, #3B82F6);
   border: 1px solid var(--border, var(--md-outline-variant, #2a2a4e));
   border-radius: var(--md-radius-md, 12px);
   cursor: pointer;
@@ -20,12 +20,12 @@
   font-weight: 600;
   transition: border-color 0.2s;
 }
-.toggleBtn:active { border-color: var(--accent, #00d4ff); opacity: 0.85; }
-@media (hover: hover) { .toggleBtn:hover { border-color: var(--accent, #00d4ff); } }
+.toggleBtn:active { border-color: var(--accent, #3B82F6); opacity: 0.85; }
+@media (hover: hover) { .toggleBtn:hover { border-color: var(--accent, #3B82F6); } }
 .toggleIcon { font-size: 12px; }
 .toggleLabel { flex: 1; text-align: left; }
 .toggleStats { display: flex; gap: 0.5rem; font-size: 12px; font-weight: 700; }
-.statCyan { color: var(--accent, #00d4ff); }
+.statCyan { color: var(--accent, #3B82F6); }
 .statOrange { color: var(--accent-orange, var(--md-warning, #f59e0b)); }
 .statRed { color: var(--accent-red, var(--md-error, #ef4444)); }
 
@@ -52,9 +52,9 @@
 .dotCyan, .dotOrange, .dotGreen, .dotGray {
   width: 8px; height: 8px; border-radius: 2px; display: inline-block;
 }
-.dotCyan { background: var(--accent, #00d4ff); }
+.dotCyan { background: var(--accent, #3B82F6); }
 .dotOrange { background: var(--accent-orange, var(--md-warning, #f59e0b)); }
-.dotGreen { background: var(--accent-green, var(--md-success, #34d399)); }
+.dotGreen { background: var(--accent-green, var(--md-success, #10B981)); }
 .dotGray { background: rgba(255, 255, 255, 0.15); }
 
 /* Grid of days */
@@ -84,7 +84,7 @@
 .dayRow:active { background: rgba(0, 212, 255, 0.06); }
 @media (hover: hover) { .dayRow:hover { background: rgba(0, 212, 255, 0.04); } }
 .dayRowWarn { border-left-color: var(--accent-red, var(--md-error, #ef4444)); }
-.dayRowActive { background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); border-left-color: var(--accent, #00d4ff); }
+.dayRowActive { background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); border-left-color: var(--accent, #3B82F6); }
 
 .dayLabel {
   width: 60px;
@@ -103,9 +103,9 @@
   overflow: hidden;
   background: rgba(255, 255, 255, 0.04);
 }
-.barSegCyan { background: var(--accent, #00d4ff); height: 100%; transition: width 0.3s ease; }
+.barSegCyan { background: var(--accent, #3B82F6); height: 100%; transition: width 0.3s ease; }
 .barSegOrange { background: var(--accent-orange, var(--md-warning, #f59e0b)); height: 100%; transition: width 0.3s ease; }
-.barSegGreen { background: var(--accent-green, var(--md-success, #34d399)); height: 100%; transition: width 0.3s ease; }
+.barSegGreen { background: var(--accent-green, var(--md-success, #10B981)); height: 100%; transition: width 0.3s ease; }
 .barSegGray { background: rgba(255, 255, 255, 0.12); height: 100%; transition: width 0.3s ease; }
 
 /* Badges */
@@ -122,7 +122,7 @@
 }
 .okBadge {
   background: rgba(0, 255, 136, 0.15);
-  color: var(--accent-green, var(--md-success, #34d399));
+  color: var(--accent-green, var(--md-success, #10B981));
   font-size: 12px;
   font-weight: 700;
   padding: 2px 6px;
@@ -158,9 +158,9 @@
   font-weight: 600;
   color: #fff;
 }
-.valCyan { color: var(--accent, #00d4ff); }
+.valCyan { color: var(--accent, #3B82F6); }
 .valOrange { color: var(--accent-orange, var(--md-warning, #f59e0b)); }
-.valGreen { color: var(--accent-green, var(--md-success, #34d399)); }
+.valGreen { color: var(--accent-green, var(--md-success, #10B981)); }
 
 .dayDetailInf {
   display: flex;

@@ -178,7 +178,7 @@ function resumeJour(activites) {
 /* Composant carte template */
 function TemplateCard({ templateKey, template, selected, onClick }) {
   const iconeMap = { journeeType: 'C', journeeLongue: 'C', serviceNuit: 'T' };
-  const couleurMap = { journeeType: '#4CAF50', journeeLongue: '#FF9800', serviceNuit: '#9C27B0' };
+  const couleurMap = { journeeType: '#4CAF50', journeeLongue: '#FF9800', serviceNuit: '#8B5CF6' };
 
   return (
     <button
@@ -188,7 +188,7 @@ function TemplateCard({ templateKey, template, selected, onClick }) {
       title={template.label}
     >
       <span className={styles.templateIcon}>
-        <IconeActivite type={iconeMap[templateKey] || 'C'} size={18} color={couleurMap[templateKey] || '#888'} />
+        <IconeActivite type={iconeMap[templateKey] || 'C'} size={18} color={couleurMap[templateKey] || '#94A3B8'} />
       </span>
       <span className={styles.templateLabel}>{template.label}</span>
     </button>
@@ -251,6 +251,7 @@ function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTy
             onClick={() => setShowTypeSelector(showTypeSelector === actIdx ? null : actIdx)}
             style={{ borderColor: typeInfo.couleur + '60', background: typeInfo.couleur + '12' }}
             title={'Changer le type (actuellement: ' + typeInfo.label + ')'}
+            aria-label={'Activite ' + (actIdx + 1) + ' : changer le type, actuellement ' + typeInfo.label}
           >
             <IconeActivite type={act.type} size={20} color={typeInfo.couleur} />
             <span className={styles.activiteTypeName} style={{ color: typeInfo.couleur }}>
@@ -263,6 +264,8 @@ function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTy
             className={styles.timeInput}
             value={act.debut}
             onChange={(e) => updateActivite(actIdx, 'debut', e.target.value)}
+            aria-label={'Heure de debut de l activite ' + (actIdx + 1)}
+            aria-invalid={chevauchement}
           />
           <span className={styles.fleche}>&rarr;</span>
           <input
@@ -270,6 +273,8 @@ function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTy
             className={styles.timeInput}
             value={act.fin}
             onChange={(e) => updateActivite(actIdx, 'fin', e.target.value)}
+            aria-label={'Heure de fin de l activite ' + (actIdx + 1)}
+            aria-invalid={chevauchement}
           />
 
           <span className={styles.dureeLabel}>
@@ -411,15 +416,16 @@ export function JourFormulaire({ jour, index, onUpdate, onRemove, onDuplicate, c
             className={styles.dateInput}
             value={jour.date}
             onChange={(e) => updateDate(e.target.value)}
+            aria-label={'Date du jour ' + (index + 1)}
           />
         </div>
         <div className={styles.jourActions}>
-          <button className={styles.actionBtnLabel} onClick={() => onDuplicate(index)} title="Dupliquer ce jour">
+          <button type="button" className={styles.actionBtnLabel} onClick={() => onDuplicate(index)} title="Dupliquer ce jour">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             <span>Dupliquer</span>
           </button>
           {canRemove ? (
-            <button className={styles.removeBtnLabel} onClick={() => onRemove(index)} title="Supprimer ce jour">
+            <button type="button" className={styles.removeBtnLabel} onClick={() => onRemove(index)} title="Supprimer ce jour">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
               <span>Supprimer</span>
             </button>
