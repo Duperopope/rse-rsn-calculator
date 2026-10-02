@@ -178,7 +178,7 @@ function resumeJour(activites) {
 /* Composant carte template */
 function TemplateCard({ templateKey, template, selected, onClick }) {
   const iconeMap = { journeeType: 'C', journeeLongue: 'C', serviceNuit: 'T' };
-  const couleurMap = { journeeType: '#4CAF50', journeeLongue: '#FF9800', serviceNuit: '#9C27B0' };
+  const couleurMap = { journeeType: '#4CAF50', journeeLongue: '#FF9800', serviceNuit: '#8B5CF6' };
 
   return (
     <button
@@ -188,7 +188,7 @@ function TemplateCard({ templateKey, template, selected, onClick }) {
       title={template.label}
     >
       <span className={styles.templateIcon}>
-        <IconeActivite type={iconeMap[templateKey] || 'C'} size={18} color={couleurMap[templateKey] || '#888'} />
+        <IconeActivite type={iconeMap[templateKey] || 'C'} size={18} color={couleurMap[templateKey] || '#94A3B8'} />
       </span>
       <span className={styles.templateLabel}>{template.label}</span>
     </button>
