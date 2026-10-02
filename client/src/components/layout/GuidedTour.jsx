@@ -2,11 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
 
 /* ============================================================
-   GuidedTour v4.0 — 4 etapes adaptees a la visibilite DOM
-   Etapes 1-6: elements toujours presents
-   Etapes 7-10: elements toujours presents (header, params, input)
-   Les cibles conditionnelles (timeline, gauges, results)
-   sont couvertes par le texte explicatif.
+   GuidedTour v8.0 — 4 etapes courtes, centrees sur l action.
+   Les vues conditionnelles sont expliquees sans forcer leur rendu.
    ============================================================ */
 
 var STEPS = [
@@ -40,7 +37,7 @@ var STEPS = [
     }
   ];
 
-var HIDE_DASHBOARD_STEPS = [4, 5];
+var HIDE_DASHBOARD_STEPS = [];
 
 var JOYRIDE_STYLES = {
   options: {
