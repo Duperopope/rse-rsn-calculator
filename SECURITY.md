@@ -11,6 +11,7 @@ FIMO Check traite des horaires et donnees de conduite qui peuvent devenir des do
 - Les uploads n'acceptent que CSV/TXT et sont supprimes apres lecture, y compris en cas d'erreur.
 - Les erreurs HTTP publiques ne doivent pas exposer les exceptions internes.
 - Helmet fournit les en-tetes de securite et une CSP restrictive.
+- Les outils navigateur QA (Puppeteer) sont des dependances de developpement et ne sont pas installes sur Render.
 - Aucun secret ne doit etre commite. Utiliser les variables d'environnement Render.
 
 ## Donnees et outils QA
