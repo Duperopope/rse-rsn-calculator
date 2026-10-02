@@ -48,6 +48,7 @@ check('parametres exposes aux lecteurs d ecran', params.includes('htmlFor="type-
 check('29 pays exposes dans l interface', (constants.match(/code: '[A-Z]{2}'/g) || []).length >= 29);
 check('cartes infraction clavier', infractions.includes('onKeyDown={handleKeyDown}'));
 check('onglets resultats semantiques', calculator.includes('role="tablist"') && calculator.includes('aria-selected'));
+check('aucun etat jauge global sur window', !calculator.includes('window.__'));
 check('README ne documente pas /api/fix fantome', !readme.includes('| `POST` | `/api/fix`'));
 check('fichier parasite "=" absent', !fs.existsSync(path.join(root, '=')));
 check('server.err absent', !fs.existsSync(path.join(root, 'server.err')));
