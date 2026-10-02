@@ -3,7 +3,7 @@ import { APP_NAME, APP_SUBTITLE } from '../../config/constants.js';
 import styles from './Header.module.css';
 
 /**
- * FIMO Check — Header v7.11.0
+ * FIMO Check — Header
  * Mobile: logo + nom + status + theme
  * Desktop: logo + nom + actions + status + theme
  * Theme = petit toggle propre, pas un emoji brut
