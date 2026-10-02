@@ -86,6 +86,17 @@ function VueJour(props) {
           key: b.index,
           className: styles.bloc,
           style: { left: b.left + '%', width: b.width + '%', backgroundColor: b.bg },
+          role: 'button',
+          tabIndex: 0,
+          'aria-label': ((COULEURS[b.type] || {}).label || b.type) + ' de ' + b.debut + ' a ' + b.fin + ', ' + formatDuree(b.duree),
+          onKeyDown: function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (tooltip && tooltip.index === b.index) setTooltip(null);
+              else setTooltip(b);
+              if (onActiviteClick) onActiviteClick(b.index);
+            }
+          },
           onClick: function(e) {
             e.stopPropagation();
             if (tooltip && tooltip.index === b.index) {
@@ -164,7 +175,16 @@ function VueSemaine(props) {
       return React.createElement('div', {
         key: i,
         className: styles.semaineLigne + (isActif ? ' ' + styles.semaineLigneActive : ''),
-        onClick: function() { if (onJourClick) onJourClick(i); }
+        role: 'button',
+        tabIndex: 0,
+        'aria-label': 'Jour ' + (i + 1) + ', ' + jourNom + ' ' + dateLabel + (nbInf ? ', ' + nbInf + ' infraction(s)' : '') + (nbAvert ? ', ' + nbAvert + ' alerte(s)' : ''),
+        onClick: function() { if (onJourClick) onJourClick(i); },
+        onKeyDown: function(e) {
+          if ((e.key === 'Enter' || e.key === ' ') && onJourClick) {
+            e.preventDefault();
+            onJourClick(i);
+          }
+        }
       },
         // Label date
         React.createElement('div', { className: styles.semaineDate },
@@ -197,8 +217,22 @@ function VueSemaine(props) {
         // Stats rapides
         React.createElement('div', { className: styles.semaineStats },
           detail.conduite_h ? React.createElement('span', { className: styles.semaineStat }, detail.conduite_h + 'h C') : null,
-          nbInf > 0 ? React.createElement('span', { className: styles.semaineInfBadge, onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'infraction'); } }, nbInf) : null,
-          nbAvert > 0 ? React.createElement('span', { className: styles.semaineAvertBadge, onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'avertissement'); } }, nbAvert) : null
+          nbInf > 0 ? React.createElement('span', {
+            className: styles.semaineInfBadge,
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': nbInf + ' infraction(s) pour ce jour',
+            onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'infraction'); },
+            onKeyDown: function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'infraction'); } }
+          }, nbInf) : null,
+          nbAvert > 0 ? React.createElement('span', {
+            className: styles.semaineAvertBadge,
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': nbAvert + ' alerte(s) pour ce jour',
+            onClick: function(e) { e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'avertissement'); },
+            onKeyDown: function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (onInfractionClick) onInfractionClick(i, 'avertissement'); } }
+          }, nbAvert) : null
         )
       );
     }),
@@ -253,7 +287,9 @@ export function Timeline24h(props) {
       vueOptions.map(function(v) {
         return React.createElement('button', {
           key: v,
+          type: 'button',
           className: styles.vueSelectorBtn + (vue === v ? ' ' + styles.vueSelectorActive : ''),
+          'aria-pressed': vue === v,
           onClick: function() { setVue(v); setTooltip(null); }
         }, v);
       })
