@@ -20,8 +20,8 @@ function IconLogo() {
       <line x1="28" y1="18" x2="30" y2="18" stroke="url(#logoGrad)" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M18 10 L18 18 L24 21" stroke="url(#logoGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="27" cy="27" r="7" fill="var(--bg-card, #12121a)" />
-      <circle cx="27" cy="27" r="6.5" stroke="#00ff88" strokeWidth="1.5" />
-      <path d="M24 27 L26 29 L30.5 24.5" stroke="#00ff88" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="27" cy="27" r="6.5" stroke="var(--accent-green, #10B981)" strokeWidth="1.5" />
+      <path d="M24 27 L26 29 L30.5 24.5" stroke="var(--accent-green, #10B981)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       <defs>
         <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36">
           <stop offset="0%" stopColor="var(--gradient-start, #667eea)" />
@@ -60,6 +60,7 @@ function ThemeToggle({ theme, onToggle }) {
   return (
     <button
       className={styles.themeToggle}
+      type="button"
       onClick={() => { if (navigator.vibrate) navigator.vibrate(5); if (onToggle) onToggle(); }}
       title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
       aria-label={isDark ? 'Mode clair' : 'Mode sombre'}
@@ -124,12 +125,13 @@ export function Header({
       <div className={styles.mobileRight}>
         <span className={online ? styles.statusOn : styles.statusOff} />
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-        <button data-tour="help" className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
+        <button data-tour="help" type="button" className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
       </div>
 
       {/* === Desktop: actions === */}
       <div className={styles.desktopActions}>
         <button
+          type="button"
           className={`${styles.analyseBtn} ${analyseEnCours ? styles.analyseBtnLoading : ''}`}
           onClick={() => { if (navigator.vibrate) navigator.vibrate(15); if (onAnalyse) onAnalyse(); }}
           disabled={analyseDisabled || analyseEnCours}
@@ -138,6 +140,7 @@ export function Header({
           <span>{analyseEnCours ? 'Analyse...' : 'Analyser la conformite'}</span>
         </button>
         <button
+          type="button"
           className={`${styles.histBtn} ${voirHistorique ? styles.histBtnActive : ''}`}
           onClick={() => { if (onToggleHistorique) onToggleHistorique(); }}
         >
@@ -156,7 +159,7 @@ export function Header({
           {!online ? 'Hors ligne' : ''}
         </span>
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-        <button className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
+        <button type="button" className={styles.helpBtn} onClick={onStartTour} title="Guide interactif" aria-label="Aide">?</button>
       </div>
     </header>
   );
