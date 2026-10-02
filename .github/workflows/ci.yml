@@ -39,6 +39,13 @@ jobs:
       - name: Install frontend dependencies
         run: npm --prefix client ci
 
+      - name: Preview dependency lock remediation
+        run: |
+          npm audit fix --package-lock-only --ignore-scripts
+          echo "=== PACKAGE_LOCK_AUDIT_FIX_DIFF ==="
+          git diff -- package-lock.json
+          npm ci
+
       - name: Release invariants
         run: npm run qa:release
 
