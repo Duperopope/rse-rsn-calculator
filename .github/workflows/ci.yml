@@ -1,5 +1,9 @@
 name: FIMO Check CI
 
+concurrency:
+  group: fimo-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
