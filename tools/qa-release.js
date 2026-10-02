@@ -24,6 +24,7 @@ const params = read('client/src/components/forms/ParametresPanel.jsx');
 const infractions = read('client/src/components/results/InfractionCard.jsx');
 const calculator = read('client/src/pages/Calculator.jsx');
 const constants = read('client/src/config/constants.js');
+const renderConfig = read('render.yaml');
 
 check('versions root/client identiques', pkg.version === clientPkg.version, pkg.version + ' / ' + clientPkg.version);
 check('README sur la version courante', readme.includes('v' + pkg.version), pkg.version);
@@ -37,6 +38,7 @@ check('CORS non ouvert globalement', !server.includes('app.use(cors());'));
 check('upload limite et filtre', server.includes('fileFilter: function') && server.includes('fileSize: 5 * 1024 * 1024'));
 check('multer 2.x minimum', /^\^?2\./.test(pkg.dependencies.multer), pkg.dependencies.multer);
 check('Puppeteer absent des dependances production', !pkg.dependencies['puppeteer-core'] && Boolean(pkg.devDependencies && pkg.devDependencies['puppeteer-core']));
+check('Render exclut Puppeteer mais inclut Vite au build', renderConfig.includes('npm ci --omit=dev') && renderConfig.includes('client ci --include=dev'));
 check('manifest standalone', manifest.display === 'standalone');
 check('manifest sans orientation forcee', !Object.prototype.hasOwnProperty.call(manifest, 'orientation'));
 check('service worker ignore API', sw.includes("url.pathname.startsWith('/api/')"));
