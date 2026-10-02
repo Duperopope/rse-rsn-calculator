@@ -47,7 +47,7 @@
   font-size: 14px;
   transition: border-color 0.2s;
 }
-.dateInput:focus { border-color: var(--accent, #3B82F6); outline: none; }
+.dateInput:focus { border-color: var(--accent, #3B82F6); outline: 2px solid transparent; }
 
 .jourActions {
   display: flex;
@@ -215,7 +215,7 @@
   text-align: center;
   transition: border-color 0.2s;
 }
-.timeInput:focus { border-color: var(--accent, #3B82F6); outline: none; }
+.timeInput:focus { border-color: var(--accent, #3B82F6); outline: 2px solid transparent; }
 
 .fleche {
   color: var(--text-secondary, #94A3B8);
