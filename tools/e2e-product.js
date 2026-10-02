@@ -134,6 +134,11 @@ async function main() {
   assert(await page.$('[data-tour="header"]'), 'header visible sur mobile');
   assert((await page.title()).includes('FIMO Check'), 'titre de page FIMO Check');
 
+  const paramsButton = await page.$('button[aria-label="Modifier les parametres"]');
+  assert(Boolean(paramsButton), 'panneau parametres accessible');
+  await paramsButton.click();
+  await page.waitForSelector('#pays-reglementation');
+
   const layout = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth,
