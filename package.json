@@ -1,6 +1,6 @@
 {
   "name": "fimo-check",
-  "version": "7.11.0",
+  "version": "8.0.0",
   "private": true,
   "description": "FIMO Check - Driver CPC Compliance Tool - Conformite CE 561/2006",
   "author": "Samir Medjaher",
