@@ -183,7 +183,7 @@ export function ResultPanel({ resultat, compact = false, onBack = null, onNaviga
                           {av.regle || ''}
                         </a>
                       ) : (av.regle || '')}
-                      {av.count > 1 ? <span style={{marginLeft:'6px',padding:'1px 6px',borderRadius:'8px',background:'rgba(255,170,0,0.15)',color:'#ffaa00',fontSize:'0.7rem',fontWeight:600}}>{String.fromCharCode(215)}{av.count}{av.jours.length > 0 ? ' (' + av.jours.join(', ') + ')' : ''}</span> : null}
+                      {av.count > 1 ? <span style={{marginLeft:'6px',padding:'1px 6px',borderRadius:'8px',background:'rgba(255,170,0,0.15)',color:'var(--warning, #F59E0B)',fontSize:'0.7rem',fontWeight:600}}>{String.fromCharCode(215)}{av.count}{av.jours.length > 0 ? ' (' + av.jours.join(', ') + ')' : ''}</span> : null}
                     </strong>
                     <p>{av.message || av.description || ''}</p>
                   </div>
