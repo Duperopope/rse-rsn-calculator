@@ -35,15 +35,34 @@ export const TYPES_SERVICE = [
 // Pays supportes
 export const PAYS_LISTE = [
   { code: 'FR', label: 'France', drapeau: '🇫🇷' },
-  { code: 'BE', label: 'Belgique', drapeau: '🇧🇪' },
   { code: 'DE', label: 'Allemagne', drapeau: '🇩🇪' },
   { code: 'ES', label: 'Espagne', drapeau: '🇪🇸' },
   { code: 'IT', label: 'Italie', drapeau: '🇮🇹' },
-  { code: 'LU', label: 'Luxembourg', drapeau: '🇱🇺' },
+  { code: 'BE', label: 'Belgique', drapeau: '🇧🇪' },
   { code: 'NL', label: 'Pays-Bas', drapeau: '🇳🇱' },
-  { code: 'CH', label: 'Suisse', drapeau: '🇨🇭' },
   { code: 'PT', label: 'Portugal', drapeau: '🇵🇹' },
-  { code: 'GB', label: 'Royaume-Uni', drapeau: '🇬🇧' }
+  { code: 'GB', label: 'Royaume-Uni', drapeau: '🇬🇧' },
+  { code: 'CH', label: 'Suisse', drapeau: '🇨🇭' },
+  { code: 'AT', label: 'Autriche', drapeau: '🇦🇹' },
+  { code: 'PL', label: 'Pologne', drapeau: '🇵🇱' },
+  { code: 'RO', label: 'Roumanie', drapeau: '🇷🇴' },
+  { code: 'GR', label: 'Grece', drapeau: '🇬🇷' },
+  { code: 'BG', label: 'Bulgarie', drapeau: '🇧🇬' },
+  { code: 'CZ', label: 'Tchequie', drapeau: '🇨🇿' },
+  { code: 'HU', label: 'Hongrie', drapeau: '🇭🇺' },
+  { code: 'SE', label: 'Suede', drapeau: '🇸🇪' },
+  { code: 'DK', label: 'Danemark', drapeau: '🇩🇰' },
+  { code: 'FI', label: 'Finlande', drapeau: '🇫🇮' },
+  { code: 'IE', label: 'Irlande', drapeau: '🇮🇪' },
+  { code: 'LU', label: 'Luxembourg', drapeau: '🇱🇺' },
+  { code: 'HR', label: 'Croatie', drapeau: '🇭🇷' },
+  { code: 'SK', label: 'Slovaquie', drapeau: '🇸🇰' },
+  { code: 'SI', label: 'Slovenie', drapeau: '🇸🇮' },
+  { code: 'NO', label: 'Norvege', drapeau: '🇳🇴' },
+  { code: 'MA', label: 'Maroc', drapeau: '🇲🇦' },
+  { code: 'TN', label: 'Tunisie', drapeau: '🇹🇳' },
+  { code: 'DZ', label: 'Algerie', drapeau: '🇩🇿' },
+  { code: 'TR', label: 'Turquie', drapeau: '🇹🇷' }
 ];
 
 // Templates de journees types (pre-remplissage formulaire)
