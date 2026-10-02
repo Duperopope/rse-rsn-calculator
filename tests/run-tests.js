@@ -1,6 +1,6 @@
 /**
  * RSE-RSN Calculator - Tests automatises
- * Version: 7.6.10.1
+ * Version: 8.0.0
  * 
  * Envoie le CSV en JSON via POST { csv: "..." } sur /api/analyze
  * et verifie les resultats contre le snapshot de reference.
@@ -146,9 +146,9 @@ function httpGet(urlPath) {
       res.on('data', function(chunk) { body += chunk; });
       res.on('end', function() {
         try {
-          resolve({ status: res.statusCode, data: JSON.parse(body) });
+          resolve({ status: res.statusCode, data: JSON.parse(body), headers: res.headers });
         } catch (e) {
-          resolve({ status: res.statusCode, data: body });
+          resolve({ status: res.statusCode, data: body, headers: res.headers });
         }
       });
     });
@@ -177,9 +177,9 @@ function httpPostJSON(urlPath, jsonBody) {
       res.on('data', function(chunk) { responseBody += chunk; });
       res.on('end', function() {
         try {
-          resolve({ status: res.statusCode, data: JSON.parse(responseBody) });
+          resolve({ status: res.statusCode, data: JSON.parse(responseBody), headers: res.headers });
         } catch (e) {
-          resolve({ status: res.statusCode, data: responseBody });
+          resolve({ status: res.statusCode, data: responseBody, headers: res.headers });
         }
       });
     });
@@ -197,8 +197,19 @@ function testHealth(healthData) {
   log('--- HEALTH ENDPOINT ---');
   assertExists('health.status', healthData, 'status');
   assertEqual('health.status = ok', healthData.status, 'ok');
-  assertExists('health.version', healthData, 'version');
+  assertEqual('health.version = 8.0.0', healthData.version, '8.0.0');
   assertExists('health.auteur', healthData, 'auteur');
+}
+
+function testSecurityHeaders(headers) {
+  log('--- SECURITY HEADERS ---');
+  assertEqual('X-Powered-By absent', headers['x-powered-by'], undefined);
+  assertEqual('X-Content-Type-Options = nosniff', headers['x-content-type-options'], 'nosniff');
+  if (headers['content-security-policy']) {
+    pass('Content-Security-Policy present');
+  } else {
+    fail('Content-Security-Policy present', 'header', headers['content-security-policy']);
+  }
 }
 
 function testStructure(data) {
@@ -359,8 +370,8 @@ function testCoherence(data) {
 async function main() {
   console.log('');
   console.log('============================================================');
-  console.log(' RSE-RSN Calculator - Tests automatises');
-  console.log(' Reference: v7.6.10.1 | Fixture: test_56jours.csv');
+  console.log(' FIMO Check - Tests automatises v8.0.0');
+  console.log(' Reference: v7.6.10.1 | Fixture canonique: tests/fixtures/test_56jours.csv');
   console.log('============================================================');
   console.log('');
   
@@ -385,6 +396,19 @@ async function main() {
     var healthResp = await httpGet('/api/health');
     assertEqual('GET /api/health -> 200', healthResp.status, 200);
     testHealth(healthResp.data);
+    testSecurityHeaders(healthResp.headers || {});
+
+    // ---- NEGATIVE API CASES ----
+    var emptyAnalyze = await httpPostJSON('/api/analyze', {
+      csv: '',
+      typeService: 'STANDARD',
+      pays: 'FR',
+      equipage: 'solo'
+    });
+    assertEqual('POST /api/analyze CSV vide -> 400', emptyAnalyze.status, 400);
+
+    var invalidPdf = await httpPostJSON('/api/rapport/pdf', { resultat: {} });
+    assertEqual('POST /api/rapport/pdf sans score -> 400', invalidPdf.status, 400);
     
     // ---- ANALYZE (POST JSON) ----
     log('POST /api/analyze avec CSV (' + csvContent.split('\n').length + ' lignes)...');
@@ -418,6 +442,19 @@ async function main() {
     
     // ---- COHERENCE ----
     testCoherence(data);
+
+    // ---- PDF REEL ----
+    var pdfResp = await httpPostJSON('/api/rapport/pdf', {
+      resultat: data,
+      options: { titre: 'Rapport QA FIMO Check' }
+    });
+    assertEqual('POST /api/rapport/pdf valide -> 200', pdfResp.status, 200);
+    assertEqual('PDF Content-Type', (pdfResp.headers || {})['content-type'], 'application/pdf');
+    if (typeof pdfResp.data === 'string' && pdfResp.data.indexOf('%PDF-') === 0) {
+      pass('PDF genere avec signature %PDF');
+    } else {
+      fail('PDF genere avec signature %PDF', '%PDF-', typeof pdfResp.data === 'string' ? pdfResp.data.slice(0, 8) : typeof pdfResp.data);
+    }
     
   } catch (err) {
     log('ERREUR FATALE: ' + err.message);
