@@ -21,14 +21,14 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --text-secondary: #94A3B8;
-  --text-tertiary: #8a8a9a;
+  --text-tertiary: #A8B0BF;
   --accent: #3B82F6;
   --accent-glow: rgba(59,130,246,0.15);
   --accent-subtle: rgba(59,130,246,0.08);
   --bg: #0B0D10;
   --bg-elevated: #1E2433;
   --border-light: #374151;
-  --text-muted: #64748B;
+  --text-muted: #94A3B8;
   --success: #10B981;
   --warning: #F59E0B;
   --danger: #EF4444;
@@ -73,11 +73,13 @@ input, textarea, select {
   border: 1px solid var(--border, #2a2a3e);
   border-radius: 8px;
   padding: 8px 12px;
-  outline: none;
-  transition: border-color 0.2s;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: border-color 0.2s, outline-color 0.2s;
 }
-input:focus, textarea:focus, select:focus {
-  border-color: var(--accent, #00d4ff);
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  border-color: var(--accent, #3B82F6);
+  outline-color: var(--accent, #3B82F6);
 }
 
 /* ========== Animations ========== */
@@ -235,11 +237,12 @@ body {
 /* Fix: supprimer highlight rectangle au tap Android */
 [role="button"] {
   -webkit-tap-highlight-color: transparent;
-  outline: none;
 }
+button:focus-visible,
+a:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid var(--accent, #00d4ff);
-  outline-offset: 2px;
+  outline: 2px solid var(--accent, #3B82F6);
+  outline-offset: 3px;
 }
 
 /* mobile-root-font-fix */
