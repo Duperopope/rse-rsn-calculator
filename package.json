@@ -13,7 +13,8 @@
     "qa:release": "node tools/qa-release.js",
     "test:parcours": "node tools/test-parcours.js",
     "pretest": "npm run check:syntax",
-    "ci": "npm run qa:release && npm run check:syntax && npm test && npm run build"
+    "ci": "npm run qa:release && npm run check:syntax && npm test && npm run build && npm run test:e2e",
+    "test:e2e": "node tools/e2e-product.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
