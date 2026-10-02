@@ -1,5 +1,3 @@
-# Changelog
-
 ## v8.0.0 (2026-10-02)
 
 ### Qualité produit et sécurité
