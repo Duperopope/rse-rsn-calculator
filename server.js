@@ -3977,7 +3977,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log("");
   console.log("============================================");
-  console.log("  FIMO Check v" + APP_VERSION");
+  console.log("  FIMO Check v" + APP_VERSION);
   console.log("  Auteur : Samir Medjaher");
   console.log("  Serveur demarre sur le port " + PORT);
   console.log("  http://localhost:" + PORT);
