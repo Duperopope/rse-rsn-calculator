@@ -24,6 +24,37 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function parseRgb(value) {
+  const match = String(value || '').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+}
+
+function luminance(rgb) {
+  const values = rgb.map((v) => {
+    const n = v / 255;
+    return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * values[0] + 0.7152 * values[1] + 0.0722 * values[2];
+}
+
+function contrastRatio(foreground, background) {
+  const fg = parseRgb(foreground);
+  const bg = parseRgb(background);
+  if (!fg || !bg) return 0;
+  const l1 = luminance(fg);
+  const l2 = luminance(bg);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+async function assertNoHorizontalOverflow(page, label) {
+  const layout = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+    innerWidth: window.innerWidth
+  }));
+  assert(layout.scrollWidth <= Math.max(layout.clientWidth, layout.innerWidth) + 2, label);
+}
+
 function request(pathname, options) {
   options = options || {};
   return new Promise((resolve, reject) => {
@@ -107,6 +138,27 @@ async function main() {
   });
   assert(badPdf.status === 400, 'PDF invalide refuse en 400');
 
+  const unknownApi = await request('/api/cette-route-n-existe-pas');
+  assert(unknownApi.status === 404, 'endpoint API inconnu refuse en 404');
+
+  const malformedJson = await request('/api/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Content-Length': '1' },
+    body: '{'
+  });
+  assert(malformedJson.status === 400, 'JSON malforme refuse en 400');
+
+  const oversizedPayload = JSON.stringify({ csv: 'x'.repeat(2 * 1024 * 1024 + 4096) });
+  const oversized = await request('/api/analyze', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(oversizedPayload)
+    },
+    body: oversizedPayload
+  });
+  assert(oversized.status === 413, 'payload JSON au-dela de la limite refuse en 413');
+
   const browserPath = findBrowser();
   assert(Boolean(browserPath), 'navigateur Chrome/Chromium disponible pour E2E');
 
@@ -139,6 +191,12 @@ async function main() {
 
   assert(await page.$('[data-tour="header"]'), 'header visible sur mobile');
   assert((await page.title()).includes('FIMO Check'), 'titre de page FIMO Check');
+
+  const darkThemeColors = await page.evaluate(() => {
+    const style = getComputedStyle(document.body);
+    return { color: style.color, background: style.backgroundColor };
+  });
+  assert(contrastRatio(darkThemeColors.color, darkThemeColors.background) >= 4.5, 'contraste texte principal dark >= 4.5:1');
 
   const paramsButton = await page.$('button[aria-label="Modifier les parametres"]');
   assert(Boolean(paramsButton), 'panneau parametres accessible');
@@ -234,6 +292,11 @@ async function main() {
   await themeButton.click();
   await page.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'light');
   assert(true, 'theme clair applique et observable');
+  const lightThemeColors = await page.evaluate(() => {
+    const style = getComputedStyle(document.body);
+    return { color: style.color, background: style.backgroundColor };
+  });
+  assert(contrastRatio(lightThemeColors.color, lightThemeColors.background) >= 4.5, 'contraste texte principal light >= 4.5:1');
 
   const historyClicked = await page.evaluate(() => {
     const candidates = Array.from(document.querySelectorAll('button'));
@@ -254,18 +317,65 @@ async function main() {
   }));
   assert(mobileAfter.scrollWidth <= mobileAfter.innerWidth + 2, 'aucun debordement horizontal mobile apres resultat');
 
+  const responsiveMatrix = [
+    { width: 320, height: 568, mobile: true, touch: true, label: '320x568' },
+    { width: 375, height: 812, mobile: true, touch: true, label: '375x812' },
+    { width: 430, height: 932, mobile: true, touch: true, label: '430x932' },
+    { width: 768, height: 1024, mobile: false, touch: true, label: '768x1024' },
+    { width: 1024, height: 768, mobile: false, touch: false, label: '1024x768 paysage' },
+    { width: 1440, height: 900, mobile: false, touch: false, label: '1440x900' },
+    { width: 1920, height: 1080, mobile: false, touch: false, label: '1920x1080' }
+  ];
+
+  for (const viewport of responsiveMatrix) {
+    await page.setViewport({
+      width: viewport.width,
+      height: viewport.height,
+      isMobile: viewport.mobile,
+      hasTouch: viewport.touch
+    });
+    await sleep(100);
+    await assertNoHorizontalOverflow(page, 'aucun debordement horizontal ' + viewport.label);
+  }
+
   await page.setViewport({ width: 1280, height: 900, isMobile: false, hasTouch: false });
   await page.reload({ waitUntil: 'networkidle0' });
   const desktop = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    innerWidth: window.innerWidth,
     theme: document.documentElement.getAttribute('data-theme'),
     hasDesktopAnalyze: Array.from(document.querySelectorAll('button'))
       .some((b) => b.textContent.includes('Analyser la conformite'))
   }));
-  assert(desktop.scrollWidth <= desktop.innerWidth + 2, 'aucun debordement horizontal desktop');
+  await assertNoHorizontalOverflow(page, 'aucun debordement horizontal desktop apres reload');
   assert(desktop.theme === 'light', 'theme persiste apres reload');
   assert(desktop.hasDesktopAnalyze, 'action Analyser disponible sur desktop');
+
+  const corruptedPage = await browser.newPage();
+  await corruptedPage.evaluateOnNewDocument(() => {
+    try {
+      localStorage.setItem('rse_onboarding_done', 'true');
+      localStorage.setItem('rse_jours', '{invalide');
+      localStorage.setItem('rse_jours2', 'pas-du-json');
+    } catch (_) {}
+  });
+  await corruptedPage.setViewport({ width: 375, height: 812, isMobile: true, hasTouch: true });
+  await corruptedPage.goto(BASE, { waitUntil: 'networkidle0', timeout: 30000 });
+  assert(Boolean(await corruptedPage.$('[data-tour="header"]')), 'stockage local corrompu ne bloque pas le chargement');
+  await corruptedPage.close();
+
+  const swReady = await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return false;
+    const registration = await navigator.serviceWorker.ready;
+    return Boolean(registration && registration.active);
+  });
+  assert(swReady, 'service worker actif');
+  await page.reload({ waitUntil: 'networkidle0' });
+  const swControlled = await page.evaluate(() => Boolean(navigator.serviceWorker && navigator.serviceWorker.controller));
+  assert(swControlled, 'page controlee par le service worker');
+  await page.setOfflineMode(true);
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 });
+  assert(Boolean(await page.$('[data-tour="header"]')), 'app shell disponible hors ligne');
+  await page.setOfflineMode(false);
+  await page.reload({ waitUntil: 'networkidle0' });
 
   await browser.close();
   browser = null;
