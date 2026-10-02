@@ -24,7 +24,7 @@
   background: transparent;
   font-size: 13px;
   font-weight: 500;
-  color: #888;
+  color: #94A3B8;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -46,7 +46,7 @@
   flex-wrap: wrap;
   padding: 0 4px 6px;
   font-size: 12px;
-  color: #888;
+  color: #94A3B8;
 }
 .legendeItem {
   display: flex;
@@ -134,7 +134,7 @@
 }
 .badge {
   font-size: 12px;
-  color: #888;
+  color: #94A3B8;
 }
 
 /* Tooltip */
@@ -296,7 +296,7 @@
   justify-content: space-between;
   padding: 8px 4px 0;
   font-size: 12px;
-  color: #888;
+  color: #94A3B8;
   border-top: 1px solid #eee;
   margin-top: 6px;
 }
