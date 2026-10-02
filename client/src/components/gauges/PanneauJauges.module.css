@@ -52,7 +52,7 @@
 .clickable:hover { opacity: 0.9; }
 .dots { display: flex; gap: 4px; justify-content: center; margin-top: 2px; }
 .dot { width: 5px; height: 5px; border-radius: var(--md-radius-full, 9999px); background: rgba(255,255,255,0.15); }
-.dotActive { width: 5px; height: 5px; border-radius: var(--md-radius-full, 9999px); background: #00d4ff; }
+.dotActive { width: 5px; height: 5px; border-radius: var(--md-radius-full, 9999px); background: #3B82F6; }
 
 /* Jauge hebdo lineaire avec zones */
 .hebdoBar { margin-top: 6px; padding: 6px 0; }
