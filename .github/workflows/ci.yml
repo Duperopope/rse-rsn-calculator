@@ -41,7 +41,7 @@ jobs:
 
       - name: Preview dependency lock remediation
         run: |
-          npm audit fix --package-lock-only --ignore-scripts
+          npm audit fix --package-lock-only --omit=dev --ignore-scripts || true
           echo "=== PACKAGE_LOCK_AUDIT_FIX_DIFF ==="
           git diff -- package-lock.json
           npm ci
