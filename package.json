@@ -15,14 +15,16 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.0",
-    "express-rate-limit": "^8.2.1",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.0",
     "helmet": "^8.1.0",
-    "multer": "^1.4.5-lts.1",
-    "pdfkit": "^0.17.2",
-    "puppeteer-core": "^24.37.3"
+    "multer": "^2.4.0",
+    "pdfkit": "^0.17.2"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.12.0"
   }
 }
