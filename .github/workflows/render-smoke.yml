@@ -20,6 +20,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Trigger Render deploy when hook is configured
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Triggering Render deploy hook..."
+            curl -fsS --max-time 20 -X POST "$RENDER_DEPLOY_HOOK_URL" >/dev/null
+          else
+            echo "No RENDER_DEPLOY_HOOK_URL secret configured; relying on Render auto-deploy."
+          fi
+
       - name: Wait for exact Render deployment
         env:
           EXPECTED_SHA: ${{ github.sha }}
@@ -29,12 +40,17 @@ jobs:
           echo "Expected version: $VERSION"
           echo "Expected commit:  $EXPECTED_SHA"
 
+          LAST_BODY=""
+          LEGACY_RESPONSES=0
+
           for attempt in $(seq 1 30); do
             echo "Render probe $attempt/30..."
             BODY="$(curl -fsS --max-time 20 "$RENDER_URL/api/health" || true)"
 
             if [ -n "$BODY" ]; then
+              LAST_BODY="$BODY"
               echo "$BODY"
+
               if HEALTH_BODY="$BODY" EXPECTED_VERSION="$VERSION" EXPECTED_SHA="$EXPECTED_SHA" node <<'NODE'
           const body = JSON.parse(process.env.HEALTH_BODY || '{}');
           const expectedVersion = process.env.EXPECTED_VERSION;
@@ -50,10 +66,36 @@ jobs:
                 echo "Render serves the exact expected commit."
                 exit 0
               fi
+
+              if HEALTH_BODY="$BODY" EXPECTED_VERSION="$VERSION" node <<'NODE'
+          const body = JSON.parse(process.env.HEALTH_BODY || '{}');
+          const expectedVersion = process.env.EXPECTED_VERSION;
+          const isLegacy =
+            body.status === 'ok' &&
+            body.version !== expectedVersion &&
+            !Object.prototype.hasOwnProperty.call(body, 'deploy_commit') &&
+            !Object.prototype.hasOwnProperty.call(body, 'runtime');
+          process.exit(isLegacy ? 0 : 1);
+          NODE
+              then
+                LEGACY_RESPONSES=$((LEGACY_RESPONSES + 1))
+              else
+                LEGACY_RESPONSES=0
+              fi
+
+              if [ "$LEGACY_RESPONSES" -ge 12 ]; then
+                echo "Render is healthy but still serves a legacy build after 12 consecutive probes." >&2
+                echo "The public service is likely detached from this repository/branch or auto-deploy is disabled." >&2
+                echo "Expected version: $VERSION / commit: $EXPECTED_SHA" >&2
+                echo "Last Render health: $LAST_BODY" >&2
+                exit 2
+              fi
             fi
 
             sleep 10
           done
 
           echo "Render did not expose the expected deployment in time." >&2
+          echo "Expected version: $VERSION / commit: $EXPECTED_SHA" >&2
+          echo "Last Render health: $LAST_BODY" >&2
           exit 1
