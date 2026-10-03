@@ -164,7 +164,12 @@ export default function GuidedTour({ visible, onClose }) {
     var index = data.index;
     var type = data.type;
 
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+    if (
+      status === STATUS.FINISHED ||
+      status === STATUS.SKIPPED ||
+      action === ACTIONS.CLOSE ||
+      action === 'close'
+    ) {
       setRun(false);
       setStepIndex(0);
       setDashboardHidden(false);
