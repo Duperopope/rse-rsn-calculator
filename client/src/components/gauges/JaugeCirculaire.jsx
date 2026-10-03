@@ -91,8 +91,15 @@ export function JaugeCirculaire({
       className={`${styles.container}${switchable ? ' ' + styles.switchable : ''}`}
       style={{ width: size, minHeight: size, cursor: 'pointer' }}
       onClick={handleClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleClick();
+        }
+      }}
       role="button"
       tabIndex={0}
+      aria-label={label ? label + ' : ' + displayValue + (displayUnite || '') : 'Jauge : ' + displayValue + (displayUnite || '')}
     >
       <svg width={size} height={size} className={styles.svg}>
         <circle
@@ -118,7 +125,7 @@ export function JaugeCirculaire({
         />
       </svg>
       <div className={styles.content}>
-        <span className={styles.valeur} style={{ color: couleur, fontSize: unite === 'hm' ? '1.1em' : undefined }}>
+        <span className={styles.valeur} style={{ color: 'var(--text, #E2E8F0)', fontSize: unite === 'hm' ? '1.1em' : undefined }}>
           {displayValue}
         </span>
         {displayUnite ? <span className={styles.unite}>{displayUnite}</span> : null}

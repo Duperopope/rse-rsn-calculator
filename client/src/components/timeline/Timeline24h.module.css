@@ -4,6 +4,7 @@
 .container {
   width: 100%;
   padding: 8px 0;
+  color: var(--text, #E2E8F0);
 }
 .dark {
   color: var(--md-on-surface, var(--md-on-surface, #e2e2f0));
@@ -19,23 +20,23 @@
 .vueSelectorBtn {
   flex: 1;
   padding: 6px 0;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border, #2D3748);
   border-radius: var(--md-radius-sm, 8px);
-  background: transparent;
+  background: var(--bg-card, #151A21);
   font-size: 13px;
   font-weight: 500;
-  color: #888;
+  color: var(--text-secondary, #94A3B8);
   cursor: pointer;
   transition: all 0.2s;
 }
 .dark .vueSelectorBtn {
-  border-color: #444;
-  color: #999;
+  border-color: var(--border, #2D3748);
+  color: var(--text-secondary, #94A3B8);
 }
 .vueSelectorActive {
-  background: #1a73e8;
+  background: var(--accent, #2563EB);
   color: #fff !important;
-  border-color: #1a73e8 !important;
+  border-color: var(--accent, #2563EB) !important;
   font-weight: 600;
 }
 
@@ -46,7 +47,7 @@
   flex-wrap: wrap;
   padding: 0 4px 6px;
   font-size: 12px;
-  color: #888;
+  color: var(--text-secondary, #94A3B8);
 }
 .legendeItem {
   display: flex;
@@ -73,7 +74,7 @@
   height: 16px;
   margin: 0 4px;
   font-size: 12px;
-  color: #aaa;
+  color: var(--text-secondary, #94A3B8);
 }
 .echelleMarque {
   position: absolute;
@@ -84,13 +85,13 @@
 .track {
   position: relative;
   height: 52px;
-  background: #f5f5f5;
+  background: var(--bg-input, #1A1F2B);
   border-radius: var(--md-radius-md, 12px);
   margin: 0 4px;
   overflow: hidden;
 }
 .dark .track {
-  background: #2a2a2a;
+  background: var(--bg-input, #1A1F2B);
 }
 
 /* Bandes nuit */
@@ -98,7 +99,7 @@
   position: absolute;
   top: 0;
   height: 100%;
-  background: rgba(63, 81, 181, 0.05);
+  background: var(--accent-subtle, rgba(59,130,246,0.08));
   pointer-events: none;
 }
 
@@ -108,7 +109,7 @@
   top: 4px;
   height: calc(100% - 8px);
   border-radius: var(--md-radius-sm, 8px);
-  min-width: 6px;
+  min-width: 32px;
   cursor: pointer;
   transition: opacity 0.15s;
   display: flex;
@@ -134,13 +135,13 @@
 }
 .badge {
   font-size: 12px;
-  color: #888;
+  color: var(--text-secondary, #94A3B8);
 }
 
 /* Tooltip */
 .tooltip {
-  background: #333;
-  color: #fff;
+  background: var(--bg-elevated, #1E2433);
+  color: var(--text, #E2E8F0);
   font-size: 12px;
   padding: 6px 10px;
   border-radius: var(--md-radius-sm, 8px);
@@ -148,7 +149,7 @@
   text-align: center;
 }
 .dark .tooltip {
-  background: #555;
+  background: var(--bg-elevated, #1E2433);
 }
 
 /* ============================== */
@@ -167,10 +168,10 @@
 .semaineTitle {
   font-size: 13px;
   font-weight: 600;
-  color: #555;
+  color: var(--text, #E2E8F0);
 }
 .dark .semaineTitle {
-  color: #ccc;
+  color: var(--text, #E2E8F0);
 }
 .semaineCounter {
   font-size: 12px;
@@ -195,8 +196,8 @@
   background: rgba(255,255,255,0.05);
 }
 .semaineLigneActive {
-  background: rgba(26, 115, 232, 0.08) !important;
-  border-left: 3px solid #1a73e8;
+  background: var(--accent-subtle, rgba(59,130,246,0.08)) !important;
+  border-left: 3px solid var(--accent, #3B82F6);
 }
 
 /* Date */
@@ -208,7 +209,7 @@
 .semaineJourNom {
   display: block;
   font-size: 12px;
-  color: #aaa;
+  color: var(--text-secondary, #94A3B8);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -216,23 +217,23 @@
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: #555;
+  color: var(--text, #E2E8F0);
 }
 .dark .semaineDateNum {
-  color: #ccc;
+  color: var(--text, #E2E8F0);
 }
 
 /* Mini barre */
 .semaineBarre {
   flex: 1;
   height: 24px;
-  background: #f0f0f0;
+  background: var(--bg-input, #1A1F2B);
   border-radius: var(--md-radius-sm, 8px);
   position: relative;
   overflow: hidden;
 }
 .dark .semaineBarre {
-  background: #2a2a2a;
+  background: var(--bg-input, #1A1F2B);
 }
 .nightBandMini {
   position: absolute;
@@ -260,14 +261,15 @@
 }
 .semaineStat {
   font-size: 12px;
-  color: #777;
+  color: var(--text-secondary, #94A3B8);
 }
 .dark .semaineStat {
-  color: #aaa;
+  color: var(--text-secondary, #94A3B8);
 }
 .semaineInfBadge {
-  background: var(--md-error, #ef4444);
-  color: #fff;
+  background: var(--danger-dim, rgba(239,68,68,0.15));
+  color: var(--text, #E2E8F0);
+  border: 1px solid var(--danger, #EF4444);
   font-size: 12px;
   font-weight: 700;
   width: 18px;
@@ -278,8 +280,9 @@
   justify-content: center;
 }
 .semaineAvertBadge {
-  background: var(--md-warning, #f59e0b);
-  color: #fff;
+  background: var(--warning-dim, rgba(245,158,11,0.15));
+  color: var(--text, #E2E8F0);
+  border: 1px solid var(--warning, #F59E0B);
   font-size: 12px;
   font-weight: 700;
   width: 18px;
@@ -296,12 +299,12 @@
   justify-content: space-between;
   padding: 8px 4px 0;
   font-size: 12px;
-  color: #888;
-  border-top: 1px solid #eee;
+  color: var(--text-secondary, #94A3B8);
+  border-top: 1px solid var(--border, #2D3748);
   margin-top: 6px;
 }
 .dark .semaineFooter {
-  border-top-color: #333;
+  border-top-color: var(--border, #2D3748);
 }
 
 /* === RESPONSIVE MOBILE === */
@@ -310,7 +313,7 @@
     height: 56px;
   }
   .bloc {
-    min-width: 8px;
+    min-width: 32px;
   }
   .semaineDate {
     width: 42px;
@@ -341,7 +344,7 @@
 .jourInfText {
   font-size: 12px;
   font-weight: 600;
-  color: var(--md-error, #ef4444);
+  color: var(--text, #E2E8F0);
 }
 .jourAvertBar {
   display: flex;
@@ -359,23 +362,19 @@
 .jourAvertText {
   font-size: 12px;
   font-weight: 600;
-  color: #e69500;
+  color: var(--text, #E2E8F0);
 }
 
-/* Mobile: les blocs temporels gardent leur largeur exacte, une liste separee
-   fournit les cibles tactiles WCAG sans deformer la chronologie. */
+/* Liste de controles equivalente : la chronologie reste exacte tandis que
+   ces boutons fournissent des cibles clavier/pointeur confortables. */
 .mobileActivityList {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 6px;
+  margin-top: 10px;
 }
 
-@media (max-width: 600px) {
-  .mobileActivityList {
-    display: grid;
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .mobileActivityButton {
+.mobileActivityButton {
     width: 100%;
     min-height: 44px;
     display: grid;
@@ -407,5 +406,19 @@
     color: var(--text-secondary, #A8B0C0);
     font-size: 0.82rem;
     white-space: nowrap;
+  }
+
+@media (max-width: 600px) {
+  .mobileActivityList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress,
+  .bloc,
+  .semaineLigne,
+  .semaineBlocAct {
+    transition: none;
   }
 }

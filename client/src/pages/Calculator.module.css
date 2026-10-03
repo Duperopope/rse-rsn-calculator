@@ -188,9 +188,9 @@
 
 /* === Onglet actif === */
 .jourNavActive {
-  background: var(--bg-elevated, #1E2433);
-  color: var(--text, #E2E8F0);
-  border: 1px solid var(--accent, #3B82F6);
+  background: var(--gradient-start, #2563EB);
+  color: #fff;
+  border: 1px solid var(--gradient-start, #2563EB);
   font-weight: 700;
 }
 
@@ -219,17 +219,18 @@
 .jourNav_ok::after { background: #2ecc71 !important; }
 .jourNav_warning::after { background: #f39c12 !important; }
 .jourNav_danger::after { background: #e74c3c !important; }
-.jourNav_neutre { opacity: 0.5; }
+.jourNav_neutre::after { background: var(--border, #CBD5E1) !important; }
 
-/* Statut sur onglet inactif — point colore */
-.jourNav_ok { color: #2ecc71; }
-.jourNav_warning { color: #f39c12; }
-.jourNav_danger { color: #e74c3c; }
+/* Le statut est porte par l'indicateur, pas par un texte faiblement contraste. */
+.jourNav_ok,
+.jourNav_warning,
+.jourNav_danger { color: var(--text-secondary, #94A3B8); }
 
-/* Statut sur onglet actif — garde le texte blanc, underline prend la couleur */
-.jourNavActive.jourNav_ok { color: #fff; }
-.jourNavActive.jourNav_warning { color: #fff; }
+.jourNavActive.jourNav_ok,
+.jourNavActive.jourNav_warning,
 .jourNavActive.jourNav_danger { color: #fff; }
+
+.jourNavActive .jourNavDate { opacity: 1; }
 
 
 /* === Fleches scroll PC (masquees sur tactile) === */

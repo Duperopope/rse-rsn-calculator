@@ -4,6 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const { spawn } = require('child_process');
 const puppeteer = require('puppeteer-core');
+const axe = require('axe-core');
 
 const PORT = 3100;
 const BASE = 'http://localhost:' + PORT;
@@ -53,6 +54,26 @@ async function assertNoHorizontalOverflow(page, label) {
     innerWidth: window.innerWidth
   }));
   assert(layout.scrollWidth <= Math.max(layout.clientWidth, layout.innerWidth) + 2, label);
+}
+
+async function assertNoSeriousA11yViolations(page, label) {
+  await page.evaluate(axe.source);
+  const results = await page.evaluate(async () => window.axe.run(document, {
+    runOnly: {
+      type: 'tag',
+      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+    }
+  }));
+  const blocking = results.violations.filter((violation) =>
+    violation.impact === 'critical' || violation.impact === 'serious'
+  );
+  if (blocking.length) {
+    const summary = blocking.map((violation) =>
+      violation.id + ': ' + violation.nodes.slice(0, 3).map((node) => node.target.join(' ')).join(', ')
+    ).join(' | ');
+    throw new Error(label + ' — violations Axe: ' + summary);
+  }
+  console.log('✓ ' + label + ' — Axe serious/critical: 0');
 }
 
 function request(pathname, options) {
@@ -124,6 +145,8 @@ async function main() {
   assert(Boolean(health.headers['content-security-policy']), 'CSP presente');
   assert(!health.headers['x-powered-by'], 'X-Powered-By absent');
 
+  // The app keeps its CSP; Puppeteer bypasses it only so axe-core can be injected by DevTools.
+
   const badCors = await request('/api/health', { headers: { Origin: 'https://evil.example' } });
   assert(badCors.status === 403, 'origine CORS externe refusee');
 
@@ -169,6 +192,7 @@ async function main() {
   });
 
   const page = await browser.newPage();
+  await page.setBypassCSP(true);
   const runtimeErrors = [];
   page.on('pageerror', (err) => runtimeErrors.push('pageerror: ' + err.message));
   page.on('console', (msg) => {
@@ -213,6 +237,7 @@ async function main() {
   assert(layout.scrollWidth <= layout.innerWidth + 2, 'aucun debordement horizontal mobile initial');
   assert(layout.countryOptions >= 29, '29 pays accessibles dans le selecteur');
   assert(layout.hasServiceLabel && layout.hasCountryLabel, 'selecteurs associes a leurs labels');
+  await assertNoSeriousA11yViolations(page, 'accessibilite ecran de saisie mobile');
 
   const templateClicked = await clickByText(page, 'button', 'Journee type');
   assert(templateClicked, 'template Journee type cliquable');
@@ -277,6 +302,8 @@ async function main() {
   assert((pdfProbe.type || '').includes('application/pdf'), 'PDF retourne le bon Content-Type');
   assert(pdfProbe.magic === '%PDF-', 'PDF binaire valide');
   assert(pdfProbe.size > 1000, 'PDF non vide');
+  await sleep(650);
+  await assertNoSeriousA11yViolations(page, 'accessibilite ecran de resultats mobile');
 
   const scoreSelector = '[role="button"][aria-label="Afficher ou masquer le detail du resultat"]';
   const scoreEl = await page.$(scoreSelector);
@@ -348,6 +375,32 @@ async function main() {
   await assertNoHorizontalOverflow(page, 'aucun debordement horizontal desktop apres reload');
   assert(desktop.theme === 'light', 'theme persiste apres reload');
   assert(desktop.hasDesktopAnalyze, 'action Analyser disponible sur desktop');
+  await assertNoSeriousA11yViolations(page, 'accessibilite desktop');
+
+  const helpOpened = await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll('button[aria-label="Aide"]'));
+    const visible = buttons.find((button) => {
+      const rect = button.getBoundingClientRect();
+      const style = getComputedStyle(button);
+      return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+    });
+    if (!visible) return false;
+    visible.click();
+    return true;
+  });
+  assert(helpOpened, 'guide interactif ouvrable');
+  await page.waitForFunction(
+    () => document.body.innerText.includes('Bienvenue sur FIMO Check'),
+    { timeout: 5000 }
+  );
+  assert(true, 'premiere etape du guide visible');
+  await assertNoSeriousA11yViolations(page, 'accessibilite du guide interactif');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(
+    () => !document.body.innerText.includes('Bienvenue sur FIMO Check'),
+    { timeout: 5000 }
+  );
+  assert(true, 'guide interactif fermable avec Echap');
 
   const corruptedPage = await browser.newPage();
   await corruptedPage.evaluateOnNewDocument(() => {

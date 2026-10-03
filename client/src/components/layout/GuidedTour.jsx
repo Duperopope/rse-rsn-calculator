@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
+import { Joyride, STATUS, ACTIONS, EVENTS } from 'react-joyride';
 
 /* ============================================================
    GuidedTour v4.0 — 4 etapes adaptees a la visibilite DOM
@@ -13,92 +13,102 @@ var STEPS = [
       title: '\uD83C\uDFAF Bienvenue sur FIMO Check !',
       content: 'Verifiez en quelques clics si vos temps de conduite et repos respectent la reglementation europeenne (CE 561/2006). Suivez ce guide rapide en 4 etapes.',
       placement: 'bottom',
-      disableBeacon: true
+      skipBeacon: true
     },
     {
       target: '[data-tour="templates"]',
       title: '\u26A1 Saisissez vos activites',
       content: 'Utilisez un modele pre-rempli (journee type, longue, nuit) ou ajoutez vos activites manuellement. Chaque activite a un type (conduite, pause, repos), une heure de debut et de fin. Ajoutez des jours avec le bouton "+".',
       placement: 'bottom',
-      disableBeacon: true
+      skipBeacon: true
     },
     {
       target: '[data-tour="header"]',
       title: '\uD83D\uDE80 Analysez et consultez',
       content: 'Cliquez sur "Analyser" (en bas sur mobile) pour obtenir votre score sur 100, les infractions avec references legales, les amendes estimees et un export PDF. Les jauges en temps reel vous alertent avant meme l\'analyse.',
       placement: 'bottom',
-      disableBeacon: true
+      skipBeacon: true
     },
     {
       target: '[data-tour="params"]',
       title: '\u2753 Besoin d\'aide ?',
       content: 'Relancez ce guide via le bouton "Aide" en bas de l\'ecran ou le "?" en haut. Parametrez votre type de service, pays et equipage dans la barre du haut. Bonne route !',
       placement: 'bottom',
-      disableBeacon: true
+      skipBeacon: true
     }
   ];
 
 var HIDE_DASHBOARD_STEPS = [];
 
+var JOYRIDE_OPTIONS = {
+  arrowColor: '#1e293b',
+  backgroundColor: '#1e293b',
+  overlayColor: 'rgba(0, 0, 0, 0.85)',
+  primaryColor: '#3B82F6',
+  textColor: '#e2e8f0',
+  zIndex: 10000,
+  showProgress: true,
+  spotlightPadding: 12,
+  scrollOffset: 100,
+  blockTargetInteraction: true,
+  buttons: ['back', 'close', 'primary', 'skip'],
+  overlayClickAction: 'close',
+  dismissKeyAction: 'close'
+};
+
 var JOYRIDE_STYLES = {
-  options: {
-    arrowColor: '#1e293b',
-    backgroundColor: '#1e293b',
-    overlayColor: 'rgba(0, 0, 0, 0.85)',
-    primaryColor: '#3B82F6',
-    textColor: '#e2e8f0',
-    spotlightShadow: '0 0 25px rgba(59, 130, 246, 0.5)',
-    zIndex: 10000,
-  },
   tooltip: {
     borderRadius: '16px',
     padding: '20px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(6,182,212,0.15)',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(59,130,246,0.15)',
     border: '1px solid rgba(59, 130, 246, 0.2)',
-    maxWidth: '420px',
+    maxWidth: '420px'
   },
   tooltipContainer: {
-    textAlign: 'left',
+    textAlign: 'left'
   },
   tooltipTitle: {
     fontSize: '1.1rem',
     fontWeight: 700,
     marginBottom: '8px',
-    color: '#f1f5f9',
+    color: '#f1f5f9'
   },
   tooltipContent: {
     fontSize: '15px',
     lineHeight: 1.6,
-    color: '#cbd5e1',
+    color: '#cbd5e1'
   },
-  buttonNext: {
+  buttonPrimary: {
     backgroundColor: '#3B82F6',
     borderRadius: '10px',
     color: '#fff',
     fontWeight: 600,
     fontSize: '14px',
-    padding: '8px 20px',
+    padding: '8px 20px'
   },
   buttonBack: {
     color: '#94a3b8',
     fontWeight: 500,
     fontSize: '14px',
-    marginRight: '8px',
+    marginRight: '8px'
   },
   buttonSkip: {
     color: '#A8B0C0',
-    fontSize: '0.85rem',
+    fontSize: '0.85rem'
   },
   buttonClose: {
-    color: '#94a3b8',
+    color: '#94a3b8'
   },
   overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)'
   },
   spotlight: {
-    borderRadius: '14px',
-    boxShadow: '0 0 0 3px #3B82F6, 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3)',
+    stroke: '#3B82F6',
+    strokeWidth: 3
   },
+  floater: {
+    filter: 'none'
+  }
 };
 
 var LOCALE = {
@@ -148,13 +158,18 @@ export default function GuidedTour({ visible, onClose }) {
     setDashboardHidden(shouldHideDashboard(stepIndex));
   }, [stepIndex]);
 
-  function handleJoyrideCallback(data) {
+  function handleJoyrideEvent(data) {
     var status = data.status;
     var action = data.action;
     var index = data.index;
     var type = data.type;
 
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+    if (
+      status === STATUS.FINISHED ||
+      status === STATUS.SKIPPED ||
+      action === ACTIONS.CLOSE ||
+      action === 'close'
+    ) {
       setRun(false);
       setStepIndex(0);
       setDashboardHidden(false);
@@ -184,26 +199,12 @@ export default function GuidedTour({ visible, onClose }) {
       steps={STEPS}
       run={run}
       stepIndex={stepIndex}
-      callback={handleJoyrideCallback}
+      onEvent={handleJoyrideEvent}
       continuous={true}
-      showSkipButton={true}
-      showProgress={true}
       scrollToFirstStep={true}
-      scrollOffset={100}
-      disableOverlayClose={false}
-      disableCloseOnEsc={false}
-      spotlightClicks={false}
-      spotlightPadding={12}
+      options={JOYRIDE_OPTIONS}
       styles={JOYRIDE_STYLES}
       locale={LOCALE}
-      floaterProps={{
-        disableAnimation: false,
-        styles: {
-          floater: {
-            filter: 'none',
-          },
-        },
-      }}
     />
   );
 }

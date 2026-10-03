@@ -255,7 +255,7 @@ function ActivityRow({ act, actIdx, jour, typeInfo, chevauchement, duree, showTy
             title={'Changer le type (actuellement: ' + typeInfo.label + ')'}
           >
             <IconeActivite type={act.type} size={20} color={typeInfo.couleur} />
-            <span className={styles.activiteTypeName} style={{ color: typeInfo.couleur }}>
+            <span className={styles.activiteTypeName}>
               {typeInfo.label}
             </span>
           </button>

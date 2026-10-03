@@ -35,8 +35,9 @@ export function ScoreSummary({ resultat, expanded, onToggle }) {
       <div
         className={styles.scoreCircleMini}
         style={{
-          background: tone,
-          color: score >= 90 ? '#000' : '#fff'
+          background: 'var(--bg-card, #151A21)',
+          color: 'var(--text, #E2E8F0)',
+          borderColor: tone
         }}
       >
         {score}
