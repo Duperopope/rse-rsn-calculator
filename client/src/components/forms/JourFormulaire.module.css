@@ -473,11 +473,15 @@
   cursor: pointer;
   white-space: nowrap;
 }
+.actionBtnLabel,
+.removeBtnLabel {
+  color: var(--text, var(--md-on-surface, #e8eaf6));
+}
 .actionBtnLabel {
-  color: var(--accent, #00d4ff);
+  border-color: var(--accent, #3B82F6);
 }
 .removeBtnLabel {
-  color: var(--accent-red, var(--md-error, #ef4444));
+  border-color: var(--danger, var(--md-error, #EF4444));
 }
 @media (hover: hover) {
   .actionBtnLabel:hover { border-color: var(--accent, #00d4ff); background: var(--accent-subtle, rgba(96, 165, 250, 0.08)); }
