@@ -40,7 +40,7 @@
 
 .label {
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  color: var(--text, #E2E8F0);
   text-align: center;
   max-width: 100%;
   overflow: hidden;
@@ -51,7 +51,7 @@
 .label[data-status="danger"],
 .label[data-status="warning"],
 .label[data-status="ok"] {
-  color: var(--text-secondary, #94A3B8);
+  color: var(--text, #E2E8F0);
   font-weight: 600;
 }
 
