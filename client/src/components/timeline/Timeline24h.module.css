@@ -362,20 +362,16 @@
   color: #e69500;
 }
 
-/* Mobile: les blocs temporels gardent leur largeur exacte, une liste separee
-   fournit les cibles tactiles WCAG sans deformer la chronologie. */
+/* Liste de controles equivalente : la chronologie reste exacte tandis que
+   ces boutons fournissent des cibles clavier/pointeur confortables. */
 .mobileActivityList {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 6px;
+  margin-top: 10px;
 }
 
-@media (max-width: 600px) {
-  .mobileActivityList {
-    display: grid;
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .mobileActivityButton {
+.mobileActivityButton {
     width: 100%;
     min-height: 44px;
     display: grid;
@@ -407,5 +403,10 @@
     color: var(--text-secondary, #A8B0C0);
     font-size: 0.82rem;
     white-space: nowrap;
+  }
+
+@media (max-width: 600px) {
+  .mobileActivityList {
+    grid-template-columns: 1fr;
   }
 }
