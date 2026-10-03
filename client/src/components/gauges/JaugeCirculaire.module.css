@@ -48,13 +48,11 @@
   white-space: nowrap;
 }
 
-.label[data-status="danger"] {
-  color: var(--accent-red, var(--md-error, #ef4444));
+.label[data-status="danger"],
+.label[data-status="warning"],
+.label[data-status="ok"] {
+  color: var(--text-secondary, #94A3B8);
   font-weight: 600;
-}
-
-.label[data-status="warning"] {
-  color: var(--accent-orange, var(--md-warning, #f59e0b));
 }
 
 
