@@ -377,6 +377,31 @@ async function main() {
   assert(desktop.hasDesktopAnalyze, 'action Analyser disponible sur desktop');
   await assertNoSeriousA11yViolations(page, 'accessibilite desktop');
 
+  const helpOpened = await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll('button[aria-label="Aide"]'));
+    const visible = buttons.find((button) => {
+      const rect = button.getBoundingClientRect();
+      const style = getComputedStyle(button);
+      return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+    });
+    if (!visible) return false;
+    visible.click();
+    return true;
+  });
+  assert(helpOpened, 'guide interactif ouvrable');
+  await page.waitForFunction(
+    () => document.body.innerText.includes('Bienvenue sur FIMO Check'),
+    { timeout: 5000 }
+  );
+  assert(true, 'premiere etape du guide visible');
+  await assertNoSeriousA11yViolations(page, 'accessibilite du guide interactif');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(
+    () => !document.body.innerText.includes('Bienvenue sur FIMO Check'),
+    { timeout: 5000 }
+  );
+  assert(true, 'guide interactif fermable avec Echap');
+
   const corruptedPage = await browser.newPage();
   await corruptedPage.evaluateOnNewDocument(() => {
     try {
