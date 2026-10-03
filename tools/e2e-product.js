@@ -302,6 +302,7 @@ async function main() {
   assert((pdfProbe.type || '').includes('application/pdf'), 'PDF retourne le bon Content-Type');
   assert(pdfProbe.magic === '%PDF-', 'PDF binaire valide');
   assert(pdfProbe.size > 1000, 'PDF non vide');
+  await sleep(650);
   await assertNoSeriousA11yViolations(page, 'accessibilite ecran de resultats mobile');
 
   const scoreSelector = '[role="button"][aria-label="Afficher ou masquer le detail du resultat"]';
