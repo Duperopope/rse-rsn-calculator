@@ -219,7 +219,7 @@
 .jourNav_ok::after { background: #2ecc71 !important; }
 .jourNav_warning::after { background: #f39c12 !important; }
 .jourNav_danger::after { background: #e74c3c !important; }
-.jourNav_neutre { opacity: 0.5; }
+.jourNav_neutre::after { background: var(--border, #CBD5E1) !important; }
 
 /* Le statut est porte par l'indicateur, pas par un texte faiblement contraste. */
 .jourNav_ok,
