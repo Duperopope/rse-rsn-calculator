@@ -4,7 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const { spawn } = require('child_process');
 const puppeteer = require('puppeteer-core');
-const axePath = require.resolve('axe-core/axe.min.js');
+const axe = require('axe-core');
 
 const PORT = 3100;
 const BASE = 'http://localhost:' + PORT;
@@ -57,7 +57,7 @@ async function assertNoHorizontalOverflow(page, label) {
 }
 
 async function assertNoSeriousA11yViolations(page, label) {
-  await page.addScriptTag({ path: axePath });
+  await page.evaluate(axe.source);
   const results = await page.evaluate(async () => window.axe.run(document, {
     runOnly: {
       type: 'tag',
@@ -145,6 +145,8 @@ async function main() {
   assert(Boolean(health.headers['content-security-policy']), 'CSP presente');
   assert(!health.headers['x-powered-by'], 'X-Powered-By absent');
 
+  // The app keeps its CSP; Puppeteer bypasses it only so axe-core can be injected by DevTools.
+
   const badCors = await request('/api/health', { headers: { Origin: 'https://evil.example' } });
   assert(badCors.status === 403, 'origine CORS externe refusee');
 
@@ -190,6 +192,7 @@ async function main() {
   });
 
   const page = await browser.newPage();
+  await page.setBypassCSP(true);
   const runtimeErrors = [];
   page.on('pageerror', (err) => runtimeErrors.push('pageerror: ' + err.message));
   page.on('console', (msg) => {
