@@ -188,9 +188,9 @@
 
 /* === Onglet actif === */
 .jourNavActive {
-  background: var(--accent, #2563EB);
+  background: var(--gradient-start, #2563EB);
   color: #fff;
-  border: 1px solid var(--accent, #2563EB);
+  border: 1px solid var(--gradient-start, #2563EB);
   font-weight: 700;
 }
 
@@ -230,7 +230,7 @@
 .jourNavActive.jourNav_warning,
 .jourNavActive.jourNav_danger { color: #fff; }
 
-.jourNavActive .jourNavDate { opacity: 0.9; }
+.jourNavActive .jourNavDate { opacity: 1; }
 
 
 /* === Fleches scroll PC (masquees sur tactile) === */
