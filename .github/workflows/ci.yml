@@ -59,10 +59,10 @@ jobs:
           test -n "$CHROME_PATH"
           echo "PUPPETEER_EXECUTABLE_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
 
-      - name: Critical dependency audit
+      - name: Dependency audit (all severities)
         run: |
-          npm audit --omit=dev --audit-level=high
-          npm --prefix client audit --omit=dev --audit-level=high
+          npm audit --audit-level=low
+          npm --prefix client audit --audit-level=low
 
       - name: Product E2E
         run: npm run test:e2e
