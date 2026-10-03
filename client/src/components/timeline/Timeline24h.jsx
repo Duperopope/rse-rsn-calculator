@@ -86,9 +86,7 @@ function VueJour(props) {
           key: b.index,
           className: styles.bloc,
           style: { left: b.left + '%', width: b.width + '%', backgroundColor: b.bg },
-          role: 'button',
-          tabIndex: 0,
-          'aria-label': b.label + ' de ' + b.debut + ' a ' + b.fin + ', ' + formatDuree(b.duree),
+          'aria-hidden': 'true',
           onClick: function(e) {
             e.stopPropagation();
             if (tooltip && tooltip.index === b.index) {
@@ -97,15 +95,6 @@ function VueJour(props) {
               setTooltip(b);
             }
             if (onActiviteClick) onActiviteClick(b.index);
-          },
-          onKeyDown: function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              e.stopPropagation();
-              if (tooltip && tooltip.index === b.index) setTooltip(null);
-              else setTooltip(b);
-              if (onActiviteClick) onActiviteClick(b.index);
-            }
           }
         },
           b.showLabel ? React.createElement('span', { className: styles.blocLabel }, b.type) : null
