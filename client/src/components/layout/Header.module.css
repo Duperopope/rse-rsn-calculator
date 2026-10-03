@@ -30,13 +30,13 @@
   margin: 0;
 }
 .subtitle {
-
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  font-weight: 550;
+  color: var(--text-secondary, #94A3B8);
   white-space: nowrap;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.8;
+  opacity: 1;
 }
 
 /* Status */
@@ -219,7 +219,8 @@
   .logo svg { width: 30px; height: 30px; }
   .title { font-size: 1.05rem; }
   .subtitle {
- font-size: 0.55rem; }
+    font-size: 12px;
+  }
   .mobileRight {
     display: flex;
     align-items: center;
