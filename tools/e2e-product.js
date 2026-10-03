@@ -4,6 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const { spawn } = require('child_process');
 const puppeteer = require('puppeteer-core');
+const { AxePuppeteer } = require('@axe-core/puppeteer');
 
 const PORT = 3100;
 const BASE = 'http://localhost:' + PORT;
@@ -53,6 +54,22 @@ async function assertNoHorizontalOverflow(page, label) {
     innerWidth: window.innerWidth
   }));
   assert(layout.scrollWidth <= Math.max(layout.clientWidth, layout.innerWidth) + 2, label);
+}
+
+async function assertNoSeriousA11yViolations(page, label) {
+  const results = await new AxePuppeteer(page)
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  const blocking = results.violations.filter((violation) =>
+    violation.impact === 'critical' || violation.impact === 'serious'
+  );
+  if (blocking.length) {
+    const summary = blocking.map((violation) =>
+      violation.id + ': ' + violation.nodes.slice(0, 3).map((node) => node.target.join(' ')).join(', ')
+    ).join(' | ');
+    throw new Error(label + ' — violations Axe: ' + summary);
+  }
+  console.log('✓ ' + label + ' — Axe serious/critical: 0');
 }
 
 function request(pathname, options) {
@@ -213,6 +230,7 @@ async function main() {
   assert(layout.scrollWidth <= layout.innerWidth + 2, 'aucun debordement horizontal mobile initial');
   assert(layout.countryOptions >= 29, '29 pays accessibles dans le selecteur');
   assert(layout.hasServiceLabel && layout.hasCountryLabel, 'selecteurs associes a leurs labels');
+  await assertNoSeriousA11yViolations(page, 'accessibilite ecran de saisie mobile');
 
   const templateClicked = await clickByText(page, 'button', 'Journee type');
   assert(templateClicked, 'template Journee type cliquable');
@@ -277,6 +295,7 @@ async function main() {
   assert((pdfProbe.type || '').includes('application/pdf'), 'PDF retourne le bon Content-Type');
   assert(pdfProbe.magic === '%PDF-', 'PDF binaire valide');
   assert(pdfProbe.size > 1000, 'PDF non vide');
+  await assertNoSeriousA11yViolations(page, 'accessibilite ecran de resultats mobile');
 
   const scoreSelector = '[role="button"][aria-label="Afficher ou masquer le detail du resultat"]';
   const scoreEl = await page.$(scoreSelector);
@@ -348,6 +367,7 @@ async function main() {
   await assertNoHorizontalOverflow(page, 'aucun debordement horizontal desktop apres reload');
   assert(desktop.theme === 'light', 'theme persiste apres reload');
   assert(desktop.hasDesktopAnalyze, 'action Analyser disponible sur desktop');
+  await assertNoSeriousA11yViolations(page, 'accessibilite desktop');
 
   const corruptedPage = await browser.newPage();
   await corruptedPage.evaluateOnNewDocument(() => {
