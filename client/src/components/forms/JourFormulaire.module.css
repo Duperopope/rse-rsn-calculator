@@ -199,7 +199,8 @@
 
 .activiteTypeName {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
+  color: var(--text, #E2E8F0);
   white-space: nowrap;
 }
 
