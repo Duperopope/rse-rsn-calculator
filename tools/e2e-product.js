@@ -4,7 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const { spawn } = require('child_process');
 const puppeteer = require('puppeteer-core');
-const { AxePuppeteer } = require('@axe-core/puppeteer');
+const axePath = require.resolve('axe-core/axe.min.js');
 
 const PORT = 3100;
 const BASE = 'http://localhost:' + PORT;
@@ -57,9 +57,13 @@ async function assertNoHorizontalOverflow(page, label) {
 }
 
 async function assertNoSeriousA11yViolations(page, label) {
-  const results = await new AxePuppeteer(page)
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .analyze();
+  await page.addScriptTag({ path: axePath });
+  const results = await page.evaluate(async () => window.axe.run(document, {
+    runOnly: {
+      type: 'tag',
+      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+    }
+  }));
   const blocking = results.violations.filter((violation) =>
     violation.impact === 'critical' || violation.impact === 'serious'
   );
